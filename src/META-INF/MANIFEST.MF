@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: . lib/swt.jar log4j2.xml
+Main-Class: com.kartoflane.superluminal.core.Superluminal
+
