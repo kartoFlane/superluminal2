@@ -2,7 +2,6 @@ package com.kartoflane.superluminal2.tools;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -10,15 +9,24 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.CellController;
-import com.kartoflane.superluminal2.mvc.views.AbstractView;
+import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.sidebar.DoorDataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 
 public class ManipulationTool extends Tool {
+
+	public enum States {
+		NORMAL,
+		ROOM_RESIZE,
+		DOOR_LINK
+	}
+
+	private States state = States.NORMAL;
+	private Point clickPoint = new Point(0, 0);
 
 	public ManipulationTool(EditorWindow window) {
 		super(window);
@@ -33,28 +41,26 @@ public class ManipulationTool extends Tool {
 		ManipulationToolComposite pointerC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(pointerC);
 
-		resetCursor();
-
-		OverviewWindow.getInstance().setEnabled(true);
 		OverviewWindow.getInstance().update();
 
 		Manager.setSelected(null);
+
+		setState(States.NORMAL);
+
+		cursor.setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+		cursor.setVisible(false);
 	}
 
 	@Override
 	public void deselect() {
 		Manager.setSelected(null);
 
-		Controller control = window.getPainter().getSelectableControllerAt(cursor.getLocation());
+		AbstractController control = window.getPainter().getSelectableControllerAt(cursor.getMouseLocation());
 		if (control != null) {
-			// control.getView().setContainsMouse(false); // TODO ?
-			control.getView().setHighlighted(false);
+			control.setHighlighted(false);
 		}
 
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
-
-		OverviewWindow.getInstance().setEnabled(false);
 	}
 
 	@Override
@@ -67,29 +73,50 @@ public class ManipulationTool extends Tool {
 		return new ManipulationToolComposite(parent, true, false);
 	}
 
+	public void setState(States state) {
+		this.state = state;
+		cursor.updateView();
+	}
+
+	public States getState() {
+		return state;
+	}
+
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
 	}
 
 	@Override
 	public void mouseDown(MouseEvent e) {
+		clickPoint.x = e.x;
+		clickPoint.y = e.y;
+
+		AbstractController selected = Manager.getSelected();
+
 		// inform the selected controller about clicks, so that it can be deselected
-		if (Manager.getSelected() != null && !Manager.getSelected().getBounds().contains(e.x, e.y))
-			Manager.getSelected().mouseDown(e);
+		// if (selected != null)
+		// selected.mouseDown(e);
 
-		// get the controller at the mouse click pos, and if found, notify it about mouseDown event
-		for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
-			if (selectableLayerIds[i] != null) {
-				AbstractController control = window.getPainter().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
-				if (control != null) {
-					control.mouseDown(e);
-					break;
-				}
-			}
+		if (state == States.NORMAL) {
+			// get the controller at the mouse click pos, and if found, notify it about mouseDown event
+			AbstractController controller = getTopmostSelectableController(e.x, e.y);
+			if (controller != null)
+				controller.mouseDown(e);
+			else if (selected != null)
+				selected.mouseDown(e);
 		}
+		// not using else if here, since a state change can occur in the previous step
+		// TODO 'tis an ugly solution, think of something more elegant
+		if (state == States.ROOM_RESIZE) {
+			RoomController room = (RoomController) selected;
 
-		/*// @formatter:off
-		} else if (state == State.DOOR_LINK) {
+			cursor.updateView();
+			if (e.button == 3)
+				cursor.setVisible(false);
+			cursor.resize(room.getSize());
+			cursor.reposition(room.getLocation());
+
+		} else if (state == States.DOOR_LINK) {
 			// get the controller at the mouse click pos, and if found, notify it about mouseDown event
 			AbstractController control = null;
 			for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
@@ -101,17 +128,16 @@ public class ManipulationTool extends Tool {
 			}
 
 			ManipulationToolComposite mtc = (ManipulationToolComposite) window.getSidebarContent();
-			DoorDataComposite ddc = (DoorDataComposite) mtc.getData();
+			DoorDataComposite ddc = (DoorDataComposite) mtc.getDataComposite();
 			RoomController roomController = control instanceof RoomController ? (RoomController) control : null;
 			ddc.linkDoor(roomController);
 
-			setState(State.MANIPULATE);
+			setState(States.NORMAL);
 		}
-		*/ // @formatter:on
 
+		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {
-			cursor.setVisible(false);
-			window.canvasRedraw(cursor.getBounds());
+			cursor.setVisible(state == States.ROOM_RESIZE);
 		}
 	}
 
@@ -125,23 +151,33 @@ public class ManipulationTool extends Tool {
 		if (Manager.getSelected() != null)
 			Manager.getSelected().mouseUp(e);
 
-		// find the topmost selectable controller and notify it about mouseUp event
-		for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
-			if (selectableLayerIds[i] != null) {
-				controller = window.getPainter().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
-				if (controller != null) {
-					controller.mouseUp(e);
-					break;
+		if (state == States.NORMAL) {
+			// find the topmost selectable controller and notify it about mouseUp event
+			for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
+				if (selectableLayerIds[i] != null) {
+					controller = window.getPainter().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
+					if (controller != null && controller != Manager.getSelected()) {
+						controller.mouseUp(e);
+						break;
+					}
 				}
 			}
-		}
-
-		if (!cursor.isVisible() && e.button == 1 && Grid.getInstance().isLocAccessible(e.x + 1, e.y + 1)) {
-			cursor.setVisible(controller == null);
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
-			if (!p.equals(cursor.getLocation()))
-				cursor.reposition(p.x, p.y);
-			window.canvasRedraw(cursor.getBounds());
+			cursor.updateView();
+			cursor.reposition(p.x, p.y);
+		} else if (state == States.ROOM_RESIZE) {
+			RoomController room = (RoomController) Manager.getSelected();
+			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
+			cursor.setVisible(false);
+			cursor.redraw();
+			cursor.updateView();
+			cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+			cursor.reposition(p.x, p.y);
+
+			if (!room.isResizing())
+				setState(States.NORMAL);
+
+		} else if (state == States.DOOR_LINK) {
 		}
 	}
 
@@ -150,96 +186,116 @@ public class ManipulationTool extends Tool {
 		super.mouseMove(e);
 
 		// faciliate mouseEnter event for controllers
-		AbstractController controller = null;
-		for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
-			if (selectableLayerIds[i] != null)
-				controller = window.getPainter().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
-			if (controller != null) {
-				// mouseEnter event also highlights the controller
-				if (!controller.getView().isHighlighted() && (Manager.getSelected() == null || !Manager.getSelected().isMoving()))
-					controller.mouseEnter(e);
-				// only one controller can be highlighted, so break the loop
-				break;
-			}
+		AbstractController controller = getTopmostSelectableController(e.x, e.y);
+		if (controller != null) {
+			// mouseEnter event also highlights the controller, so check if its not highlighted already
+			if (!controller.isHighlighted() && (Manager.getSelected() == null || !Manager.getSelected().isMoving()))
+				controller.mouseEnter(e);
 		}
 
-		// move the cursor around to follow mouse
-		if (Grid.getInstance().isLocAccessible(e.x, e.y) && controller == null) {
-			cursor.setVisible(!Manager.leftMouseDown && controller == null);
+		if (state == States.NORMAL) {
+			// move the cursor around to follow mouse
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
 			// always redraw it - prevents an odd visual bug where the controller sometimes doesn't register that it was moved
 			cursor.reposition(p.x, p.y);
-		} else if (cursor.isVisible()) {
-			cursor.setVisible(false);
-			window.canvasRedraw(cursor.getBounds());
+			cursor.updateView();
+
+		} else if (state == States.ROOM_RESIZE) {
+			RoomController room = (RoomController) Manager.getSelected();
+
+			Point resizeAnchor = room.getResizeAnchor();
+
+			// choose appropriate snapmode depending on the direction in which the user is resizing
+			Snapmodes resizeSnapmode = null;
+			if (e.x >= resizeAnchor.x && e.y >= resizeAnchor.y)
+				resizeSnapmode = Snapmodes.CORNER_BR;
+			else if (e.x >= resizeAnchor.x && e.y < resizeAnchor.y)
+				resizeSnapmode = Snapmodes.CORNER_TR;
+			else if (e.x < resizeAnchor.x && e.y >= resizeAnchor.y)
+				resizeSnapmode = Snapmodes.CORNER_BL;
+			else
+				resizeSnapmode = Snapmodes.CORNER_TL;
+
+			Point pointer = Grid.getInstance().snapToGrid(e.x, e.y, resizeSnapmode);
+			Point anchor = new Point(0, 0);
+
+			if (pointer.x < resizeAnchor.x)
+				// if mouse is to the left of the anchor...
+				anchor.x = resizeAnchor.x + (clickPoint.x > resizeAnchor.x ? ShipContainer.CELL_SIZE : 0);
+			else
+				// if mouse is to the right of the anchor...
+				anchor.x = resizeAnchor.x + (clickPoint.x > resizeAnchor.x ? 0 : -ShipContainer.CELL_SIZE);
+			if (pointer.y < resizeAnchor.y)
+				// if mouse is above the anchor...
+				anchor.y = resizeAnchor.y + (clickPoint.y > resizeAnchor.y ? ShipContainer.CELL_SIZE : 0);
+			else
+				// if mouse is below the anchor...
+				anchor.y = resizeAnchor.y + (clickPoint.y > resizeAnchor.y ? 0 : -ShipContainer.CELL_SIZE);
+
+			anchor = Grid.getInstance().snapToGrid(anchor.x, anchor.y, Snapmodes.CROSS);
+
+			int x = Math.min(anchor.x, pointer.x);
+			int y = Math.min(anchor.y, pointer.y);
+			int w = Math.max(Math.abs(anchor.x - pointer.x), ShipContainer.CELL_SIZE);
+			int h = Math.max(Math.abs(anchor.y - pointer.y), ShipContainer.CELL_SIZE);
+
+			cursor.updateView();
+			cursor.resize(w, h);
+			cursor.reposition(x + w / 2, y + h / 2);
+
+			if (!room.isResizing())
+				setState(States.NORMAL);
+
+		} else if (state == States.DOOR_LINK) {
+			// move the cursor around to follow mouse
+			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
+			// always redraw it - prevents an odd visual bug where the controller sometimes doesn't register that it was moved
+			cursor.reposition(p.x, p.y);
+			cursor.updateView();
+
 		}
 
 		// faciliate mouseExit event for controllers
 		for (Layers layer : window.getPainter().getLayerMap().descendingKeySet()) {
 			for (AbstractController control : window.getPainter().getLayerMap().get(layer)) {
-				if (control != null && control.getView().isVisible()) {
-					// also send mouseExit event to controllers that are obscured by other controllers
+				if (control != null && control.isVisible()) {
+					// send mouseExit event to controllers that are obscured by other controllers
+					// if:
+					// - control is selectable AND
+					// --- control doesn't contain the mouse pointer OR
+					// ----- control is not the same object as controller AND
+					// ----- both control and controller contain the mouse pointer
 					if (control.isSelectable() && ((!control.getBounds().contains(e.x, e.y))
 							|| (controller != null && control != controller && control.getBounds().contains(e.x, e.y) && controller.getBounds().contains(e.x, e.y))))
 						control.mouseExit(e);
+
 					// also pass on mouseMove event
-					if (window.canvasContains(e.x, e.y))
-						control.mouseMove(e);
+					control.mouseMove(e);
 				}
 			}
 		}
 	}
 
+	private AbstractController getTopmostSelectableController(int x, int y) {
+		AbstractController controller = null;
+		for (int i = selectableLayerIds.length - 1; i >= 0 && controller == null; i--) {
+			if (selectableLayerIds[i] != null)
+				controller = window.getPainter().getSelectableControllerAt(x, y, selectableLayerIds[i]);
+		}
+		return controller;
+	}
+
 	@Override
 	public void mouseEnter(MouseEvent e) {
 		cursor.setVisible(!Manager.leftMouseDown);
-		window.canvasRedraw(cursor.getBounds());
 	}
 
 	@Override
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
-
-		// @formatter:off
-		/*
-		for (Layers layer : window.getPainter().getLayerMap().descendingKeySet()) {
-			for (AbstractController controller : window.getPainter().getLayerMap().get(layer)) {
-				if (controller != null)
-					controller.mouseExit(e);
-			}
-		}
-		*/
-		// @formatter:on
 	}
 
 	@Override
 	public void mouseHover(MouseEvent e) {
-	}
-
-	/** Changes the cursor appearance to resize */
-	private void setRoomResizeCursor() { // TODO how to inform the cursor without exposing the method? change app to fully event-driven??
-		cursorView.setImage(null);
-		cursorView.setBackgroundColor(AbstractView.HIGHLIGHT_RGB);
-		cursorView.setBorderColor(null);
-		cursorView.setAlpha(255 / 3);
-
-		cursor.setSnapMode(Snapmodes.CELL);
-		cursor.setSize(CellController.SIZE, CellController.SIZE);
-		cursor.reposition(Grid.getInstance().snapToGrid(cursor.getLocation(), cursor.getSnapMode()));
-	}
-
-	/** Resets the cursor appearance to the default state for this tool. */
-	private void resetCursor() {
-		cursorView.setImage(null);
-		cursorView.setBackgroundColor(null);
-		cursorView.setBorderColor(AbstractView.HIGHLIGHT_RGB);
-		cursorView.setBorderThickness(3);
-		cursor.setSnapMode(Snapmodes.CELL);
-
-		Rectangle oldBounds = cursor.getBounds();
-		cursor.setSize(CellController.SIZE, CellController.SIZE);
-		cursor.setVisible(false);
-		window.canvasRedraw(oldBounds);
 	}
 }

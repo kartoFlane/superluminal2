@@ -12,11 +12,8 @@ import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 
-public class ShipView extends AbstractView {
+public class ShipView extends BaseView {
 
-	protected ShipController controller = null;
-
-	private Color anchorColor = null;
 	private Color horizontalColor = null;
 	private Color verticalColor = null;
 
@@ -26,7 +23,6 @@ public class ShipView extends AbstractView {
 	public ShipView() {
 		super();
 
-		anchorColor = Cache.checkOutColor(this, new RGB(0, 255, 255));
 		horizontalColor = Cache.checkOutColor(this, new RGB(255, 0, 0));
 		verticalColor = Cache.checkOutColor(this, new RGB(0, 255, 0));
 		setBorderColor(0, 0, 0);
@@ -37,21 +33,8 @@ public class ShipView extends AbstractView {
 	}
 
 	@Override
-	public ShipController getController() {
-		return controller;
-	}
-
-	@Override
 	public void setController(Controller controller) {
 		this.controller = (ShipController) controller;
-	}
-
-	public void updateLines() {
-		Point gridSize = Grid.getInstance().getSize();
-		lineH.setStart(getX(), getY());
-		lineH.setEnd(gridSize.x, getY());
-		lineV.setStart(getX(), getY());
-		lineV.setEnd(getX(), gridSize.y);
 	}
 
 	public Rectangle getHLineBounds() {
@@ -72,7 +55,7 @@ public class ShipView extends AbstractView {
 			e.gc.setForeground(verticalColor);
 			lineV.paintControl(e);
 
-			paintBackground(e, anchorColor, alpha);
+			paintBackground(e, backgroundColor, alpha);
 			paintBorder(e, borderColor, getBorderThickness(), alpha);
 
 			e.gc.setForeground(prevFgColor);
@@ -80,13 +63,33 @@ public class ShipView extends AbstractView {
 	}
 
 	@Override
+	public void updateView() {
+		updateLines();
+
+		setBackgroundColor(0, 255, 255);
+		if (controller.isSelected()) {
+			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);
+		} else if (controller.isHighlighted()) {
+			setBorderColor(HIGHLIGHT_RGB);
+		} else {
+			setBorderColor(0, 0, 0);
+		}
+	}
+
+	private void updateLines() {
+		Point gridSize = Grid.getInstance().getSize();
+		lineH.setStart(controller.getX(), controller.getY());
+		lineH.setEnd(gridSize.x, controller.getY());
+		lineV.setStart(controller.getX(), controller.getY());
+		lineV.setEnd(controller.getX(), gridSize.y);
+	}
+
+	@Override
 	public void dispose() {
 		super.dispose();
 
-		Cache.checkInColor(this, anchorColor.getRGB());
 		Cache.checkInColor(this, horizontalColor.getRGB());
 		Cache.checkInColor(this, verticalColor.getRGB());
-		anchorColor = null;
 		horizontalColor = null;
 		verticalColor = null;
 	}

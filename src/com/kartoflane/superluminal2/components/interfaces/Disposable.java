@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.components.interfaces;
 
+import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.core.Cache;
 
 /**
@@ -22,5 +23,5 @@ public interface Disposable {
 	 * <br>
 	 * Disposed objects cannot be retrieved via undo, therefore this method should be called to clean up unretrievable objects.
 	 */
-	public void dispose();
+	public void dispose() throws NotDeletableException;
 }

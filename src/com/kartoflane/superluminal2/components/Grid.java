@@ -6,6 +6,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.mvc.controllers.CellController;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 /**
  * A class representing the grid, consisting of individual {@link Cell} objects.
@@ -71,7 +72,7 @@ public class Grid {
 				cells.get(i).add(CellController.newInstance(i, j));
 		}
 
-		updateBounds(x * CellController.SIZE, y * CellController.SIZE);
+		updateBounds(x * ShipContainer.CELL_SIZE, y * ShipContainer.CELL_SIZE);
 	}
 
 	public static Grid getInstance() {
@@ -80,13 +81,13 @@ public class Grid {
 
 	public void updateBounds(int width, int height) {
 		// add one after division as a buffer
-		bounds.width = (width / CellController.SIZE + 1) * CellController.SIZE;
-		bounds.height = (height / CellController.SIZE + 1) * CellController.SIZE;
+		bounds.width = (width / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
+		bounds.height = (height / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
 
-		for (int i = 1; i <= bounds.width / CellController.SIZE; i++) {
+		for (int i = 1; i <= bounds.width / ShipContainer.CELL_SIZE; i++) {
 			if (cells.size() < i)
 				cells.add(new ArrayList<CellController>());
-			for (int j = 1; j <= bounds.height / CellController.SIZE; j++)
+			for (int j = 1; j <= bounds.height / ShipContainer.CELL_SIZE; j++)
 				if (cells.get(i - 1).size() < j)
 					cells.get(i - 1).add(CellController.newInstance(i - 1, j - 1));
 		}
@@ -121,7 +122,7 @@ public class Grid {
 
 	/** @return a Cell at the given coordinates, or null if out of grid. */
 	public CellController getCellAt(int x, int y) {
-		return getCell(x / CellController.SIZE, y / CellController.SIZE);
+		return getCell(x / ShipContainer.CELL_SIZE, y / ShipContainer.CELL_SIZE);
 	}
 
 	/**
@@ -129,11 +130,11 @@ public class Grid {
 	 * If the coordinates are inside the grid, use {@link #getCellAt(int, int)} instead.
 	 */
 	public CellController getClosestCell(int x, int y) {
-		int width = bounds.width - bounds.width % CellController.SIZE - CellController.SIZE;
-		int height = bounds.height - bounds.height % CellController.SIZE - CellController.SIZE;
+		int width = bounds.width - bounds.width % ShipContainer.CELL_SIZE - ShipContainer.CELL_SIZE;
+		int height = bounds.height - bounds.height % ShipContainer.CELL_SIZE - ShipContainer.CELL_SIZE;
 
-		x = x < width ? x / CellController.SIZE : width / CellController.SIZE - 1;
-		y = y < height ? y / CellController.SIZE : height / CellController.SIZE - 1;
+		x = x < width ? x / ShipContainer.CELL_SIZE : width / ShipContainer.CELL_SIZE - 1;
+		y = y < height ? y / ShipContainer.CELL_SIZE : height / ShipContainer.CELL_SIZE - 1;
 
 		return getCell(x, y);
 	}
@@ -200,43 +201,43 @@ public class Grid {
 				p.y--;
 				break;
 			case LINE_H:
-				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + CellController.SIZE - y))
+				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + ShipContainer.CELL_SIZE - y))
 					p.y = c.getBounds().y;
 				else
-					p.y = c.getBounds().y + CellController.SIZE;
+					p.y = c.getBounds().y + ShipContainer.CELL_SIZE;
 				break;
 			case LINE_V:
-				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + CellController.SIZE - x))
+				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + ShipContainer.CELL_SIZE - x))
 					p.x = c.getBounds().x;
 				else
-					p.x = c.getBounds().x + CellController.SIZE;
+					p.x = c.getBounds().x + ShipContainer.CELL_SIZE;
 				break;
 			case CROSS:
-				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + CellController.SIZE - x))
+				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + ShipContainer.CELL_SIZE - x))
 					p.x = c.getBounds().x + 1;
 				else
-					p.x = c.getBounds().x + CellController.SIZE + 1;
+					p.x = c.getBounds().x + ShipContainer.CELL_SIZE + 1;
 
-				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + CellController.SIZE - y))
+				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + ShipContainer.CELL_SIZE - y))
 					p.y = c.getBounds().y + 1;
 				else
-					p.y = c.getBounds().y + CellController.SIZE + 1;
+					p.y = c.getBounds().y + ShipContainer.CELL_SIZE + 1;
 				break;
 			case EDGE_H:
 				p.x = c.getLocation().x - 1;
 
-				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + CellController.SIZE - y))
+				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + ShipContainer.CELL_SIZE - y))
 					p.y = c.getBounds().y + 1;
 				else
-					p.y = c.getBounds().y + CellController.SIZE + 1;
+					p.y = c.getBounds().y + ShipContainer.CELL_SIZE + 1;
 				break;
 			case EDGE_V:
 				p.y = c.getLocation().y - 1;
 
-				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + CellController.SIZE - x))
+				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + ShipContainer.CELL_SIZE - x))
 					p.x = c.getBounds().x + 1;
 				else
-					p.x = c.getBounds().x + CellController.SIZE + 1;
+					p.x = c.getBounds().x + ShipContainer.CELL_SIZE + 1;
 				break;
 			case EDGES:
 				Point a = snapToGrid(x, y, Snapmodes.EDGE_H);
@@ -248,7 +249,7 @@ public class Grid {
 					p = b;
 				break;
 			case ANY:
-				// round to any multiple of 17.5 (CellController.SIZE / 2.0)
+				// round to any multiple of 17.5 (ShipContainer.CELL_SIZE / 2.0)
 				// just subtract the remainder of division, and add 1 to correct
 				p.x += -p.x % 17.5 + 1;
 				p.y += -p.y % 17.5 + 1;
@@ -263,23 +264,23 @@ public class Grid {
 				break;
 			case CORNER_TL:
 				p = c.getLocation();
-				p.x -= CellController.SIZE / 2 + 1;
-				p.y -= CellController.SIZE / 2 + 1;
+				p.x -= ShipContainer.CELL_SIZE / 2 + 1;
+				p.y -= ShipContainer.CELL_SIZE / 2 + 1;
 				break;
 			case CORNER_TR:
 				p = c.getLocation();
-				p.x += CellController.SIZE / 2 + 1;
-				p.y -= CellController.SIZE / 2 + 1;
+				p.x += ShipContainer.CELL_SIZE / 2 + 1;
+				p.y -= ShipContainer.CELL_SIZE / 2 + 1;
 				break;
 			case CORNER_BL:
 				p = c.getLocation();
-				p.x -= CellController.SIZE / 2 + 1;
-				p.y += CellController.SIZE / 2 + 1;
+				p.x -= ShipContainer.CELL_SIZE / 2 + 1;
+				p.y += ShipContainer.CELL_SIZE / 2 + 1;
 				break;
 			case CORNER_BR:
 				p = c.getLocation();
-				p.x += CellController.SIZE / 2 + 1;
-				p.y += CellController.SIZE / 2 + 1;
+				p.x += ShipContainer.CELL_SIZE / 2 + 1;
+				p.y += ShipContainer.CELL_SIZE / 2 + 1;
 				break;
 
 			default:

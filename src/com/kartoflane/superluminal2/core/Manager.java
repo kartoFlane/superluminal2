@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
+import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.tools.Tool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 
 /**
@@ -41,7 +42,7 @@ public class Manager {
 	public static boolean modCtrl = false;
 
 	private static AbstractController selectedController;
-	private static ShipController currentShip = null;
+	private static ShipContainer currentShip = null;
 	private static Tools selectedTool = null;
 
 	/**
@@ -74,16 +75,18 @@ public class Manager {
 	public static void createNewShip() {
 		if (currentShip != null)
 			currentShip.dispose();
-		currentShip = ShipController.newInstance(true);
+		currentShip = new ShipContainer(new ShipObject(true)); // TODO choose if player ship
+		currentShip.getShipController().reposition(2 * ShipContainer.CELL_SIZE, 2 * ShipContainer.CELL_SIZE);
 	}
 
-	public static void loadShip(ShipController ship) {
+	public static void loadShip(ShipObject ship) {
+		currentShip = new ShipContainer(ship);
 		// TODO load the ship
-		currentShip = ship;
+		// currentShip = ship;
 	}
 
 	/** Returns the currently loaded ship. */
-	public static ShipController getCurrentShip() {
+	public static ShipContainer getCurrentShip() {
 		return currentShip;
 	}
 

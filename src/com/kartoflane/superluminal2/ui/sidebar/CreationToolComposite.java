@@ -99,7 +99,7 @@ public class CreationToolComposite extends Composite implements SidebarComposite
 	private void selectTool(ToolItem item) {
 		selectedTool = (Tools) item.getData();
 		Manager.selectTool(selectedTool);
-		setData(selectedTool);
+		setToolComposite(selectedTool);
 	}
 
 	public void selectTool(Tools toolId) {
@@ -129,7 +129,7 @@ public class CreationToolComposite extends Composite implements SidebarComposite
 
 	@Override
 	public DataComposite getDataComposite() {
-		return null; // doesn't hold DataCarriers
+		return null;
 	}
 
 	@Override

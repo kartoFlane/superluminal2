@@ -15,29 +15,29 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Superluminal;
 import com.kartoflane.superluminal2.mvc.Controller;
-import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
+import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
-import com.kartoflane.superluminal2.mvc.controllers.ShipController;
-import com.kartoflane.superluminal2.mvc.models.MountModel;
-import com.kartoflane.superluminal2.mvc.models.RoomModel;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 
 public class OverviewWindow {
 
 	private static OverviewWindow instance = null;
 
-	private ShipController ship;
-	private Controller highlightedController = null;
-	private HashMap<Controller, TreeItem> carrierMap = new HashMap<Controller, TreeItem>();
+	private ShipContainer ship;
+	private ObjectController highlightedController = null;
+	private HashMap<Controller, TreeItem> controllerMap = new HashMap<Controller, TreeItem>();
 
 	private Shell shell;
 	private TreeItem trtmRooms;
@@ -45,6 +45,9 @@ public class OverviewWindow {
 	private TreeItem trtmMounts;
 	private Tree tree;
 	private Menu overviewMenu;
+	private ToolBar toolBar;
+	private ToolItem tltmAlias;
+	private ToolItem tltmRemove;
 
 	public OverviewWindow(Shell parent) {
 		instance = this;
@@ -55,6 +58,17 @@ public class OverviewWindow {
 		shell.setLocation(pLoc.x + parent.getSize().x - shell.getSize().x, pLoc.y + 50);
 		shell.setText(String.format("%s - Ship Overview", Superluminal.APP_NAME));
 		shell.setLayout(new GridLayout(1, false));
+
+		toolBar = new ToolBar(shell, SWT.FLAT | SWT.RIGHT);
+		toolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+
+		tltmAlias = new ToolItem(toolBar, SWT.NONE);
+		tltmAlias.setToolTipText("Set Alias\n\nAlias is a short name to help you distinguish between objects.");
+		tltmAlias.setImage(SWTResourceManager.getImage(OverviewWindow.class, "/assets/alias.png"));
+
+		tltmRemove = new ToolItem(toolBar, SWT.NONE);
+		tltmRemove.setToolTipText("Remove Alias");
+		tltmRemove.setImage(SWTResourceManager.getImage(OverviewWindow.class, "/assets/noalias.png"));
 
 		tree = new Tree(shell, SWT.BORDER);
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -106,28 +120,33 @@ public class OverviewWindow {
 		tree.addListener(SWT.MouseMove, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				TreeItem item = tree.getItem(new Point(e.x, e.y));
-				Controller controller = null;
-				if (item != null && item.getData() != null)
-					controller = (Controller) item.getData();
+				if (Manager.getSelectedToolId() == Tools.POINTER) {
+					TreeItem item = tree.getItem(new Point(e.x, e.y));
+					ObjectController controller = null;
+					if (item != null && item.getData() != null)
+						controller = (ObjectController) item.getData();
 
-				if (highlightedController != null && highlightedController != controller && highlightedController.getView().isHighlighted())
-					highlightedController.getView().setHighlighted(false);
-				if (controller != null && !controller.getView().isHighlighted())
-					controller.getView().setHighlighted(true);
-				highlightedController = controller;
+					if (highlightedController != null && highlightedController != controller && highlightedController.isHighlighted())
+						highlightedController.setHighlighted(false);
+					if (controller != null && !controller.isHighlighted())
+						controller.setHighlighted(true);
+					highlightedController = controller;
+				}
 			}
 		});
 
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (tree.getSelectionCount() == 0 || Manager.getSelectedToolId() != Tools.POINTER)
-					return;
+				if (tree.getSelectionCount() != 0 && Manager.getSelectedToolId() == Tools.POINTER) {
+					TreeItem item = tree.getSelection()[0];
+					ObjectController controller = (ObjectController) item.getData();
+					Manager.setSelected(controller);
+				}
 
-				TreeItem item = tree.getSelection()[0];
-				AbstractController controller = (AbstractController) item.getData();
-				Manager.setSelected(controller);
+				boolean enable = tree.getSelectionCount() != 0 && tree.getSelection()[0].getData() != null;
+				tltmAlias.setEnabled(enable);
+				tltmRemove.setEnabled(enable);
 			}
 		});
 
@@ -142,15 +161,10 @@ public class OverviewWindow {
 					overviewMenu.setVisible(false);
 					return;
 				}
-
-				Alias aliasable = (Alias) tree.getSelection()[0].getData();
-				String alias = aliasable.getAlias();
-				mntmSetAlias.setEnabled(true);
-				mntmRemoveAlias.setEnabled(alias != null);
 			}
 		});
 
-		mntmSetAlias.addSelectionListener(new SelectionAdapter() {
+		SelectionAdapter setAliasListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Alias alias = (Alias) tree.getSelection()[0].getData();
@@ -158,16 +172,20 @@ public class OverviewWindow {
 				dialog.open();
 				update(tree.getSelection()[0]);
 			}
-		});
+		};
+		mntmSetAlias.addSelectionListener(setAliasListener);
+		tltmAlias.addSelectionListener(setAliasListener);
 
-		mntmRemoveAlias.addSelectionListener(new SelectionAdapter() {
+		SelectionAdapter removeAliasListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Alias alias = (Alias) tree.getSelection()[0].getData();
 				alias.setAlias(null);
 				update(tree.getSelection()[0]);
 			}
-		});
+		};
+		mntmRemoveAlias.addSelectionListener(removeAliasListener);
+		tltmRemove.addSelectionListener(removeAliasListener);
 	}
 
 	public void open() {
@@ -190,7 +208,7 @@ public class OverviewWindow {
 			it.dispose();
 		for (TreeItem it : trtmMounts.getItems())
 			it.dispose();
-		carrierMap.clear();
+		controllerMap.clear();
 
 		for (RoomController r : ship.getRoomControllers())
 			createItem(r);
@@ -198,15 +216,13 @@ public class OverviewWindow {
 			createItem(d);
 		for (MountController m : ship.getMountControllers())
 			createItem(m);
-
-		setEnabled(Manager.getSelectedToolId() == Tools.POINTER);
 	}
 
 	public void update(Controller controller) {
-		TreeItem item = carrierMap.get(controller);
+		TreeItem item = controllerMap.get(controller);
 		if (item == null) {
 			item = createItem(controller);
-			carrierMap.put(controller, item);
+			controllerMap.put(controller, item);
 			return; // no need to update, since we've already created a new item
 		}
 		// throw new IllegalArgumentException("DataCarrier " + data + " has not yet been added to the manager.");
@@ -219,40 +235,21 @@ public class OverviewWindow {
 
 		if (data instanceof RoomController) {
 			RoomController controller = (RoomController) data;
-			RoomModel model = controller.getModel();
-			StringBuilder buf = new StringBuilder();
-			buf.append("Room " + model.getId());
-
-			if (model.getSystem() != null)
-				buf.append(": " + model.getSystem().toString());
-			String alias = model.getAlias();
-			if (alias != null)
-				buf.append(" - \"" + alias + "\"");
-
-			item.setText(buf.toString());
+			item.setText(controller.toString());
 
 			if (controller.isSelected())
 				tree.select(item);
 		} else if (data instanceof DoorController) {
 			DoorController controller = (DoorController) data;
-
-			StringBuilder buf = new StringBuilder();
-			buf.append("Door " + (controller.getModel().isHorizontal() ? "H" : "V"));
-
-			String alias = controller.getAlias();
-			if (alias != null)
-				buf.append(" - \"" + alias + "\"");
-
-			item.setText(buf.toString());
+			item.setText(controller.toString());
 
 			if (controller.isSelected())
 				tree.select(item);
 		} else if (data instanceof MountController) {
 			MountController controller = (MountController) data;
-			MountModel model = controller.getModel();
 
 			StringBuilder buf = new StringBuilder();
-			buf.append("Mount " + model.getId());
+			buf.append("Mount " + controller.getId());
 
 			String alias = controller.getAlias();
 			if (alias != null)
@@ -271,8 +268,8 @@ public class OverviewWindow {
 
 	public void setEnabled(boolean b) {
 		tree.setEnabled(b);
-		if (highlightedController != null && highlightedController.getView().isHighlighted())
-			highlightedController.getView().setHighlighted(false);
+		if (highlightedController != null && highlightedController.isHighlighted())
+			highlightedController.setHighlighted(false);
 	}
 
 	public boolean isEnabled() {
@@ -299,7 +296,7 @@ public class OverviewWindow {
 
 		update(item);
 
-		carrierMap.put(controller, item);
+		controllerMap.put(controller, item);
 		return item;
 	}
 }

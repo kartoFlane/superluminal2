@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.components;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -11,10 +12,12 @@ import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
-import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 
 /**
+ * The class governs when and in what order controllers are drawn.
+ * Also implements several methods for selection.
+ * 
  * The last controller in a layer is the topmost one.
  * The first view in a layer is the bottom-most one.
  * 
@@ -55,25 +58,25 @@ public class LayeredPainter implements PaintListener {
 	 * Places the Controller at the top of the layer. The newly added Controller
 	 * will be drawn last on the layer, and will therefore appear as topmost.
 	 */
-	public void add(Controller controller, Layers layer) {
+	public void add(AbstractController controller, Layers layer) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
 		ArrayList<AbstractController> list = layerMap.get(layer);
-		list.add((AbstractController) controller);
+		list.add(controller);
 	}
 
 	/**
 	 * Places the Controller at the bottom of the layer. The newly added Controller
 	 * will be drawn first on the layer, and will therefore appear as bottom-most.
 	 */
-	public void addToBottom(Controller controller, Layers layer) {
+	public void addToBottom(AbstractController controller, Layers layer) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
 		ArrayList<AbstractController> list = layerMap.get(layer);
-		list.add(0, (AbstractController) controller);
+		list.add(0, controller);
 	}
 
-	public void remove(Controller controller) {
+	public void remove(AbstractController controller) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
 		for (Layers layer : Layers.values()) {
@@ -82,11 +85,11 @@ public class LayeredPainter implements PaintListener {
 		}
 	}
 
-	public boolean contains(Controller controller) {
+	public boolean contains(AbstractController controller) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
 		for (Layers layer : Layers.values()) {
-			for (Controller c : layerMap.get(layer))
+			for (AbstractController c : layerMap.get(layer))
 				if (c == controller)
 					return true;
 		}
@@ -116,7 +119,7 @@ public class LayeredPainter implements PaintListener {
 		for (Layers layer : Layers.values()) {
 			for (AbstractController controller : layerMap.get(layer)) {
 				if (controller.intersects(dirtyRect))
-					controller.getView().redraw(e);
+					controller.redraw(e);
 			}
 		}
 		e.gc.dispose();
@@ -158,7 +161,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return the topmost visible Controller, on whichever layer. */
 	public AbstractController getControllerAt(int x, int y) {
-		for (Layers layer : SELECTION_ORDER) {
+		for (int i = SELECTION_ORDER.length - 1; i >= 0; i--) {
+			Layers layer = SELECTION_ORDER[i];
 			AbstractController controller = getControllerAt(x, y, layer);
 			if (controller != null)
 				return controller;
@@ -172,7 +176,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @eturn the topmost visible, selectable Controller at the given coordinates, on whichever layer. */
 	public AbstractController getSelectableControllerAt(int x, int y) {
-		for (Layers layer : SELECTION_ORDER) {
+		for (int i = SELECTION_ORDER.length - 1; i >= 0; i--) {
+			Layers layer = SELECTION_ORDER[i];
 			AbstractController controller = getSelectableControllerAt(x, y, layer);
 			if (controller != null)
 				return controller;
@@ -203,5 +208,75 @@ public class LayeredPainter implements PaintListener {
 				return controller;
 		}
 		return null;
+	}
+
+	/**
+	 * @return a list of all controllers that contain the point
+	 */
+	public List<AbstractController> getAllControllersAt(int x, int y) {
+		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
+
+		for (Layers layer : SELECTION_ORDER) {
+			for (AbstractController controller : layerMap.get(layer)) {
+				if (controller != null && controller.contains(x, y))
+					list.add(controller);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * @return a list of all controllers that contain the point
+	 */
+	public List<AbstractController> getAllControllersAt(Point p) {
+		return getAllControllersAt(p.x, p.y);
+	}
+
+	/**
+	 * @return a list of all selectable controllers that contain the point
+	 */
+	public List<AbstractController> getAllSelectableControllersAt(int x, int y) {
+		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
+
+		for (Layers layer : SELECTION_ORDER) {
+			for (AbstractController controller : layerMap.get(layer)) {
+				if (controller != null && controller.isSelectable() && controller.contains(x, y))
+					list.add(controller);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * @return a list of all selectable controllers that contain the point
+	 */
+	public List<AbstractController> getAllSelectableControllersAt(Point p) {
+		return getAllSelectableControllersAt(p.x, p.y);
+	}
+
+	/** @return all controllers matching the conditions set by the predicate */
+	public List<AbstractController> getAllControllersMatching(Predicate<AbstractController> p) {
+		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
+
+		for (Layers layer : SELECTION_ORDER) {
+			for (AbstractController controller : layerMap.get(layer)) {
+				if (controller != null && p.accept(controller))
+					list.add(controller);
+			}
+		}
+		return list;
+	}
+
+	/** @return all controllers on the given layer matching the conditions set by the predicate */
+	public List<AbstractController> getAllControllersMatching(Predicate<AbstractController> p, Layers layer) {
+		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
+
+		for (AbstractController controller : layerMap.get(layer)) {
+			if (controller != null && p.accept(controller))
+				list.add(controller);
+		}
+		return list;
 	}
 }

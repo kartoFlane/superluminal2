@@ -3,23 +3,23 @@ package com.kartoflane.superluminal2.tools;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.mvc.controllers.CellController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
-import com.kartoflane.superluminal2.mvc.controllers.StationController;
-import com.kartoflane.superluminal2.mvc.views.AbstractView;
+import com.kartoflane.superluminal2.mvc.controllers.SystemController;
+import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class StationTool extends Tool {
 
-	private static final RGB DENY_RGB = AbstractView.DENY_RGB;
-	private static final RGB ALLOW_RGB = AbstractView.ALLOW_RGB;
+	private static final RGB DENY_RGB = BaseView.DENY_RGB;
+	private static final RGB ALLOW_RGB = BaseView.ALLOW_RGB;
+
+	private boolean canPlace = false;
 
 	public StationTool(EditorWindow window) {
 		super(window);
@@ -28,6 +28,7 @@ public class StationTool extends Tool {
 	@Override
 	public void select() {
 		resetCursor();
+		cursor.updateView();
 	}
 
 	@Override
@@ -52,22 +53,24 @@ public class StationTool extends Tool {
 	public void mouseDown(MouseEvent e) {
 		if (e.button == 1) {
 			// station assignment
-			RoomController roomController = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
-			if (roomController != null && roomController.isVisible() && roomController.getModel().getSystem().canContainStation()) {
-				StationController station = roomController.getSystemController().getStationController();
+			ShipContainer container = Manager.getCurrentShip();
+			RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+			if (roomC != null && container.getSystemController(roomC.getSystemId()).canContainStation()) {
+				// StationController station = roomController.getSystemController().getStationController();
 				// correction to pick the correct slot
-				station.getModel().setSlotId(roomController.getModel().getSlotId(e.x - 2, e.y - 2));
+				// station.getModel().setSlotId(roomC.getModel().getSlotId(e.x - 2, e.y - 2));
 				// station.updateSlot();
-				window.canvasRedraw(roomController.getBounds());
+				window.canvasRedraw(roomC.getBounds());
 			}
 		} else if (e.button == 3) {
 			// station removal
-			RoomController roomController = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
-			if (roomController != null && roomController.isVisible() && roomController.getModel().getSystem().canContainStation()) {
-				StationController station = roomController.getSystemController().getStationController();
-				station.setSlotId(-2);
+			ShipContainer container = Manager.getCurrentShip();
+			RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+			if (roomC != null && container.getSystemController(roomC.getSystemId()).canContainStation()) {
+				// StationController station = roomController.getSystemController().getStationController();
+				// station.setSlotId(-2);
 				// station.updateSlot();
-				window.canvasRedraw(roomController.getBounds());
+				window.canvasRedraw(roomC.getBounds());
 			}
 		}
 
@@ -110,14 +113,13 @@ public class StationTool extends Tool {
 			window.canvasRedraw(cursor.getBounds());
 		}
 
-		RoomController roomController = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
-		if (roomController != null && roomController.isVisible()) {
-			if (roomController.getModel().getSystem().canContainStation() && cursorView.getBorderRGB() != ALLOW_RGB)
-				cursorView.setBorderColor(ALLOW_RGB);
-			else if (!roomController.getModel().getSystem().canContainStation() && cursorView.getBorderRGB() != DENY_RGB)
-				cursorView.setBorderColor(DENY_RGB);
-		} else if (cursorView.getBorderRGB() != DENY_RGB) {
-			cursorView.setBorderColor(DENY_RGB);
+		ShipContainer container = Manager.getCurrentShip();
+		RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+		if (roomC != null) {
+			SystemController system = container.getSystemController(roomC.getSystemId());
+			canPlace = system.canContainStation();
+		} else {
+			canPlace = false;
 		}
 	}
 
@@ -133,19 +135,25 @@ public class StationTool extends Tool {
 		window.canvasRedraw(cursor.getBounds());
 	}
 
+	public boolean canPlaceStation() {
+		return canPlace;
+	}
+
 	@Override
 	public void mouseHover(MouseEvent e) {
 	}
 
 	private void resetCursor() {
-		cursorView.setImage(null);
-		cursorView.setBackgroundColor(null);
-		cursorView.setBorderColor(ALLOW_RGB);
-		cursorView.setAlpha(255);
-		cursor.setSnapMode(Snapmodes.CELL);
-
-		Rectangle oldBounds = cursor.getBounds();
-		cursor.setSize(CellController.SIZE, CellController.SIZE);
-		window.canvasRedraw(oldBounds);
+		/*
+		 * cursor.setImage(null);
+		 * cursor.setBackgroundColor(null);
+		 * cursor.setBorderColor(ALLOW_RGB);
+		 * cursor.setAlpha(255);
+		 * cursor.setSnapMode(Snapmodes.CELL);
+		 * 
+		 * Rectangle oldBounds = cursor.getBounds();
+		 * cursor.setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+		 * window.canvasRedraw(oldBounds);
+		 */
 	}
 }

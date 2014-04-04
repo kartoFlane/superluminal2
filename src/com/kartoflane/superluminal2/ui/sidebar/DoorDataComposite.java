@@ -3,71 +3,95 @@ package com.kartoflane.superluminal2.ui.sidebar;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.CellController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
+import com.kartoflane.superluminal2.tools.ManipulationTool.States;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 
 public class DoorDataComposite extends Composite implements DataComposite {
 
+	private static final String AUTOLINK_TXT = "Linked automatically";
+	private static final String SELECT_ROOM_TXT = "Select a room";
+
 	private ManipulationTool tool = null;
-	/** Determines which door's link is set during linking */
-	private int id = SWT.LEFT;
+	/** Determines which door's link is being set during linking */
+	private boolean leftLinking = true;
 
 	private Button btnHorizontal;
 	private Button btnIdLeft;
 	private Button btnIdRight;
 
 	private DoorController controller = null;
+	private Button btnSelectLeft;
+	private Button btnSelectRight;
+	private Label lblIdLeft;
+	private Label lblIdRight;
 
-	public DoorDataComposite(Composite parent, DoorController controller) {
+	public DoorDataComposite(Composite parent, DoorController control) {
 		super(parent, SWT.NONE);
 
 		tool = (ManipulationTool) Manager.getSelectedTool();
-		this.controller = controller;
+		controller = control;
 
-		setLayout(new GridLayout(2, false));
+		setLayout(new GridLayout(3, false));
 
 		Label label = new Label(this, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 2, 1));
+		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
 		label.setText("Door");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
 		btnHorizontal = new Button(this, SWT.CHECK);
-		btnHorizontal.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		btnHorizontal.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
 		btnHorizontal.setText("Horizontal");
-		btnHorizontal.setSelection(controller.getModel().isHorizontal());
+		btnHorizontal.setSelection(controller.isHorizontal());
 
-		Label lblIdLeft = new Label(this, SWT.NONE);
-		lblIdLeft.setText("Left ID:  ");
+		lblIdLeft = new Label(this, SWT.NONE);
+		lblIdLeft.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		lblIdLeft.setText("XXXXX ID:");
 
 		btnIdLeft = new Button(this, SWT.TOGGLE);
 		btnIdLeft.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		btnIdLeft.setText("(linked automatically)");
+		btnIdLeft.setText(AUTOLINK_TXT);
 
-		Label lblIdRight = new Label(this, SWT.NONE);
-		lblIdRight.setText("Right ID:  ");
+		btnSelectLeft = new Button(this, SWT.NONE);
+		GridData gd_btnSelectLeft = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSelectLeft.widthHint = 30;
+		btnSelectLeft.setLayoutData(gd_btnSelectLeft);
+		btnSelectLeft.setText(">");
+		btnSelectLeft.setToolTipText("Select the linked room");
+
+		lblIdRight = new Label(this, SWT.NONE);
+		lblIdRight.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		lblIdRight.setText("XXXXX ID:");
 
 		btnIdRight = new Button(this, SWT.TOGGLE);
 		btnIdRight.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		btnIdRight.setText("(linked automatically)");
+		btnIdRight.setText(AUTOLINK_TXT);
+
+		btnSelectRight = new Button(this, SWT.NONE);
+		GridData gd_btnSelectRight = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSelectRight.widthHint = 30;
+		btnSelectRight.setLayoutData(gd_btnSelectRight);
+		btnSelectRight.setText(">");
+		btnSelectRight.setToolTipText("Select the linked room");
 
 		btnHorizontal.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				DoorDataComposite.this.controller.setHorizontal(btnHorizontal.getSelection());
+				controller.setHorizontal(btnHorizontal.getSelection());
+				OverviewWindow.getInstance().update(controller);
+				updateData();
 			}
 		});
 
@@ -77,15 +101,15 @@ public class DoorDataComposite extends Composite implements DataComposite {
 				Button btn = (Button) e.getSource();
 
 				if (btn.getSelection()) {
-					btn.setText("(select a room)");
+					btn.setText(SELECT_ROOM_TXT);
 					btnIdRight.setEnabled(false);
-					id = SWT.LEFT;
-					// tool.setState(State.DOOR_LINK); // TODO
+					leftLinking = true;
+					tool.setState(States.DOOR_LINK);
 				} else {
-					RoomController room = DoorDataComposite.this.controller.getLeftRoomController();
-					btn.setText(room == null ? "(linked automatically)" : room.toString());
+					RoomController room = controller.getLeftRoomController();
+					btn.setText(room == null ? AUTOLINK_TXT : room.toString());
 					btnIdRight.setEnabled(true);
-					// tool.setState(State.MANIPULATE); // TODO
+					tool.setState(States.NORMAL);
 				}
 			}
 		});
@@ -96,55 +120,68 @@ public class DoorDataComposite extends Composite implements DataComposite {
 				Button btn = (Button) e.getSource();
 
 				if (btn.getSelection()) {
-					btn.setText("(select a room)");
+					btn.setText(SELECT_ROOM_TXT);
 					btnIdLeft.setEnabled(false);
-					id = SWT.RIGHT;
-					// tool.setState(State.DOOR_LINK);// TODO
+					leftLinking = false;
+					tool.setState(States.DOOR_LINK);
 				} else {
-					RoomController room = DoorDataComposite.this.controller.getRightRoomController();
-					btn.setText(room == null ? "(linked automatically)" : room.toString());
+					RoomController room = controller.getRightRoomController();
+					btn.setText(room == null ? AUTOLINK_TXT : room.toString());
 					btnIdLeft.setEnabled(true);
-					// tool.setState(State.MANIPULATE);//TODO
+					tool.setState(States.NORMAL);
 				}
 			}
 		});
 
-		updateData();
+		btnSelectLeft.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.setSelected(controller.getLeftRoomController());
+			}
+		});
+
+		btnSelectRight.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.setSelected(controller.getRightRoomController());
+			}
+		});
+
+		// updateData();
 	}
 
 	@Override
 	public void updateData() {
-		Point gridSize = Grid.getInstance().getSize();
-		btnHorizontal.setEnabled(controller.getX() < gridSize.x - CellController.SIZE && controller.getY() < gridSize.y - CellController.SIZE);
+		controller.verifyLinkedDoors();
+
+		btnHorizontal.setSelection(controller.isHorizontal());
+
+		lblIdLeft.setText((controller.isHorizontal() ? "Upper" : "Left") + " ID:");
+		lblIdRight.setText((controller.isHorizontal() ? "Lower" : "Right") + " ID:");
 
 		RoomController linkedRoom = controller.getLeftRoomController();
-		btnIdLeft.setText(linkedRoom == null ? "(linked automatically)" : linkedRoom.toString());
+		btnIdLeft.setText(linkedRoom == null ? AUTOLINK_TXT : linkedRoom.toString());
+		btnSelectLeft.setEnabled(linkedRoom != null);
 		linkedRoom = controller.getRightRoomController();
-		btnIdRight.setText(linkedRoom == null ? "(linked automatically)" : linkedRoom.toString());
+		btnIdRight.setText(linkedRoom == null ? AUTOLINK_TXT : linkedRoom.toString());
+		btnSelectRight.setEnabled(linkedRoom != null);
+
+		lblIdLeft.pack();
+		lblIdRight.pack();
 	}
 
 	public void linkDoor(RoomController room) {
-		switch (id) {
-			case SWT.LEFT:
-				controller.setLeftRoomController(room);
-				btnIdLeft.setSelection(false);
-				btnIdRight.setEnabled(true);
-				updateData();
-				break;
-			case SWT.RIGHT:
-				controller.setRightRoomController(room);
-				btnIdLeft.setEnabled(true);
-				btnIdRight.setSelection(false);
-				updateData();
-				break;
-			default:
-				throw new IllegalArgumentException();
+		if (leftLinking) {
+			controller.setLeftRoomController(room);
+			btnIdLeft.setSelection(false);
+			btnIdRight.setEnabled(true);
+			updateData();
+		} else {
+			controller.setRightRoomController(room);
+			btnIdLeft.setEnabled(true);
+			btnIdRight.setSelection(false);
+			updateData();
 		}
-	}
-
-	@Override
-	public DoorController getController() {
-		return controller;
 	}
 
 	@Override

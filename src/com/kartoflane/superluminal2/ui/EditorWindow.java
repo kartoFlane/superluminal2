@@ -32,16 +32,16 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.LayeredPainter;
+import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Manager.Hotkeys;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
-import com.kartoflane.superluminal2.core.Superluminal;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
-import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.DoorTool;
 import com.kartoflane.superluminal2.tools.GibTool;
@@ -69,11 +69,16 @@ public class EditorWindow {
 	private ScrolledComposite sideContainer;
 	private Canvas canvas;
 	private LayeredPainter painter;
+
 	private ToolItem tltmPointer;
 	private ToolItem tltmCreation;
 	private ToolItem tltmGib;
 	private ToolItem tltmProperties;
 	private ToolItem tltmManager;
+
+	private MenuItem mntmUndo;
+	private MenuItem mntmRedo;
+	private MenuItem mntmDelete;
 
 	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
 	private boolean shellResizing = false;
@@ -119,10 +124,10 @@ public class EditorWindow {
 		mntmFile.setMenu(menu_1);
 
 		MenuItem mntmNewShip = new MenuItem(menu_1, SWT.NONE);
-		mntmNewShip.setText("New Ship");
+		mntmNewShip.setText("New Ship\tCtrl+N");
 
 		MenuItem mntmLoadShip = new MenuItem(menu_1, SWT.NONE);
-		mntmLoadShip.setText("Load Ship");
+		mntmLoadShip.setText("Load Ship\tCtrl+L");
 
 		// Edit menu
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
@@ -130,6 +135,17 @@ public class EditorWindow {
 
 		Menu menu_2 = new Menu(mntmEdit);
 		mntmEdit.setMenu(menu_2);
+
+		mntmUndo = new MenuItem(menu_2, SWT.NONE);
+		mntmUndo.setText("Undo\tCtrl+Z");
+
+		mntmRedo = new MenuItem(menu_2, SWT.NONE);
+		mntmRedo.setText("Redo\tCtrl+Y");
+
+		new MenuItem(menu_2, SWT.SEPARATOR);
+
+		mntmDelete = new MenuItem(menu_2, SWT.NONE);
+		mntmDelete.setText("Delete\tShift+D");
 
 		// View menu
 		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
@@ -308,19 +324,21 @@ public class EditorWindow {
 					if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
 							e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {
 						AbstractController selected = Manager.getSelected();
-						if (selected != null && !selected.isPinned()) {
+						if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
 							ManipulationToolComposite mtc = (ManipulationToolComposite) getSidebarContent();
 
-							Point p = selected.toPresentedLocation(selected.getLocation());
+							Point p = selected.getPresentedLocation();
 							Rectangle oldBounds = null;
 
 							oldBounds = selected.getBounds();
 
-							Point size = selected.toNormalSize(p.x + (e.keyCode == SWT.ARROW_RIGHT ? 1 : e.keyCode == SWT.ARROW_LEFT ? -1 : 0),
+							selected.setPresentedLocation(p.x + (e.keyCode == SWT.ARROW_RIGHT ? 1 : e.keyCode == SWT.ARROW_LEFT ? -1 : 0),
 									p.y + (e.keyCode == SWT.ARROW_DOWN ? 1 : e.keyCode == SWT.ARROW_UP ? -1 : 0));
-							selected.setSize(size.x, size.y);
+							selected.updateFollowOffset();
+							Manager.getCurrentShip().updateBoundingArea();
+							selected.updateView();
 
-							canvasRedraw(selected.getBounds());
+							selected.redraw();
 							canvasRedraw(oldBounds);
 
 							mtc.updateData();
@@ -329,10 +347,21 @@ public class EditorWindow {
 						// deletion
 						AbstractController selected = Manager.getSelected();
 						if (selected != null) {
-							selected.dispose();
-							selected.redraw();
+							try {
+								Manager.getCurrentShip().delete(selected);
+								selected.redraw();
 
-							Manager.setSelected(null);
+								Manager.setSelected(null);
+							} catch (NotDeletableException ex) {
+								log.debug("Selected object is not disposable: " + selected.getClass().getSimpleName());
+							}
+						}
+					} else if (e.keyCode == SWT.SPACE) {
+						AbstractController selected = Manager.getSelected();
+						if (selected != null) {
+							selected.setPinned(!selected.isPinned());
+							((ManipulationToolComposite) getSidebarContent()).updateData();
+							e.doit = false;
 						}
 					}
 				}
@@ -341,14 +370,6 @@ public class EditorWindow {
 				if (e.keyCode == 'z' && Manager.modCtrl) {
 					if (Manager.DELETED_LIST.size() > 0)
 						Manager.DELETED_LIST.removeLast().restore();
-				}
-
-				if (e.keyCode == SWT.SPACE) {
-					AbstractController selected = Manager.getSelected();
-					if (selected != null) {
-						selected.setPinned(!selected.isPinned());
-						e.doit = false;
-					}
 				}
 			}
 		});
@@ -386,15 +407,11 @@ public class EditorWindow {
 			public void controlResized(ControlEvent e) {
 				Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
-				ShipController ship = Manager.getCurrentShip();
+				ShipContainer ship = Manager.getCurrentShip();
 				if (ship != null) {
-					// update bounding lines
-					ShipController shipController = Manager.getCurrentShip();
-					shipController.getView().updateLines();
-					shipController.redraw();
-
-					// update bounding area
-					ship.recalculateBoundedArea();
+					ship.updateBoundingArea();
+					ship.getShipController().setVisible(true); // to update the view
+					ship.getShipController().redraw();
 				}
 
 				if (!shellResizing)
@@ -413,14 +430,11 @@ public class EditorWindow {
 
 				Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
-				ShipController ship = Manager.getCurrentShip();
+				ShipContainer ship = Manager.getCurrentShip();
 				if (ship != null) {
-					// update bounding lines
-					ShipController shipController = Manager.getCurrentShip();
-					shipController.getView().updateLines();
-					shipController.redraw();
-					// update bounding area
-					ship.recalculateBoundedArea();
+					ship.updateBoundingArea();
+					ship.getShipController().setVisible(true); // to update the view
+					ship.getShipController().redraw();
 				}
 
 				int width = shell.getClientArea().width;

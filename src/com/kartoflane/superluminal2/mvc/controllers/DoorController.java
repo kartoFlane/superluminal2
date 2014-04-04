@@ -1,99 +1,93 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import com.kartoflane.superluminal2.components.Grid;
+import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
-import com.kartoflane.superluminal2.components.interfaces.Alias;
-import com.kartoflane.superluminal2.mvc.Model;
+import com.kartoflane.superluminal2.ftl.DoorObject;
+import com.kartoflane.superluminal2.mvc.ObjectModel;
 import com.kartoflane.superluminal2.mvc.View;
-import com.kartoflane.superluminal2.mvc.models.DoorModel;
+import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.mvc.views.DoorView;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.DoorDataComposite;
 
-public class DoorController extends AbstractController implements Alias {
+public class DoorController extends ObjectController {
 
-	protected DoorModel model;
-	protected DoorView view;
+	public static final int COLLISION_TOLERANCE = 3;
 
+	protected ShipContainer container = null;
 	protected RoomController left = null;
 	protected RoomController right = null;
 
-	private DoorController(DoorModel model, DoorView view) {
+	private DoorController(ShipContainer container, ObjectModel model, DoorView view) {
 		super();
-
 		setModel(model);
 		setView(view);
 
+		this.container = container;
+
 		setSelectable(true);
+		setLocModifiable(true);
+		setBounded(true);
+		setCollidable(true);
+		setTolerance(COLLISION_TOLERANCE);
+		setParent(container.getShipController());
 	}
 
-	public static DoorController newInstance(ShipController shipController, boolean horizontal) {
-		DoorModel model = new DoorModel();
+	public static DoorController newInstance(ShipContainer container, DoorObject object) {
+		ObjectModel model = new ObjectModel(object);
 		DoorView view = new DoorView();
-		DoorController controller = new DoorController(model, view);
-		controller.setHorizontal(horizontal);
+		DoorController controller = new DoorController(container, model, view);
+		controller.setHorizontal(controller.getGameObject().isHorizontal());
 
-		shipController.add(controller);
+		container.add(controller);
 
 		return controller;
 	}
 
-	public static DoorController newInstance(ShipController shipController, DoorModel model) {
-		DoorView view = new DoorView();
-		DoorController controller = new DoorController(model, view);
-		controller.setHorizontal(model.isHorizontal());
+	private ObjectModel getModel() {
+		return (ObjectModel) model;
+	}
 
-		shipController.add(controller);
-
-		return controller;
+	public DoorObject getGameObject() {
+		return (DoorObject) getModel().getGameObject();
 	}
 
 	public void setHorizontal(boolean horizontal) {
-		model.setHorizontal(horizontal);
-		model.setSize(horizontal ? 31 : 6, horizontal ? 6 : 31);
-		view.setHorizontal(horizontal);
+		Point p = getPresentedLocation();
+		getGameObject().setHorizontal(horizontal);
+		updateView();
+
+		setSnapMode(horizontal ? Snapmodes.EDGE_H : Snapmodes.EDGE_V);
+		resize(horizontal ? 31 : 6, horizontal ? 6 : 31);
+		updateBoundingArea();
+		reposition(Grid.getInstance().snapToGrid(p.x * 35, p.y * 35, getSnapMode()));
+		updateFollowOffset();
 	}
 
-	@Override
-	public DoorModel getModel() {
-		return model;
-	}
-
-	@Override
-	public void setModel(Model model) {
-		if (model == null)
-			throw new IllegalArgumentException("Argument is null.");
-		this.model = (DoorModel) model;
-	}
-
-	@Override
-	public DoorView getView() {
-		return view;
+	public boolean isHorizontal() {
+		return getGameObject().isHorizontal();
 	}
 
 	@Override
 	public void setView(View view) {
-		if (view == null)
-			throw new IllegalArgumentException("Argument is null.");
-
-		if (this.view != null)
-			this.view.dispose();
-		this.view = (DoorView) view;
-
-		view.setController(this);
+		super.setView(view);
 		this.view.addToPainter(Layers.DOOR);
 	}
 
 	public void setLeftRoomController(RoomController room) {
-		model.setLeftRoom(room.getModel());
+		getGameObject().setLeftRoom(room == null ? null : room.getGameObject());
 		left = room;
 	}
 
 	public void setRightRoomController(RoomController room) {
-		model.setRightRoom(room.getModel());
+		getGameObject().setRightRoom(room == null ? null : room.getGameObject());
 		right = room;
 	}
 
@@ -106,67 +100,92 @@ public class DoorController extends AbstractController implements Alias {
 	}
 
 	@Override
-	public void setSize(int w, int h) {
-		return;
+	public Point getPresentedLocation() {
+		return new Point((getX() + getH()) / ShipContainer.CELL_SIZE,
+				(getY() + getW()) / ShipContainer.CELL_SIZE);
 	}
 
 	@Override
-	public void setLocation(int x, int y) {
-		model.setLocation(x, y);
+	public Point getPresentedSize() {
+		throw new NotImplementedException();
 	}
 
 	@Override
-	public void translate(int dx, int dy) {
-		model.translate(dx, dy);
+	public void setPresentedLocation(int x, int y) {
+		setLocation(Grid.getInstance().snapToGrid(x * 35, y * 35, getSnapMode()));
 	}
 
 	@Override
-	public void dispose() {
-		view.dispose();
-	}
-
-	@Override
-	public Point toPresentedLocation(int x, int y) {
-		return new Point(x / 35, y / 35);
-	}
-
-	@Override
-	public Point toPresentedSize(int w, int h) {
-		return null;
-	}
-
-	@Override
-	public Point toNormalLocation(int x, int y) {
-		return new Point(x * 35, y * 35);
-	}
-
-	@Override
-	public Point toNormalSize(int w, int h) {
-		return null;
-	}
-
-	@Override
-	public String getAlias() {
-		return model.getAlias();
-	}
-
-	@Override
-	public void setAlias(String alias) {
-		model.setAlias(alias);
+	public void setPresentedSize(int w, int h) {
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public DataComposite getDataComposite(Composite parent) {
-		return new DoorDataComposite(parent, this);
+		DataComposite dc = new DoorDataComposite(parent, this);
+		dc.updateData();
+		return dc;
 	}
 
 	@Override
-	public boolean contains(int x, int y) {
-		return model.contains(x, y);
+	public void setHighlighted(boolean high) {
+		super.setHighlighted(high && !selected);
+
+		if (view.isHighlighted()) {
+			view.setBorderColor(BaseView.HIGHLIGHT_RGB);
+			view.setBorderThickness(3);
+		} else {
+			view.setBorderColor(isSelected() ? BaseView.SELECT_RGB : null);
+			view.setBorderThickness(2);
+		}
+		redraw();
+	}
+
+	protected void updateSelectionAppearance() {
+		if (selected) {
+			view.setBorderColor(BaseView.SELECT_RGB);
+			view.setBorderThickness(2);
+		} else {
+			view.setBorderColor(null);
+		}
+		redraw();
 	}
 
 	@Override
-	public boolean intersects(Rectangle rect) {
-		return model.intersects(rect);
+	public void select() {
+		super.select();
+		updateSelectionAppearance();
+	}
+
+	@Override
+	public void deselect() {
+		super.deselect();
+		setMoving(false);
+		updateSelectionAppearance();
+	}
+
+	@Override
+	public void updateBoundingArea() {
+		Point gridSize = Grid.getInstance().getSize();
+		gridSize.x -= (gridSize.x % ShipContainer.CELL_SIZE) + ShipContainer.CELL_SIZE;
+		gridSize.y -= (gridSize.y % ShipContainer.CELL_SIZE) + ShipContainer.CELL_SIZE;
+		setBoundingPoints(getParent().getX() + (getGameObject().isHorizontal() ? getW() / 2 + 2 : 0),
+				getParent().getY() + (getGameObject().isHorizontal() ? 0 : getH() / 2 + 2), gridSize.x, gridSize.y);
+	}
+
+	@Override
+	public String toString() {
+		DoorObject door = getGameObject();
+		String result = "Door " + (door.isHorizontal() ? "H" : "V");
+		if (getAlias() != null && !getAlias().equals(""))
+			result += " (" + door.getAlias() + ")";
+		return result;
+	}
+
+	public void verifyLinkedDoors() {
+		if (left != null && left.isDeleted())
+			setLeftRoomController(null);
+		if (right != null && right.isDeleted())
+			setRightRoomController(null);
 	}
 }

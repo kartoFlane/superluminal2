@@ -9,7 +9,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
-import com.kartoflane.superluminal2.mvc.views.CursorView;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
 /**
@@ -35,27 +34,28 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 		STATION
 	};
 
+	protected static Layers[] selectableLayerIds;
+
 	protected Tool instance = null;
 	protected CursorController cursor = null;
-	protected CursorView cursorView = null;
 	protected EditorWindow window = null;
-	protected Layers[] selectableLayerIds;
 
 	public Tool(EditorWindow window) {
 		this.window = window;
 		instance = this;
 
 		cursor = CursorController.getInstance();
-		cursorView = cursor.getView();
 
-		Layers[] allLayerIds = window.getPainter().getSelectionOrder();
-		Layers[] ignoredLayers = { Layers.CURSOR, Layers.GRID, Layers.OVERLAY, Layers.SYSTEM, Layers.STATION };
-		selectableLayerIds = new Layers[allLayerIds.length];
+		if (selectableLayerIds == null) {
+			Layers[] allLayerIds = window.getPainter().getSelectionOrder();
+			Layers[] ignoredLayers = { Layers.CURSOR, Layers.GRID, Layers.OVERLAY, Layers.SYSTEM, Layers.STATION };
+			selectableLayerIds = new Layers[allLayerIds.length];
 
-		for (int i = 0; i < allLayerIds.length; i++) {
-			// leave uninteresting layers as null
-			if (ignoredLayers == null || !containsLayer(ignoredLayers, allLayerIds[i]))
-				selectableLayerIds[i] = allLayerIds[i];
+			for (int i = 0; i < allLayerIds.length; i++) {
+				// leave uninteresting layers as null
+				if (ignoredLayers == null || !containsLayer(ignoredLayers, allLayerIds[i]))
+					selectableLayerIds[i] = allLayerIds[i];
+			}
 		}
 	}
 
@@ -65,6 +65,10 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 				return true;
 		}
 		return false;
+	}
+
+	public static Layers[] getSelectableLayerIds() {
+		return selectableLayerIds;
 	}
 
 	/**
@@ -82,5 +86,13 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 
 	public void mouseMove(MouseEvent e) {
 		cursor.mouseMove(e);
+	}
+
+	public void mouseDown(MouseEvent e) {
+		cursor.mouseDown(e);
+	}
+
+	public void mouseUp(MouseEvent e) {
+		cursor.mouseUp(e);
 	}
 }

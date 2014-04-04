@@ -1,161 +1,127 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
-import com.kartoflane.superluminal2.components.interfaces.Alias;
-import com.kartoflane.superluminal2.mvc.Model;
+import com.kartoflane.superluminal2.ftl.MountObject;
+import com.kartoflane.superluminal2.ftl.MountObject.Directions;
+import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.mvc.ObjectModel;
 import com.kartoflane.superluminal2.mvc.View;
-import com.kartoflane.superluminal2.mvc.models.MountModel;
 import com.kartoflane.superluminal2.mvc.views.MountView;
+import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.MountDataComposite;
 
-public class MountController extends AbstractController implements Alias, Comparable<MountController> {
+public class MountController extends ObjectController implements Comparable<MountController> {
+	public static final int DEFAULT_WIDTH = 16;
+	public static final int DEFAULT_HEIGHT = 50;
 
-	protected MountModel model;
-	protected MountView view;
+	protected ShipContainer container = null;
 
-	private MountController(MountModel model, MountView view) {
+	private MountController(ShipContainer container, ObjectModel model, MountView view) {
 		super();
-
 		setModel(model);
 		setView(view);
+		this.container = container;
 
 		setSelectable(true);
+		setLocModifiable(true);
+		setBounded(false);
+		setCollidable(false);
+		setParent(container.getShipController());
 	}
 
-	public static MountController newInstance(ShipController shipController) {
-		MountModel model = new MountModel(shipController.getNextMountId());
+	public static MountController newInstance(ShipContainer container, MountObject object) {
+		ObjectModel model = new ObjectModel(object);
 		MountView view = new MountView();
-		MountController controller = new MountController(model, view);
+		MountController controller = new MountController(container, model, view);
 
-		shipController.add(controller);
-
-		// setId() in controller TODO
-
-		return controller;
-	}
-
-	public static MountController newInstance(ShipController shipController, MountModel model) {
-		MountView view = new MountView();
-		MountController controller = new MountController(model, view);
-
-		shipController.add(controller);
+		container.add(controller);
+		controller.setWeapon(null);
 
 		return controller;
 	}
 
 	@Override
-	public MountModel getModel() {
-		return model;
+	public boolean setLocation(int x, int y) {
+		boolean result = super.setLocation(x, y);
+		updateView();
+		return result;
 	}
 
 	@Override
-	public void setModel(Model model) {
-		if (model == null)
-			throw new IllegalArgumentException("Argument is null.");
-		this.model = (MountModel) model;
+	public void redraw() {
+		super.redraw();
+		EditorWindow.getInstance().canvasRedraw(getView().getDirectionArrowBounds());
 	}
 
-	@Override
-	public MountView getView() {
-		return view;
+	private ObjectModel getModel() {
+		return (ObjectModel) model;
+	}
+
+	private MountView getView() {
+		return (MountView) view;
+	}
+
+	public MountObject getGameObject() {
+		return (MountObject) getModel().getGameObject();
 	}
 
 	@Override
 	public void setView(View view) {
-		if (view == null)
-			throw new IllegalArgumentException("Argument is null.");
-
-		if (this.view != null)
-			this.view.dispose();
-		this.view = (MountView) view;
-
-		view.setController(this);
+		super.setView(view);
 		this.view.addToPainter(Layers.MOUNT);
+		updateView();
 	}
 
-	public void setRotated(boolean rotated) {
-		model.setRotated(rotated);
-		// TODO ?
-	}
+	public void setWeapon(WeaponObject weapon) {
+		// TODO
 
-	public void setMirrored(boolean mirrored) {
-		model.setMirrored(mirrored);
-		// TODO ?
-	}
-
-	public void setDirection(int direction) {
-		switch (direction) {
-			case SWT.UP:
-			case SWT.LEFT:
-			case SWT.RIGHT:
-			case SWT.DOWN:
-			case SWT.NONE:
-				model.setDirection(direction);
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown direction: " + direction);
+		if (weapon == null) {
+			setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 		}
 	}
 
-	@Override
-	public void setSize(int w, int h) {
-		model.setSize(w, h);
+	public void setRotated(boolean rotated) {
+		getGameObject().setRotated(rotated);
+		updateView();
 	}
 
-	@Override
-	public void setLocation(int x, int y) {
-		model.setLocation(x, y);
+	public boolean isRotated() {
+		return getGameObject().isRotated();
 	}
 
-	@Override
-	public void translate(int dx, int dy) {
-		model.translate(dx, dy);
+	public void setMirrored(boolean mirrored) {
+		getGameObject().setMirrored(mirrored);
+		updateView();
 	}
 
-	@Override
-	public void dispose() {
-		view.dispose();
+	public boolean isMirrored() {
+		return getGameObject().isMirrored();
 	}
 
-	@Override
-	public Point toPresentedLocation(int x, int y) {
-		return new Point(x, y);
+	public void setDirection(Directions direction) {
+		Rectangle oldBounds = getView().getDirectionArrowBounds();
+		getGameObject().setDirection(direction);
+		updateView();
+		redraw();
+		EditorWindow.getInstance().canvasRedraw(oldBounds);
 	}
 
-	@Override
-	public Point toPresentedSize(int w, int h) {
-		return new Point(w, h);
+	public Directions getDirection() {
+		return getGameObject().getDirection();
 	}
 
-	@Override
-	public Point toNormalLocation(int x, int y) {
-		return new Point(x, y);
-	}
-
-	@Override
-	public Point toNormalSize(int w, int h) {
-		return new Point(w, h);
-	}
-
-	@Override
-	public String getAlias() {
-		return model.getAlias();
-	}
-
-	@Override
-	public void setAlias(String alias) {
-		model.setAlias(alias);
+	public int getId() {
+		return getGameObject().getId();
 	}
 
 	@Override
 	public int compareTo(MountController o) {
-		return model.compareTo(o.model);
+		return getGameObject().compareTo(o.getGameObject());
 	}
 
 	@Override
@@ -170,6 +136,6 @@ public class MountController extends AbstractController implements Alias, Compar
 
 	@Override
 	public boolean intersects(Rectangle rect) {
-		return model.intersects(rect);
+		return model.intersects(rect) || getView().getDirectionArrowBounds().intersects(rect);
 	}
 }

@@ -6,15 +6,22 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Transform;
 
-import com.kartoflane.superluminal2.components.AbstractDrawable;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.components.interfaces.Disposable;
+import com.kartoflane.superluminal2.components.interfaces.Redrawable;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.mvc.BaseModel;
+import com.kartoflane.superluminal2.mvc.Controller;
+import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
+import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
-public abstract class AbstractView extends AbstractDrawable implements View {
+public abstract class BaseView implements View, Disposable, Redrawable {
 
 	public static final RGB SELECT_RGB = new RGB(0, 0, 255);
 	public static final RGB HIGHLIGHT_RGB = new RGB(0, 128, 192);
@@ -22,82 +29,113 @@ public abstract class AbstractView extends AbstractDrawable implements View {
 	public static final RGB ALLOW_RGB = new RGB(50, 230, 50);
 	public static final RGB PIN_RGB = new RGB(192, 192, 0);
 
-	private String imagePath = null;
+	protected AbstractController controller = null;
+	protected BaseModel model = null;
 
+	protected Layers layer = null;
+	protected Transform transform = null;
+
+	protected String imagePath = null;
 	protected Image image = null;
 	protected Color borderColor = null;
 	protected Color backgroundColor = null;
 	protected int borderThickness = 0;
 
+	protected float rotation = 0;
+	protected int alpha = 255;
+
+	protected boolean flipX = false;
+	protected boolean flipY = false;
+	protected boolean visible = true;
 	protected boolean highlighted = false;
 
-	public AbstractView() {
-		super();
+	public BaseView() {
+	}
+
+	public void setController(ObjectController controller) {
+		this.controller = controller;
+	}
+
+	public final Layers getLayerId() {
+		return layer;
 	}
 
 	@Override
-	public void setSize(int w, int h) {
-		return;
+	public void setController(Controller controller) {
+		this.controller = (AbstractController) controller;
 	}
 
 	@Override
-	public void setLocation(int x, int y) {
-		return;
+	public void setModel(Model model) {
+		this.model = (BaseModel) model;
 	}
 
 	@Override
-	public void translate(int dx, int dy) {
-		return;
+	public void updateView() {
+		// reset to defaults
+		setFlippedX(false);
+		setFlippedY(false);
+		setVisible(true);
+		setHighlighted(false);
+		setRotation(0);
+		setAlpha(255);
 	}
 
-	@Override
-	public Point getSize() {
-		return getController().getModel().getSize();
+	public void setRotation(float rotation) {
+		this.rotation = rotation;
 	}
 
-	@Override
-	public int getW() {
-		return getController().getModel().getW();
+	public float getRotation() {
+		return rotation;
 	}
 
-	@Override
-	public int getH() {
-		return getController().getModel().getH();
+	public void setVisible(boolean vis) {
+		visible = vis;
 	}
 
-	@Override
-	public Point getLocation() {
-		return getController().getModel().getLocation();
+	public boolean isVisible() {
+		return visible;
 	}
 
-	@Override
-	public int getX() {
-		return getController().getModel().getX();
+	public void setAlpha(int alpha) {
+		if (alpha < 0 || alpha > 255)
+			throw new IllegalArgumentException("Argument is not within allowed range: " + alpha);
+		this.alpha = alpha;
 	}
 
-	@Override
-	public int getY() {
-		return getController().getModel().getY();
+	public int getAlpha() {
+		return alpha;
 	}
 
-	@Override
-	public Rectangle getBounds() {
-		return getController().getModel().getBounds();
+	public void setFlippedX(boolean flip) {
+		flipX = flip;
 	}
 
-	@Override
+	public void setFlippedY(boolean flip) {
+		flipY = flip;
+	}
+
+	public boolean isFlippedX() {
+		return flipX;
+	}
+
+	public boolean isFlippedY() {
+		return flipY;
+	}
+
 	public void setHighlighted(boolean high) {
 		this.highlighted = high;
 	}
 
-	@Override
 	public boolean isHighlighted() {
 		return highlighted;
 	}
 
 	public void setImage(String path) {
+		if (imagePath != null && path != null && imagePath.equals(path))
+			return; // don't do anything if it's the same thing
+
 		if (image != null) {
-			image.dispose();
 			Cache.checkInImage(this, imagePath);
 		}
 
@@ -167,13 +205,33 @@ public abstract class AbstractView extends AbstractDrawable implements View {
 	}
 
 	@Override
-	public boolean contains(int x, int y) {
-		return getController().getModel().contains(x, y);
+	public void redraw(PaintEvent e) {
+		if (visible) {
+			boolean trans = getRotation() % 360 != 0 || flipX || flipY;
+			if (trans) {
+				e.gc.setAdvanced(true);
+				transform = new Transform(e.gc.getDevice());
+				Point p = model.getLocation();
+				transform.translate(p.x, p.y);
+				transform.rotate(getRotation());
+				transform.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+				transform.translate(-p.x, -p.y);
+
+				e.gc.setTransform(transform);
+			}
+
+			paintControl(e);
+
+			if (trans) {
+				transform.dispose();
+				transform = null;
+
+				e.gc.setAdvanced(false);
+			}
+		}
 	}
 
-	@Override
-	public boolean intersects(Rectangle rect) {
-		return getController().getModel().intersects(rect);
+	public void paintControl(PaintEvent e) {
 	}
 
 	/**
@@ -185,7 +243,7 @@ public abstract class AbstractView extends AbstractDrawable implements View {
 			e.gc.setAlpha(alpha);
 
 			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, getX() - imageRect.width / 2, getY() - imageRect.height / 2);
+			e.gc.drawImage(image, model.getX() - imageRect.width / 2, model.getY() - imageRect.height / 2);
 
 			e.gc.setAlpha(prevAlpha);
 		}
@@ -245,7 +303,7 @@ public abstract class AbstractView extends AbstractDrawable implements View {
 			e.gc.setBackground(backgroundColor);
 			e.gc.setAlpha(alpha);
 
-			e.gc.fillRectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH());
+			e.gc.fillRectangle(model.getX() - model.getW() / 2, model.getY() - model.getH() / 2, model.getW(), model.getH());
 
 			e.gc.setBackground(prevBgColor);
 			e.gc.setAlpha(prevAlpha);
@@ -263,8 +321,9 @@ public abstract class AbstractView extends AbstractDrawable implements View {
 			e.gc.setLineWidth(borderThickness);
 
 			// lines are drawn from the center, which makes the math a little funky
-			e.gc.drawRectangle(getX() - getW() / 2 + borderThickness / 2, getY() - getH() / 2 + borderThickness / 2,
-					getW() - 1 - borderThickness / 2, getH() - 1 - borderThickness / 2);
+			e.gc.drawRectangle(model.getX() - model.getW() / 2 + borderThickness / 2,
+					model.getY() - model.getH() / 2 + borderThickness / 2,
+					model.getW() - 1 - borderThickness / 2, model.getH() - 1 - borderThickness / 2);
 
 			e.gc.setForeground(prevBgColor);
 			e.gc.setAlpha(prevAlpha);
@@ -284,12 +343,12 @@ public abstract class AbstractView extends AbstractDrawable implements View {
 			throw new IllegalArgumentException("Illegal layer.");
 
 		this.layer = layer;
-		painter.add(getController(), layer);
+		painter.add(controller, layer);
 	}
 
 	/** Unregisters this box from the LayeredPainter object */
 	public void removeFromPainter() {
-		EditorWindow.getInstance().getPainter().remove(getController());
+		EditorWindow.getInstance().getPainter().remove(controller);
 	}
 
 	@Override

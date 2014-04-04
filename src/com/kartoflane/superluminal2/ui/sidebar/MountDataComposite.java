@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -25,10 +26,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 
 	private MountController controller = null;
 
-	public MountDataComposite(Composite parent, MountController controller) {
+	public MountDataComposite(Composite parent, MountController control) {
 		super(parent, SWT.NONE);
 
-		this.controller = controller;
+		this.controller = control;
 
 		setLayout(new GridLayout(2, false));
 
@@ -83,18 +84,18 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnRotated.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Rectangle oldBounds = MountDataComposite.this.controller.getBounds();
-				MountDataComposite.this.controller.setRotated(btnRotated.getSelection());
-				EditorWindow.getInstance().canvasRedraw(MountDataComposite.this.controller.getBounds());
+				Rectangle oldBounds = controller.getBounds();
+				controller.setRotated(btnRotated.getSelection());
+				controller.redraw();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
 		});
 		btnMirrored.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Rectangle oldBounds = MountDataComposite.this.controller.getBounds();
-				MountDataComposite.this.controller.setMirrored(btnMirrored.getSelection());
-				EditorWindow.getInstance().canvasRedraw(MountDataComposite.this.controller.getBounds());
+				Rectangle oldBounds = controller.getBounds();
+				controller.setMirrored(btnMirrored.getSelection());
+				controller.redraw();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
 		});
@@ -102,7 +103,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		directionCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MountDataComposite.this.controller.setDirection(indexToDirection(directionCombo.getSelectionIndex()));
+				controller.setDirection(indexToDirection(directionCombo.getSelectionIndex()));
 			}
 		});
 
@@ -111,15 +112,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 
 	@Override
 	public void updateData() {
-		btnRotated.setSelection(controller.getModel().isRotated());
-		btnMirrored.setSelection(controller.getModel().isMirrored());
+		btnRotated.setSelection(controller.isRotated());
+		btnMirrored.setSelection(controller.isMirrored());
 
-		directionCombo.select(directionToIndex(controller.getModel().getDirection()));
-	}
-
-	@Override
-	public MountController getController() {
-		return controller;
+		directionCombo.select(directionToIndex(controller.getDirection()));
 	}
 
 	@Override
@@ -127,35 +123,35 @@ public class MountDataComposite extends Composite implements DataComposite {
 		this.controller = (MountController) controller;
 	}
 
-	private int directionToIndex(int dir) {
+	private int directionToIndex(Directions dir) {
 		switch (dir) {
-			case SWT.UP:
+			case UP:
 				return 0;
-			case SWT.LEFT:
+			case LEFT:
 				return 1;
-			case SWT.RIGHT:
+			case RIGHT:
 				return 2;
-			case SWT.DOWN:
+			case DOWN:
 				return 3;
-			case SWT.NONE:
+			case NONE:
 				return 4;
 			default:
 				throw new IllegalArgumentException("Unknown direction: " + dir);
 		}
 	}
 
-	private int indexToDirection(int index) {
+	private Directions indexToDirection(int index) {
 		switch (index) {
 			case 0:
-				return SWT.UP;
+				return Directions.UP;
 			case 1:
-				return SWT.LEFT;
+				return Directions.LEFT;
 			case 2:
-				return SWT.RIGHT;
+				return Directions.RIGHT;
 			case 3:
-				return SWT.DOWN;
+				return Directions.DOWN;
 			case 4:
-				return SWT.NONE;
+				return Directions.NONE;
 			default:
 				throw new IllegalArgumentException("Unknown index: " + index);
 		}

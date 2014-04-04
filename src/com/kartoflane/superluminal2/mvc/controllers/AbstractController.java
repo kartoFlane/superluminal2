@@ -1,98 +1,240 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Boundable;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
+import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Followable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
 import com.kartoflane.superluminal2.components.interfaces.MouseInputListener;
 import com.kartoflane.superluminal2.components.interfaces.Pinnable;
-import com.kartoflane.superluminal2.components.interfaces.Presentable;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
+import com.kartoflane.superluminal2.components.interfaces.SizeListener;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.BaseModel;
 import com.kartoflane.superluminal2.mvc.Controller;
-import com.kartoflane.superluminal2.mvc.models.AbstractModel;
+import com.kartoflane.superluminal2.mvc.Model;
+import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 
-public abstract class AbstractController implements Controller, Selectable, Resizable, Disposable, Pinnable, MouseInputListener, Presentable, Collidable, Boundable, Follower, Followable {
+public abstract class AbstractController implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
+		MouseInputListener, Collidable, Boundable, Follower, Followable, SizeListener {
 
 	protected Followable parent = null;
+	protected Point followOffset = null;
+	protected HashSet<Follower> followers = null;
+
+	protected HashSet<SizeListener> sizeListeners = null;
+
+	protected BaseModel model = null;
+	protected BaseView view = null;
 
 	protected boolean selectable = true;
 	protected boolean selected = false;
 	protected boolean moving = false;
 	protected boolean containsMouse = false;
 	protected boolean followableActive = true;
+	protected boolean deleted = false;
 
 	protected Snapmodes snapmode = Snapmodes.FREE;
 	protected Point clickOffset = new Point(0, 0);
 
-	public abstract boolean contains(int x, int y);
-
-	public abstract boolean intersects(Rectangle rect);
-
-	public boolean contains(Point p) {
-		return contains(p.x, p.y);
+	@Override
+	public void setModel(Model model) {
+		if (model == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		this.model = (BaseModel) model;
 	}
 
-	private AbstractModel getModelAbstract() {
-		return (AbstractModel) getModel();
+	@Override
+	public void setView(View view) {
+		if (view == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		if (this.view != null)
+			this.view.dispose();
+		this.view = (BaseView) view;
+
+		view.setController(this);
+		view.setModel(model);
 	}
 
-	public void setLocation(Point p) {
-		setLocation(p.x, p.y);
+	public void updateView() {
+		view.updateView();
+	}
+
+	public boolean setLocation(int x, int y) {
+		// if the new location falls outside of the area the object is
+		// bounded to, change the parameters to be as close the border as possible
+		if (isBounded()) {
+			int nx = x, ny = y;
+
+			Rectangle boundingArea = getBoundingArea();
+			if (x <= boundingArea.x)
+				nx = boundingArea.x;
+			else if (x >= boundingArea.x + boundingArea.width)
+				nx = boundingArea.x + boundingArea.width;
+			if (y <= boundingArea.y)
+				ny = boundingArea.y;
+			else if (y >= boundingArea.y + boundingArea.height)
+				ny = boundingArea.y + boundingArea.height;
+
+			x = nx;
+			y = ny;
+		}
+
+		Rectangle b = new Rectangle(x - getW() / 2, y - getH() / 2, getW(), getH());
+
+		if (isCollidable() && collidesAs(b, this))
+			return false;
+
+		model.setLocation(x, y);
+
+		if (isFollowActive() && followers != null) { // followers set is lazily initiated when it's needed
+			for (Follower fol : followers)
+				fol.updateFollower();
+		}
+		return true;
+	}
+
+	public boolean setLocation(Point p) {
+		return setLocation(p.x, p.y);
 	}
 
 	@Override
 	public Point getLocation() {
-		return getModel().getLocation();
+		return model.getLocation();
+	}
+
+	@Override
+	public boolean translate(int dx, int dy) {
+		// if the new location falls outside of the area the object is
+		// bounded to, change the parameters to be as close the border as possible
+		if (isBounded()) {
+			int nx = dx, ny = dy;
+
+			Rectangle boundingArea = getBoundingArea();
+			if (getX() + dx <= boundingArea.x)
+				nx = boundingArea.x - getX();
+			else if (getX() + dx >= boundingArea.x + boundingArea.width)
+				nx = boundingArea.x + boundingArea.width - getX();
+			if (getY() + dy <= boundingArea.y)
+				ny = boundingArea.y - getY();
+			else if (getY() + dy >= boundingArea.y + boundingArea.height)
+				ny = boundingArea.y + boundingArea.height - getY();
+
+			dx = nx;
+			dy = ny;
+		}
+
+		Rectangle b = new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH());
+		b.x += dx;
+		b.y += dy;
+
+		if (isCollidable() && collidesAs(b, this))
+			return false;
+
+		model.translate(dx, dy);
+		if (isFollowActive() && followers != null) { // followers set is lazily initiated when it's needed
+			for (Follower fol : followers)
+				fol.updateFollower();
+		}
+		return true;
 	}
 
 	@Override
 	public int getX() {
-		return getModel().getX();
+		return model.getX();
 	}
 
 	@Override
 	public int getY() {
-		return getModel().getY();
+		return model.getY();
 	}
 
-	public void setSize(Point p) {
-		setSize(p.x, p.y);
+	@Override
+	public boolean setSize(int w, int h) {
+		model.setSize(w, h);
+
+		if (sizeListeners != null) {
+			for (SizeListener listener : sizeListeners) {
+				listener.notifySizeChanged(w, h);
+			}
+		}
+		return true;
+	}
+
+	public boolean setSize(Point p) {
+		return setSize(p.x, p.y);
 	}
 
 	@Override
 	public Point getSize() {
-		return getModel().getSize();
+		return model.getSize();
 	}
 
 	@Override
 	public int getW() {
-		return getModel().getW();
+		return model.getW();
 	}
 
 	@Override
 	public int getH() {
-		return getModel().getH();
+		return model.getH();
 	}
 
 	@Override
 	public Rectangle getBounds() {
-		return getModel().getBounds();
+		if (getRotation() % 180 == 0)
+			return model.getBounds();
+		else if (getRotation() % 90 == 0) {
+			Rectangle b = model.getBounds();
+			int cX = b.x + b.width / 2;
+			int cY = b.y + b.height / 2;
+			b.x = cX - b.height / 2;
+			b.y = cY - b.width / 2;
+			cX = b.width;
+			b.width = b.height;
+			b.height = cX;
+			return b;
+		} else if (getRotation() % 45 == 0) {
+			// TODO ?
+			return null;
+		} else {
+			// TODO perform sine/cosine calculations...
+			// end.x = (int) (start.x + Math.cos(rad) * distance - Math.sin(rad) * distance);
+			// end.y = (int) (start.y + Math.sin(rad) * distance + Math.cos(rad) * distance);
+			return null;
+		}
+	}
+
+	private float getRotation() {
+		return view.getRotation();
+	}
+
+	/**
+	 * @return rectangle that is exactly represents the area of the controller.
+	 */
+	public Rectangle getDimensions() {
+		return new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH());
 	}
 
 	/**
@@ -100,7 +242,7 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	 * immediately if the controller is visible.
 	 */
 	public void reposition(int x, int y) {
-		if (getView().isVisible()) {
+		if (isVisible()) {
 			setVisible(false);
 			redraw();
 			setLocation(x, y);
@@ -119,19 +261,69 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 		reposition(p.x, p.y);
 	}
 
+	/**
+	 * Sets the size of the controller to the specified values, redrawing
+	 * immediately if the controller is visible.
+	 */
+	public void resize(int w, int h) {
+		if (isVisible()) {
+			setVisible(false);
+			redraw();
+			setSize(w, h);
+			setVisible(true);
+			redraw();
+		} else {
+			setSize(w, h);
+		}
+	}
+
+	/**
+	 * Sets the size of the controller to the specified values, redrawing
+	 * immediately if the controller is visible.
+	 */
+	public void resize(Point p) {
+		resize(p.x, p.y);
+	}
+
+	public Point getPresentedLocation() {
+		return getLocation();
+	}
+
+	public Point getPresentedSize() {
+		return getSize();
+	}
+
+	public void setPresentedLocation(int x, int y) {
+		setLocation(x, y);
+	}
+
+	public void setPresentedSize(int w, int h) {
+		setSize(w, h);
+		updateBoundingArea();
+	}
+
 	/** Redraws the controller's area. */
 	public void redraw() {
 		EditorWindow.getInstance().canvasRedraw(getBounds());
 	}
 
+	/**
+	 * Forwards the PaintEvent to the View.
+	 */
+	public void redraw(PaintEvent e) {
+		view.redraw(e);
+	}
+
 	@Override
 	public void setPinned(boolean pin) {
-		getModelAbstract().setPinned(pin);
+		model.setPinned(pin);
+		updateView();
+		redraw();
 	}
 
 	@Override
 	public boolean isPinned() {
-		return getModelAbstract().isPinned();
+		return model.isPinned();
 	}
 
 	@Override
@@ -147,21 +339,26 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	/**
 	 * Sets the controller as selected. <br>
 	 * Override this to implement the view's selected appearance.<br>
-	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(AbstractController)} instead.
+	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(ObjectController)} instead.
 	 */
 	@Override
 	public void select() {
 		selected = selectable;
+		updateView();
+		redraw();
 	}
 
 	/**
 	 * Sets the controller as deselected. <br>
 	 * Override this to implement the view's deselected (normal) appearance.<br>
-	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(AbstractController)} instead.
+	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(ObjectController)} instead.
 	 */
 	@Override
 	public void deselect() {
 		selected = false;
+		setMoving(false);
+		updateView();
+		redraw();
 	}
 
 	@Override
@@ -187,7 +384,6 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	@Override
 	public void setParent(Followable followable) {
 		checkParentConditions(followable);
-		((AbstractModel) getModel()).checkParentConditions(followable == null ? null : (Followable) ((Controller) followable).getModel());
 
 		// if it passes, change the parent
 		if (parent != null)
@@ -195,53 +391,57 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 		if (followable != null)
 			followable.addFollower(this);
 
-		((Follower) getModel()).setParent(followable == null ? null : (Followable) ((Controller) followable).getModel());
 		parent = followable;
 	}
 
 	@Override
 	public Followable getParent() {
-		return ((Follower) getModel()).getParent();
-	}
-
-	@Override
-	public void setFollowOffset(int x, int y) {
-		((Follower) getModel()).setFollowOffset(x, y);
+		return parent;
 	}
 
 	@Override
 	public Point getFollowOffset() {
-		return ((Follower) getModel()).getFollowOffset();
+		if (followOffset == null)
+			followOffset = new Point(0, 0);
+		return new Point(followOffset.x, followOffset.y);
+	}
+
+	@Override
+	public void setFollowOffset(int x, int y) {
+		if (followOffset == null)
+			followOffset = new Point(x, y);
+		else {
+			followOffset.x = x;
+			followOffset.y = y;
+		}
 	}
 
 	@Override
 	public Set<Follower> getFollowers() {
-		return ((Followable) getModel()).getFollowers();
-	}
-
-	@Override
-	public int getFollowerCount() {
-		return ((Followable) getModel()).getFollowerCount();
+		if (followers == null)
+			followers = new HashSet<Follower>();
+		return Collections.unmodifiableSet(followers);
 	}
 
 	@Override
 	public boolean addFollower(Follower fol) {
-		return ((Followable) getModel()).addFollower(fol);
+		if (followers == null)
+			followers = new HashSet<Follower>();
+		return followers.add(fol);
 	}
 
 	@Override
 	public boolean removeFollower(Follower fol) {
-		return ((Followable) getModel()).removeFollower(fol);
+		if (followers == null)
+			followers = new HashSet<Follower>();
+		return followers.remove(fol);
 	}
 
 	@Override
-	public void updateFollower() {
-		Followable parent = getParent();
-		if (parent == null)
-			throw new NullPointerException("Parent is null.");
-		Point offset = getFollowOffset();
-
-		reposition(parent.getX() + offset.x, parent.getY() + offset.y);
+	public int getFollowerCount() {
+		if (followers == null)
+			followers = new HashSet<Follower>();
+		return followers.size();
 	}
 
 	@Override
@@ -255,13 +455,25 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	}
 
 	@Override
+	public void updateFollower() {
+		updateBoundingArea();
+		Followable parent = getParent();
+		if (parent == null)
+			throw new NullPointerException("Parent is null.");
+		Point offset = getFollowOffset();
+
+		reposition(parent.getX() + offset.x, parent.getY() + offset.y);
+		updateBoundingArea();
+	}
+
+	@Override
 	public void setCollidable(boolean collidable) {
-		getModelAbstract().setCollidable(collidable);
+		model.setCollidable(collidable);
 	}
 
 	@Override
 	public boolean isCollidable() {
-		return getModelAbstract().isCollidable();
+		return model.isCollidable();
 	}
 
 	public void setMoving(boolean mov) {
@@ -273,11 +485,12 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	}
 
 	public void setVisible(boolean vis) {
-		getView().setVisible(vis);
+		view.setVisible(vis);
+		redraw();
 	}
 
 	public boolean isVisible() {
-		return getView().isVisible();
+		return view.isVisible();
 	}
 
 	/**
@@ -296,35 +509,23 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	}
 
 	/**
-	 * Sets the highlighted state of the controller. <br>
-	 * Override to implement the view's highlighted appearance.
+	 * Sets the highlighted state of the controller.
 	 */
 	public void setHighlighted(boolean high) {
-		getView().setHighlighted(high);
+		view.setHighlighted(high);
+		updateView();
+		redraw();
 	}
 
-	@Override
+	public boolean isHighlighted() {
+		return view.isHighlighted();
+	}
+
 	public DataComposite getDataComposite(Composite parent) {
 		if (selectable)
-			throw new IllegalStateException("This Controller is selectable, but doesn't define a DataComposite!");
+			throw new IllegalStateException("This Controller is selectable, but doesn't define a DataComposite");
 		else
 			return null;
-	}
-
-	public Point toPresentedLocation(Point p) {
-		return toPresentedLocation(p.x, p.y);
-	}
-
-	public Point toPresentedSize(Point p) {
-		return toPresentedSize(p.x, p.y);
-	}
-
-	public Point toNormalLocation(Point p) {
-		return toNormalLocation(p.x, p.y);
-	}
-
-	public Point toNormalSize(Point p) {
-		return toNormalSize(p.x, p.y);
 	}
 
 	@Override
@@ -347,9 +548,8 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 		if (Manager.getSelectedToolId() == Tools.POINTER) {
 			if (e.button == 1) {
 				Rectangle bounds = getBounds();
-				if (!bounds.contains(e.x, e.y) && !bounds.contains(getX() + clickOffset.x, getY() + clickOffset.y) && selected) {
+				if (!bounds.contains(e.x, e.y) && !bounds.contains(getX() + clickOffset.x, getY() + clickOffset.y) && selected)
 					Manager.setSelected(null);
-				}
 				setMoving(false);
 			}
 		}
@@ -362,6 +562,7 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 				Point p = Grid.getInstance().snapToGrid(e.x - clickOffset.x, e.y - clickOffset.y, snapmode);
 				if (p != null) {
 					reposition(p.x, p.y);
+					updateFollowOffset();
 				}
 
 				((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
@@ -393,30 +594,35 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	public void mouseHover(MouseEvent e) {
 	}
 
+	public boolean collides(Rectangle rect) {
+		return collides(rect.x, rect.y, rect.width, rect.height);
+	}
+
 	@Override
 	public boolean collides(int x, int y, int w, int h) {
-		Rectangle rect = new Rectangle(x, y, w, h);
+		Rectangle rect = new Rectangle(x + getTolerance(), y + getTolerance(),
+				w - 2 * getTolerance(), h - 2 * getTolerance());
 		return rect.intersects(new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH()));
 	}
 
 	@Override
 	public boolean isBounded() {
-		return getModelAbstract().isBounded();
+		return model.isBounded();
 	}
 
 	@Override
 	public void setBounded(boolean bound) {
-		getModelAbstract().setBounded(bound);
+		model.setBounded(bound);
 	}
 
 	@Override
 	public Rectangle getBoundingArea() {
-		return getModelAbstract().getBoundingArea();
+		return model.getBoundingArea();
 	}
 
 	@Override
 	public void setBoundingArea(int x, int y, int w, int h) {
-		getModelAbstract().setBoundingArea(x, y, w, h);
+		model.setBoundingArea(x, y, w, h);
 	}
 
 	public void setBoundingArea(Rectangle r) {
@@ -432,5 +638,110 @@ public abstract class AbstractController implements Controller, Selectable, Resi
 	}
 
 	public void updateBoundingArea() {
+	}
+
+	public void dispose() {
+		model.dispose();
+		view.dispose();
+	}
+
+	@Override
+	public boolean contains(int x, int y) {
+		return model.contains(x, y);
+	}
+
+	@Override
+	public boolean intersects(Rectangle rect) {
+		return model.intersects(rect);
+	}
+
+	public void setLocModifiable(boolean b) {
+	}
+
+	public boolean isLocModifiable() {
+		return false;
+	}
+
+	@Override
+	public void delete() {
+		deleted = true;
+		setVisible(false);
+		view.removeFromPainter();
+	}
+
+	@Override
+	public void restore() {
+		deleted = false;
+		setView(view);
+		setVisible(true);
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	@Override
+	public void setDeletable(boolean deletable) {
+		model.setDeletable(deletable);
+	}
+
+	@Override
+	public boolean isDeletable() {
+		return model.isDeletable();
+	}
+
+	@Override
+	public void setTolerance(int px) {
+		model.setTolerance(px);
+	}
+
+	@Override
+	public int getTolerance() {
+		return model.getTolerance();
+	}
+
+	public void addSizeListener(SizeListener listener) {
+		if (sizeListeners == null)
+			sizeListeners = new HashSet<SizeListener>();
+		sizeListeners.add(listener);
+	}
+
+	public void removeSizeListener(SizeListener listener) {
+		if (sizeListeners == null)
+			sizeListeners = new HashSet<SizeListener>();
+		sizeListeners.remove(listener);
+	}
+
+	public void notifySizeChanged(int w, int h) {
+		resize(w, h);
+	}
+
+	public static boolean collidesAs(Rectangle rect, AbstractController col) {
+		CollisionPredicate predicate = new CollisionPredicate(rect, col);
+		Layers layer = ((AbstractController) col).view.getLayerId();
+		return EditorWindow.getInstance().getPainter().getControllerMatching(predicate, layer) != null;
+	}
+
+	public static class CollisionPredicate implements Predicate<AbstractController> {
+		private final Rectangle b;
+		private final Controller controller;
+
+		public CollisionPredicate(Rectangle b, AbstractController controller) {
+			this.b = b;
+			this.controller = controller;
+		}
+
+		@Override
+		public boolean accept(AbstractController control) {
+			return control.isVisible() && control.isCollidable() &&
+					control != controller && control.collides(b);
+		}
+	}
+
+	public void updateFollowOffset() {
+		if (getParent() != null) {
+			Point p = getLocation();
+			setFollowOffset(p.x - getParent().getX(), p.y - getParent().getY());
+		}
 	}
 }

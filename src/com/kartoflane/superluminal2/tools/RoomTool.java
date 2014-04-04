@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
@@ -12,20 +11,16 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.CellController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
-import com.kartoflane.superluminal2.mvc.controllers.ShipController;
-import com.kartoflane.superluminal2.mvc.views.AbstractView;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.RoomToolComposite;
 
 public class RoomTool extends Tool {
-	public static final int COLLISION_TOLERANCE = CellController.SIZE / 2;
-
-	private static final RGB DENY_RGB = AbstractView.DENY_RGB;
-	private static final RGB ALLOW_RGB = AbstractView.ALLOW_RGB;
+	public static final int COLLISION_TOLERANCE = ShipContainer.CELL_SIZE / 2;
 
 	// room creation helper variables
 	private Point createOrigin;
@@ -42,16 +37,16 @@ public class RoomTool extends Tool {
 
 	@Override
 	public void select() {
-		resetCursor();
-
+		cursor.setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+		cursor.setSnapMode(Snapmodes.CELL);
+		cursor.updateView();
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
 	}
 
 	@Override
 	public void deselect() {
+		cursor.updateView();
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
 	}
 
 	@Override
@@ -64,6 +59,14 @@ public class RoomTool extends Tool {
 		return new RoomToolComposite(parent);
 	}
 
+	public boolean isCreating() {
+		return creating;
+	}
+
+	public boolean canCreate() {
+		return canCreate;
+	}
+
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
 	}
@@ -72,18 +75,17 @@ public class RoomTool extends Tool {
 	public void mouseDown(MouseEvent e) {
 		if (e.button == 1 && EditorWindow.getInstance().isFocusControl()) {
 			// room creation begin
-			if (Grid.getInstance().isLocAccessible(e.x + 1, e.y + 1)) {
-				setCreationCursor();
-
-				createOrigin = Grid.getInstance().snapToGrid(e.x + 1, e.y + 1, Snapmodes.CORNER_TL);
+			if (Grid.getInstance().isLocAccessible(e.x, e.y)) {
+				createOrigin = Grid.getInstance().snapToGrid(e.x, e.y, Snapmodes.CORNER_TL);
 
 				createBounds.x = createOrigin.x;
 				createBounds.y = createOrigin.y;
-				createBounds.width = CellController.SIZE;
-				createBounds.height = CellController.SIZE;
+				createBounds.width = ShipContainer.CELL_SIZE;
+				createBounds.height = ShipContainer.CELL_SIZE;
 
 				creating = true;
-				mouseMove(e);
+				cursor.updateView();
+				// mouseMove(e);
 			}
 		} else if (e.button == 3) {
 		}
@@ -95,14 +97,12 @@ public class RoomTool extends Tool {
 			if (creating) {
 				// room creation finalize
 				createBounds = cursor.getBounds();
-				resetCursor();
-				cursor.setVisible(false);
 
 				if (canCreate) {
 					// if the area is clear, create the room
-					ShipController shipController = Manager.getCurrentShip();
-
-					RoomController roomController = RoomController.newInstance(shipController);
+					ShipContainer container = Manager.getCurrentShip();
+					RoomObject object = new RoomObject();
+					RoomController roomController = RoomController.newInstance(container, object);
 
 					// round the size to match grid cell size (bounds are usually off by a pixel or two as an error margin)
 					Point p = Grid.getInstance().snapToGrid(createBounds.width, createBounds.height, Snapmodes.CROSS);
@@ -117,51 +117,35 @@ public class RoomTool extends Tool {
 					roomController.setSize(createBounds.width, createBounds.height);
 					roomController.setLocation(p.x, p.y);
 
-					p = roomController.getLocation();
-					roomController.setFollowOffset(p.x - roomController.getParent().getX(), p.y - roomController.getParent().getY());
-
-					shipController.recalculateBoundedArea();
+					roomController.updateFollowOffset();
+					container.updateBoundingArea();
 
 					window.canvasRedraw(createBounds);
 					OverviewWindow.getInstance().update(roomController);
 				} else {
-					// if collided with a room, just redraw the area (createBox isn't visible anymore)
+					// if collided with a room, just redraw the area (cursor isn't visible)
 					window.canvasRedraw(createBounds);
 				}
 
 				creating = false;
+				canCreate = canCreate(cursor.getDimensions());
+
+				cursor.updateView();
+				cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+				cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
+				cursor.setVisible(true);
 			}
 		} else if (e.button == 3) {
 			// room creation abort
 			if (creating) {
-				createBounds = cursor.getBounds();
-				resetCursor();
-				cursor.setVisible(false);
-				window.canvasRedraw(createBounds);
-
 				creating = false;
-			}
-		}
+				canCreate = canCreate(cursor.getDimensions());
 
-		// handle cursor
-		if (!cursor.isVisible() && Grid.getInstance().isLocAccessible(e.x + 1, e.y + 1)) {
-			if (e.button == 1)
+				cursor.updateView();
+				cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+				cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
 				cursor.setVisible(true);
-
-			Rectangle anchorBounds = Manager.getCurrentShip().getBounds();
-			boolean result = cursor.getX() > anchorBounds.x && cursor.getY() > anchorBounds.y;
-			if (result)
-				result = window.getPainter().getControllerAt(e.x + 1, e.y + 1, Layers.ROOM) == null;
-
-			if (result && cursorView.getBorderRGB() != ALLOW_RGB)
-				cursorView.setBorderColor(ALLOW_RGB);
-			else if (!result && cursorView.getBorderRGB() != DENY_RGB)
-				cursorView.setBorderColor(DENY_RGB);
-
-			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
-			if (!p.equals(cursor.getLocation()))
-				cursor.reposition(p.x, p.y);
-			window.canvasRedraw(cursor.getBounds());
+			}
 		}
 	}
 
@@ -180,71 +164,63 @@ public class RoomTool extends Tool {
 			Point cursor = Grid.getInstance().snapToGrid(e.x + 1, e.y + 1, snapmode);
 			Point anchor = new Point(0, 0);
 
-			anchor.x = createOrigin.x + (cursor.x < createOrigin.x ? CellController.SIZE : 0);
-			anchor.y = createOrigin.y + (cursor.y < createOrigin.y ? CellController.SIZE : 0);
+			anchor.x = createOrigin.x + (cursor.x < createOrigin.x ? ShipContainer.CELL_SIZE : 0);
+			anchor.y = createOrigin.y + (cursor.y < createOrigin.y ? ShipContainer.CELL_SIZE : 0);
 			anchor = Grid.getInstance().snapToGrid(anchor.x, anchor.y, Snapmodes.CROSS);
 
 			Rectangle oldCreateBounds = this.cursor.getBounds();
 
 			createBounds.x = Math.min(anchor.x, cursor.x);
 			createBounds.y = Math.min(anchor.y, cursor.y);
-			createBounds.width = Math.max(Math.abs(anchor.x - cursor.x), CellController.SIZE);
-			createBounds.height = Math.max(Math.abs(anchor.y - cursor.y), CellController.SIZE);
+			createBounds.width = Math.max(Math.abs(anchor.x - cursor.x), ShipContainer.CELL_SIZE);
+			createBounds.height = Math.max(Math.abs(anchor.y - cursor.y), ShipContainer.CELL_SIZE);
 
 			// only redraw when we actually have to
 			if (!oldCreateBounds.equals(createBounds)) {
-				canCreate = canCreate();
+				canCreate = canCreate(createBounds);
 
-				this.cursorView.setBackgroundColor(canCreate ? ALLOW_RGB : DENY_RGB);
+				this.cursor.updateView();
 				this.cursor.setSize(createBounds.width, createBounds.height);
-				this.cursor.setLocation(createBounds.x + createBounds.width / 2, createBounds.y + createBounds.height / 2);
-
-				window.canvasRedraw(createBounds);
+				this.cursor.reposition(createBounds.x + createBounds.width / 2, createBounds.y + createBounds.height / 2);
 				window.canvasRedraw(oldCreateBounds);
 			}
 		} else {
 			// move the cursor around to follow mouse
-			if (Grid.getInstance().isLocAccessible(e.x + 1, e.y + 1)) {
+			if (Grid.getInstance().isLocAccessible(e.x, e.y)) {
 				cursor.setVisible(!Manager.leftMouseDown);
 				Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
 				// always redraw it: prevents an odd visual bug where the box sometimes doesn't register it was moved
 				cursor.reposition(p.x, p.y);
 			} else if (cursor.isVisible()) {
 				cursor.setVisible(false);
-				window.canvasRedraw(cursor.getBounds());
+				cursor.redraw();
 			}
 
-			// check whether the cursor is beyond the anchor, and color it accordingly
-			Rectangle anchorBounds = Manager.getCurrentShip().getBounds();
-			boolean result = cursor.getX() > anchorBounds.x && cursor.getY() > anchorBounds.y;
-			if (result)
-				result = window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM) == null;
-
-			if (result && cursorView.getBorderRGB() != ALLOW_RGB)
-				cursorView.setBorderColor(ALLOW_RGB);
-			else if (!result && cursorView.getBorderRGB() != DENY_RGB)
-				cursorView.setBorderColor(DENY_RGB);
+			canCreate = canCreate(cursor.getDimensions());
 		}
+
+		cursor.updateView();
 	}
 
 	@Override
 	public void mouseEnter(MouseEvent e) {
 		cursor.setVisible(!Manager.leftMouseDown);
-		window.canvasRedraw(cursor.getBounds());
+		cursor.redraw();
 	}
 
 	@Override
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
+		cursor.redraw();
 	}
 
 	@Override
 	public void mouseHover(MouseEvent e) {
 	}
 
-	private boolean canCreate() {
-		Rectangle anchorBounds = Manager.getCurrentShip().getBounds();
+	private boolean canCreate(Rectangle createBounds) {
+		ShipContainer container = Manager.getCurrentShip();
+		Rectangle anchorBounds = container.getShipController().getBounds();
 		if (createBounds.x <= anchorBounds.x || createBounds.y <= anchorBounds.y)
 			return false;
 
@@ -257,30 +233,5 @@ public class RoomTool extends Tool {
 				collided = true;
 		}
 		return !collided;
-	}
-
-	/** Changes the cursor appearance to creation. */
-	private void setCreationCursor() {
-		cursorView.setImage(null);
-		cursorView.setBackgroundColor(ALLOW_RGB);
-		cursorView.setBorderColor(null);
-		cursorView.setAlpha(255 / 3);
-
-		cursor.setSnapMode(Snapmodes.CELL);
-		cursor.setSize(CellController.SIZE, CellController.SIZE);
-		cursor.reposition(Grid.getInstance().snapToGrid(cursor.getLocation(), cursor.getSnapMode()));
-	}
-
-	/** Resets the cursor appearance to the default state for this tool. */
-	private void resetCursor() {
-		cursorView.setImage(null);
-		cursorView.setBackgroundColor(null);
-		cursorView.setBorderColor(AbstractView.ALLOW_RGB);
-		cursorView.setBorderThickness(3);
-		cursorView.setAlpha(255);
-
-		cursor.setSnapMode(Snapmodes.CELL);
-		cursor.setSize(CellController.SIZE, CellController.SIZE);
-		cursor.reposition(Grid.getInstance().snapToGrid(cursor.getLocation(), cursor.getSnapMode()));
 	}
 }

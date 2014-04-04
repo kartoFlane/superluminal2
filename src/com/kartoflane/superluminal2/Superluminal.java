@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.core;
+package com.kartoflane.superluminal2;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import com.kartoflane.superluminal2.components.Grid;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.core.Manager.Hotkeys;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
@@ -43,8 +45,6 @@ public class Superluminal {
 	 * TODO:
 	 * - revisit door linking -- it works, but isn't exactly elegant...
 	 * - hull image etc positioning f'd up --> see hull's ImageBox
-	 * - hull image etc cant be selected in sidebar --> they have no DataCarrier
-	 * - rework everything to fit with MVC model?
 	 * - door link broken --> crashes
 	 * - finish weapon mounts
 	 * - shift + arrow key nudge -> move 35 pixels
@@ -185,9 +185,9 @@ public class Superluminal {
 					display.sleep();
 			}
 		} catch (Throwable t) {
-			log.error("Exception occured and the editor was forced to terminate.", t);
+			log.error("An exception occured and the editor was forced to terminate.", t);
 			StringBuilder buf = new StringBuilder();
-			buf.append("Superluminal has encountered a problem and needs to close.\n\n");
+			buf.append(APP_NAME + " has encountered a problem and needs to close.\n\n");
 			buf.append("Please check editor-log.txt in the editor's directory, and post it\n");
 			buf.append("in the editor's thread on the FTL forums.");
 			showErrorDialog(buf.toString());

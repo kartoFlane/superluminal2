@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.kartoflane.superluminal2.core.Superluminal;
+import com.kartoflane.superluminal2.Superluminal;
 
 public class AboutDialog {
 	private static AboutDialog instance;

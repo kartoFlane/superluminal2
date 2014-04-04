@@ -1,0 +1,286 @@
+package com.kartoflane.superluminal2.ftl;
+
+import com.kartoflane.superluminal2.ftl.MountObject.Directions;
+
+public class SystemObject extends GameObject {
+
+	public enum Systems {
+		EMPTY,
+		ARTILLERY, CLOAK, DOORS, DRONES, ENGINES, MEDBAY,
+		OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
+		MIND, HACKING, BATTERY, CLONEBAY; // AE
+
+		@Override
+		public String toString() {
+			String result = super.toString().toLowerCase();
+			result = result.substring(0, 1).toUpperCase() + result.substring(1);
+			return result;
+		}
+
+		/** @return array of all systems, excluding {@link #EMPTY} */
+		public static Systems[] getSystems() {
+			return new Systems[] {
+					ARTILLERY, BATTERY, CLOAK, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
+					MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
+			};
+		}
+	}
+
+	public enum Glows {
+		BLUE, GREEN, YELLOW
+	}
+
+	private static final long serialVersionUID = -4784249566049070706L;
+
+	private final Systems id;
+
+	private final int levelCap;
+	private int levelStart = 0;
+	private int levelMax = 0;
+	private boolean availableAtStart = true;
+	/**
+	 * Id of the tile on which the station will be located.<br>
+	 * -2 = use default value<br>
+	 * -1 = no station<br>
+	 * A 2x2 room has slot ids like this:
+	 * <p>
+	 * [ 0 1 ]<br>
+	 * [ 2 3 ]
+	 * </p>
+	 */
+	protected int slotId = -2;
+	protected Directions slotDirection = Directions.UP;
+
+	private RoomObject room;
+
+	private String interiorPath = null;
+	private String glowPathBlue = null;
+	private String glowPathGreen = null;
+	private String glowPathYellow = null;
+
+	public SystemObject(Systems systemId) {
+		id = systemId;
+
+		setDeletable(false);
+
+		switch (systemId) {
+			case BATTERY:
+				levelCap = 2;
+				break;
+			case PILOT:
+			case DOORS:
+			case SENSORS:
+			case CLOAK:
+			case MEDBAY:
+			case CLONEBAY:
+			case TELEPORTER:
+			case OXYGEN:
+			case HACKING:
+			case MIND:
+				levelCap = 3;
+				break;
+			case ARTILLERY:
+				levelCap = 4;
+				break;
+			case SHIELDS:
+			case WEAPONS:
+			case ENGINES:
+			case DRONES:
+				levelCap = 8;
+				break;
+			default:
+				levelCap = 0;
+		}
+
+		// TODO
+		// if (canContainStation())
+		// station = new StationModel(this);
+	}
+
+	public Systems getSystemId() {
+		return id;
+	}
+
+	public void setRoom(RoomObject newRoom) {
+		room = newRoom;
+	}
+
+	public RoomObject getRoom() {
+		return room;
+	}
+
+	public void setInteriorPath(String path) {
+		interiorPath = path;
+	}
+
+	public String getInteriorPath() {
+		return interiorPath;
+	}
+
+	public void setGlowPath(String path, Glows id) {
+		switch (id) {
+			case BLUE:
+				glowPathBlue = path;
+				break;
+			case GREEN:
+				glowPathGreen = path;
+				break;
+			case YELLOW:
+				glowPathYellow = path;
+				break;
+			default:
+				throw new IllegalArgumentException();
+		}
+	}
+
+	public String getGlowPath(Glows id) {
+		switch (id) {
+			case BLUE:
+				return glowPathBlue;
+			case GREEN:
+				return glowPathGreen;
+			case YELLOW:
+				return glowPathYellow;
+			default:
+				throw new IllegalArgumentException();
+		}
+	}
+
+	public int getLevelCap() {
+		return levelCap;
+	}
+
+	public void setLevelStart(int level) {
+		levelStart = level;
+	}
+
+	public int getLevelStart() {
+		return levelStart;
+	}
+
+	public void setLevelMax(int level) {
+		levelMax = level;
+	}
+
+	public int getLevelMax() {
+		return levelMax;
+	}
+
+	public void setAvailable(boolean available) {
+		availableAtStart = available;
+	}
+
+	public boolean isAvailable() {
+		return availableAtStart;
+	}
+
+	/** Returns true is the system is assigned to a room, false otherwise. */
+	public boolean isAssigned() {
+		return room != null;
+	}
+
+	/** Returns true if the system can have a station, false otherwise. */
+	public boolean canContainStation() {
+		return id == Systems.SHIELDS || id == Systems.ENGINES ||
+				id == Systems.WEAPONS || id == Systems.MEDBAY ||
+				id == Systems.PILOT;
+	}
+
+	/** Returns true if the system can have a interior image, false otherwise */
+	public boolean canContainInterior() {
+		return id != Systems.EMPTY;
+	}
+
+	/** Returns true if the system can have a glow image, false otherwise. */
+	public boolean canContainGlow() {
+		return id == Systems.SHIELDS || id == Systems.ENGINES ||
+				id == Systems.WEAPONS || id == Systems.PILOT ||
+				id == Systems.CLOAK;
+	}
+
+	@Override
+	public String toString() {
+		return getSystemName(id);
+	}
+
+	public static String getSystemName(Systems systemId) {
+		switch (systemId) {
+			case EMPTY:
+			case SHIELDS:
+			case ENGINES:
+			case OXYGEN:
+			case WEAPONS:
+			case DRONES:
+			case MEDBAY:
+			case PILOT:
+			case SENSORS:
+			case DOORS:
+			case CLOAK:
+			case ARTILLERY:
+			case TELEPORTER:
+				return systemId.toString();
+			default:
+				return "";
+		}
+	}
+
+	public static int getDefaultSlotId(Systems systemId) {
+		switch (systemId) {
+			case ENGINES:
+				return 2;
+			case PILOT:
+				return 0;
+			case SHIELDS:
+				return 0;
+			case WEAPONS:
+				return 1;
+			case MEDBAY:
+				return 1;
+			default:
+				return -2;
+		}
+	}
+
+	public static Directions getDefaultSlotDirection(Systems systemId) {
+		switch (systemId) {
+			case ENGINES:
+				return Directions.DOWN;
+			case PILOT:
+				return Directions.RIGHT;
+			case SHIELDS:
+				return Directions.LEFT;
+			case WEAPONS:
+				return Directions.UP;
+			case MEDBAY:
+				return Directions.NONE;
+			default:
+				return Directions.UP;
+		}
+	}
+
+	/**
+	 * Id of the tile on which the station will be located.<br>
+	 * -2 = use default value<br>
+	 * -1 = no station<br>
+	 * A 2x2 room has slot ids like this:
+	 * <p>
+	 * [ 0 1 ]<br>
+	 * [ 2 3 ]
+	 * </p>
+	 */
+	public void setSlotId(int id) {
+		slotId = id;
+	}
+
+	public int getSlotId() {
+		return slotId;
+	}
+
+	public void setSlotDirection(Directions dir) {
+		slotDirection = dir;
+	}
+
+	public Directions getSlotDirection() {
+		return slotDirection;
+	}
+}

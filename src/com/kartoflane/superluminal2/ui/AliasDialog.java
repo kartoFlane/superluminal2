@@ -16,8 +16,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
-import com.kartoflane.superluminal2.core.Superluminal;
 
 public class AliasDialog {
 	private Alias alias;
@@ -96,6 +96,7 @@ public class AliasDialog {
 
 		String text = alias.getAlias();
 		aliasText.setText(text == null ? "" : text);
+		aliasText.selectAll();
 
 		shell.open();
 

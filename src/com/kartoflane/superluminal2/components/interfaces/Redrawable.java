@@ -9,8 +9,4 @@ public interface Redrawable extends PaintListener {
 	 * Calls paintControl if the object is visible.
 	 */
 	public void redraw(PaintEvent e);
-
-	public void setVisible(boolean vis);
-
-	public boolean isVisible();
 }

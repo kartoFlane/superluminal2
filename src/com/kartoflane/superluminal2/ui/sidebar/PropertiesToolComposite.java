@@ -25,11 +25,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Superluminal;
+import com.kartoflane.superluminal2.ftl.ShipObject.Images;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
-import com.kartoflane.superluminal2.mvc.models.ShipModel;
-import com.kartoflane.superluminal2.mvc.models.ShipModel.Images;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
 public class PropertiesToolComposite extends Composite implements SidebarComposite {
@@ -77,8 +76,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(1, false));
 
-		controller = Manager.getCurrentShip();
-		final ShipModel model = controller.getModel();
+		controller = Manager.getCurrentShip().getShipController();
 
 		Label lblPropertiesTool = new Label(this, SWT.NONE);
 		lblPropertiesTool.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
@@ -179,10 +177,10 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 		txtShield = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
 		txtShield.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
-		// Miniship widgets
+		// Thumbnail widgets
 		Label lblMini = new Label(imagesComposite, SWT.NONE);
 		lblMini.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		lblMini.setText("Mini-Ship");
+		lblMini.setText("Thumbnail");
 
 		btnMiniView = new Button(imagesComposite, SWT.NONE);
 		btnMiniView.setEnabled(false);
@@ -210,9 +208,9 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 				else if (e.getSource() == btnShieldView)
 					type = Images.SHIELD;
 				else if (e.getSource() == btnMiniView)
-					type = Images.MINISHIP;
+					type = Images.THUMBNAIL;
 
-				String path = model.getImagePath(type);
+				String path = controller.getImagePath(type);
 				if (path == null)
 					return;
 
@@ -253,7 +251,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 				else if (e.getSource() == btnShieldBrowse)
 					type = Images.SHIELD;
 				else if (e.getSource() == btnMiniBrowse)
-					type = Images.MINISHIP;
+					type = Images.THUMBNAIL;
 
 				// path == null only when user cancels
 				if (path != null) {
@@ -281,7 +279,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 				else if (e.getSource() == btnShieldClear)
 					type = Images.SHIELD;
 				else if (e.getSource() == btnMiniClear)
-					type = Images.MINISHIP;
+					type = Images.THUMBNAIL;
 
 				controller.setImagePath(type, null);
 				updateData();
@@ -350,7 +348,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 		spPower.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
 		// Enemy ship-specific widgets
-		if (!model.isPlayerShip()) {
+		if (!controller.isPlayerShip()) {
 			Label lblMinSector = new Label(generalComposite, SWT.NONE);
 			lblMinSector.setText("Min Sector:");
 
@@ -478,39 +476,35 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 		if (controller == null)
 			return;
 
-		ShipModel model = controller.getModel();
-
 		// btnPlayer.setSelection(ship.isPlayerShip());
 
 		// update image path text fields and scroll them to the end to show the file's name
-		File temp = null;
-		String path = model.getImagePath(Images.HULL);
+		String path = controller.getImagePath(Images.HULL);
 
 		txtHull.setText(path == null ? "" : path);
 		txtHull.selectAll();
 		btnHullView.setEnabled(path != null);
 
-		path = model.getImagePath(Images.FLOOR);
+		path = controller.getImagePath(Images.FLOOR);
 		txtFloor.setText(path == null ? "" : path);
 		txtFloor.selectAll();
 		btnFloorView.setEnabled(path != null);
 
-		path = model.getImagePath(Images.CLOAK);
+		path = controller.getImagePath(Images.CLOAK);
 		txtCloak.setText(path == null ? "" : path);
 		txtCloak.selectAll();
 		btnCloakView.setEnabled(path != null);
 
-		path = model.getImagePath(Images.SHIELD);
+		path = controller.getImagePath(Images.SHIELD);
 		txtShield.setText(path == null ? "" : path);
 		txtShield.selectAll();
 		btnShieldView.setEnabled(path != null);
 
-		path = model.getImagePath(Images.MINISHIP);
-		txtMini.setText(path == null || !model.isPlayerShip() ? "" : path);
+		txtMini.setText(path == null || !controller.isPlayerShip() ? "" : path);
 		txtMini.selectAll();
-		btnMiniView.setEnabled(model.isPlayerShip() && path != null);
-		btnMiniBrowse.setEnabled(model.isPlayerShip());
-		btnMiniClear.setEnabled(model.isPlayerShip());
+		btnMiniView.setEnabled(controller.isPlayerShip() && path != null);
+		btnMiniBrowse.setEnabled(controller.isPlayerShip());
+		btnMiniClear.setEnabled(controller.isPlayerShip());
 	}
 
 	@Override

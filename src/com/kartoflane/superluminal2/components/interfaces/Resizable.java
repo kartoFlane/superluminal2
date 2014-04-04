@@ -4,8 +4,12 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 public interface Resizable extends Movable {
-	/** Change size of the object to the specified values */
-	public void setSize(int w, int h);
+	/**
+	 * Change size of the object to the specified values
+	 * 
+	 * @return true if size was changed, false otherwise
+	 */
+	public boolean setSize(int w, int h);
 
 	/**
 	 * @return size of the object

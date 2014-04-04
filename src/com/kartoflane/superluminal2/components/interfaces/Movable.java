@@ -16,8 +16,9 @@ public interface Movable {
 	 *            the x coordinate of the new location
 	 * @param y
 	 *            the y coordinate of the new location
+	 * @return true if location was changed, false otherwise
 	 */
-	public void setLocation(int x, int y);
+	public boolean setLocation(int x, int y);
 
 	/**
 	 * Moves the object by the given displacement vector.
@@ -26,8 +27,9 @@ public interface Movable {
 	 *            displacement on the X axis. Positive values move to the right, negative - to the left.
 	 * @param dy
 	 *            displacement on the Y axis. Positive values move downwards, negative - upwards.
+	 * @return true if location was changed, false otherwise
 	 */
-	public void translate(int dx, int dy);
+	public boolean translate(int dx, int dy);
 
 	/** @return a new point representing the location of the object */
 	public Point getLocation();

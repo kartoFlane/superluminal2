@@ -1,8 +1,6 @@
 package com.kartoflane.superluminal2.ui.sidebar;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -14,31 +12,24 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Spinner;
 
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class ManipulationToolComposite extends Composite implements SidebarComposite, DataComposite {
 	private Button btnPinned;
-	private Spinner spX;
-	private Spinner spY;
-	private Spinner spW;
-	private Spinner spH;
-	private Label labelX;
-	private Label labelY;
-	private Label labelW;
-	private Label labelH;
 
 	private Composite boundsContainer;
 	private Composite dataContainer;
 
-	private boolean locModifiable = true;
-	private boolean sizeModifiable = true;
-
-	private boolean dataLoad = false;
-
 	private AbstractController controller;
+	private Button btnUp;
+	private Button btnLeft;
+	private Button btnRight;
+	private Label centerFiller;
+	private Button btnDown;
 
 	public ManipulationToolComposite(Composite parent, boolean location, boolean size) {
 		super(parent, SWT.NONE);
@@ -52,148 +43,118 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
 		boundsContainer = new Composite(this, SWT.BORDER);
-		GridLayout gl_boundsContainer = new GridLayout(2, false);
+		GridLayout gl_boundsContainer = new GridLayout(3, false);
 		boundsContainer.setLayout(gl_boundsContainer);
 		boundsContainer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
 		btnPinned = new Button(boundsContainer, SWT.CHECK);
-		btnPinned.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		btnPinned.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
 		btnPinned.setText("Pinned");
 
-		labelX = new Label(boundsContainer, SWT.NONE);
-		labelX.setText("X:");
+		btnUp = new Button(boundsContainer, SWT.NONE);
+		btnUp.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/up.png"));
+		GridData gd_btnUp = new GridData(SWT.CENTER, SWT.CENTER, false, false, 3, 1);
+		gd_btnUp.heightHint = 36;
+		gd_btnUp.widthHint = 36;
+		btnUp.setLayoutData(gd_btnUp);
 
-		spX = new Spinner(boundsContainer, SWT.BORDER);
-		spX.setTextLimit(4);
-		spX.setMaximum(9999);
-		spX.setMinimum(-999);
-		spX.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		btnLeft = new Button(boundsContainer, SWT.NONE);
+		btnLeft.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/left.png"));
+		GridData gd_btnLeft = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_btnLeft.heightHint = 36;
+		gd_btnLeft.widthHint = 36;
+		btnLeft.setLayoutData(gd_btnLeft);
 
-		labelY = new Label(boundsContainer, SWT.NONE);
-		labelY.setText("Y:");
+		centerFiller = new Label(boundsContainer, SWT.NONE);
+		GridData gd_centerFiller = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_centerFiller.widthHint = 36;
+		gd_centerFiller.heightHint = 36;
+		centerFiller.setLayoutData(gd_centerFiller);
 
-		spY = new Spinner(boundsContainer, SWT.BORDER);
-		spY.setTextLimit(4);
-		spY.setMaximum(9999);
-		spY.setMinimum(-999);
-		spY.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		btnRight = new Button(boundsContainer, SWT.NONE);
+		btnRight.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/right.png"));
+		GridData gd_btnRight = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+		gd_btnRight.widthHint = 36;
+		gd_btnRight.heightHint = 36;
+		btnRight.setLayoutData(gd_btnRight);
+
+		btnDown = new Button(boundsContainer, SWT.NONE);
+		btnDown.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/down.png"));
+		GridData gd_btnDown = new GridData(SWT.CENTER, SWT.CENTER, false, false, 3, 1);
+		gd_btnDown.widthHint = 36;
+		gd_btnDown.heightHint = 36;
+		btnDown.setLayoutData(gd_btnDown);
 
 		dataContainer = new Composite(this, SWT.BORDER);
 		dataContainer.setLayout(new FillLayout(SWT.HORIZONTAL));
 		dataContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
-		setLocationModifiable(location);
-		setSizeModifiable(size);
-
 		btnPinned.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				controller.setPinned(btnPinned.getSelection());
+				updateData();
 			}
 		});
 
-		ModifyListener applyLocListener = new ModifyListener() {
+		btnUp.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void modifyText(ModifyEvent e) {
-				if (!dataLoad)
-					applyLocation();
+			public void widgetSelected(SelectionEvent e) {
+				Rectangle oldBounds = controller.getBounds();
+				Point p = controller.getPresentedLocation();
+				controller.setPresentedLocation(p.x, p.y - 1);
+				updateController();
+				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
-		};
+		});
 
-		spX.addModifyListener(applyLocListener);
-		spY.addModifyListener(applyLocListener);
-
-		setData(null);
-	}
-
-	/**
-	 * Not all entities' size can be modified, so we only create the widgets when it's necessary.
-	 */
-	private void createSize() {
-		labelW = new Label(boundsContainer, SWT.NONE);
-		labelW.setText("W:");
-
-		spW = new Spinner(boundsContainer, SWT.BORDER);
-		spW.setTextLimit(4);
-		spW.setMaximum(9999);
-		spW.setMinimum(-999);
-		spW.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-
-		labelH = new Label(boundsContainer, SWT.NONE);
-		labelH.setText("H:");
-
-		spH = new Spinner(boundsContainer, SWT.BORDER);
-		spH.setTextLimit(4);
-		spH.setMaximum(9999);
-		spH.setMinimum(-999);
-		spH.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-
-		ModifyListener applySizeListener = new ModifyListener() {
+		btnDown.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void modifyText(ModifyEvent e) {
-				if (!dataLoad)
-					applySize();
+			public void widgetSelected(SelectionEvent e) {
+				Rectangle oldBounds = controller.getBounds();
+				Point p = controller.getPresentedLocation();
+				controller.setPresentedLocation(p.x, p.y + 1);
+				updateController();
+				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
-		};
+		});
 
-		spW.addModifyListener(applySizeListener);
-		spH.addModifyListener(applySizeListener);
+		btnLeft.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Rectangle oldBounds = controller.getBounds();
+				Point p = controller.getPresentedLocation();
+				controller.setPresentedLocation(p.x - 1, p.y);
+				updateController();
+				EditorWindow.getInstance().canvasRedraw(oldBounds);
+			}
+		});
 
-		Control[] changed = { labelW, spW, labelH, spH };
-		boundsContainer.layout(changed);
-		pack();
+		btnRight.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Rectangle oldBounds = controller.getBounds();
+				Point p = controller.getPresentedLocation();
+				controller.setPresentedLocation(p.x + 1, p.y);
+				updateController();
+				EditorWindow.getInstance().canvasRedraw(oldBounds);
+			}
+		});
+
+		setEnabled(false);
 	}
 
-	public void setLocationModifiable(boolean b) {
-		locModifiable = b;
-
-		spX.setEnabled(b);
-		spY.setEnabled(b);
-	}
-
-	public void setSizeModifiable(boolean b) {
-		sizeModifiable = b;
-		if (b && labelW == null) {
-			createSize();
-		} else if (!b && labelW != null) {
-			labelW.dispose();
-			spW.dispose();
-			labelH.dispose();
-			spH.dispose();
-
-			labelW = null;
-			spW = null;
-			labelH = null;
-			spH = null;
-
-			pack();
-		}
-	}
-
-	public boolean isLocationModifiable() {
-		return locModifiable;
-	}
-
-	public boolean isSizeModifiable() {
-		return sizeModifiable;
+	private void updateController() {
+		controller.updateFollowOffset();
+		Manager.getCurrentShip().updateBoundingArea();
+		controller.updateView();
+		controller.redraw();
 	}
 
 	@Override
 	public void setController(AbstractController controller) {
-		dataLoad = true;
-
 		if (controller == null) {
-			// reset fields
-
 			btnPinned.setSelection(false);
-
-			spX.setSelection(0);
-			spY.setSelection(0);
-
-			if (sizeModifiable) {
-				spW.setSelection(0);
-				spH.setSelection(0);
-			}
 
 			Composite c = (Composite) getDataComposite();
 			if (c != null)
@@ -202,21 +163,6 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			setEnabled(false);
 		} else {
 			setEnabled(true);
-
-			btnPinned.setSelection(controller.isPinned());
-
-			setLocationModifiable(controller.getModel().isLocModifiable() && !controller.isPinned());
-			setSizeModifiable(controller.getModel().isSizeModifiable() && !controller.isPinned());
-
-			Point p = controller.toPresentedLocation(controller.getLocation());
-			spX.setSelection(p.x);
-			spY.setSelection(p.y);
-
-			if (controller.getModel().isSizeModifiable()) {
-				p = controller.toPresentedSize(controller.getSize());
-				spW.setSelection(p.x);
-				spH.setSelection(p.y);
-			}
 
 			if (this.controller != null && this.controller.getClass().equals(controller.getClass())) {
 				// if the previously selected object is of the same type as the newly
@@ -240,14 +186,8 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		}
 
 		this.controller = controller;
+		updateData();
 		EditorWindow.getInstance().updateSidebarScroll();
-
-		dataLoad = false;
-	}
-
-	@Override
-	public AbstractController getController() {
-		return controller;
 	}
 
 	@Override
@@ -270,89 +210,26 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		if (controller == null)
 			return;
 
-		dataLoad = true;
-
 		btnPinned.setSelection(controller.isPinned());
-
-		setLocationModifiable(controller.getModel().isLocModifiable() && !controller.isPinned());
-		setSizeModifiable(controller.getModel().isSizeModifiable() && !controller.isPinned());
-
-		Point p = controller.toPresentedLocation(controller.getLocation());
-		spX.setSelection(p.x);
-		spY.setSelection(p.y);
-
-		if (sizeModifiable) {
-			p = controller.toPresentedSize(controller.getSize());
-			spW.setSelection(p.x);
-			spH.setSelection(p.y);
-		}
-
-		dataLoad = false;
-	}
-
-	public void setPresentedLocation(int x, int y) {
-		if (locModifiable) {
-			spX.setSelection(x);
-			spY.setSelection(y);
-			applyLocation();
-		}
-	}
-
-	public Point getPresentedLocation() {
-		if (locModifiable)
-			return new Point(spX.getSelection(), spY.getSelection());
-		else
-			return null;
-	}
-
-	public void setPresentedSize(int w, int h) {
-		if (sizeModifiable) {
-			spW.setSelection(w);
-			spH.setSelection(h);
-			applySize();
-		}
-	}
-
-	public Point getPresentedSize() {
-		if (sizeModifiable)
-			return new Point(spW.getSelection(), spH.getSelection());
-		else
-			return null;
+		btnUp.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+		btnLeft.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+		btnDown.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+		btnRight.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 	}
 
 	@Override
 	public void setEnabled(boolean enable) {
-		super.setEnabled(enable);
-
 		btnPinned.setEnabled(enable);
-
-		setLocationModifiable(controller != null && controller.getModel().isLocModifiable() && !controller.isPinned());
-		setSizeModifiable(controller != null && controller.getModel().isSizeModifiable() && !controller.isPinned());
-	}
-
-	private void applyLocation() {
-		if (controller.getModel().isLocModifiable()) {
-			Rectangle oldBounds = controller.getBounds();
-			controller.setLocation(controller.toNormalLocation(spX.getSelection(), spY.getSelection()));
-			EditorWindow.getInstance().canvasRedraw(controller.getBounds());
-			EditorWindow.getInstance().canvasRedraw(oldBounds);
-		}
-	}
-
-	private void applySize() {
-		if (sizeModifiable && controller.getModel().isSizeModifiable()) {
-			Rectangle oldBounds = controller.getBounds();
-			controller.setSize(controller.toNormalSize(spW.getSelection(), spH.getSelection()));
-			EditorWindow.getInstance().canvasRedraw(controller.getBounds());
-			EditorWindow.getInstance().canvasRedraw(oldBounds);
-		}
+		btnUp.setEnabled(enable);
+		btnLeft.setEnabled(enable);
+		btnDown.setEnabled(enable);
+		btnRight.setEnabled(enable);
 	}
 
 	@Override
 	public boolean isFocusControl() {
-		boolean result = spX.isFocusControl() || spY.isFocusControl();
-		if (sizeModifiable)
-			result |= spW.isFocusControl() || spY.isFocusControl();
+		boolean result = btnUp.isFocusControl() || btnDown.isFocusControl();
+		result |= btnLeft.isFocusControl() || btnRight.isFocusControl();
 		return result;
 	}
 }

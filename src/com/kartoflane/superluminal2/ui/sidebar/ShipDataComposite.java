@@ -31,11 +31,6 @@ public class ShipDataComposite extends Composite implements DataComposite {
 	}
 
 	@Override
-	public ShipController getController() {
-		return controller;
-	}
-
-	@Override
 	public void setController(AbstractController controller) {
 		this.controller = (ShipController) controller;
 	}

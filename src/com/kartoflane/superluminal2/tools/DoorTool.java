@@ -2,7 +2,6 @@ package com.kartoflane.superluminal2.tools;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
@@ -10,20 +9,16 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
-import com.kartoflane.superluminal2.mvc.Controller;
+import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.CellController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
-import com.kartoflane.superluminal2.mvc.controllers.ShipController;
-import com.kartoflane.superluminal2.mvc.views.AbstractView;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.sidebar.DoorToolComposite;
 
 public class DoorTool extends Tool {
-
-	private static final RGB DENY_COLOR = AbstractView.DENY_RGB;
-	private static final RGB ALLOW_COLOR = AbstractView.ALLOW_RGB;
 
 	/** A flag indicating whether or not the door can be placed */
 	private boolean canCreate = false;
@@ -35,19 +30,13 @@ public class DoorTool extends Tool {
 
 	@Override
 	public void select() {
-		cursorView.setImage(null);
-		cursorView.setBackgroundColor(null);
-		cursorView.setBorderColor(ALLOW_COLOR);
 		cursor.setSnapMode(Snapmodes.EDGES);
-
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
 	}
 
 	@Override
 	public void deselect() {
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
 	}
 
 	@Override
@@ -57,7 +46,7 @@ public class DoorTool extends Tool {
 
 	@Override
 	public Composite getToolComposite(Composite parent) {
-		return null; // TODO
+		return new DoorToolComposite(parent);
 	}
 
 	@Override
@@ -67,92 +56,87 @@ public class DoorTool extends Tool {
 	@Override
 	public void mouseDown(MouseEvent e) {
 		if (e.button == 1 && canCreate) {
-			ShipController shipController = Manager.getCurrentShip();
-			DoorController door = DoorController.newInstance(shipController, horizontal);
-			Rectangle oldBounds = door.getBounds();
+			ShipContainer container = Manager.getCurrentShip();
+			DoorObject object = new DoorObject(horizontal);
+			DoorController doorController = DoorController.newInstance(container, object);
+			Rectangle oldBounds = doorController.getBounds();
 
-			door.setLocation(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
-			door.getModel().setBounded(true);
+			doorController.setLocation(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
+			doorController.setBounded(true);
+
+			Point p = doorController.getLocation();
+			doorController.setFollowOffset(p.x - doorController.getParent().getX(), p.y - doorController.getParent().getY());
 
 			window.canvasRedraw(oldBounds);
-			door.redraw();
+			doorController.redraw();
 
-			shipController.recalculateBoundedArea();
-			OverviewWindow.getInstance().update();
+			container.updateBoundingArea();
+			OverviewWindow.getInstance().update(doorController);
 		}
 		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {
 			cursor.setVisible(false);
-			window.canvasRedraw(cursor.getBounds());
 		}
 	}
 
 	@Override
 	public void mouseUp(MouseEvent e) {
 		// handle cursor
-		if (Grid.getInstance().isLocAccessible(e.x, e.y)) {
-			if (e.button == 1)
-				cursor.setVisible(true);
-
+		if (e.button == 1) {
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
-			horizontal = p.y % CellController.SIZE == 0;
-			updateSize(horizontal);
-			cursor.reposition(p.x, p.y);
-			canCreate = canCreate(p.x, p.y);
-			cursorView.setBorderColor(canCreate ? ALLOW_COLOR : DENY_COLOR);
+			horizontal = p.y % ShipContainer.CELL_SIZE == 0;
 
-			window.canvasRedraw(cursor.getBounds());
+			cursor.resize(horizontal ? 34 : ShipContainer.CELL_SIZE / 3, horizontal ? ShipContainer.CELL_SIZE / 3 : 34);
+			cursor.reposition(p.x, p.y);
+
+			canCreate = canCreate();
+			cursor.updateView();
+			cursor.redraw();
 		}
 	}
 
 	@Override
 	public void mouseMove(MouseEvent e) {
 		// move the cursor around to follow mouse
-		if (Grid.getInstance().isLocAccessible(e.x, e.y)) {
-			cursor.setVisible(!Manager.leftMouseDown);
+		Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
+		horizontal = p.y % ShipContainer.CELL_SIZE == 0;
+		cursor.resize(horizontal ? 34 : ShipContainer.CELL_SIZE / 3, horizontal ? ShipContainer.CELL_SIZE / 3 : 34);
+		cursor.reposition(p.x, p.y);
 
-			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
-			if (!p.equals(cursor.getLocation())) {
-				horizontal = p.y % CellController.SIZE == 0;
-				updateSize(horizontal);
-				cursor.reposition(p.x, p.y);
-
-				canCreate = canCreate(p.x, p.y);
-				cursorView.setBorderColor(canCreate ? ALLOW_COLOR : DENY_COLOR);
-			}
-		} else if (cursor.isVisible()) {
-			cursor.setVisible(false);
-			window.canvasRedraw(cursor.getBounds());
-		}
+		canCreate = canCreate();
+		cursor.updateView();
+		cursor.redraw();
 	}
 
 	@Override
 	public void mouseEnter(MouseEvent e) {
 		cursor.setVisible(!Manager.leftMouseDown);
-		window.canvasRedraw(cursor.getBounds());
+		cursor.redraw();
 	}
 
 	@Override
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
+		cursor.redraw();
 	}
 
 	@Override
 	public void mouseHover(MouseEvent e) {
 	}
 
-	private void updateSize(boolean horizontal) {
-		Rectangle oldBounds = cursor.getBounds();
-		cursor.setSize(horizontal ? 34 : CellController.SIZE / 3, horizontal ? CellController.SIZE / 3 : 34);
-		window.canvasRedraw(oldBounds);
-	}
-
-	private boolean canCreate(int x, int y) {
-		Controller control = window.getPainter().getSelectableControllerAt(x, y);
+	private boolean canCreate() {
+		AbstractController control = window.getPainter().getSelectableControllerAt(cursor.getLocation());
 		if (control != null && control instanceof RoomController) {
-			return !Utils.contains(((AbstractController) control).getBounds(), cursor.getBounds());
+			return control.getBounds().intersects(cursor.getBounds()) && !Utils.contains(control.getBounds(), cursor.getBounds());
 		} else
 			return false;
+	}
+
+	public boolean canPlace() {
+		return canCreate;
+	}
+
+	public boolean isHorizontal() {
+		return horizontal;
 	}
 }

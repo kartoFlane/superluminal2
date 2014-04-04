@@ -20,4 +20,8 @@ public interface Deletable {
 	 * and removing it from the list of deleted objects in UndoManager.
 	 */
 	public void restore();
+
+	public void setDeletable(boolean deletable);
+
+	public boolean isDeletable();
 }

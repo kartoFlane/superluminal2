@@ -20,16 +20,18 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
-import com.kartoflane.superluminal2.core.Superluminal;
+import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.SystemObject.Glows;
+import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
-import com.kartoflane.superluminal2.mvc.models.SystemModel;
-import com.kartoflane.superluminal2.mvc.models.SystemModel.Glows;
-import com.kartoflane.superluminal2.mvc.models.SystemModel.Systems;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class RoomDataComposite extends Composite implements DataComposite {
 
@@ -73,17 +75,24 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private Button btnGlow3Clear;
 	private Button btnGlow3View;
 
-	private RoomController controller = null;
+	private RoomController roomC = null;
+	private ShipContainer container = null;
+	private MenuItem mntmClonebay;
+	private MenuItem mntmBattery;
+	private MenuItem mntmHacking;
+	private MenuItem mntmMind;
 
 	public RoomDataComposite(Composite parent, RoomController control) {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(3, false));
 
-		this.controller = control;
+		this.roomC = control;
+		container = Manager.getCurrentShip();
+		final ShipController shipC = container.getShipController();
 
 		Label label = new Label(this, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
-		label.setText(controller.getModel().getSystem() == null ? "Room" : "Room / System");
+		label.setText(roomC.getSystemId() == Systems.EMPTY ? "Room" : "Room / System");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -121,12 +130,13 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		scaleSysLevel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controller.getModel().getSystem().setLevel(scaleSysLevel.getSelection());
+				SystemController system = container.getSystemController(roomC.getSystemId());
+				system.setLevel(scaleSysLevel.getSelection());
 				txtSysLevel.setText("" + scaleSysLevel.getSelection());
 			}
 		});
 
-		if (!controller.getShipController().getModel().isPlayerShip()) {
+		if (!Manager.getCurrentShip().getShipController().isPlayerShip()) {
 			lblMaxLevel = new Label(this, SWT.NONE);
 			lblMaxLevel.setText("Max Level:");
 
@@ -147,9 +157,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleMaxLevel.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					controller.getModel().getSystem().setLevelMax(scaleMaxLevel.getSelection());
+					SystemController system = container.getSystemController(roomC.getSystemId());
+					system.setLevelMax(scaleMaxLevel.getSelection());
 					txtMaxLevel.setText("" + scaleMaxLevel.getSelection());
-					if (!controller.getShipController().getModel().isPlayerShip()) {
+					if (!shipC.isPlayerShip()) {
 						scaleSysLevel.setMaximum(scaleMaxLevel.getSelection());
 						scaleSysLevel.notifyListeners(SWT.Selection, null);
 					}
@@ -254,22 +265,24 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnAvailable.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controller.getSystemController().setAvailableAtStart(btnAvailable.getSelection());
+				SystemController system = container.getSystemController(roomC.getSystemId());
+				system.setAvailableAtStart(btnAvailable.getSelection());
 			}
 		});
 
 		SelectionAdapter imageViewListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				SystemController system = container.getSystemController(roomC.getSystemId());
 				File file = null;
 				if (e.getSource() == btnInteriorView)
-					file = new File(controller.getModel().getSystem().getInteriorPath());
+					file = new File(system.getInteriorPath());
 				else if (e.getSource() == btnGlow1View)
-					file = new File(controller.getModel().getSystem().getGlowPath(Glows.BLUE));
+					file = new File(system.getGlowPath(Glows.BLUE));
 				else if (e.getSource() == btnGlow2View)
-					file = new File(controller.getModel().getSystem().getGlowPath(Glows.GREEN));
+					file = new File(system.getGlowPath(Glows.GREEN));
 				else if (e.getSource() == btnGlow3View)
-					file = new File(controller.getModel().getSystem().getGlowPath(Glows.YELLOW));
+					file = new File(system.getGlowPath(Glows.YELLOW));
 
 				if (file != null && file.exists()) {
 					if (Desktop.isDesktopSupported()) {
@@ -294,6 +307,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				SystemController system = container.getSystemController(roomC.getSystemId());
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
 				String path = dialog.open();
 
@@ -308,9 +322,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				// path == null only when user cancels
 				if (path != null) {
 					if (type == null)
-						controller.getSystemController().setInterior(path);
+						system.setInteriorPath(path);
 					else
-						controller.getSystemController().setGlow(type, path);
+						system.setGlowPath(type, path);
 					updateData();
 				}
 			}
@@ -323,6 +337,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageClearListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				SystemController system = container.getSystemController(roomC.getSystemId());
 				Glows type = null;
 				if (e.getSource() == btnGlow1Clear)
 					type = Glows.BLUE;
@@ -332,9 +347,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					type = Glows.YELLOW;
 
 				if (type == null)
-					controller.getSystemController().setInterior(null);
+					system.setInteriorPath(null);
 				else
-					controller.getSystemController().setGlow(type, null);
+					system.setGlowPath(type, null);
 				updateData();
 			}
 		};
@@ -360,27 +375,23 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		Menu menu = new Menu(mntmSystem);
 		mntmSystem.setMenu(menu);
 
-		ShipController shipController = controller.getShipController();
-
 		mntmEngines = new MenuItem(menu, SWT.RADIO);
 		mntmEngines.setText("Engines");
-		mntmEngines.setEnabled(!shipController.getModel().getSystem(Systems.ENGINES).isAssigned());
 
 		mntmMedbay = new MenuItem(menu, SWT.RADIO);
 		mntmMedbay.setText("Medbay");
-		mntmMedbay.setEnabled(!shipController.getModel().getSystem(Systems.MEDBAY).isAssigned());
+
+		mntmClonebay = new MenuItem(menu, SWT.RADIO);
+		mntmClonebay.setText("Clonebay");
 
 		mntmOxygen = new MenuItem(menu, SWT.RADIO);
 		mntmOxygen.setText("Oxygen");
-		mntmOxygen.setEnabled(!shipController.getModel().getSystem(Systems.OXYGEN).isAssigned());
 
 		mntmShields = new MenuItem(menu, SWT.RADIO);
 		mntmShields.setText("Shields");
-		mntmShields.setEnabled(!shipController.getModel().getSystem(Systems.SHIELDS).isAssigned());
 
 		mntmWeapons = new MenuItem(menu, SWT.RADIO);
 		mntmWeapons.setText("Weapons");
-		mntmWeapons.setEnabled(!shipController.getModel().getSystem(Systems.WEAPONS).isAssigned());
 
 		MenuItem mntmSubsystem = new MenuItem(systemMenu, SWT.CASCADE);
 		mntmSubsystem.setText("Subsystems");
@@ -388,17 +399,17 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		Menu menu_1 = new Menu(mntmSubsystem);
 		mntmSubsystem.setMenu(menu_1);
 
+		mntmBattery = new MenuItem(menu_1, SWT.RADIO);
+		mntmBattery.setText("Battery");
+
 		mntmDoors = new MenuItem(menu_1, SWT.RADIO);
 		mntmDoors.setText("Doors");
-		mntmDoors.setEnabled(!shipController.getModel().getSystem(Systems.DOORS).isAssigned());
 
 		mntmPilot = new MenuItem(menu_1, SWT.RADIO);
 		mntmPilot.setText("Pilot");
-		mntmPilot.setEnabled(!shipController.getModel().getSystem(Systems.PILOT).isAssigned());
 
 		mntmSensors = new MenuItem(menu_1, SWT.RADIO);
 		mntmSensors.setText("Sensors");
-		mntmSensors.setEnabled(!shipController.getModel().getSystem(Systems.SENSORS).isAssigned());
 
 		MenuItem mntmSpecial = new MenuItem(systemMenu, SWT.CASCADE);
 		mntmSpecial.setText("Special");
@@ -408,67 +419,83 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 		mntmArtillery = new MenuItem(menu_2, SWT.RADIO);
 		mntmArtillery.setText("Artillery");
-		mntmArtillery.setEnabled(!shipController.getModel().getSystem(Systems.ARTILLERY).isAssigned());
 
 		mntmCloaking = new MenuItem(menu_2, SWT.RADIO);
 		mntmCloaking.setText("Cloaking");
-		mntmCloaking.setEnabled(!shipController.getModel().getSystem(Systems.CLOAK).isAssigned());
 
 		mntmDrones = new MenuItem(menu_2, SWT.RADIO);
 		mntmDrones.setText("Drone Control");
-		mntmDrones.setEnabled(!shipController.getModel().getSystem(Systems.DRONES).isAssigned());
+
+		mntmHacking = new MenuItem(menu_2, SWT.RADIO);
+		mntmHacking.setText("Hacking");
+
+		mntmMind = new MenuItem(menu_2, SWT.RADIO);
+		mntmMind.setText("Mind Control");
 
 		mntmTeleporter = new MenuItem(menu_2, SWT.RADIO);
 		mntmTeleporter.setText("Teleporter");
-		mntmTeleporter.setEnabled(!shipController.getModel().getSystem(Systems.TELEPORTER).isAssigned());
 
 		SelectionAdapter systemListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ShipController shipController = controller.getShipController();
 				if (e.getSource() == mntmEmpty) {
-					shipController.getSystemController(Systems.EMPTY).assignTo(controller);
+					container.assign(Systems.EMPTY, roomC);
 					btnSystem.setText(Systems.EMPTY.toString());
 				} else if (e.getSource() == mntmEngines) {
-					shipController.getSystemController(Systems.ENGINES).assignTo(controller);
+					container.assign(Systems.ENGINES, roomC);
 					btnSystem.setText(Systems.ENGINES.toString());
 				} else if (e.getSource() == mntmMedbay) {
-					shipController.getSystemController(Systems.MEDBAY).assignTo(controller);
+					container.assign(Systems.MEDBAY, roomC);
 					btnSystem.setText(Systems.MEDBAY.toString());
 				} else if (e.getSource() == mntmOxygen) {
-					shipController.getSystemController(Systems.OXYGEN).assignTo(controller);
+					container.assign(Systems.OXYGEN, roomC);
 					btnSystem.setText(Systems.OXYGEN.toString());
 				} else if (e.getSource() == mntmShields) {
-					shipController.getSystemController(Systems.SHIELDS).assignTo(controller);
+					container.assign(Systems.SHIELDS, roomC);
 					btnSystem.setText(Systems.SHIELDS.toString());
 				} else if (e.getSource() == mntmWeapons) {
-					shipController.getSystemController(Systems.WEAPONS).assignTo(controller);
+					container.assign(Systems.WEAPONS, roomC);
 					btnSystem.setText(Systems.WEAPONS.toString());
 				} else if (e.getSource() == mntmArtillery) {
-					shipController.getSystemController(Systems.ARTILLERY).assignTo(controller);
+					container.assign(Systems.ARTILLERY, roomC);
 					btnSystem.setText(Systems.ARTILLERY.toString());
 				} else if (e.getSource() == mntmCloaking) {
-					shipController.getSystemController(Systems.CLOAK).assignTo(controller);
+					container.assign(Systems.CLOAK, roomC);
 					btnSystem.setText(Systems.CLOAK.toString());
 				} else if (e.getSource() == mntmDrones) {
-					shipController.getSystemController(Systems.DRONES).assignTo(controller);
+					container.assign(Systems.DRONES, roomC);
 					btnSystem.setText(Systems.DRONES.toString());
 				} else if (e.getSource() == mntmTeleporter) {
-					shipController.getSystemController(Systems.TELEPORTER).assignTo(controller);
+					container.assign(Systems.TELEPORTER, roomC);
 					btnSystem.setText(Systems.TELEPORTER.toString());
 				} else if (e.getSource() == mntmDoors) {
-					shipController.getSystemController(Systems.DOORS).assignTo(controller);
+					container.assign(Systems.DOORS, roomC);
 					btnSystem.setText(Systems.DOORS.toString());
 				} else if (e.getSource() == mntmPilot) {
-					shipController.getSystemController(Systems.PILOT).assignTo(controller);
+					container.assign(Systems.PILOT, roomC);
 					btnSystem.setText(Systems.PILOT.toString());
 				} else if (e.getSource() == mntmSensors) {
-					shipController.getSystemController(Systems.SENSORS).assignTo(controller);
+					container.assign(Systems.SENSORS, roomC);
 					btnSystem.setText(Systems.SENSORS.toString());
+
+					// AE contenet:
+				} else if (e.getSource() == mntmClonebay) {
+					container.assign(Systems.CLONEBAY, roomC);
+					btnSystem.setText(Systems.CLONEBAY.toString());
+				} else if (e.getSource() == mntmHacking) {
+					container.assign(Systems.HACKING, roomC);
+					btnSystem.setText(Systems.HACKING.toString());
+				} else if (e.getSource() == mntmMind) {
+					container.assign(Systems.MIND, roomC);
+					btnSystem.setText(Systems.MIND.toString());
+				} else if (e.getSource() == mntmBattery) {
+					container.assign(Systems.BATTERY, roomC);
+					btnSystem.setText(Systems.BATTERY.toString());
 				}
 
 				updateData();
-				EditorWindow.getInstance().canvasRedraw(controller.getBounds());
+				roomC.redraw();
+				OverviewWindow.getInstance().update(roomC);
 			}
 		};
 
@@ -485,6 +512,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		mntmDoors.addSelectionListener(systemListener);
 		mntmPilot.addSelectionListener(systemListener);
 		mntmSensors.addSelectionListener(systemListener);
+		mntmClonebay.addSelectionListener(systemListener);
+		mntmBattery.addSelectionListener(systemListener);
+		mntmHacking.addSelectionListener(systemListener);
+		mntmMind.addSelectionListener(systemListener);
 
 		updateData();
 
@@ -494,69 +525,80 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	public void showSystemMenu() {
 		systemMenu.setVisible(true);
 
-		mntmEmpty.setSelection(controller.getModel().getSystem().getId() == Systems.EMPTY);
+		SystemController roomSystem = container.getSystemController(roomC.getSystemId());
+		mntmEmpty.setSelection(roomSystem.getSystemId() == Systems.EMPTY);
 		for (Systems systemId : Systems.getSystems()) {
 			MenuItem item = getSystemItem(systemId);
-			item.setEnabled(!controller.getShipController().getModel().getSystem(systemId).isAssigned());
-			item.setSelection(controller.getModel().getSystem().getId() == systemId);
+			item.setSelection(roomSystem.getSystemId() == systemId);
+			if (container.isAssigned(systemId))
+				item.setImage(Cache.checkOutImage(item, "/assets/tick.png"));
+			else {
+				Cache.checkInImage(item, "/assets/tick.png");
+				item.setImage(null);
+			}
 		}
+
+		// medbay and clonebay are mutually exclusive, and occupy the same room
+		MenuItem medbay = getSystemItem(Systems.MEDBAY);
+		MenuItem clonebay = getSystemItem(Systems.CLONEBAY);
+		medbay.setEnabled(!container.isAssigned(Systems.CLONEBAY));
+		clonebay.setEnabled(!container.isAssigned(Systems.MEDBAY));
 	}
 
 	public void updateData() {
-		if (controller == null)
+		if (roomC == null)
 			return;
 
-		SystemController systemController = controller.getSystemController();
-		SystemModel systemModel = systemController.getModel();
-		ShipController shipController = controller.getShipController();
-		boolean playerShip = shipController.getModel().isPlayerShip();
+		SystemController system = container.getSystemController(roomC.getSystemId());
+		ShipController shipController = container.getShipController();
+		boolean playerShip = shipController.isPlayerShip();
 
-		btnSystem.setText(controller.getModel().getSystem().getId().toString());
+		btnSystem.setText(system.toString());
 
 		// enable/disable buttons
-		btnInteriorBrowse.setEnabled(systemModel.canContainInterior());
-		btnInteriorClear.setEnabled(systemModel.canContainInterior());
-		btnInteriorView.setEnabled(systemModel.getInteriorPath() != null);
+		btnInteriorBrowse.setEnabled(system.canContainInterior());
+		btnInteriorClear.setEnabled(system.canContainInterior());
+		btnInteriorView.setEnabled(system.getInteriorPath() != null);
 
-		btnGlow1Browse.setEnabled(systemModel.canContainGlow());
-		btnGlow1Clear.setEnabled(systemModel.canContainGlow());
-		btnGlow1View.setEnabled(systemModel.getGlowPath(Glows.BLUE) != null);
+		btnGlow1Browse.setEnabled(system.canContainGlow());
+		btnGlow1Clear.setEnabled(system.canContainGlow());
+		btnGlow1View.setEnabled(system.getGlowPath(Glows.BLUE) != null);
 		// cloak only uses the first glow image (for the blue glow when activated)
-		btnGlow2Browse.setEnabled(systemModel.canContainGlow() && systemModel.getId() != Systems.CLOAK);
-		btnGlow2Clear.setEnabled(systemModel.canContainGlow() && systemModel.getId() != Systems.CLOAK);
-		btnGlow1View.setEnabled(systemModel.getGlowPath(Glows.GREEN) != null);
-		btnGlow3Browse.setEnabled(systemModel.canContainGlow() && systemModel.getId() != Systems.CLOAK);
-		btnGlow3Clear.setEnabled(systemModel.canContainGlow() && systemModel.getId() != Systems.CLOAK);
-		btnGlow1View.setEnabled(systemModel.getGlowPath(Glows.YELLOW) != null);
+		btnGlow2Browse.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
+		btnGlow2Clear.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
+		btnGlow1View.setEnabled(system.getGlowPath(Glows.GREEN) != null);
+		btnGlow3Browse.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
+		btnGlow3Clear.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
+		btnGlow1View.setEnabled(system.getGlowPath(Glows.YELLOW) != null);
 
-		btnAvailable.setEnabled(systemModel.getId() != Systems.EMPTY);
-		scaleSysLevel.setEnabled(systemModel.getId() != Systems.EMPTY);
+		btnAvailable.setEnabled(system.getSystemId() != Systems.EMPTY);
+		scaleSysLevel.setEnabled(system.getSystemId() != Systems.EMPTY);
 		if (!playerShip)
-			scaleMaxLevel.setEnabled(systemModel.getId() != Systems.EMPTY);
+			scaleMaxLevel.setEnabled(system.getSystemId() != Systems.EMPTY);
 
-		if (systemModel.getId() != Systems.EMPTY) {
+		if (system.getSystemId() != Systems.EMPTY) {
 			// update widgets with the system's data
-			btnAvailable.setSelection(systemModel.isAvailableAtStart());
+			btnAvailable.setSelection(system.isAvailableAtStart());
 
 			if (!playerShip) {
-				scaleMaxLevel.setMaximum(systemModel.getLevelCap());
-				scaleMaxLevel.setSelection(systemModel.getLevelMax());
+				scaleMaxLevel.setMaximum(system.getLevelCap());
+				scaleMaxLevel.setSelection(system.getLevelMax());
 				scaleMaxLevel.notifyListeners(SWT.Selection, null);
 			}
-			scaleSysLevel.setMaximum(playerShip ? systemModel.getLevelCap() : scaleMaxLevel.getSelection());
-			scaleSysLevel.setSelection(systemModel.getLevel());
+			scaleSysLevel.setMaximum(playerShip ? system.getLevelCap() : scaleMaxLevel.getSelection());
+			scaleSysLevel.setSelection(system.getLevel());
 			scaleSysLevel.notifyListeners(SWT.Selection, null);
 
-			String temp = systemModel.getInteriorPath();
+			String temp = system.getInteriorPath();
 			txtInterior.setText(temp == null ? "" : temp);
 			txtInterior.selectAll();
-			temp = systemModel.getGlowPath(Glows.BLUE);
+			temp = system.getGlowPath(Glows.BLUE);
 			txtGlow1.setText(temp == null ? "" : temp);
 			txtGlow1.selectAll();
-			temp = systemModel.getGlowPath(Glows.GREEN);
+			temp = system.getGlowPath(Glows.GREEN);
 			txtGlow2.setText(temp == null ? "" : temp);
 			txtGlow2.selectAll();
-			temp = systemModel.getGlowPath(Glows.YELLOW);
+			temp = system.getGlowPath(Glows.YELLOW);
 			txtGlow3.setText(temp == null ? "" : temp);
 			txtGlow3.selectAll();
 		} else {
@@ -577,7 +619,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		}
 		OverviewWindow overview = OverviewWindow.getInstance();
 		if (overview != null && overview.isVisible())
-			overview.update(controller);
+			overview.update(roomC);
 	}
 
 	private MenuItem getSystemItem(Systems systemId) {
@@ -606,18 +648,21 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				return mntmPilot;
 			case SENSORS:
 				return mntmSensors;
+			case CLONEBAY:
+				return mntmClonebay;
+			case BATTERY:
+				return mntmBattery;
+			case HACKING:
+				return mntmHacking;
+			case MIND:
+				return mntmMind;
 			default:
 				return null;
 		}
 	}
 
 	@Override
-	public RoomController getController() {
-		return controller;
-	}
-
-	@Override
-	public void setController(AbstractController controller) {
-		this.controller = (RoomController) controller;
+	public void setController(AbstractController roomC) {
+		this.roomC = (RoomController) roomC;
 	}
 }

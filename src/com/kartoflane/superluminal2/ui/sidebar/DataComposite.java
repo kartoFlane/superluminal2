@@ -12,8 +12,6 @@ public interface DataComposite {
 
 	public void updateData();
 
-	public AbstractController getController();
-
 	/**
 	 * Sets the DataComposite's controller to the specified controller, and
 	 * calls the updateData() method.
