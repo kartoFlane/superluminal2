@@ -13,7 +13,7 @@ Requirements
 ------------
 * Java (1.7 or higher).
     * http://www.java.com/en/download/
-* FTL (1.01-1.03.3, Windows/OSX/Linux, Steam/GOG/Standalone).
+* FTL: AE (1.5.4, Windows/OSX/Linux, Steam/GOG/Standalone).
     * http://www.ftlgame.com/
 * SWT GUI library (included in each distribution).
     * http://www.eclipse.org/swt/
