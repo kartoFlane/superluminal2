@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.mvc;
+package com.kartoflane.superluminal2.mvc.models;
 
 import java.io.Serializable;
 
@@ -13,6 +13,7 @@ import com.kartoflane.superluminal2.components.interfaces.Movable;
 import com.kartoflane.superluminal2.components.interfaces.Pinnable;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.mvc.Model;
 
 public class BaseModel implements Model, Movable, Resizable, Disposable, Deletable,
 		Collidable, Boundable, Pinnable, Serializable {

@@ -67,6 +67,8 @@ public class DoorTool extends Tool {
 			Point p = doorController.getLocation();
 			doorController.setFollowOffset(p.x - doorController.getParent().getX(), p.y - doorController.getParent().getY());
 
+			container.add(doorController);
+
 			window.canvasRedraw(oldBounds);
 			doorController.redraw();
 

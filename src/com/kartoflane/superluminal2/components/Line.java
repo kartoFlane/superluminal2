@@ -54,7 +54,8 @@ public class Line implements PaintListener {
 	}
 
 	public Rectangle getBounds() {
-		return new Rectangle(start.x, start.y, Math.max(1, end.x - start.x), Math.max(1, end.y - start.y));
+		return new Rectangle(Math.min(start.x, end.x), Math.min(start.y, end.y),
+				Math.max(1, end.x - start.x), Math.max(1, end.y - start.y));
 	}
 
 	@Override

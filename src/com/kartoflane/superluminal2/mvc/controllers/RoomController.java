@@ -13,8 +13,8 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.RoomView;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.tools.ManipulationTool.States;
@@ -69,8 +69,6 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		ObjectModel model = new ObjectModel(object);
 		RoomView view = new RoomView();
 		RoomController controller = new RoomController(container, model, view);
-
-		container.add(controller);
 
 		return controller;
 	}
@@ -133,27 +131,32 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 
 	@Override
 	public Point getPresentedLocation() {
-		return new Point((getX() - getW() / 2) / ShipContainer.CELL_SIZE,
-				(getY() - getH() / 2) / ShipContainer.CELL_SIZE);
+		return new Point((getX() - getW() / 2) / getPresentedFactor(),
+				(getY() - getH() / 2) / getPresentedFactor());
 	}
 
 	@Override
 	public Point getPresentedSize() {
-		return new Point(getW() / ShipContainer.CELL_SIZE, getH() / ShipContainer.CELL_SIZE);
+		return new Point(getW() / getPresentedFactor(), getH() / getPresentedFactor());
 	}
 
 	@Override
 	public void setPresentedLocation(int x, int y) {
-		setLocation(x * 35 + getW() / 2, y * 35 + getH() / 2);
+		setLocation(x * getPresentedFactor() + getW() / 2, y * getPresentedFactor() + getH() / 2);
 	}
 
 	@Override
 	public void setPresentedSize(int w, int h) {
 		Point presLoc = getPresentedLocation();
-		if (setSize(w * 35, h * 35)) {
+		if (setSize(w * getPresentedFactor(), h * getPresentedFactor())) {
 			updateBoundingArea();
 			setPresentedLocation(presLoc.x, presLoc.y);
 		}
+	}
+
+	@Override
+	public int getPresentedFactor() {
+		return ShipContainer.CELL_SIZE;
 	}
 
 	public int getId() {
@@ -359,6 +362,14 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		setResizing(false);
 		updateView();
 		redraw();
+	}
+
+	@Override
+	public void delete() {
+		Systems id = getGameObject().getSystem();
+		container.unassign(id);
+
+		super.delete();
 	}
 
 	@Override

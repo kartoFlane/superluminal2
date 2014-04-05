@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.mvc;
+package com.kartoflane.superluminal2.mvc.models;
 
 import com.kartoflane.superluminal2.ftl.GameObject;
 

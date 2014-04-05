@@ -17,6 +17,7 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.widgets.Spinner;
 
 public class ManipulationToolComposite extends Composite implements SidebarComposite, DataComposite {
 	private Button btnPinned;
@@ -28,8 +29,8 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 	private Button btnUp;
 	private Button btnLeft;
 	private Button btnRight;
-	private Label centerFiller;
 	private Button btnDown;
+	private Spinner spNudge;
 
 	public ManipulationToolComposite(Composite parent, boolean location, boolean size) {
 		super(parent, SWT.NONE);
@@ -65,11 +66,8 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		gd_btnLeft.widthHint = 36;
 		btnLeft.setLayoutData(gd_btnLeft);
 
-		centerFiller = new Label(boundsContainer, SWT.NONE);
-		GridData gd_centerFiller = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_centerFiller.widthHint = 36;
-		gd_centerFiller.heightHint = 36;
-		centerFiller.setLayoutData(gd_centerFiller);
+		spNudge = new Spinner(boundsContainer, SWT.BORDER);
+		spNudge.setMinimum(1);
 
 		btnRight = new Button(boundsContainer, SWT.NONE);
 		btnRight.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/right.png"));
@@ -102,7 +100,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			public void widgetSelected(SelectionEvent e) {
 				Rectangle oldBounds = controller.getBounds();
 				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x, p.y - 1);
+				controller.setPresentedLocation(p.x, p.y - spNudge.getSelection());
 				updateController();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
@@ -113,7 +111,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			public void widgetSelected(SelectionEvent e) {
 				Rectangle oldBounds = controller.getBounds();
 				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x, p.y + 1);
+				controller.setPresentedLocation(p.x, p.y + spNudge.getSelection());
 				updateController();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
@@ -124,7 +122,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			public void widgetSelected(SelectionEvent e) {
 				Rectangle oldBounds = controller.getBounds();
 				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x - 1, p.y);
+				controller.setPresentedLocation(p.x - spNudge.getSelection(), p.y);
 				updateController();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
@@ -135,7 +133,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			public void widgetSelected(SelectionEvent e) {
 				Rectangle oldBounds = controller.getBounds();
 				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x + 1, p.y);
+				controller.setPresentedLocation(p.x + spNudge.getSelection(), p.y);
 				updateController();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
@@ -160,6 +158,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			if (c != null)
 				c.dispose();
 
+			spNudge.setSelection(1);
 			setEnabled(false);
 		} else {
 			setEnabled(true);
@@ -215,6 +214,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		btnLeft.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		btnDown.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		btnRight.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+		spNudge.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 	}
 
 	@Override
@@ -224,6 +224,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		btnLeft.setEnabled(enable);
 		btnDown.setEnabled(enable);
 		btnRight.setEnabled(enable);
+		spNudge.setEnabled(enable);
 	}
 
 	@Override

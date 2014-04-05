@@ -19,9 +19,7 @@ import com.kartoflane.superluminal2.ui.sidebar.MountToolComposite;
 public class MountTool extends Tool {
 
 	private boolean canCreate = false;
-	private boolean rotated = false;
-	private boolean mirrored = false;
-	private Directions direction = Directions.UP;
+	private MountController toolMount = null;
 
 	public MountTool(EditorWindow window) {
 		super(window);
@@ -29,19 +27,31 @@ public class MountTool extends Tool {
 
 	@Override
 	public void select() {
+		if (toolMount == null) {
+			MountObject object = new MountObject();
+			toolMount = MountController.newInstance(Manager.getCurrentShip(), object);
+			toolMount.setSelectable(false);
+		}
+
 		cursor.setSnapMode(Snapmodes.FREE);
 		cursor.updateView();
 		cursor.setVisible(false);
-		setRotated(rotated);
-		setMirrored(mirrored);
-		setDirection(direction);
-		cursor.setSize(MountController.DEFAULT_WIDTH, MountController.DEFAULT_HEIGHT);
+
+		setRotated(toolMount.isRotated());
+		setMirrored(toolMount.isMirrored());
+		setDirection(toolMount.getDirection());
+		toolMount.setParent(cursor);
+		toolMount.setVisible(cursor.isVisible());
+
+		cursor.resize(MountController.DEFAULT_WIDTH, MountController.DEFAULT_HEIGHT);
 	}
 
 	@Override
 	public void deselect() {
 		cursor.updateView();
 		cursor.setVisible(false);
+		toolMount.setParent(null);
+		toolMount.setVisible(false);
 	}
 
 	@Override
@@ -50,30 +60,27 @@ public class MountTool extends Tool {
 	}
 
 	public void setRotated(boolean rot) {
-		rotated = rot;
-		cursor.updateView();
+		toolMount.setRotated(rot);
 	}
 
 	public boolean isRotated() {
-		return rotated;
+		return toolMount.isRotated();
 	}
 
 	public void setMirrored(boolean mir) {
-		mirrored = mir;
-		cursor.updateView();
+		toolMount.setMirrored(mir);
 	}
 
 	public boolean isMirrored() {
-		return mirrored;
+		return toolMount.isMirrored();
 	}
 
 	public void setDirection(Directions dir) {
-		direction = dir;
-		cursor.updateView();
+		toolMount.setDirection(dir);
 	}
 
 	public Directions getDirection() {
-		return direction;
+		return toolMount.getDirection();
 	}
 
 	@Override
@@ -94,6 +101,12 @@ public class MountTool extends Tool {
 			Rectangle oldBounds = mount.getBounds();
 
 			mount.setLocation(e.x, e.y);
+			mount.setRotated(isRotated());
+			mount.setMirrored(isMirrored());
+			mount.setDirection(getDirection());
+			mount.updateFollowOffset();
+
+			container.add(mount);
 
 			window.canvasRedraw(oldBounds);
 			mount.redraw();
@@ -102,6 +115,7 @@ public class MountTool extends Tool {
 		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {
 			cursor.setVisible(false);
+			toolMount.setVisible(false);
 		}
 	}
 
@@ -112,8 +126,10 @@ public class MountTool extends Tool {
 			canCreate = canPlace();
 			cursor.updateView();
 
-			if (e.button == 1)
+			if (e.button == 1) {
 				cursor.setVisible(true);
+				toolMount.setVisible(true);
+			}
 
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
 			if (!p.equals(cursor.getLocation())) {
@@ -130,23 +146,24 @@ public class MountTool extends Tool {
 			cursor.updateView();
 			cursor.setVisible(!Manager.leftMouseDown);
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
-			if (!p.equals(cursor.getLocation())) {
-				cursor.reposition(p.x, p.y);
-
-			}
+			cursor.reposition(p.x, p.y);
+			toolMount.setVisible(cursor.isVisible());
 		} else if (cursor.isVisible()) {
 			cursor.setVisible(false);
+			toolMount.setVisible(false);
 		}
 	}
 
 	@Override
 	public void mouseEnter(MouseEvent e) {
 		cursor.setVisible(!Manager.leftMouseDown);
+		toolMount.setVisible(!Manager.leftMouseDown);
 	}
 
 	@Override
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
+		toolMount.setVisible(false);
 	}
 
 	@Override

@@ -108,16 +108,11 @@ public class CursorView extends BaseView {
 	private void handleMountToolAppearance() {
 		MountTool tool = (MountTool) Manager.getSelectedTool();
 
-		String path = getImagePath();
-		if (path == null || !path.equals(MountView.DEFAULT_MOUNT_IMG)) {
-			setImage(MountView.DEFAULT_MOUNT_IMG);
-		}
 		setBorderColor(tool.canCreate() ? ALLOW_RGB : DENY_RGB);
 		setBackgroundColor(null);
 		setAlpha(255);
 		setBorderThickness(2);
 		setRotation(tool.isRotated() ? 90 : 0);
-		setFlippedX(tool.isMirrored());
 	}
 
 	private void handleDoorAppearance(DoorController door) {

@@ -81,6 +81,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private MenuItem mntmBattery;
 	private MenuItem mntmHacking;
 	private MenuItem mntmMind;
+	private Label label;
 
 	public RoomDataComposite(Composite parent, RoomController control) {
 		super(parent, SWT.NONE);
@@ -90,9 +91,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		container = Manager.getCurrentShip();
 		final ShipController shipC = container.getShipController();
 
-		Label label = new Label(this, SWT.NONE);
+		label = new Label(this, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
-		label.setText(roomC.getSystemId() == Systems.EMPTY ? "Room" : "Room / System");
+		label.setText("Room: " + roomC.getId());
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -552,6 +553,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SystemController system = container.getSystemController(roomC.getSystemId());
 		ShipController shipController = container.getShipController();
 		boolean playerShip = shipController.isPlayerShip();
+
+		String alias = roomC.getAlias();
+		label.setText("Room " + roomC.getId() + (alias == null || alias.equals("") ? "" : " (" + alias + ")"));
 
 		btnSystem.setText(system.toString());
 

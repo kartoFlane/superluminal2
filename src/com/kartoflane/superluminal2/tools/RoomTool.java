@@ -117,6 +117,8 @@ public class RoomTool extends Tool {
 					roomController.setSize(createBounds.width, createBounds.height);
 					roomController.setLocation(p.x, p.y);
 
+					container.add(roomController);
+
 					roomController.updateFollowOffset();
 					container.updateBoundingArea();
 

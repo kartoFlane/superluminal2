@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
@@ -7,8 +8,8 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.MountView;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -39,8 +40,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 		MountView view = new MountView();
 		MountController controller = new MountController(container, model, view);
 
-		container.add(controller);
-		controller.setWeapon(null);
+		controller.setWeapon(ShipContainer.DEFAULT_WEAPON_OBJ);
 
 		return controller;
 	}
@@ -78,11 +78,15 @@ public class MountController extends ObjectController implements Comparable<Moun
 	}
 
 	public void setWeapon(WeaponObject weapon) {
-		// TODO
+		if (weapon == null)
+			throw new NullPointerException("Must not be null. For default, use DEFAULT_WEAPON_OBJ");
 
-		if (weapon == null) {
-			setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-		}
+		setSize(weapon.getFrameSize());
+		getGameObject().setWeapon(weapon);
+	}
+
+	public WeaponObject getWeapon() {
+		return getGameObject().getWeapon();
 	}
 
 	public void setRotated(boolean rotated) {
@@ -130,12 +134,30 @@ public class MountController extends ObjectController implements Comparable<Moun
 	}
 
 	@Override
+	public Rectangle getBounds() {
+		Rectangle b = super.getBounds();
+		Point offset = getGameObject().getWeapon().getMountOffset();
+
+		int s = isMirrored() ? -1 : 1;
+
+		if (isRotated()) {
+			b.x += b.height / 2 + 1;
+			b.y += s * (b.height / 2 - offset.x);
+		} else {
+			b.x += s * (b.width / 2 - offset.x);
+			b.y -= b.width / 2 + 1;
+		}
+
+		return b;
+	}
+
+	@Override
 	public boolean contains(int x, int y) {
-		return model.contains(x, y);
+		return getBounds().contains(x, y);
 	}
 
 	@Override
 	public boolean intersects(Rectangle rect) {
-		return model.intersects(rect) || getView().getDirectionArrowBounds().intersects(rect);
+		return getBounds().intersects(rect) || getView().getDirectionArrowBounds().intersects(rect);
 	}
 }

@@ -26,10 +26,10 @@ import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
 import com.kartoflane.superluminal2.components.interfaces.SizeListener;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.mvc.BaseModel;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -203,10 +203,13 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	@Override
 	public Rectangle getBounds() {
-		if (getRotation() % 180 == 0)
-			return model.getBounds();
-		else if (getRotation() % 90 == 0) {
-			Rectangle b = model.getBounds();
+		return correctBounds(model.getBounds());
+	}
+
+	protected Rectangle correctBounds(Rectangle b) {
+		if (getRotation() % 180 == 0) {
+			// no need to do anything
+		} else if (getRotation() % 90 == 0) {
 			int cX = b.x + b.width / 2;
 			int cY = b.y + b.height / 2;
 			b.x = cX - b.height / 2;
@@ -214,16 +217,14 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			cX = b.width;
 			b.width = b.height;
 			b.height = cX;
-			return b;
 		} else if (getRotation() % 45 == 0) {
 			// TODO ?
-			return null;
 		} else {
-			// TODO perform sine/cosine calculations...
+			// TODO perform sine/cosine calculations, or approximations of those...
 			// end.x = (int) (start.x + Math.cos(rad) * distance - Math.sin(rad) * distance);
 			// end.y = (int) (start.y + Math.sin(rad) * distance + Math.cos(rad) * distance);
-			return null;
 		}
+		return b;
 	}
 
 	private float getRotation() {
@@ -294,17 +295,33 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void setPresentedLocation(int x, int y) {
-		setLocation(x, y);
+		reposition(x, y);
+	}
+
+	public void setPresentedLocation(Point p) {
+		setPresentedLocation(p.x, p.y);
 	}
 
 	public void setPresentedSize(int w, int h) {
-		setSize(w, h);
+		resize(w, h);
 		updateBoundingArea();
+	}
+
+	public void setPresentedSize(Point p) {
+		setPresentedSize(p.x, p.y);
+	}
+
+	public int getPresentedFactor() {
+		return 1;
 	}
 
 	/** Redraws the controller's area. */
 	public void redraw() {
 		EditorWindow.getInstance().canvasRedraw(getBounds());
+	}
+
+	public static void redraw(Rectangle r) {
+		EditorWindow.getInstance().canvasRedraw(r);
 	}
 
 	/**
@@ -317,6 +334,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	@Override
 	public void setPinned(boolean pin) {
 		model.setPinned(pin);
+		setMoving(false);
 		updateView();
 		redraw();
 	}
@@ -647,12 +665,12 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	@Override
 	public boolean contains(int x, int y) {
-		return model.contains(x, y);
+		return getBounds().contains(x, y);
 	}
 
 	@Override
 	public boolean intersects(Rectangle rect) {
-		return model.intersects(rect);
+		return getBounds().intersects(rect);
 	}
 
 	public void setLocModifiable(boolean b) {

@@ -3,7 +3,7 @@ package com.kartoflane.superluminal2.mvc.views;
 import org.eclipse.swt.events.PaintEvent;
 
 import com.kartoflane.superluminal2.ftl.MountObject;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 
 public class GibView extends BaseView {
 

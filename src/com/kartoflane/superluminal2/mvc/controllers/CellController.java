@@ -1,8 +1,8 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
-import com.kartoflane.superluminal2.mvc.BaseModel;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.CellView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 

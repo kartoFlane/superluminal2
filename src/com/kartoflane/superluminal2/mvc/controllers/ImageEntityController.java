@@ -1,7 +1,7 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.mvc.BaseModel;
+import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.ImageEntityView;
 
 public class ImageEntityController extends AbstractController {

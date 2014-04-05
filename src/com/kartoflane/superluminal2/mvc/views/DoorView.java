@@ -3,13 +3,14 @@ package com.kartoflane.superluminal2.mvc.views;
 import org.eclipse.swt.events.PaintEvent;
 
 import com.kartoflane.superluminal2.ftl.DoorObject;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 
 public class DoorView extends BaseView {
 
 	public DoorView() {
 		super();
 
+		setImage("/assets/door_object.png");
 		setBorderColor(null);
 		setBackgroundColor(null);
 		setBorderThickness(2);
@@ -33,11 +34,6 @@ public class DoorView extends BaseView {
 
 	@Override
 	public void updateView() {
-		if (getGameObject().isHorizontal())
-			setImage("/assets/door_h.png");
-		else
-			setImage("/assets/door_v.png");
-
 		if (controller.isSelected()) {
 			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);
 			setBackgroundColor(HIGHLIGHT_RGB);
@@ -51,6 +47,8 @@ public class DoorView extends BaseView {
 			setBackgroundColor(null);
 			setBorderThickness(2);
 		}
+
+		setRotation(getGameObject().isHorizontal() ? 0 : 90);
 	}
 
 	@Override

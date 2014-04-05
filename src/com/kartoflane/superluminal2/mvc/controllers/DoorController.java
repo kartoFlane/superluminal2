@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -9,8 +10,8 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.ftl.DoorObject;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.mvc.views.DoorView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -38,6 +39,7 @@ public class DoorController extends ObjectController {
 		setCollidable(true);
 		setTolerance(COLLISION_TOLERANCE);
 		setParent(container.getShipController());
+		setSize(DoorObject.DOOR_WIDTH, DoorObject.DOOR_HEIGHT);
 	}
 
 	public static DoorController newInstance(ShipContainer container, DoorObject object) {
@@ -45,8 +47,6 @@ public class DoorController extends ObjectController {
 		DoorView view = new DoorView();
 		DoorController controller = new DoorController(container, model, view);
 		controller.setHorizontal(controller.getGameObject().isHorizontal());
-
-		container.add(controller);
 
 		return controller;
 	}
@@ -61,14 +61,17 @@ public class DoorController extends ObjectController {
 
 	public void setHorizontal(boolean horizontal) {
 		Point p = getPresentedLocation();
+		Rectangle oldBounds = getBounds();
 		getGameObject().setHorizontal(horizontal);
-		updateView();
+		updateBoundingArea();
 
 		setSnapMode(horizontal ? Snapmodes.EDGE_H : Snapmodes.EDGE_V);
-		resize(horizontal ? 31 : 6, horizontal ? 6 : 31);
-		updateBoundingArea();
-		reposition(Grid.getInstance().snapToGrid(p.x * 35, p.y * 35, getSnapMode()));
+		setLocation(Grid.getInstance().snapToGrid(p.x * getPresentedFactor(), p.y * getPresentedFactor(), getSnapMode()));
 		updateFollowOffset();
+
+		updateView();
+		redraw();
+		redraw(oldBounds);
 	}
 
 	public boolean isHorizontal() {
@@ -100,9 +103,34 @@ public class DoorController extends ObjectController {
 	}
 
 	@Override
+	public int getW() {
+		return isHorizontal() ? DoorObject.DOOR_WIDTH : DoorObject.DOOR_HEIGHT;
+	}
+
+	@Override
+	public int getH() {
+		return isHorizontal() ? DoorObject.DOOR_HEIGHT : DoorObject.DOOR_WIDTH;
+	}
+
+	@Override
+	public Rectangle getBounds() {
+		Rectangle b = model.getBounds();
+		if (!isHorizontal()) {
+			int cX = b.x + b.width / 2;
+			int cY = b.y + b.height / 2;
+			b.x = cX - b.height / 2;
+			b.y = cY - b.width / 2;
+			cX = b.width;
+			b.width = b.height;
+			b.height = cX;
+		}
+		return b;
+	}
+
+	@Override
 	public Point getPresentedLocation() {
-		return new Point((getX() + getH()) / ShipContainer.CELL_SIZE,
-				(getY() + getW()) / ShipContainer.CELL_SIZE);
+		return new Point((getX() + getH()) / getPresentedFactor(),
+				(getY() + getW()) / getPresentedFactor());
 	}
 
 	@Override
@@ -112,12 +140,17 @@ public class DoorController extends ObjectController {
 
 	@Override
 	public void setPresentedLocation(int x, int y) {
-		setLocation(Grid.getInstance().snapToGrid(x * 35, y * 35, getSnapMode()));
+		setLocation(Grid.getInstance().snapToGrid(x * getPresentedFactor(), y * getPresentedFactor(), getSnapMode()));
 	}
 
 	@Override
 	public void setPresentedSize(int w, int h) {
 		throw new NotImplementedException();
+	}
+
+	@Override
+	public int getPresentedFactor() {
+		return ShipContainer.CELL_SIZE;
 	}
 
 	@Override
@@ -169,8 +202,8 @@ public class DoorController extends ObjectController {
 		Point gridSize = Grid.getInstance().getSize();
 		gridSize.x -= (gridSize.x % ShipContainer.CELL_SIZE) + ShipContainer.CELL_SIZE;
 		gridSize.y -= (gridSize.y % ShipContainer.CELL_SIZE) + ShipContainer.CELL_SIZE;
-		setBoundingPoints(getParent().getX() + (getGameObject().isHorizontal() ? getW() / 2 + 2 : 0),
-				getParent().getY() + (getGameObject().isHorizontal() ? 0 : getH() / 2 + 2), gridSize.x, gridSize.y);
+		setBoundingPoints(getParent().getX() + (isHorizontal() ? getW() / 2 + 4 : 0),
+				getParent().getY() + (isHorizontal() ? 0 : getH() / 2 + 4), gridSize.x, gridSize.y);
 	}
 
 	@Override

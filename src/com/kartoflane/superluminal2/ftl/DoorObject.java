@@ -11,6 +11,9 @@ public class DoorObject extends GameObject implements Alias, Movable, Serializab
 
 	private static final long serialVersionUID = 6051451407440322891L;
 
+	public static final int DOOR_WIDTH = 27;
+	public static final int DOOR_HEIGHT = 8;
+
 	private RoomObject leftRoom = null;
 	private RoomObject rightRoom = null;
 	private boolean horizontal = false;

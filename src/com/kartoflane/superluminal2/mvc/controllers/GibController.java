@@ -4,7 +4,7 @@ import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.GibView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 

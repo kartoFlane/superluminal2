@@ -15,6 +15,7 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
+import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
@@ -33,6 +34,7 @@ public class ShipContainer implements Disposable {
 
 	/** The size of a single cell. Both width and height are equal to this value. */
 	public static final int CELL_SIZE = 35;
+	public static final WeaponObject DEFAULT_WEAPON_OBJ = new WeaponObject();
 
 	private ArrayList<RoomController> roomControllers;
 	private ArrayList<DoorController> doorControllers;

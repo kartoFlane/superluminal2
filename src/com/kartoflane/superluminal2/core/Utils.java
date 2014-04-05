@@ -25,6 +25,10 @@ public class Utils {
 		return new Rectangle(r.x, r.y, r.width, r.height);
 	}
 
+	public static Point copy(Point p) {
+		return new Point(p.x, p.y);
+	}
+
 	/**
 	 * Fixes the rectangle, so that width and height are always positive, but the
 	 * resulting rectangle covers the same area.

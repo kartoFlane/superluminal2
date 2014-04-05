@@ -4,8 +4,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
-import com.kartoflane.superluminal2.mvc.BaseModel;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.CursorView;
 
 public class CursorController extends AbstractController {

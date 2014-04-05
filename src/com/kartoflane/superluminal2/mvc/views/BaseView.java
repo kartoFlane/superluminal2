@@ -13,12 +13,12 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Redrawable;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.mvc.BaseModel;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
+import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
 public abstract class BaseView implements View, Disposable, Redrawable {
@@ -250,7 +250,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	}
 
 	/**
-	 * Paints the image without any modifications at the given location (relative to the canvas)
+	 * Paints the image without any modifications, centered at the given location (relative to the canvas)
 	 */
 	protected void paintImage(PaintEvent e, Image image, int x, int y, int alpha) {
 		if (image != null) {
@@ -258,7 +258,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			e.gc.setAlpha(alpha);
 
 			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x, y, imageRect.width, imageRect.height);
+			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x - imageRect.width, y - imageRect.height, imageRect.width, imageRect.height);
 
 			e.gc.setAlpha(prevAlpha);
 		}
@@ -310,6 +310,36 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		}
 	}
 
+	protected void paintBackground(PaintEvent e, Rectangle rect, Color backgroundColor, int alpha) {
+		if (backgroundColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+
+			e.gc.setBackground(backgroundColor);
+			e.gc.setAlpha(alpha);
+
+			e.gc.fillRectangle(rect);
+
+			e.gc.setBackground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+		}
+	}
+
+	protected void paintBackground(PaintEvent e, int x, int y, int w, int h, Color backgroundColor, int alpha) {
+		if (backgroundColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+
+			e.gc.setBackground(backgroundColor);
+			e.gc.setAlpha(alpha);
+
+			e.gc.fillRectangle(x, y, w, h);
+
+			e.gc.setBackground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+		}
+	}
+
 	protected void paintBorder(PaintEvent e, Color borderColor, int borderThickness, int alpha) {
 		if (borderColor != null) {
 			Color prevBgColor = e.gc.getBackground();
@@ -324,6 +354,46 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			e.gc.drawRectangle(model.getX() - model.getW() / 2 + borderThickness / 2,
 					model.getY() - model.getH() / 2 + borderThickness / 2,
 					model.getW() - 1 - borderThickness / 2, model.getH() - 1 - borderThickness / 2);
+
+			e.gc.setForeground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+			e.gc.setLineWidth(prevWidth);
+		}
+	}
+
+	protected void paintBorder(PaintEvent e, Rectangle rect, Color borderColor, int borderThickness, int alpha) {
+		if (borderColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+			int prevWidth = e.gc.getLineWidth();
+
+			e.gc.setForeground(borderColor);
+			e.gc.setAlpha(alpha);
+			e.gc.setLineWidth(borderThickness);
+
+			// lines are drawn from the center, which makes the math a little funky
+			e.gc.drawRectangle(rect.x + borderThickness / 2, rect.y + borderThickness / 2,
+					rect.width - 1 - borderThickness / 2, rect.height - 1 - borderThickness / 2);
+
+			e.gc.setForeground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+			e.gc.setLineWidth(prevWidth);
+		}
+	}
+
+	protected void paintBorder(PaintEvent e, int x, int y, int w, int h, Color borderColor, int borderThickness, int alpha) {
+		if (borderColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+			int prevWidth = e.gc.getLineWidth();
+
+			e.gc.setForeground(borderColor);
+			e.gc.setAlpha(alpha);
+			e.gc.setLineWidth(borderThickness);
+
+			// lines are drawn from the center, which makes the math a little funky
+			e.gc.drawRectangle(x + borderThickness / 2, y + borderThickness / 2,
+					w - 1 - borderThickness / 2, h - 1 - borderThickness / 2);
 
 			e.gc.setForeground(prevBgColor);
 			e.gc.setAlpha(prevAlpha);

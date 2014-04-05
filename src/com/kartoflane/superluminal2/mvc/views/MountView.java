@@ -9,23 +9,22 @@ import org.eclipse.swt.graphics.Transform;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.MountObject.Directions;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 
 public class MountView extends BaseView {
 
-	public static final String DEFAULT_MOUNT_IMG = "/assets/weapon.png";
 	public static final int ARROW_WIDTH = 9;
 	public static final int ARROW_HEIGHT = 35;
 
 	private Image directionArrow = null;
+	private Point weaponOffset = null;
 
 	public MountView() {
 		super();
 
 		directionArrow = Cache.checkOutImage(this, "/assets/arrow.png");
 
-		setImage(DEFAULT_MOUNT_IMG);
 		setBorderColor(null);
 		setBackgroundColor(null);
 		setBorderThickness(2);
@@ -38,10 +37,11 @@ public class MountView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			paintImage(e, image, alpha);
+			paintImage(e, image, controller.getX() + controller.getW() - weaponOffset.x, controller.getY() + controller.getH() - weaponOffset.y, alpha);
+			paintBorder(e, controller.getX() - weaponOffset.x, controller.getY() - weaponOffset.y,
+					controller.getW(), controller.getH(), borderColor, borderThickness, alpha);
 			if (getController().getDirection() != Directions.NONE)
 				paintDirectionArrow(e, directionArrow, alpha);
-			paintBorder(e, borderColor, borderThickness, alpha);
 		}
 	}
 
@@ -108,6 +108,9 @@ public class MountView extends BaseView {
 
 	@Override
 	public void updateView() {
+		setImage(getController().getWeapon().getSheetPath());
+		weaponOffset = getGameObject().getWeapon().getMountOffset();
+
 		if (controller.isSelected()) {
 			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);
 			setBackgroundColor(null);

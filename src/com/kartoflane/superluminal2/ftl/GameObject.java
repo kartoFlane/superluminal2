@@ -3,7 +3,7 @@ package com.kartoflane.superluminal2.ftl;
 import java.io.Serializable;
 
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
-import com.kartoflane.superluminal2.mvc.ObjectModel;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 
 public abstract class GameObject implements Deletable, Serializable {
 
