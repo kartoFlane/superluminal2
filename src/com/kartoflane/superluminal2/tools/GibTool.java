@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.sidebar.GibToolComposite;
 
 public class GibTool extends Tool {
 
@@ -18,8 +19,8 @@ public class GibTool extends Tool {
 		if (c != null && !c.isDisposed())
 			c.dispose();
 
-		// PointerComposite pointerC = new PointerComposite(window.getSidebarWidget(), true, false);
-		// window.setSidebarContent(pointerC);
+		GibToolComposite gibC = getToolComposite(window.getSidebarWidget());
+		window.setSidebarContent(gibC);
 	}
 
 	@Override
@@ -32,8 +33,8 @@ public class GibTool extends Tool {
 	}
 
 	@Override
-	public Composite getToolComposite(Composite parent) {
-		return null; // TODO
+	public GibToolComposite getToolComposite(Composite parent) {
+		return new GibToolComposite(parent);
 	}
 
 	@Override

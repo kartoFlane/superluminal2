@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.mvc.views;
 
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
@@ -23,8 +24,8 @@ public class SystemView extends BaseView {
 		if (alpha > 0) {
 			// image is icon
 			// interiorImage is the interior image (duh)
-			paintImage(e, interiorImage, controller.getX() - controller.getW() / 2,
-					controller.getY() - controller.getH() / 2, controller.getW(), controller.getH(), alpha);
+			paintImageCorner(e, interiorImage, controller.getX() - controller.getW() / 2,
+					controller.getY() - controller.getH() / 2, alpha);
 			paintBackground(e, backgroundColor, alpha / 4); // TODO tint RoomView's background instead?
 			paintImage(e, image, alpha);
 		}
@@ -45,6 +46,10 @@ public class SystemView extends BaseView {
 			interiorImage = Cache.checkOutImage(this, path);
 			interiorPath = path;
 		}
+	}
+
+	public Rectangle getImageBounds() {
+		return interiorImage == null ? new Rectangle(0, 0, 0, 0) : interiorImage.getBounds();
 	}
 
 	@Override

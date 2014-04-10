@@ -265,6 +265,21 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	}
 
 	/**
+	 * Paints the image without any modifications, with the image's top left corner at the given location.
+	 */
+	protected void paintImageCorner(PaintEvent e, Image image, int x, int y, int alpha) {
+		if (image != null) {
+			int prevAlpha = e.gc.getAlpha();
+			e.gc.setAlpha(alpha);
+
+			Rectangle imageRect = image.getBounds();
+			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x, y, imageRect.width, imageRect.height);
+
+			e.gc.setAlpha(prevAlpha);
+		}
+	}
+
+	/**
 	 * Paints the image in the given area, modifying the image to fit.
 	 */
 	protected void paintImage(PaintEvent e, Image image, Rectangle rect, int alpha) {

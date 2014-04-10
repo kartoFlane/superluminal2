@@ -332,8 +332,10 @@ public class EditorWindow {
 
 							oldBounds = selected.getBounds();
 
-							selected.setPresentedLocation(p.x + (e.keyCode == SWT.ARROW_RIGHT ? 1 : e.keyCode == SWT.ARROW_LEFT ? -1 : 0),
-									p.y + (e.keyCode == SWT.ARROW_DOWN ? 1 : e.keyCode == SWT.ARROW_UP ? -1 : 0));
+							int nudgeAmount = Manager.modShift && selected.getPresentedFactor() == 1 ? ShipContainer.CELL_SIZE : 1;
+
+							selected.setPresentedLocation(p.x + (e.keyCode == SWT.ARROW_RIGHT ? nudgeAmount : e.keyCode == SWT.ARROW_LEFT ? -nudgeAmount : 0),
+									p.y + (e.keyCode == SWT.ARROW_DOWN ? nudgeAmount : e.keyCode == SWT.ARROW_UP ? -nudgeAmount : 0));
 							selected.updateFollowOffset();
 							Manager.getCurrentShip().updateBoundingArea();
 							selected.updateView();
@@ -342,6 +344,8 @@ public class EditorWindow {
 							canvasRedraw(oldBounds);
 
 							mtc.updateData();
+
+							e.doit = false;
 						}
 					} else if ((e.keyCode == 'd' && Manager.modShift) || e.keyCode == SWT.DEL) {
 						// deletion
@@ -353,7 +357,7 @@ public class EditorWindow {
 
 								Manager.setSelected(null);
 							} catch (NotDeletableException ex) {
-								log.debug("Selected object is not disposable: " + selected.getClass().getSimpleName());
+								log.trace("Selected object is not deletable: " + selected.getClass().getSimpleName());
 							}
 						}
 					} else if (e.keyCode == SWT.SPACE) {
@@ -410,6 +414,7 @@ public class EditorWindow {
 				ShipContainer ship = Manager.getCurrentShip();
 				if (ship != null) {
 					ship.updateBoundingArea();
+					ship.updateChildBoundingAreas();
 					ship.getShipController().setVisible(true); // to update the view
 					ship.getShipController().redraw();
 				}
@@ -433,6 +438,7 @@ public class EditorWindow {
 				ShipContainer ship = Manager.getCurrentShip();
 				if (ship != null) {
 					ship.updateBoundingArea();
+					ship.updateChildBoundingAreas();
 					ship.getShipController().setVisible(true); // to update the view
 					ship.getShipController().redraw();
 				}
@@ -633,6 +639,10 @@ public class EditorWindow {
 			result &= !c.isFocusControl();
 
 		return result;
+	}
+
+	public boolean forceFocus() {
+		return canvas.forceFocus();
 	}
 
 	public void dispose() {

@@ -70,11 +70,11 @@ public class RoomView extends BaseView {
 				e.gc.setForeground(prevFgColor);
 			}
 
-			paintBorder(e, borderColor, borderThickness, alpha);
-
 			// draw system
 			SystemController systemC = Manager.getCurrentShip().getSystemController(getGameObject().getSystem());
 			systemC.redraw(e);
+
+			paintBorder(e, borderColor, borderThickness, alpha);
 
 			paintResizeHandles(e);
 		}

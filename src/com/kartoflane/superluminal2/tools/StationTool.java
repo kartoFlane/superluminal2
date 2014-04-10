@@ -2,37 +2,33 @@ package com.kartoflane.superluminal2.tools;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
+import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.MountObject.Directions;
+import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
+import com.kartoflane.superluminal2.mvc.controllers.StationController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
-import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.sidebar.StationToolComposite;
 
 public class StationTool extends Tool {
 
-	private static final RGB DENY_RGB = BaseView.DENY_RGB;
-	private static final RGB ALLOW_RGB = BaseView.ALLOW_RGB;
+	private enum States {
+		PLACEMENT, DIRECTION, REMOVAL
+	}
 
+	private States state = States.PLACEMENT;
 	private boolean canPlace = false;
+	private Directions direction = Directions.UP;
 
 	public StationTool(EditorWindow window) {
 		super(window);
-	}
-
-	@Override
-	public void select() {
-		resetCursor();
-		cursor.updateView();
-	}
-
-	@Override
-	public void deselect() {
 	}
 
 	@Override
@@ -41,8 +37,52 @@ public class StationTool extends Tool {
 	}
 
 	@Override
+	public void select() {
+		cursor.updateView();
+		cursor.setSnapMode(Snapmodes.CELL);
+		cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+		cursor.setVisible(false);
+	}
+
+	@Override
+	public void deselect() {
+	}
+
+	public void setDirection(Directions dir) {
+		direction = dir;
+	}
+
+	public Directions getDirection() {
+		return direction;
+	}
+
+	public void setStatePlacement() {
+		state = States.PLACEMENT;
+	}
+
+	public boolean isStatePlacement() {
+		return state == States.PLACEMENT;
+	}
+
+	public void setStateDirection() {
+		state = States.DIRECTION;
+	}
+
+	public boolean isStateDirection() {
+		return state == States.DIRECTION;
+	}
+
+	public void setStateRemoval() {
+		state = States.REMOVAL;
+	}
+
+	public boolean isStateRemoval() {
+		return state == States.REMOVAL;
+	}
+
+	@Override
 	public Composite getToolComposite(Composite parent) {
-		return null; // TODO
+		return new StationToolComposite(parent);
 	}
 
 	@Override
@@ -51,109 +91,115 @@ public class StationTool extends Tool {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
-		if (e.button == 1) {
-			// station assignment
-			ShipContainer container = Manager.getCurrentShip();
-			RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
-			if (roomC != null && container.getSystemController(roomC.getSystemId()).canContainStation()) {
-				// StationController station = roomController.getSystemController().getStationController();
-				// correction to pick the correct slot
-				// station.getModel().setSlotId(roomC.getModel().getSlotId(e.x - 2, e.y - 2));
-				// station.updateSlot();
-				window.canvasRedraw(roomC.getBounds());
-			}
-		} else if (e.button == 3) {
-			// station removal
-			ShipContainer container = Manager.getCurrentShip();
-			RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
-			if (roomC != null && container.getSystemController(roomC.getSystemId()).canContainStation()) {
-				// StationController station = roomController.getSystemController().getStationController();
-				// station.setSlotId(-2);
-				// station.updateSlot();
-				window.canvasRedraw(roomC.getBounds());
-			}
-		}
-
 		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {
 			cursor.setVisible(false);
-			window.canvasRedraw(cursor.getBounds());
 		}
 	}
 
 	@Override
 	public void mouseUp(MouseEvent e) {
-		if (e.button == 1) {
-		} else if (e.button == 3) {
+		if (canPlace && e.button == 1) {
+			if (state == States.PLACEMENT) {
+				// station placement
+				ShipContainer container = Manager.getCurrentShip();
+				RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+				if (roomC != null) {
+					SystemController system = container.getSystemController(roomC.getSystemId());
+					if (system.canContainStation()) {
+						StationController station = (StationController) container.getController(system.getGameObject().getStation());
+						int id = roomC.getSlotId(cursor.getX(), cursor.getY());
+						// station.setSlotDirection(direction);
+						station.setSlotId(id);
+						roomC.setLocation(roomC.getX(), roomC.getY()); // to update the station's followOffset
+						station.setVisible(true);
+					}
+					roomC.redraw();
+				}
+			} else if (state == States.DIRECTION) {
+				// direction change
+				ShipContainer container = Manager.getCurrentShip();
+				RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+				if (roomC != null) {
+					SystemController system = container.getSystemController(roomC.getSystemId());
+					if (system.canContainStation()) {
+						StationController station = (StationController) container.getController(system.getGameObject().getStation());
+						station.setSlotDirection(direction);
+						roomC.reposition(roomC.getX(), roomC.getY()); // to update the station's followOffset
+					}
+					roomC.redraw();
+				}
+			} else if (state == States.REMOVAL) {
+				removeStation(e.x, e.y);
+			}
+		} else if (canPlace && e.button == 3) {
+			if (state == States.PLACEMENT) {
+				removeStation(e.x, e.y);
+			}
 		}
 
 		// handle cursor
-		if (!cursor.isVisible() && Grid.getInstance().isLocAccessible(e.x + 1, e.y + 1)) {
-			if (e.button == 1)
-				cursor.setVisible(true);
+		if (e.button == 1) {
+			cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
+			cursor.setVisible(true);
+		}
+	}
 
-			Point p = Grid.getInstance().snapToGrid(e.x + 1, e.y + 1, cursor.getSnapMode());
-			if (!p.equals(cursor.getLocation()))
-				cursor.reposition(p.x, p.y);
-			window.canvasRedraw(cursor.getBounds());
+	private void removeStation(int x, int y) {
+		ShipContainer container = Manager.getCurrentShip();
+		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
+		if (roomC != null) {
+			SystemController system = container.getSystemController(roomC.getSystemId());
+			if (system.canContainStation()) {
+				StationController station = (StationController) container.getController(system.getGameObject().getStation());
+				station.setSlotId(-2);
+				station.setVisible(false);
+			}
+			roomC.redraw();
 		}
 	}
 
 	@Override
 	public void mouseMove(MouseEvent e) {
-		// move the cursor around to follow mouse
-		// (1, 1) vector correction so that the cursor shows up on the correct grid cell
-		if (Grid.getInstance().isLocAccessible(e.x + 1, e.y + 1)) {
-			cursor.setVisible(!Manager.leftMouseDown);
-			Point p = Grid.getInstance().snapToGrid(e.x + 1, e.y + 1, cursor.getSnapMode());
-			// always redraw it: prevents an odd visual bug where the box sometimes doesn't register it was moved
-			cursor.reposition(p.x, p.y);
-		} else if (cursor.isVisible()) {
-			cursor.setVisible(false);
-			window.canvasRedraw(cursor.getBounds());
-		}
-
 		ShipContainer container = Manager.getCurrentShip();
-		RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+		Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
+		RoomController roomC = (RoomController) window.getPainter().getControllerAt(p.x, p.y, Layers.ROOM);
 		if (roomC != null) {
 			SystemController system = container.getSystemController(roomC.getSystemId());
-			canPlace = system.canContainStation();
+			Systems id = system.getSystemId();
+			canPlace = system.canContainStation() && roomC.getDimensions().contains(p.x, p.y);
+			canPlace &= !(isStateDirection() && (id == Systems.MEDBAY || id == Systems.CLONEBAY));
 		} else {
 			canPlace = false;
 		}
+
+		// move the cursor around to follow mouse
+		cursor.updateView();
+		if (p.x != cursor.getX() || p.y != cursor.getY()) {
+			cursor.reposition(p.x, p.y);
+			if (!cursor.isVisible())
+				cursor.setVisible(!Manager.leftMouseDown);
+		}
+		cursor.redraw();
 	}
 
 	@Override
 	public void mouseEnter(MouseEvent e) {
 		cursor.setVisible(!Manager.leftMouseDown);
-		window.canvasRedraw(cursor.getBounds());
+		cursor.redraw();
 	}
 
 	@Override
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
-		window.canvasRedraw(cursor.getBounds());
+		cursor.redraw();
 	}
 
-	public boolean canPlaceStation() {
+	public boolean canPlace() {
 		return canPlace;
 	}
 
 	@Override
 	public void mouseHover(MouseEvent e) {
-	}
-
-	private void resetCursor() {
-		/*
-		 * cursor.setImage(null);
-		 * cursor.setBackgroundColor(null);
-		 * cursor.setBorderColor(ALLOW_RGB);
-		 * cursor.setAlpha(255);
-		 * cursor.setSnapMode(Snapmodes.CELL);
-		 * 
-		 * Rectangle oldBounds = cursor.getBounds();
-		 * cursor.setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
-		 * window.canvasRedraw(oldBounds);
-		 */
 	}
 }

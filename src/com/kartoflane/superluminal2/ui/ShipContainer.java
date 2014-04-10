@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.swt.graphics.Point;
 
@@ -10,6 +11,7 @@ import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
+import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -18,9 +20,12 @@ import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
+import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
+import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.mvc.controllers.StationController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 
 /**
@@ -39,16 +44,21 @@ public class ShipContainer implements Disposable {
 	private ArrayList<RoomController> roomControllers;
 	private ArrayList<DoorController> doorControllers;
 	private ArrayList<MountController> mountControllers;
-	// private ArrayList<GibController> gibControllers; // TODO
+	private ArrayList<GibController> gibControllers;
 	private ArrayList<SystemController> systemControllers;
-	private ShipController shipController;
+
+	private HashMap<GameObject, AbstractController> objectControllerMap;
+
+	private ShipController shipController = null;
 
 	private ShipContainer() {
 		roomControllers = new ArrayList<RoomController>();
 		doorControllers = new ArrayList<DoorController>();
 		mountControllers = new ArrayList<MountController>();
-		// gibControllers = new ArrayList<GibController>();
+		gibControllers = new ArrayList<GibController>();
 		systemControllers = new ArrayList<SystemController>();
+
+		objectControllerMap = new HashMap<GameObject, AbstractController>();
 	}
 
 	public ShipContainer(ShipObject ship) {
@@ -57,14 +67,19 @@ public class ShipContainer implements Disposable {
 		shipController = ShipController.newInstance(this, ship);
 
 		for (RoomObject room : ship.getRooms())
-			roomControllers.add(RoomController.newInstance(this, room));
+			add(RoomController.newInstance(this, room));
 		for (DoorObject door : ship.getDoors())
-			doorControllers.add(DoorController.newInstance(this, door));
+			add(DoorController.newInstance(this, door));
 		for (MountObject mount : ship.getMounts())
-			mountControllers.add(MountController.newInstance(this, mount));
+			add(MountController.newInstance(this, mount));
+		for (GibObject gib : ship.getGibs())
+			add(GibController.newInstance(this, gib));
 		for (Systems sys : Systems.values()) {
 			SystemObject system = ship.getSystem(sys);
-			systemControllers.add(SystemController.newInstance(this, system));
+			SystemController systemC = SystemController.newInstance(this, system);
+			add(systemC);
+			if (system.canContainStation())
+				add(StationController.newInstance(this, systemC, system.getStation()));
 		}
 	}
 
@@ -90,27 +105,23 @@ public class ShipContainer implements Disposable {
 
 	public SystemController getSystemController(Systems systemId) {
 		for (SystemController sys : systemControllers) {
-			if (sys.getGameObject().getSystemId() == systemId)
+			if (sys.getSystemId() == systemId)
 				return sys;
 		}
 		throw new IllegalArgumentException("Controller for the specified system id was not found: " + systemId);
 	}
 
-	public AbstractController getController(GameObject object) {
-		if (object instanceof RoomObject) {
-			for (RoomController control : roomControllers)
-				if (control.getGameObject() == object)
-					return control;
-		} else if (object instanceof DoorObject) {
-			for (DoorController control : doorControllers)
-				if (control.getGameObject() == object)
-					return control;
-		} else if (object instanceof MountObject) {
-			for (MountController control : mountControllers)
-				if (control.getGameObject() == object)
-					return control;
+	public StationController getStationController(Systems systemId) {
+		for (SystemController sys : systemControllers) {
+			if (sys.getSystemId() == systemId)
+				return (StationController) getController(sys.getGameObject().getStation());
 		}
+
 		return null;
+	}
+
+	public AbstractController getController(GameObject object) {
+		return objectControllerMap.get(object);
 	}
 
 	/**
@@ -148,26 +159,41 @@ public class ShipContainer implements Disposable {
 
 	public void assign(Systems sys, RoomController room) {
 		if (sys == null)
-			throw new NullPointerException("System ID is null.");
+			throw new NullPointerException("System id must not be null.");
 		if (room == null)
 			throw new NullPointerException("Room controller is null. Use system.unassign() instead.");
 
-		unassign(room.getSystemId());
 		SystemController system = getSystemController(sys);
+		StationController station = getStationController(sys);
+
+		unassign(room.getSystemId());
 		system.assignTo(room.getGameObject());
-		system.setSize(room.getSize());
-		system.reposition(room.getLocation());
+		system.reposition(room.getX(), room.getY());
 		system.setParent(room);
+
 		room.addSizeListener(system);
+
+		if (system.canContainStation()) {
+			room.addSizeListener(station);
+			station.updateFollowOffset();
+			station.updateFollower();
+			station.setVisible(true);
+		}
 	}
 
 	public void unassign(Systems sys) {
 		if (sys == null)
-			throw new NullPointerException("System ID is null.");
+			throw new NullPointerException("System id must not be null.");
 		SystemController system = getSystemController(sys);
+		StationController station = getStationController(sys);
 		AbstractController room = getController(system.getGameObject().getRoom());
-		if (room != null)
+
+		if (room != null) {
 			room.removeSizeListener(system);
+			room.removeSizeListener(station);
+		}
+		if (system.canContainStation())
+			station.setVisible(false);
 		system.unassign();
 	}
 
@@ -190,9 +216,19 @@ public class ShipContainer implements Disposable {
 			mount.getGameObject().setId(getNextMountId());
 			mountControllers.add(mount);
 			shipController.getGameObject().add(mount.getGameObject());
+		} else if (controller instanceof GibController) {
+			GibController gib = (GibController) controller;
+			gibControllers.add(gib);
+			shipController.getGameObject().add(gib.getGameObject());
+		} else if (controller instanceof SystemController) {
+			SystemController system = (SystemController) controller;
+			systemControllers.add(system);
 		} else {
 			// not an ObjectController, nothing to do here
 		}
+
+		if (controller instanceof ObjectController)
+			objectControllerMap.put(((ObjectController) controller).getGameObject(), controller);
 	}
 
 	public void remove(AbstractController controller) {
@@ -208,9 +244,19 @@ public class ShipContainer implements Disposable {
 			MountController mount = (MountController) controller;
 			mountControllers.remove(mount);
 			shipController.getGameObject().remove(mount.getGameObject());
+		} else if (controller instanceof GibController) {
+			GibController gib = (GibController) controller;
+			gibControllers.remove(gib);
+			shipController.getGameObject().remove(gib.getGameObject());
+		} else if (controller instanceof SystemController) {
+			SystemController system = (SystemController) controller;
+			systemControllers.remove(system);
 		} else {
 			// not an ObjectController, nothing to do here
 		}
+
+		if (controller instanceof ObjectController)
+			objectControllerMap.remove(((ObjectController) controller).getGameObject());
 	}
 
 	private int getNextRoomId() {
@@ -236,21 +282,53 @@ public class ShipContainer implements Disposable {
 			throw new NotDeletableException();
 
 		controller.delete();
-
-		if (controller instanceof RoomController)
-			remove(controller);
-		// TODO remove from lists
+		remove(controller);
 	}
 
 	public void restore(AbstractController controller) {
 		controller.restore();
-
-		// TODO readd to lists
+		add(controller);
 	}
 
 	@Override
 	public void dispose() throws NotDeletableException {
-		// TODO dispose and clear all lists, call GC
+		if (shipController == null)
+			return; // nothing loaded yet
+
+		ArrayList<AbstractController> controllers = new ArrayList<AbstractController>();
+		controllers.addAll(roomControllers);
+		controllers.addAll(doorControllers);
+		controllers.addAll(mountControllers);
+		controllers.addAll(gibControllers);
+
+		for (AbstractController ac : controllers) {
+			delete(ac);
+		}
+
+		controllers.clear();
+		roomControllers.clear();
+		doorControllers.clear();
+		mountControllers.clear();
+		gibControllers.clear();
+		systemControllers.clear();
+
+		shipController.dispose();
+		shipController = null;
+
+		// TODO dispose and clear all lists
+
+		System.gc();
+	}
+
+	public void updateChildBoundingAreas() {
+		for (RoomController rc : roomControllers)
+			rc.updateBoundingArea();
+		for (DoorController dc : doorControllers)
+			dc.updateBoundingArea();
+		for (MountController mc : mountControllers)
+			mc.updateBoundingArea();
+		for (GibController gc : gibControllers)
+			gc.updateBoundingArea();
 	}
 
 	public void updateBoundingArea() {

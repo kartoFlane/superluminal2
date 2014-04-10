@@ -11,9 +11,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.ftl.SystemObject.Glows;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
@@ -57,23 +56,11 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private Scale scaleMaxLevel;
 	private Text txtMaxLevel;
 	private Button btnAvailable;
-	private Group grpSystemImages;
+	private Composite imagesComposite;
 	private Button btnInteriorBrowse;
 	private Button btnInteriorClear;
 	private Text txtInterior;
 	private Button btnInteriorView;
-	private Text txtGlow1;
-	private Button btnGlow1Browse;
-	private Button btnGlow1Clear;
-	private Button btnGlow1View;
-	private Text txtGlow2;
-	private Button btnGlow2Browse;
-	private Button btnGlow2Clear;
-	private Button btnGlow2View;
-	private Text txtGlow3;
-	private Button btnGlow3Browse;
-	private Button btnGlow3Clear;
-	private Button btnGlow3View;
 
 	private RoomController roomC = null;
 	private ShipContainer container = null;
@@ -82,6 +69,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private MenuItem mntmHacking;
 	private MenuItem mntmMind;
 	private Label label;
+	private Label lblGlow;
+	private Combo glowCombo;
 
 	public RoomDataComposite(Composite parent, RoomController control) {
 		super(parent, SWT.NONE);
@@ -169,90 +158,47 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			});
 		}
 
-		grpSystemImages = new Group(this, SWT.NONE);
-		grpSystemImages.setLayout(new GridLayout(4, false));
-		grpSystemImages.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-		grpSystemImages.setText("System Images");
+		imagesComposite = new Composite(this, SWT.NONE);
+		GridLayout gl_imagesComposite = new GridLayout(4, false);
+		gl_imagesComposite.marginHeight = 0;
+		gl_imagesComposite.marginWidth = 0;
+		imagesComposite.setLayout(gl_imagesComposite);
+		imagesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 
 		// Interior widgets
-		Label lblInterior = new Label(grpSystemImages, SWT.NONE);
-		lblInterior.setText("Interior");
+		Label lblInterior = new Label(imagesComposite, SWT.NONE);
+		lblInterior.setText("Interior image:");
 
-		btnInteriorView = new Button(grpSystemImages, SWT.NONE);
+		btnInteriorView = new Button(imagesComposite, SWT.NONE);
 		btnInteriorView.setEnabled(false);
 		btnInteriorView.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 		btnInteriorView.setText("View");
 
-		btnInteriorBrowse = new Button(grpSystemImages, SWT.NONE);
+		btnInteriorBrowse = new Button(imagesComposite, SWT.NONE);
 		btnInteriorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnInteriorBrowse.setText("Browse");
 
-		btnInteriorClear = new Button(grpSystemImages, SWT.NONE);
+		btnInteriorClear = new Button(imagesComposite, SWT.NONE);
 		btnInteriorClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnInteriorClear.setText("Clear");
 
-		txtInterior = new Text(grpSystemImages, SWT.BORDER | SWT.READ_ONLY);
+		txtInterior = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
 		txtInterior.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
-		// Glow 1 widgets
-		Label lblGlow1 = new Label(grpSystemImages, SWT.NONE);
-		lblGlow1.setText("Blue Glow");
+		lblGlow = new Label(imagesComposite, SWT.NONE);
+		lblGlow.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblGlow.setText("Manning glow:");
 
-		btnGlow1View = new Button(grpSystemImages, SWT.NONE);
-		btnGlow1View.setEnabled(false);
-		btnGlow1View.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		btnGlow1View.setText("View");
+		glowCombo = new Combo(imagesComposite, SWT.READ_ONLY);
+		glowCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
-		btnGlow1Browse = new Button(grpSystemImages, SWT.NONE);
-		btnGlow1Browse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnGlow1Browse.setText("Browse");
+		// TODO figure out cloak handling
+		// TODO read and add glow sets
 
-		btnGlow1Clear = new Button(grpSystemImages, SWT.NONE);
-		btnGlow1Clear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnGlow1Clear.setText("Clear");
-
-		txtGlow1 = new Text(grpSystemImages, SWT.BORDER | SWT.READ_ONLY);
-		txtGlow1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
-
-		// Glow 2 widgets
-		Label lblGlow2 = new Label(grpSystemImages, SWT.NONE);
-		lblGlow2.setText("Green Glow");
-
-		btnGlow2View = new Button(grpSystemImages, SWT.NONE);
-		btnGlow2View.setEnabled(false);
-		btnGlow2View.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		btnGlow2View.setText("View");
-
-		btnGlow2Browse = new Button(grpSystemImages, SWT.NONE);
-		btnGlow2Browse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnGlow2Browse.setText("Browse");
-
-		btnGlow2Clear = new Button(grpSystemImages, SWT.NONE);
-		btnGlow2Clear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnGlow2Clear.setText("Clear");
-
-		txtGlow2 = new Text(grpSystemImages, SWT.BORDER | SWT.READ_ONLY);
-		txtGlow2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
-
-		// Glow 3 widgets
-		Label lblGlow3 = new Label(grpSystemImages, SWT.NONE);
-		lblGlow3.setText("Gold Glow");
-
-		btnGlow3View = new Button(grpSystemImages, SWT.NONE);
-		btnGlow3View.setEnabled(false);
-		btnGlow3View.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		btnGlow3View.setText("View");
-
-		btnGlow3Browse = new Button(grpSystemImages, SWT.NONE);
-		btnGlow3Browse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnGlow3Browse.setText("Browse");
-
-		btnGlow3Clear = new Button(grpSystemImages, SWT.NONE);
-		btnGlow3Clear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnGlow3Clear.setText("Clear");
-
-		txtGlow3 = new Text(grpSystemImages, SWT.BORDER | SWT.READ_ONLY);
-		txtGlow3.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		glowCombo.add("Define new glow set...");
+		glowCombo.add("Default glow set");
+		glowCombo.select(1);
+		// TODO define dialog popup to define new glow set
 
 		btnSystem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -275,15 +221,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				SystemController system = container.getSystemController(roomC.getSystemId());
-				File file = null;
-				if (e.getSource() == btnInteriorView)
-					file = new File(system.getInteriorPath());
-				else if (e.getSource() == btnGlow1View)
-					file = new File(system.getGlowPath(Glows.BLUE));
-				else if (e.getSource() == btnGlow2View)
-					file = new File(system.getGlowPath(Glows.GREEN));
-				else if (e.getSource() == btnGlow3View)
-					file = new File(system.getGlowPath(Glows.YELLOW));
+				File file = new File(system.getInteriorPath());
 
 				if (file != null && file.exists()) {
 					if (Desktop.isDesktopSupported()) {
@@ -301,9 +239,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			}
 		};
 		btnInteriorView.addSelectionListener(imageViewListener);
-		btnGlow1View.addSelectionListener(imageViewListener);
-		btnGlow2View.addSelectionListener(imageViewListener);
-		btnGlow3View.addSelectionListener(imageViewListener);
 
 		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 			@Override
@@ -312,52 +247,25 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
 				String path = dialog.open();
 
-				Glows type = null;
-				if (e.getSource() == btnGlow1Browse)
-					type = Glows.BLUE;
-				else if (e.getSource() == btnGlow2Browse)
-					type = Glows.GREEN;
-				else if (e.getSource() == btnGlow3Browse)
-					type = Glows.YELLOW;
-
 				// path == null only when user cancels
 				if (path != null) {
-					if (type == null)
-						system.setInteriorPath(path);
-					else
-						system.setGlowPath(type, path);
+					system.setInteriorPath(path);
 					updateData();
 				}
 			}
 		};
 		btnInteriorBrowse.addSelectionListener(imageBrowseListener);
-		btnGlow1Browse.addSelectionListener(imageBrowseListener);
-		btnGlow2Browse.addSelectionListener(imageBrowseListener);
-		btnGlow3Browse.addSelectionListener(imageBrowseListener);
 
 		SelectionAdapter imageClearListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				SystemController system = container.getSystemController(roomC.getSystemId());
-				Glows type = null;
-				if (e.getSource() == btnGlow1Clear)
-					type = Glows.BLUE;
-				else if (e.getSource() == btnGlow2Clear)
-					type = Glows.GREEN;
-				else if (e.getSource() == btnGlow3Clear)
-					type = Glows.YELLOW;
 
-				if (type == null)
-					system.setInteriorPath(null);
-				else
-					system.setGlowPath(type, null);
+				system.setInteriorPath(null);
 				updateData();
 			}
 		};
 		btnInteriorClear.addSelectionListener(imageClearListener);
-		btnGlow1Clear.addSelectionListener(imageClearListener);
-		btnGlow2Clear.addSelectionListener(imageClearListener);
-		btnGlow3Clear.addSelectionListener(imageClearListener);
 
 		/*
 		 * =========================
@@ -563,17 +471,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnInteriorBrowse.setEnabled(system.canContainInterior());
 		btnInteriorClear.setEnabled(system.canContainInterior());
 		btnInteriorView.setEnabled(system.getInteriorPath() != null);
-
-		btnGlow1Browse.setEnabled(system.canContainGlow());
-		btnGlow1Clear.setEnabled(system.canContainGlow());
-		btnGlow1View.setEnabled(system.getGlowPath(Glows.BLUE) != null);
-		// cloak only uses the first glow image (for the blue glow when activated)
-		btnGlow2Browse.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
-		btnGlow2Clear.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
-		btnGlow1View.setEnabled(system.getGlowPath(Glows.GREEN) != null);
-		btnGlow3Browse.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
-		btnGlow3Clear.setEnabled(system.canContainGlow() && system.getSystemId() != Systems.CLOAK);
-		btnGlow1View.setEnabled(system.getGlowPath(Glows.YELLOW) != null);
+		glowCombo.setEnabled(system.canContainGlow());
 
 		btnAvailable.setEnabled(system.getSystemId() != Systems.EMPTY);
 		scaleSysLevel.setEnabled(system.getSystemId() != Systems.EMPTY);
@@ -596,15 +494,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			String temp = system.getInteriorPath();
 			txtInterior.setText(temp == null ? "" : temp);
 			txtInterior.selectAll();
-			temp = system.getGlowPath(Glows.BLUE);
-			txtGlow1.setText(temp == null ? "" : temp);
-			txtGlow1.selectAll();
-			temp = system.getGlowPath(Glows.GREEN);
-			txtGlow2.setText(temp == null ? "" : temp);
-			txtGlow2.selectAll();
-			temp = system.getGlowPath(Glows.YELLOW);
-			txtGlow3.setText(temp == null ? "" : temp);
-			txtGlow3.selectAll();
 		} else {
 			// no system - reset to default
 			if (!playerShip) {
@@ -617,9 +506,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtSysLevel.setText("");
 
 			txtInterior.setText("");
-			txtGlow1.setText("");
-			txtGlow2.setText("");
-			txtGlow3.setText("");
 		}
 		OverviewWindow overview = OverviewWindow.getInstance();
 		if (overview != null && overview.isVisible())

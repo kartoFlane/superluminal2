@@ -75,14 +75,16 @@ public class Manager {
 	public static void createNewShip() {
 		if (currentShip != null)
 			currentShip.dispose();
-		currentShip = new ShipContainer(new ShipObject(true)); // TODO choose if player ship
+		currentShip = new ShipContainer(new ShipObject(true)); // TODO dialog prompt to choose if player ship?
 		currentShip.getShipController().reposition(2 * ShipContainer.CELL_SIZE, 2 * ShipContainer.CELL_SIZE);
 	}
 
 	public static void loadShip(ShipObject ship) {
+		if (currentShip != null)
+			currentShip.dispose();
+
 		currentShip = new ShipContainer(ship);
-		// TODO load the ship
-		// currentShip = ship;
+		// TODO load the ship, anything else to do?
 	}
 
 	/** Returns the currently loaded ship. */

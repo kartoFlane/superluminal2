@@ -34,4 +34,12 @@ public class GibController extends ObjectController {
 		return (GibObject) getModel().getGameObject();
 	}
 
+	public static GibController newInstance(ShipContainer shipContainer, GibObject gib) {
+		ObjectModel model = new ObjectModel(gib);
+		GibView view = new GibView();
+		GibController controller = new GibController(shipContainer, model, view);
+
+		return controller;
+	}
+
 }

@@ -1,6 +1,8 @@
 package com.kartoflane.superluminal2.ui.sidebar;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -12,12 +14,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.Spinner;
 
 public class ManipulationToolComposite extends Composite implements SidebarComposite, DataComposite {
 	private Button btnPinned;
@@ -31,6 +33,12 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 	private Button btnRight;
 	private Button btnDown;
 	private Spinner spNudge;
+	private Label lblX;
+	private Spinner spX;
+	private Label lblY;
+	private Spinner spY;
+
+	private boolean dataLoad = false;
 
 	public ManipulationToolComposite(Composite parent, boolean location, boolean size) {
 		super(parent, SWT.NONE);
@@ -52,9 +60,29 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		btnPinned.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
 		btnPinned.setText("Pinned");
 
+		lblX = new Label(boundsContainer, SWT.NONE);
+		lblX.setText("X:");
+
+		spX = new Spinner(boundsContainer, SWT.BORDER);
+		spX.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+		spX.setEnabled(false);
+		spX.setTextLimit(4);
+		spX.setMaximum(9999);
+		spX.setMinimum(-999);
+
+		lblY = new Label(boundsContainer, SWT.NONE);
+		lblY.setText("Y:");
+
+		spY = new Spinner(boundsContainer, SWT.BORDER);
+		spY.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+		spY.setEnabled(false);
+		spY.setTextLimit(4);
+		spY.setMaximum(9999);
+		spY.setMinimum(-999);
+
 		btnUp = new Button(boundsContainer, SWT.NONE);
 		btnUp.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/up.png"));
-		GridData gd_btnUp = new GridData(SWT.CENTER, SWT.CENTER, false, false, 3, 1);
+		GridData gd_btnUp = new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1);
 		gd_btnUp.heightHint = 36;
 		gd_btnUp.widthHint = 36;
 		btnUp.setLayoutData(gd_btnUp);
@@ -92,6 +120,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			public void widgetSelected(SelectionEvent e) {
 				controller.setPinned(btnPinned.getSelection());
 				updateData();
+				EditorWindow.getInstance().forceFocus();
 			}
 		});
 
@@ -102,7 +131,9 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 				Point p = controller.getPresentedLocation();
 				controller.setPresentedLocation(p.x, p.y - spNudge.getSelection());
 				updateController();
+				updateData();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
+				EditorWindow.getInstance().forceFocus();
 			}
 		});
 
@@ -113,7 +144,9 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 				Point p = controller.getPresentedLocation();
 				controller.setPresentedLocation(p.x, p.y + spNudge.getSelection());
 				updateController();
+				updateData();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
+				EditorWindow.getInstance().forceFocus();
 			}
 		});
 
@@ -124,7 +157,9 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 				Point p = controller.getPresentedLocation();
 				controller.setPresentedLocation(p.x - spNudge.getSelection(), p.y);
 				updateController();
+				updateData();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
+				EditorWindow.getInstance().forceFocus();
 			}
 		});
 
@@ -135,9 +170,22 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 				Point p = controller.getPresentedLocation();
 				controller.setPresentedLocation(p.x + spNudge.getSelection(), p.y);
 				updateController();
+				updateData();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
+				EditorWindow.getInstance().forceFocus();
 			}
 		});
+
+		ModifyListener applyLocListener = new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (!dataLoad)
+					applyLocation();
+			}
+		};
+
+		spX.addModifyListener(applyLocListener);
+		spY.addModifyListener(applyLocListener);
 
 		setEnabled(false);
 	}
@@ -151,6 +199,8 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 
 	@Override
 	public void setController(AbstractController controller) {
+		dataLoad = true;
+
 		if (controller == null) {
 			btnPinned.setSelection(false);
 
@@ -158,6 +208,8 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			if (c != null)
 				c.dispose();
 
+			spX.setSelection(0);
+			spY.setSelection(0);
 			spNudge.setSelection(1);
 			setEnabled(false);
 		} else {
@@ -184,6 +236,8 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			}
 		}
 
+		dataLoad = false;
+
 		this.controller = controller;
 		updateData();
 		EditorWindow.getInstance().updateSidebarScroll();
@@ -209,17 +263,29 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		if (controller == null)
 			return;
 
+		dataLoad = true;
+
+		Point p = controller.getPresentedLocation();
+		spX.setSelection(p.x);
+		spY.setSelection(p.y);
+
 		btnPinned.setSelection(controller.isPinned());
+		spX.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+		spY.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		btnUp.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		btnLeft.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		btnDown.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		btnRight.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		spNudge.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+
+		dataLoad = false;
 	}
 
 	@Override
 	public void setEnabled(boolean enable) {
 		btnPinned.setEnabled(enable);
+		spX.setEnabled(enable);
+		spY.setEnabled(enable);
 		btnUp.setEnabled(enable);
 		btnLeft.setEnabled(enable);
 		btnDown.setEnabled(enable);
@@ -227,10 +293,24 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		spNudge.setEnabled(enable);
 	}
 
+	private void applyLocation() {
+		if (controller.isLocModifiable()) {
+			Rectangle oldBounds = controller.getBounds();
+
+			controller.setPresentedLocation(spX.getSelection(), spY.getSelection());
+			controller.updateFollowOffset();
+			controller.updateView();
+			Manager.getCurrentShip().updateBoundingArea();
+
+			controller.redraw();
+			AbstractController.redraw(oldBounds);
+		}
+	}
+
 	@Override
 	public boolean isFocusControl() {
-		boolean result = btnUp.isFocusControl() || btnDown.isFocusControl();
-		result |= btnLeft.isFocusControl() || btnRight.isFocusControl();
+		boolean result = btnPinned.isFocusControl() || spNudge.isFocusControl();
+		result |= spX.isFocusControl() || spY.isFocusControl();
 		return result;
 	}
 }

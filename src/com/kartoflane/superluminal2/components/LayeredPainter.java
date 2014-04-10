@@ -41,7 +41,7 @@ public class LayeredPainter implements PaintListener {
 	}
 
 	/** Specifies the layer order for selection and highlighting purposes. */
-	private static final Layers[] SELECTION_ORDER = { Layers.GRID, Layers.SHIELD, Layers.HULL, Layers.MOUNT,
+	private static final Layers[] selectionOrder = { Layers.GRID, Layers.SHIELD, Layers.HULL, Layers.MOUNT,
 			Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.STATION, Layers.DOOR, Layers.OVERLAY,
 			Layers.SHIP_ORIGIN, Layers.CURSOR };
 
@@ -110,7 +110,7 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return array of Layers, specifying the layer order for selection and highlighting purposes. */
 	public Layers[] getSelectionOrder() {
-		return SELECTION_ORDER.clone();
+		return selectionOrder.clone();
 	}
 
 	public void paintControl(PaintEvent e) {
@@ -161,8 +161,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return the topmost visible Controller, on whichever layer. */
 	public AbstractController getControllerAt(int x, int y) {
-		for (int i = SELECTION_ORDER.length - 1; i >= 0; i--) {
-			Layers layer = SELECTION_ORDER[i];
+		for (int i = selectionOrder.length - 1; i >= 0; i--) {
+			Layers layer = selectionOrder[i];
 			AbstractController controller = getControllerAt(x, y, layer);
 			if (controller != null)
 				return controller;
@@ -176,8 +176,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @eturn the topmost visible, selectable Controller at the given coordinates, on whichever layer. */
 	public AbstractController getSelectableControllerAt(int x, int y) {
-		for (int i = SELECTION_ORDER.length - 1; i >= 0; i--) {
-			Layers layer = SELECTION_ORDER[i];
+		for (int i = selectionOrder.length - 1; i >= 0; i--) {
+			Layers layer = selectionOrder[i];
 			AbstractController controller = getSelectableControllerAt(x, y, layer);
 			if (controller != null)
 				return controller;
@@ -202,7 +202,7 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return the topmost Controller matching the conditions set by the predicate, on whichever layer. */
 	public AbstractController getControllerMatching(Predicate<AbstractController> p) {
-		for (Layers layer : SELECTION_ORDER) {
+		for (Layers layer : selectionOrder) {
 			AbstractController controller = getControllerMatching(p, layer);
 			if (controller != null)
 				return controller;
@@ -216,7 +216,7 @@ public class LayeredPainter implements PaintListener {
 	public List<AbstractController> getAllControllersAt(int x, int y) {
 		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
 
-		for (Layers layer : SELECTION_ORDER) {
+		for (Layers layer : selectionOrder) {
 			for (AbstractController controller : layerMap.get(layer)) {
 				if (controller != null && controller.contains(x, y))
 					list.add(controller);
@@ -239,7 +239,7 @@ public class LayeredPainter implements PaintListener {
 	public List<AbstractController> getAllSelectableControllersAt(int x, int y) {
 		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
 
-		for (Layers layer : SELECTION_ORDER) {
+		for (Layers layer : selectionOrder) {
 			for (AbstractController controller : layerMap.get(layer)) {
 				if (controller != null && controller.isSelectable() && controller.contains(x, y))
 					list.add(controller);
@@ -260,7 +260,7 @@ public class LayeredPainter implements PaintListener {
 	public List<AbstractController> getAllControllersMatching(Predicate<AbstractController> p) {
 		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
 
-		for (Layers layer : SELECTION_ORDER) {
+		for (Layers layer : selectionOrder) {
 			for (AbstractController controller : layerMap.get(layer)) {
 				if (controller != null && p.accept(controller))
 					list.add(controller);

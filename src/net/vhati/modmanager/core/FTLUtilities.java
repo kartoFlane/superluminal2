@@ -3,9 +3,15 @@ package net.vhati.modmanager.core;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
+
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 
 public class FTLUtilities {
 
@@ -105,6 +111,53 @@ public class FTLUtilities {
 				File contentsPath = new File(f, "Contents");
 				if (contentsPath.exists() && contentsPath.isDirectory() && new File(contentsPath, "Resources").exists())
 					result = new File(contentsPath, "Resources");
+			}
+		}
+
+		if (result != null && isDatsDirValid(result)) {
+			return result;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Modally prompts the user for the FTL resources dir.
+	 * 
+	 * @param parentShell
+	 *            a parent for SWT dialogs
+	 */
+	public static File promptForDatsDir(Shell parentShell) {
+		File result = null;
+
+		String message = "";
+		message += "You will now be prompted to locate FTL manually.\n";
+		message += "Select '(FTL dir)/resources/data.dat'.\n";
+		message += "Or 'FTL.app', if you're on OSX.";
+
+		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
+		box.setText("Find FTL");
+		box.setMessage(message);
+
+		FileDialog fd = new FileDialog(parentShell, SWT.OPEN);
+		fd.setText("Find data.dat or FTL.app");
+		fd.setFilterExtensions(new String[] { "*.dat", "*.app" });
+		fd.setFilterNames(new String[] { "FTL Data File - (FTL dir)/resources/data.dat", "FTL Application Bundle" });
+
+		String filePath = fd.open();
+
+		if (filePath == null) {
+			// User aborted selection
+			// Nothing to do here
+		} else {
+			File f = new File(filePath);
+			if (f.getName().equals("data.dat")) {
+				result = f.getParentFile();
+			} else if (f.getName().endsWith(".app")) {
+				File contentsPath = new File(f, "Contents");
+				if (contentsPath.exists() && contentsPath.isDirectory() && new File(contentsPath, "Resources").exists())
+					result = new File(contentsPath, "Resources");
+				// TODO test whether this works on OSX
 			}
 		}
 

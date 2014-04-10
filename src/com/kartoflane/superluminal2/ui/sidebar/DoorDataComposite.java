@@ -10,17 +10,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
-import com.kartoflane.superluminal2.tools.ManipulationTool.States;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 
 public class DoorDataComposite extends Composite implements DataComposite {
 
-	private static final String AUTOLINK_TXT = "Linked automatically";
-	private static final String SELECT_ROOM_TXT = "Select a room";
+	private static final String autolinkText = "Linked automatically";
+	private static final String selectRoomText = "Select a room";
 
 	private ManipulationTool tool = null;
 	/** Determines which door's link is being set during linking */
@@ -62,7 +62,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 
 		btnIdLeft = new Button(this, SWT.TOGGLE);
 		btnIdLeft.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		btnIdLeft.setText(AUTOLINK_TXT);
+		btnIdLeft.setText(autolinkText);
 
 		btnSelectLeft = new Button(this, SWT.NONE);
 		GridData gd_btnSelectLeft = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -77,7 +77,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 
 		btnIdRight = new Button(this, SWT.TOGGLE);
 		btnIdRight.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		btnIdRight.setText(AUTOLINK_TXT);
+		btnIdRight.setText(autolinkText);
 
 		btnSelectRight = new Button(this, SWT.NONE);
 		GridData gd_btnSelectRight = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -101,15 +101,15 @@ public class DoorDataComposite extends Composite implements DataComposite {
 				Button btn = (Button) e.getSource();
 
 				if (btn.getSelection()) {
-					btn.setText(SELECT_ROOM_TXT);
+					btn.setText(selectRoomText);
 					btnIdRight.setEnabled(false);
 					leftLinking = true;
-					tool.setState(States.DOOR_LINK);
+					tool.setStateDoorLink();
 				} else {
-					RoomController room = controller.getLeftRoomController();
-					btn.setText(room == null ? AUTOLINK_TXT : room.toString());
+					RoomObject room = controller.getLeftRoom();
+					btn.setText(room == null ? autolinkText : room.toString());
 					btnIdRight.setEnabled(true);
-					tool.setState(States.NORMAL);
+					tool.setStateManipulate();
 				}
 			}
 		});
@@ -120,15 +120,15 @@ public class DoorDataComposite extends Composite implements DataComposite {
 				Button btn = (Button) e.getSource();
 
 				if (btn.getSelection()) {
-					btn.setText(SELECT_ROOM_TXT);
+					btn.setText(selectRoomText);
 					btnIdLeft.setEnabled(false);
 					leftLinking = false;
-					tool.setState(States.DOOR_LINK);
+					tool.setStateDoorLink();
 				} else {
-					RoomController room = controller.getRightRoomController();
-					btn.setText(room == null ? AUTOLINK_TXT : room.toString());
+					RoomObject room = controller.getRightRoom();
+					btn.setText(room == null ? autolinkText : room.toString());
 					btnIdLeft.setEnabled(true);
-					tool.setState(States.NORMAL);
+					tool.setStateManipulate();
 				}
 			}
 		});
@@ -136,14 +136,16 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		btnSelectLeft.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Manager.setSelected(controller.getLeftRoomController());
+				RoomController rc = (RoomController) Manager.getCurrentShip().getController(controller.getLeftRoom());
+				Manager.setSelected(rc);
 			}
 		});
 
 		btnSelectRight.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Manager.setSelected(controller.getRightRoomController());
+				RoomController rc = (RoomController) Manager.getCurrentShip().getController(controller.getRightRoom());
+				Manager.setSelected(rc);
 			}
 		});
 
@@ -159,11 +161,11 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		lblIdLeft.setText((controller.isHorizontal() ? "Upper" : "Left") + " ID:");
 		lblIdRight.setText((controller.isHorizontal() ? "Lower" : "Right") + " ID:");
 
-		RoomController linkedRoom = controller.getLeftRoomController();
-		btnIdLeft.setText(linkedRoom == null ? AUTOLINK_TXT : linkedRoom.toString());
+		RoomObject linkedRoom = controller.getLeftRoom();
+		btnIdLeft.setText(linkedRoom == null ? autolinkText : linkedRoom.toString());
 		btnSelectLeft.setEnabled(linkedRoom != null);
-		linkedRoom = controller.getRightRoomController();
-		btnIdRight.setText(linkedRoom == null ? AUTOLINK_TXT : linkedRoom.toString());
+		linkedRoom = controller.getRightRoom();
+		btnIdRight.setText(linkedRoom == null ? autolinkText : linkedRoom.toString());
 		btnSelectRight.setEnabled(linkedRoom != null);
 
 		lblIdLeft.pack();
@@ -172,12 +174,12 @@ public class DoorDataComposite extends Composite implements DataComposite {
 
 	public void linkDoor(RoomController room) {
 		if (leftLinking) {
-			controller.setLeftRoomController(room);
+			controller.setLeftRoom(room == null ? null : room.getGameObject());
 			btnIdLeft.setSelection(false);
 			btnIdRight.setEnabled(true);
 			updateData();
 		} else {
-			controller.setRightRoomController(room);
+			controller.setRightRoom(room == null ? null : room.getGameObject());
 			btnIdLeft.setEnabled(true);
 			btnIdRight.setSelection(false);
 			updateData();

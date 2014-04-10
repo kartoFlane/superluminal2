@@ -16,6 +16,7 @@ import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.DoorTool;
 import com.kartoflane.superluminal2.tools.MountTool;
 import com.kartoflane.superluminal2.tools.RoomTool;
+import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -55,6 +56,8 @@ public class CursorView extends BaseView {
 			handleDoorToolAppearance();
 		else if (toolId == Tools.WEAPON)
 			handleMountToolAppearance();
+		else if (toolId == Tools.STATION)
+			handleStationToolAppearance();
 		else
 			; // TODO
 	}
@@ -113,6 +116,21 @@ public class CursorView extends BaseView {
 		setAlpha(255);
 		setBorderThickness(2);
 		setRotation(tool.isRotated() ? 90 : 0);
+	}
+
+	private void handleStationToolAppearance() {
+		StationTool tool = (StationTool) Manager.getSelectedTool();
+
+		setFlippedX(false);
+		setFlippedY(false);
+		setRotation(0);
+		setImage(null);
+
+		setBackgroundColor(null);
+
+		setBorderThickness(3);
+		setBorderColor(tool.canPlace() ? ALLOW_RGB : DENY_RGB);
+		setAlpha(255);
 	}
 
 	private void handleDoorAppearance(DoorController door) {

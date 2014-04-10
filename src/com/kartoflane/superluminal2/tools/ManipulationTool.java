@@ -19,7 +19,7 @@ import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 
 public class ManipulationTool extends Tool {
 
-	public enum States {
+	private enum States {
 		NORMAL,
 		ROOM_RESIZE,
 		DOOR_LINK
@@ -45,7 +45,7 @@ public class ManipulationTool extends Tool {
 
 		Manager.setSelected(null);
 
-		setState(States.NORMAL);
+		setStateManipulate();
 
 		cursor.setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
 		cursor.setVisible(false);
@@ -73,13 +73,31 @@ public class ManipulationTool extends Tool {
 		return new ManipulationToolComposite(parent, true, false);
 	}
 
-	public void setState(States state) {
-		this.state = state;
+	public void setStateManipulate() {
+		state = States.NORMAL;
 		cursor.updateView();
 	}
 
-	public States getState() {
-		return state;
+	public boolean isStateManipulate() {
+		return state == States.NORMAL;
+	}
+
+	public void setStateDoorLink() {
+		state = States.DOOR_LINK;
+		cursor.updateView();
+	}
+
+	public boolean isStateDoorLink() {
+		return state == States.DOOR_LINK;
+	}
+
+	public void setStateRoomResize() {
+		state = States.ROOM_RESIZE;
+		cursor.updateView();
+	}
+
+	public boolean isStateRoomResize() {
+		return state == States.ROOM_RESIZE;
 	}
 
 	@Override
@@ -132,7 +150,7 @@ public class ManipulationTool extends Tool {
 			RoomController roomController = control instanceof RoomController ? (RoomController) control : null;
 			ddc.linkDoor(roomController);
 
-			setState(States.NORMAL);
+			setStateManipulate();
 		}
 
 		// handle cursor
@@ -175,7 +193,7 @@ public class ManipulationTool extends Tool {
 			cursor.reposition(p.x, p.y);
 
 			if (!room.isResizing())
-				setState(States.NORMAL);
+				setStateManipulate();
 
 		} else if (state == States.DOOR_LINK) {
 		}
@@ -244,7 +262,7 @@ public class ManipulationTool extends Tool {
 			cursor.reposition(x + w / 2, y + h / 2);
 
 			if (!room.isResizing())
-				setState(States.NORMAL);
+				setStateManipulate();
 
 		} else if (state == States.DOOR_LINK) {
 			// move the cursor around to follow mouse

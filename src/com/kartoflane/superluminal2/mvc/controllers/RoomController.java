@@ -17,7 +17,6 @@ import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.RoomView;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
-import com.kartoflane.superluminal2.tools.ManipulationTool.States;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -175,7 +174,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		this.resizing = res;
 
 		if (res)
-			((ManipulationTool) Manager.getSelectedTool()).setState(States.ROOM_RESIZE);
+			((ManipulationTool) Manager.getSelectedTool()).setStateRoomResize();
 		// tool reverses to normal state on its own
 	}
 
@@ -221,6 +220,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 					setResizing(false);
 
 					if (canResize) {
+						setVisible(false);
 						// if the area is clear, resize and reposition the room
 						Point resLoc = CursorController.getInstance().getLocation();
 						Point resSize = CursorController.getInstance().getSize();
@@ -232,13 +232,14 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 						resLoc = Grid.getInstance().snapToGrid(resLoc, getSnapMode(w, h)); // figure out the snapmode that goes here TODO
 						resSize = Grid.getInstance().snapToGrid(resSize, Snapmodes.CROSS);
 
-						resize(resSize);
-						reposition(resLoc);
+						setSize(resSize);
+						setLocation(resLoc);
 
 						setFollowOffset(getX() - getParent().getX(), getY() - getParent().getY());
 						((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
 
 						Manager.getCurrentShip().updateBoundingArea();
+						setVisible(true);
 					}
 					updateView();
 				}
@@ -285,11 +286,10 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 
 					p = Grid.getInstance().snapToGrid(checkBounds.x + getW() / 2, checkBounds.y + getH() / 2, snapmode);
 					// proceed only if the position actually changed
-					if (!p.equals(getLocation())) {
+					if (p.x != getX() || p.y != getY()) {
 						reposition(p.x, p.y);
 						updateView();
-						p = getLocation();
-						setFollowOffset(p.x - getParent().getX(), p.y - getParent().getY());
+						updateFollowOffset();
 
 						((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
 						Manager.getCurrentShip().updateBoundingArea();
@@ -318,16 +318,24 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		Rectangle bounds = getBounds();
 		int w = bounds.width / ShipContainer.CELL_SIZE;
 		int h = bounds.height / ShipContainer.CELL_SIZE;
-		return w + h * w >= slotId && slotId >= 0;
+		return w + h * w > slotId && slotId >= 0;
 	}
 
+	/**
+	 * Returns the location of the given slot id relative to the room's top left corner.
+	 * 
+	 * @param slotId
+	 *            id of the slot
+	 * @return location of the slot relative to room's top left corner,
+	 *         or null if the slot can't be contained
+	 */
 	public Point getSlotLocation(int slotId) {
 		Point size = getSize();
 		int w = size.x / ShipContainer.CELL_SIZE;
 		int h = size.y / ShipContainer.CELL_SIZE;
 
 		// can't contain the slot
-		if (w + (h - 1) * w < slotId || slotId < 0)
+		if (w + (h - 1) * w <= slotId || slotId < 0)
 			return null;
 
 		int x = slotId % w;

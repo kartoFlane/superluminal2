@@ -203,10 +203,20 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	@Override
 	public Rectangle getBounds() {
-		return correctBounds(model.getBounds());
+		Rectangle b = model.getBounds();
+		correctBounds(b);
+		return b;
 	}
 
-	protected Rectangle correctBounds(Rectangle b) {
+	/**
+	 * Corrects the bounds by including rotation. This way bounds
+	 * cover the entire area of the controller, and can be reliably
+	 * used to redraw it.
+	 * 
+	 * @param b
+	 *            the rectangle representing the controller's bounds
+	 */
+	protected void correctBounds(Rectangle b) {
 		if (getRotation() % 180 == 0) {
 			// no need to do anything
 		} else if (getRotation() % 90 == 0) {
@@ -224,7 +234,6 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			// end.x = (int) (start.x + Math.cos(rad) * distance - Math.sin(rad) * distance);
 			// end.y = (int) (start.y + Math.sin(rad) * distance + Math.cos(rad) * distance);
 		}
-		return b;
 	}
 
 	private float getRotation() {
@@ -245,10 +254,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void reposition(int x, int y) {
 		if (isVisible()) {
 			setVisible(false);
-			redraw();
 			setLocation(x, y);
 			setVisible(true);
-			redraw();
 		} else {
 			setLocation(x, y);
 		}
@@ -269,10 +276,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void resize(int w, int h) {
 		if (isVisible()) {
 			setVisible(false);
-			redraw();
 			setSize(w, h);
 			setVisible(true);
-			redraw();
 		} else {
 			setSize(w, h);
 		}
@@ -311,15 +316,26 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		setPresentedSize(p.x, p.y);
 	}
 
+	/**
+	 * Presented factor is the number by which the controller's dimensions and location are multiplied
+	 * before they are displayed in the sidebar.
+	 * 
+	 * @return the presented factor of the room
+	 */
 	public int getPresentedFactor() {
 		return 1;
 	}
 
-	/** Redraws the controller's area. */
+	/**
+	 * Redraws the controller's area.
+	 */
 	public void redraw() {
 		EditorWindow.getInstance().canvasRedraw(getBounds());
 	}
 
+	/**
+	 * Convenience method to redraw the rectangle.
+	 */
 	public static void redraw(Rectangle r) {
 		EditorWindow.getInstance().canvasRedraw(r);
 	}
@@ -331,6 +347,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		view.redraw(e);
 	}
 
+	/**
+	 * Allows to (un)pin the controller. Pinned controllers cannot be moved by dragging.
+	 */
 	@Override
 	public void setPinned(boolean pin) {
 		model.setPinned(pin);
@@ -339,16 +358,25 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		redraw();
 	}
 
+	/**
+	 * @return true if the controller is pinned and cannot be moved by dragging, false otherwise.
+	 */
 	@Override
 	public boolean isPinned() {
 		return model.isPinned();
 	}
 
+	/**
+	 * Allows to make the controller (un)selectable.
+	 */
 	@Override
 	public void setSelectable(boolean sel) {
 		selectable = sel;
 	}
 
+	/**
+	 * @return true if the controller can be selected by clicking on it, false otherwie.
+	 */
 	@Override
 	public boolean isSelectable() {
 		return selectable;
@@ -356,7 +384,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	/**
 	 * Sets the controller as selected. <br>
-	 * Override this to implement the view's selected appearance.<br>
+	 * Override this to execute additional actions when this controller is selected.<br>
 	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(ObjectController)} instead.
 	 */
 	@Override
@@ -368,7 +396,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	/**
 	 * Sets the controller as deselected. <br>
-	 * Override this to implement the view's deselected (normal) appearance.<br>
+	 * Override this to execute additional actions when this controller is deselected.<br>
 	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(ObjectController)} instead.
 	 */
 	@Override
@@ -578,12 +606,12 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		if (Manager.getSelectedToolId() == Tools.POINTER) {
 			if (selected && moving) {
 				Point p = Grid.getInstance().snapToGrid(e.x - clickOffset.x, e.y - clickOffset.y, snapmode);
-				if (p != null) {
+				if (p.x != getX() || p.y != getY()) {
 					reposition(p.x, p.y);
 					updateFollowOffset();
-				}
 
-				((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+					((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+				}
 			}
 		}
 	}

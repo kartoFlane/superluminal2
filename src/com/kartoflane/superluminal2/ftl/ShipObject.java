@@ -90,6 +90,8 @@ public class ShipObject extends GameObject {
 			doors.add((DoorObject) object);
 		else if (object instanceof MountObject)
 			mounts.add((MountObject) object);
+		else if (object instanceof GibObject)
+			gibs.add((GibObject) object);
 		else
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
 	}
@@ -110,6 +112,8 @@ public class ShipObject extends GameObject {
 			doors.remove((DoorObject) object);
 		else if (object instanceof MountObject)
 			mounts.remove((MountObject) object);
+		else if (object instanceof GibObject)
+			gibs.remove((GibObject) object);
 		else
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
 	}

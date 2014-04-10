@@ -18,7 +18,6 @@ import com.kartoflane.superluminal2.ftl.ShipObject.Images;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.ShipView;
-import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.ShipDataComposite;
@@ -26,6 +25,7 @@ import com.kartoflane.superluminal2.ui.sidebar.ShipDataComposite;
 public class ShipController extends ObjectController {
 
 	protected ShipContainer container = null;
+	protected ArrayList<Collidable> collidables = new ArrayList<Collidable>();
 
 	private ShipController(ShipContainer container, ObjectModel model, ShipView view) {
 		super();
@@ -42,6 +42,30 @@ public class ShipController extends ObjectController {
 		setSnapMode(Snapmodes.CROSS);
 
 		setSize(ShipContainer.CELL_SIZE / 2, ShipContainer.CELL_SIZE / 2);
+	}
+
+	@Override
+	public void select() {
+		super.select();
+
+		if (followableActive) {
+			for (Follower fol : getFollowers()) {
+				Collidable c = (Collidable) fol;
+				if (c.isCollidable()) {
+					c.setCollidable(false);
+					collidables.add(c);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void deselect() {
+		super.deselect();
+
+		for (Collidable c : collidables)
+			c.setCollidable(true);
+		collidables.clear();
 	}
 
 	public static ShipController newInstance(ShipContainer container, ShipObject object) {
@@ -76,7 +100,7 @@ public class ShipController extends ObjectController {
 			throw new IllegalArgumentException("Image ID must not be null.");
 
 		getGameObject().setImagePath(path, imageId);
-		view.updateView();
+		updateView();
 		redraw();
 	}
 
@@ -90,23 +114,8 @@ public class ShipController extends ObjectController {
 
 	@Override
 	public boolean setLocation(int x, int y) {
-		ArrayList<Collidable> colls = new ArrayList<Collidable>();
-		if (followableActive) {
-			for (Follower fol : getFollowers()) {
-				Collidable c = (Collidable) fol;
-				if (c.isCollidable()) {
-					c.setCollidable(false);
-					colls.add(c);
-				}
-			}
-		}
 		boolean result = super.setLocation(x, y);
 		updateView();
-		if (result) {
-			for (Collidable c : colls)
-				c.setCollidable(true);
-		}
-		colls.clear();
 		return result;
 	}
 
@@ -134,8 +143,8 @@ public class ShipController extends ObjectController {
 	@Override
 	public void redraw() {
 		super.redraw();
-		EditorWindow.getInstance().canvasRedraw(getView().getHLineBounds());
-		EditorWindow.getInstance().canvasRedraw(getView().getVLineBounds());
+		redraw(getView().getHLineBounds());
+		redraw(getView().getVLineBounds());
 	}
 
 	@Override

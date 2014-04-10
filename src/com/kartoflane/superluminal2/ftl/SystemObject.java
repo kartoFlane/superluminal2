@@ -26,10 +26,6 @@ public class SystemObject extends GameObject {
 		}
 	}
 
-	public enum Glows {
-		BLUE, GREEN, YELLOW
-	}
-
 	private static final long serialVersionUID = -4784249566049070706L;
 
 	private final Systems id;
@@ -38,27 +34,16 @@ public class SystemObject extends GameObject {
 	private int levelStart = 0;
 	private int levelMax = 0;
 	private boolean availableAtStart = true;
-	/**
-	 * Id of the tile on which the station will be located.<br>
-	 * -2 = use default value<br>
-	 * -1 = no station<br>
-	 * A 2x2 room has slot ids like this:
-	 * <p>
-	 * [ 0 1 ]<br>
-	 * [ 2 3 ]
-	 * </p>
-	 */
-	protected int slotId = -2;
-	protected Directions slotDirection = Directions.UP;
 
 	private RoomObject room;
+	private StationObject station;
+	private GlowObject glow;
 
 	private String interiorPath = null;
-	private String glowPathBlue = null;
-	private String glowPathGreen = null;
-	private String glowPathYellow = null;
 
 	public SystemObject(Systems systemId) {
+		if (systemId == null)
+			throw new NullPointerException("System id must not be null.");
 		id = systemId;
 
 		setDeletable(false);
@@ -92,9 +77,10 @@ public class SystemObject extends GameObject {
 				levelCap = 0;
 		}
 
-		// TODO
-		// if (canContainStation())
-		// station = new StationModel(this);
+		if (canContainStation()) {
+			station = new StationObject(this);
+			station.setSlotId(getDefaultSlotId(systemId));
+		}
 	}
 
 	public Systems getSystemId() {
@@ -109,41 +95,24 @@ public class SystemObject extends GameObject {
 		return room;
 	}
 
+	public StationObject getStation() {
+		return station;
+	}
+
+	public GlowObject getGlow() {
+		return glow;
+	}
+
+	public void setGlow(GlowObject glow) {
+		this.glow = glow;
+	}
+
 	public void setInteriorPath(String path) {
 		interiorPath = path;
 	}
 
 	public String getInteriorPath() {
 		return interiorPath;
-	}
-
-	public void setGlowPath(String path, Glows id) {
-		switch (id) {
-			case BLUE:
-				glowPathBlue = path;
-				break;
-			case GREEN:
-				glowPathGreen = path;
-				break;
-			case YELLOW:
-				glowPathYellow = path;
-				break;
-			default:
-				throw new IllegalArgumentException();
-		}
-	}
-
-	public String getGlowPath(Glows id) {
-		switch (id) {
-			case BLUE:
-				return glowPathBlue;
-			case GREEN:
-				return glowPathGreen;
-			case YELLOW:
-				return glowPathYellow;
-			default:
-				throw new IllegalArgumentException();
-		}
 	}
 
 	public int getLevelCap() {
@@ -183,7 +152,8 @@ public class SystemObject extends GameObject {
 	public boolean canContainStation() {
 		return id == Systems.SHIELDS || id == Systems.ENGINES ||
 				id == Systems.WEAPONS || id == Systems.MEDBAY ||
-				id == Systems.PILOT;
+				id == Systems.PILOT || id == Systems.DOORS ||
+				id == Systems.SENSORS || id == Systems.CLONEBAY;
 	}
 
 	/** Returns true if the system can have a interior image, false otherwise */
@@ -226,16 +196,17 @@ public class SystemObject extends GameObject {
 
 	public static int getDefaultSlotId(Systems systemId) {
 		switch (systemId) {
-			case ENGINES:
-				return 2;
 			case PILOT:
-				return 0;
+			case DOORS:
 			case SHIELDS:
 				return 0;
 			case WEAPONS:
-				return 1;
 			case MEDBAY:
+			case CLONEBAY:
+			case SENSORS:
 				return 1;
+			case ENGINES:
+				return 2;
 			default:
 				return -2;
 		}
@@ -250,37 +221,14 @@ public class SystemObject extends GameObject {
 			case SHIELDS:
 				return Directions.LEFT;
 			case WEAPONS:
+			case DOORS:
+			case SENSORS:
 				return Directions.UP;
 			case MEDBAY:
+			case CLONEBAY:
 				return Directions.NONE;
 			default:
 				return Directions.UP;
 		}
-	}
-
-	/**
-	 * Id of the tile on which the station will be located.<br>
-	 * -2 = use default value<br>
-	 * -1 = no station<br>
-	 * A 2x2 room has slot ids like this:
-	 * <p>
-	 * [ 0 1 ]<br>
-	 * [ 2 3 ]
-	 * </p>
-	 */
-	public void setSlotId(int id) {
-		slotId = id;
-	}
-
-	public int getSlotId() {
-		return slotId;
-	}
-
-	public void setSlotDirection(Directions dir) {
-		slotDirection = dir;
-	}
-
-	public Directions getSlotDirection() {
-		return slotDirection;
 	}
 }

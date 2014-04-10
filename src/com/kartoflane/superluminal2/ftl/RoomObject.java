@@ -183,4 +183,12 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	public int compareTo(RoomObject o) {
 		return id - o.id;
 	}
+
+	@Override
+	public String toString() {
+		String result = getId() + ": " + getSystem();
+		if (getAlias() != null && !getAlias().equals(""))
+			result += " (" + getAlias() + ")";
+		return result;
+	}
 }

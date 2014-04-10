@@ -10,6 +10,7 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.ftl.DoorObject;
+import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
@@ -23,8 +24,6 @@ public class DoorController extends ObjectController {
 	public static final int COLLISION_TOLERANCE = 3;
 
 	protected ShipContainer container = null;
-	protected RoomController left = null;
-	protected RoomController right = null;
 
 	private DoorController(ShipContainer container, ObjectModel model, DoorView view) {
 		super();
@@ -60,8 +59,8 @@ public class DoorController extends ObjectController {
 	}
 
 	public void setHorizontal(boolean horizontal) {
+		setVisible(false);
 		Point p = getPresentedLocation();
-		Rectangle oldBounds = getBounds();
 		getGameObject().setHorizontal(horizontal);
 		updateBoundingArea();
 
@@ -70,8 +69,7 @@ public class DoorController extends ObjectController {
 		updateFollowOffset();
 
 		updateView();
-		redraw();
-		redraw(oldBounds);
+		setVisible(true);
 	}
 
 	public boolean isHorizontal() {
@@ -84,22 +82,20 @@ public class DoorController extends ObjectController {
 		this.view.addToPainter(Layers.DOOR);
 	}
 
-	public void setLeftRoomController(RoomController room) {
-		getGameObject().setLeftRoom(room == null ? null : room.getGameObject());
-		left = room;
+	public void setLeftRoom(RoomObject room) {
+		getGameObject().setLeftRoom(room);
 	}
 
-	public void setRightRoomController(RoomController room) {
-		getGameObject().setRightRoom(room == null ? null : room.getGameObject());
-		right = room;
+	public void setRightRoom(RoomObject room) {
+		getGameObject().setRightRoom(room);
 	}
 
-	public RoomController getLeftRoomController() {
-		return left;
+	public RoomObject getLeftRoom() {
+		return getGameObject().getLeftRoom();
 	}
 
-	public RoomController getRightRoomController() {
-		return right;
+	public RoomObject getRightRoom() {
+		return getGameObject().getRightRoom();
 	}
 
 	@Override
@@ -160,20 +156,6 @@ public class DoorController extends ObjectController {
 		return dc;
 	}
 
-	@Override
-	public void setHighlighted(boolean high) {
-		super.setHighlighted(high && !selected);
-
-		if (view.isHighlighted()) {
-			view.setBorderColor(BaseView.HIGHLIGHT_RGB);
-			view.setBorderThickness(3);
-		} else {
-			view.setBorderColor(isSelected() ? BaseView.SELECT_RGB : null);
-			view.setBorderThickness(2);
-		}
-		redraw();
-	}
-
 	protected void updateSelectionAppearance() {
 		if (selected) {
 			view.setBorderColor(BaseView.SELECT_RGB);
@@ -215,10 +197,16 @@ public class DoorController extends ObjectController {
 		return result;
 	}
 
+	/**
+	 * Makes sure that the door is not linked to a deleted room.
+	 */
 	public void verifyLinkedDoors() {
-		if (left != null && left.isDeleted())
-			setLeftRoomController(null);
-		if (right != null && right.isDeleted())
-			setRightRoomController(null);
+		AbstractController ac = null;
+		ac = container.getController(getLeftRoom());
+		if (ac != null && ac.isDeleted())
+			setLeftRoom(null);
+		ac = container.getController(getRightRoom());
+		if (ac != null && ac.isDeleted())
+			setRightRoom(null);
 	}
 }

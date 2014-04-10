@@ -1,8 +1,11 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
+import org.eclipse.swt.graphics.Rectangle;
+
+import com.kartoflane.superluminal2.ftl.GlowObject.Glows;
+import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.SystemObject.Glows;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.View;
@@ -33,12 +36,6 @@ public class SystemController extends ObjectController implements Controller {
 		SystemView view = new SystemView();
 		SystemController controller = new SystemController(container, model, view);
 
-		/*
-		 * if (object.canContainStation()) {
-		 * controller.setStationController(StationController.newInstance(controller));
-		 * }
-		 */
-
 		controller.setFollowOffset(0, 0);
 		controller.setVisible(false);
 		controller.updateView();
@@ -48,6 +45,10 @@ public class SystemController extends ObjectController implements Controller {
 
 	private ObjectModel getModel() {
 		return (ObjectModel) model;
+	}
+
+	private SystemView getView() {
+		return (SystemView) view;
 	}
 
 	@Override
@@ -125,19 +126,6 @@ public class SystemController extends ObjectController implements Controller {
 		redraw();
 	}
 
-	public void setGlowPath(Glows glowId, String glowPath) {
-		getGameObject().setGlowPath(glowPath, glowId);
-		// glows are not represented in the editor, nothing else to do here
-	}
-
-	public String getInteriorPath() {
-		return getGameObject().getInteriorPath();
-	}
-
-	public String getGlowPath(Glows glowId) {
-		return getGameObject().getGlowPath(glowId);
-	}
-
 	public int getLevelCap() {
 		return getGameObject().getLevelCap();
 	}
@@ -158,6 +146,19 @@ public class SystemController extends ObjectController implements Controller {
 		return getGameObject().getLevelMax();
 	}
 
+	public String getInteriorPath() {
+		return getGameObject().getInteriorPath();
+	}
+
+	public void setGlowPath(Glows glowId, String glowPath) {
+		getGameObject().getGlow().setGlowPath(glowPath, glowId);
+		// glows are not represented in the editor, nothing else to do here
+	}
+
+	public String getGlowPath(Glows glowId) {
+		return getGameObject().getGlow().getGlowPath(glowId);
+	}
+
 	public boolean canContainGlow() {
 		return getGameObject().canContainGlow();
 	}
@@ -168,6 +169,23 @@ public class SystemController extends ObjectController implements Controller {
 
 	public boolean canContainStation() {
 		return getGameObject().canContainStation();
+	}
+
+	public Directions getDefaultStationDirection() {
+		return SystemObject.getDefaultSlotDirection(getSystemId());
+	}
+
+	public int getDefaultStationSlotId() {
+		return SystemObject.getDefaultSlotId(getSystemId());
+	}
+
+	@Override
+	public void redraw() {
+		super.redraw();
+		Rectangle bounds = getView().getImageBounds();
+		bounds.x = getX() - getW() / 2;
+		bounds.y = getY() - getH() / 2;
+		redraw(bounds);
 	}
 
 	@Override

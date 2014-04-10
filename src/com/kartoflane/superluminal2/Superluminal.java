@@ -7,9 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
 
@@ -22,8 +19,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.core.Manager.Hotkeys;
+import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
 public class Superluminal {
@@ -31,7 +28,7 @@ public class Superluminal {
 
 	public static final String APP_NAME = "Superluminal";
 	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 pre-alpha");
-	public static final String APP_URL = "http://www.google.com/";
+	public static final String APP_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
 
 	// config variables
@@ -43,11 +40,7 @@ public class Superluminal {
 
 	/**
 	 * TODO:
-	 * - revisit door linking -- it works, but isn't exactly elegant...
 	 * - hull image etc positioning f'd up --> see hull's ImageBox
-	 * - door link broken --> crashes
-	 * - finish weapon mounts
-	 * - shift + arrow key nudge -> move 35 pixels
 	 * - entity deletion --> add (to) undo
 	 * - load data directly from archives - don't unpack
 	 * - undo przy pomocy reflection -- UndoableBooleanFieldEdit, etc ?? ...chyba nie
@@ -55,15 +48,6 @@ public class Superluminal {
 	 */
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				initializeGUI();
-			}
-		});
-	}
-
-	private static void initializeGUI() {
 		Display.setAppName(APP_NAME);
 		Display.setAppVersion(APP_VERSION.toString());
 
@@ -137,18 +121,31 @@ public class Superluminal {
 			log.trace("No FTL dats path previously set.");
 		}
 
+		// create the main window instance
+		EditorWindow editorWindow = null;
+		try {
+			display = Display.getDefault();
+			editorWindow = new EditorWindow(display);
+		} catch (Exception e) {
+			log.error("Exception while creating EditorWindow.", e);
+			System.exit(1);
+		}
+
 		// find/prompt for the path to set in the config
 		if (datsDir == null) {
 			datsDir = FTLUtilities.findDatsDir();
 			if (datsDir != null) {
-				int response = JOptionPane.showConfirmDialog(null, "FTL resources were found in:\n" + datsDir.getPath() + "\nIs this correct?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-				if (response == JOptionPane.NO_OPTION)
+				MessageBox box = new MessageBox(editorWindow.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+				box.setText("Confirm");
+				box.setMessage("FTL resources were found in:\n" + datsDir.getPath() + "\nIs this correct?");
+				int response = box.open();
+				if (response == SWT.NO)
 					datsDir = null;
 			}
 
 			if (datsDir == null) {
 				log.debug("FTL dats path was not located automatically. Prompting user for location.");
-				datsDir = FTLUtilities.promptForDatsDir(null);
+				datsDir = FTLUtilities.promptForDatsDir(editorWindow.getShell());
 			}
 
 			if (datsDir != null) {
@@ -161,16 +158,6 @@ public class Superluminal {
 		if (datsDir == null) {
 			showErrorDialog("FTL resources were not found.\nThe editor will now exit.");
 			log.debug("No FTL dats path found, exiting.");
-			System.exit(1);
-		}
-
-		// create the main window instance
-		EditorWindow editorWindow = null;
-		try {
-			display = Display.getDefault();
-			editorWindow = new EditorWindow(display);
-		} catch (Exception e) {
-			log.error("Exception while creating EditorWindow.", e);
 			System.exit(1);
 		}
 

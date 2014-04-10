@@ -142,7 +142,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 
 		if (isRotated()) {
 			b.x += b.height / 2 + 1;
-			b.y += s * (b.height / 2 - offset.x);
+			b.y += s * (b.height / 2 - offset.x - 1);
 		} else {
 			b.x += s * (b.width / 2 - offset.x);
 			b.y -= b.width / 2 + 1;
