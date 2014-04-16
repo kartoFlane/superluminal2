@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.ui.sidebar;
+package com.kartoflane.superluminal2.ui.sidebar.data;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -214,6 +214,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			public void widgetSelected(SelectionEvent e) {
 				SystemController system = container.getSystemController(roomC.getSystemId());
 				system.setAvailableAtStart(btnAvailable.getSelection());
+				roomC.redraw();
 			}
 		});
 
@@ -245,6 +246,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			public void widgetSelected(SelectionEvent e) {
 				SystemController system = container.getSystemController(roomC.getSystemId());
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
+				dialog.setFilterExtensions(new String[] { "*.png" });
 				String path = dialog.open();
 
 				// path == null only when user cancels
@@ -369,8 +371,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					container.assign(Systems.ARTILLERY, roomC);
 					btnSystem.setText(Systems.ARTILLERY.toString());
 				} else if (e.getSource() == mntmCloaking) {
-					container.assign(Systems.CLOAK, roomC);
-					btnSystem.setText(Systems.CLOAK.toString());
+					container.assign(Systems.CLOAKING, roomC);
+					btnSystem.setText(Systems.CLOAKING.toString());
 				} else if (e.getSource() == mntmDrones) {
 					container.assign(Systems.DRONES, roomC);
 					btnSystem.setText(Systems.DRONES.toString());
@@ -526,7 +528,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				return mntmWeapons;
 			case ARTILLERY:
 				return mntmArtillery;
-			case CLOAK:
+			case CLOAKING:
 				return mntmCloaking;
 			case DRONES:
 				return mntmDrones;

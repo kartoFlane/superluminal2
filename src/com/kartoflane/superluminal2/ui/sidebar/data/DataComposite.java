@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.ui.sidebar;
+package com.kartoflane.superluminal2.ui.sidebar.data;
 
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 

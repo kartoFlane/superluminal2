@@ -26,10 +26,12 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.ftl.ShipObject.Images;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
 public class PropertiesToolComposite extends Composite implements SidebarComposite {
 	private Text txtHull;
@@ -69,14 +71,14 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 	private TreeItem trtmCrewSlot7;
 	private TreeItem trtmCrewSlot8;
 
-	private ShipController controller = null;
+	private ShipContainer container;
 	private int crewBudget = 8;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(1, false));
 
-		controller = Manager.getCurrentShip().getShipController();
+		container = Manager.getCurrentShip();
 
 		Label lblPropertiesTool = new Label(this, SWT.NONE);
 		lblPropertiesTool.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
@@ -210,7 +212,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 				else if (e.getSource() == btnMiniView)
 					type = Images.THUMBNAIL;
 
-				String path = controller.getImagePath(type);
+				String path = container.getImage(type);
 				if (path == null)
 					return;
 
@@ -229,6 +231,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 				}
 			}
 		};
+
 		btnHullView.addSelectionListener(imageViewListener);
 		btnFloorView.addSelectionListener(imageViewListener);
 		btnCloakView.addSelectionListener(imageViewListener);
@@ -239,6 +242,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
+				dialog.setFilterExtensions(new String[] { "*.png" });
 				String path = dialog.open();
 
 				Images type = null;
@@ -255,11 +259,12 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 
 				// path == null only when user cancels
 				if (path != null) {
-					controller.setImagePath(type, path);
+					container.setImage(type, path);
 					updateData();
 				}
 			}
 		};
+
 		btnHullBrowse.addSelectionListener(imageBrowseListener);
 		btnFloorBrowse.addSelectionListener(imageBrowseListener);
 		btnCloakBrowse.addSelectionListener(imageBrowseListener);
@@ -281,10 +286,11 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 				else if (e.getSource() == btnMiniClear)
 					type = Images.THUMBNAIL;
 
-				controller.setImagePath(type, null);
+				container.setImage(type, null);
 				updateData();
 			}
 		};
+
 		btnHullClear.addSelectionListener(imageClearListener);
 		btnFloorClear.addSelectionListener(imageClearListener);
 		btnCloakClear.addSelectionListener(imageClearListener);
@@ -348,7 +354,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 		spPower.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
 		// Enemy ship-specific widgets
-		if (!controller.isPlayerShip()) {
+		if (!container.getShipController().isPlayerShip()) {
 			Label lblMinSector = new Label(generalComposite, SWT.NONE);
 			lblMinSector.setText("Min Sector:");
 
@@ -473,33 +479,31 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 	}
 
 	public void updateData() {
-		if (controller == null)
-			return;
-
 		// btnPlayer.setSelection(ship.isPlayerShip());
 
 		// update image path text fields and scroll them to the end to show the file's name
-		String path = controller.getImagePath(Images.HULL);
+		String path = container.getImage(Images.HULL);
 
 		txtHull.setText(path == null ? "" : path);
 		txtHull.selectAll();
 		btnHullView.setEnabled(path != null);
 
-		path = controller.getImagePath(Images.FLOOR);
+		path = container.getImage(Images.FLOOR);
 		txtFloor.setText(path == null ? "" : path);
 		txtFloor.selectAll();
 		btnFloorView.setEnabled(path != null);
 
-		path = controller.getImagePath(Images.CLOAK);
+		path = container.getImage(Images.CLOAK);
 		txtCloak.setText(path == null ? "" : path);
 		txtCloak.selectAll();
 		btnCloakView.setEnabled(path != null);
 
-		path = controller.getImagePath(Images.SHIELD);
+		path = container.getImage(Images.SHIELD);
 		txtShield.setText(path == null ? "" : path);
 		txtShield.selectAll();
 		btnShieldView.setEnabled(path != null);
 
+		ShipController controller = container.getShipController();
 		txtMini.setText(path == null || !controller.isPlayerShip() ? "" : path);
 		txtMini.selectAll();
 		btnMiniView.setEnabled(controller.isPlayerShip() && path != null);
@@ -509,11 +513,6 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 
 	@Override
 	public DataComposite getDataComposite() {
-		return null; // no data container
-	}
-
-	@Override
-	public Composite getComposite() {
 		return null; // no data container
 	}
 

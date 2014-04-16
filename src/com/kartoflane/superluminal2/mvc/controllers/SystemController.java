@@ -2,8 +2,8 @@ package com.kartoflane.superluminal2.mvc.controllers;
 
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.ftl.GlowObject.Glows;
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
@@ -25,6 +25,8 @@ public class SystemController extends ObjectController implements Controller {
 
 		setSelectable(false);
 		setLocModifiable(false);
+
+		setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
 	}
 
 	/**
@@ -113,7 +115,6 @@ public class SystemController extends ObjectController implements Controller {
 	public void setAvailableAtStart(boolean available) {
 		getGameObject().setAvailable(available);
 		updateView();
-		redraw();
 	}
 
 	public boolean isAvailableAtStart() {
@@ -182,7 +183,7 @@ public class SystemController extends ObjectController implements Controller {
 	@Override
 	public void redraw() {
 		super.redraw();
-		Rectangle bounds = getView().getImageBounds();
+		Rectangle bounds = getView().getInteriorBounds();
 		bounds.x = getX() - getW() / 2;
 		bounds.y = getY() - getH() / 2;
 		redraw(bounds);

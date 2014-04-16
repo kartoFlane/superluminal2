@@ -16,8 +16,8 @@ import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.mvc.views.DoorView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
-import com.kartoflane.superluminal2.ui.sidebar.DoorDataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DoorDataComposite;
 
 public class DoorController extends ObjectController {
 

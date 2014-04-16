@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
 public class CreationToolComposite extends Composite implements SidebarComposite {
 	private static Tools selectedTool = Tools.ROOM;
@@ -29,7 +30,7 @@ public class CreationToolComposite extends Composite implements SidebarComposite
 	private ToolItem tltmMount;
 	private ToolItem tltmStation;
 
-	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<>();
+	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<Tools, ToolItem>();
 
 	public CreationToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -132,8 +133,7 @@ public class CreationToolComposite extends Composite implements SidebarComposite
 		return null;
 	}
 
-	@Override
-	public Composite getComposite() {
+	private Composite getComposite() {
 		if (dataContainer.getChildren().length == 0)
 			return null;
 		else

@@ -6,6 +6,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+
 public class GibToolComposite extends Composite implements SidebarComposite {
 	private Composite dataContainer;
 
@@ -32,13 +34,5 @@ public class GibToolComposite extends Composite implements SidebarComposite {
 	@Override
 	public DataComposite getDataComposite() {
 		return null;
-	}
-
-	@Override
-	public Composite getComposite() {
-		if (dataContainer.getChildren().length == 0)
-			return null;
-		else
-			return (Composite) dataContainer.getChildren()[0];
 	}
 }

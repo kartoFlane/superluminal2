@@ -33,6 +33,8 @@ public class AboutDialog {
 	private Composite container;
 
 	public AboutDialog(Shell parent) {
+		instance = this;
+
 		Display display = parent.getDisplay();
 
 		shell = new Shell(parent, SWT.TITLE | SWT.APPLICATION_MODAL);
@@ -73,7 +75,6 @@ public class AboutDialog {
 		GridData gd_btnOk = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
 		gd_btnOk.widthHint = 80;
 		btnOk.setLayoutData(gd_btnOk);
-		btnOk.setBounds(0, 0, 80, 23);
 		btnOk.setText("OK");
 
 		btnOk.addSelectionListener(new SelectionAdapter() {
@@ -82,8 +83,6 @@ public class AboutDialog {
 				shell.dispose();
 			}
 		});
-
-		instance = this;
 	}
 
 	public int open() {

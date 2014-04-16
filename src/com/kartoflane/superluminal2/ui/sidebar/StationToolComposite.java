@@ -10,8 +10,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.tools.StationTool;
 
 public class StationToolComposite extends Composite {

@@ -14,8 +14,8 @@ import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import com.kartoflane.superluminal2.ui.sidebar.DoorDataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DoorDataComposite;
 
 public class ManipulationTool extends Tool {
 

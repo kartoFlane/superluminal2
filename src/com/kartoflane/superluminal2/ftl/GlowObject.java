@@ -2,7 +2,7 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
+import com.kartoflane.superluminal2.components.Directions;
 
 /**
  * A class representing a glow namespace.

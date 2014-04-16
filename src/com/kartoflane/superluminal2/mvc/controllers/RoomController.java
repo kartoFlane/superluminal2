@@ -20,9 +20,9 @@ import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
-import com.kartoflane.superluminal2.ui.sidebar.RoomDataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.RoomDataComposite;
 
 public class RoomController extends ObjectController implements Comparable<RoomController> {
 
@@ -318,7 +318,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		Rectangle bounds = getBounds();
 		int w = bounds.width / ShipContainer.CELL_SIZE;
 		int h = bounds.height / ShipContainer.CELL_SIZE;
-		return w + h * w > slotId && slotId >= 0;
+		return w + (h - 1) * w > slotId && slotId >= 0;
 	}
 
 	/**

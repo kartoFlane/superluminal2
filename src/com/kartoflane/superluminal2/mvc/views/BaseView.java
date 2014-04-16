@@ -152,6 +152,10 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		return imagePath;
 	}
 
+	public Rectangle getImageBounds() {
+		return image == null ? new Rectangle(0, 0, 0, 0) : image.getBounds();
+	}
+
 	public void setBorderColor(RGB rgb) {
 		if (borderColor != null)
 			Cache.checkInColor(this, borderColor.getRGB());

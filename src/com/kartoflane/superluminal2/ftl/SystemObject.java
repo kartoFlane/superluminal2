@@ -1,12 +1,12 @@
 package com.kartoflane.superluminal2.ftl;
 
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
+import com.kartoflane.superluminal2.components.Directions;
 
 public class SystemObject extends GameObject {
 
 	public enum Systems {
 		EMPTY,
-		ARTILLERY, CLOAK, DOORS, DRONES, ENGINES, MEDBAY,
+		ARTILLERY, CLOAKING, DOORS, DRONES, ENGINES, MEDBAY,
 		OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
 		MIND, HACKING, BATTERY, CLONEBAY; // AE
 
@@ -20,7 +20,7 @@ public class SystemObject extends GameObject {
 		/** @return array of all systems, excluding {@link #EMPTY} */
 		public static Systems[] getSystems() {
 			return new Systems[] {
-					ARTILLERY, BATTERY, CLOAK, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
+					ARTILLERY, BATTERY, CLOAKING, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
 					MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
 			};
 		}
@@ -55,7 +55,7 @@ public class SystemObject extends GameObject {
 			case PILOT:
 			case DOORS:
 			case SENSORS:
-			case CLOAK:
+			case CLOAKING:
 			case MEDBAY:
 			case CLONEBAY:
 			case TELEPORTER:
@@ -80,6 +80,7 @@ public class SystemObject extends GameObject {
 		if (canContainStation()) {
 			station = new StationObject(this);
 			station.setSlotId(getDefaultSlotId(systemId));
+			station.setSlotDirection(getDefaultSlotDirection(systemId));
 		}
 	}
 
@@ -165,7 +166,7 @@ public class SystemObject extends GameObject {
 	public boolean canContainGlow() {
 		return id == Systems.SHIELDS || id == Systems.ENGINES ||
 				id == Systems.WEAPONS || id == Systems.PILOT ||
-				id == Systems.CLOAK;
+				id == Systems.CLOAKING;
 	}
 
 	@Override
@@ -185,7 +186,7 @@ public class SystemObject extends GameObject {
 			case PILOT:
 			case SENSORS:
 			case DOORS:
-			case CLOAK:
+			case CLOAKING:
 			case ARTILLERY:
 			case TELEPORTER:
 				return systemId.toString();

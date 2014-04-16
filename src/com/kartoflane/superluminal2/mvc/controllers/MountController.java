@@ -4,17 +4,17 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.ftl.MountObject;
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.MountView;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
-import com.kartoflane.superluminal2.ui.sidebar.MountDataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.MountDataComposite;
 
 public class MountController extends ObjectController implements Comparable<MountController> {
 	public static final int DEFAULT_WIDTH = 16;

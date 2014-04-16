@@ -2,9 +2,6 @@ package com.kartoflane.superluminal2.mvc.views;
 
 import org.eclipse.swt.events.PaintEvent;
 
-import com.kartoflane.superluminal2.ftl.MountObject;
-import com.kartoflane.superluminal2.mvc.models.ObjectModel;
-
 public class GibView extends BaseView {
 
 	@Override
@@ -13,14 +10,6 @@ public class GibView extends BaseView {
 			paintImage(e, image, alpha);
 			paintBorder(e, borderColor, borderThickness, alpha);
 		}
-	}
-
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
-	private MountObject getGameObject() {
-		return (MountObject) getModel().getGameObject();
 	}
 
 	@Override
@@ -38,8 +27,5 @@ public class GibView extends BaseView {
 			setBackgroundColor(null);
 			setBorderThickness(2);
 		}
-
-		setRotation(getGameObject().isRotated() ? 90 : 0);
-		setFlippedY(getGameObject().isMirrored());
 	}
 }

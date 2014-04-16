@@ -1,33 +1,41 @@
 package com.kartoflane.superluminal2.ftl;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.TreeSet;
 
+import org.eclipse.swt.graphics.Rectangle;
+
+import com.kartoflane.superluminal2.components.Images;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 
 public class ShipObject extends GameObject {
 
-	public enum Images {
-		HULL, FLOOR, CLOAK, SHIELD, THUMBNAIL;
-	}
-
 	private static final long serialVersionUID = 5820228601368854867L;
 
 	private boolean isPlayer = false;
+	private String blueprintName = null;
+	private String layoutTXT = null;
+	private String layoutXML = null;
+
+	private String shipClass = null;
+	private String shipName = null;
+	private String shipDescription = null;
+
+	private int xOffset = 0;
+	private int yOffset = 0;
+	private int horizontal = 0;
+	private int vertical = 0;
+	private Rectangle ellipse = new Rectangle(0, 0, 0, 0);
 
 	private TreeSet<RoomObject> rooms;
 	private HashSet<DoorObject> doors;
 	private TreeSet<MountObject> mounts;
 	private HashSet<GibObject> gibs;
-	private LinkedHashMap<Systems, SystemObject> systemMap;
-
-	private String hullPath = null;
-	private String floorPath = null;
-	private String cloakPath = null;
-	private String shieldPath = null;
-	private String thumbnailPath = null;
+	private HashMap<Systems, SystemObject> systemMap;
+	private HashMap<Images, ImageObject> imageMap;
 
 	private ShipObject() {
 		setDeletable(false);
@@ -36,10 +44,15 @@ public class ShipObject extends GameObject {
 		doors = new HashSet<DoorObject>();
 		mounts = new TreeSet<MountObject>();
 		gibs = new HashSet<GibObject>();
-		systemMap = new LinkedHashMap<Systems, SystemObject>();
+		systemMap = new HashMap<Systems, SystemObject>();
+		imageMap = new HashMap<Images, ImageObject>();
 
-		for (Systems system : Systems.values()) {
+		for (Systems system : Systems.values())
 			systemMap.put(system, new SystemObject(system));
+		for (Images image : Images.values()) {
+			ImageObject object = new ImageObject();
+			object.setAlias(image.name().toLowerCase());
+			imageMap.put(image, object);
 		}
 	}
 
@@ -53,8 +66,117 @@ public class ShipObject extends GameObject {
 		return isPlayer;
 	}
 
+	public void setBlueprintName(String name) {
+		blueprintName = name;
+	}
+
+	public String getBlueprintName() {
+		return blueprintName;
+	}
+
+	public void setLayoutTXT(String layout) {
+		if (layout == null)
+			throw new IllegalArgumentException("Name of the layout.txt must not be null.");
+		layoutTXT = layout;
+	}
+
+	public String getLayoutTXT() {
+		return layoutTXT;
+	}
+
+	public void setLayoutXML(String layout) {
+		if (layout == null)
+			throw new IllegalArgumentException("Name of the layout.xml must not be null.");
+		layoutXML = layout;
+	}
+
+	public String getLayoutXML() {
+		return layoutXML;
+	}
+
+	public void setShipClass(String className) {
+		if (className == null)
+			throw new IllegalArgumentException("The ship class' name must not be null.");
+		shipClass = className;
+	}
+
+	public String getShipClass() {
+		return shipClass;
+	}
+
+	public void setShipName(String shipName) {
+		if (shipName == null)
+			throw new IllegalArgumentException("The ship's name must not be null.");
+		this.shipName = shipName;
+	}
+
+	public String getShipName() {
+		return shipName;
+	}
+
+	public void setShipDescription(String desc) {
+		shipDescription = desc;
+	}
+
+	public String getShipDescription() {
+		return shipDescription;
+	}
+
+	public void setXOffset(int i) {
+		xOffset = i;
+	}
+
+	public int getXOffset() {
+		return xOffset;
+	}
+
+	public void setYOffset(int i) {
+		yOffset = i;
+	}
+
+	public int getYOffset() {
+		return yOffset;
+	}
+
+	public void setHorizontal(int i) {
+		horizontal = i;
+	}
+
+	public int getHorizontal() {
+		return horizontal;
+	}
+
+	public void setVertical(int i) {
+		vertical = i;
+	}
+
+	public int getVertical() {
+		return vertical;
+	}
+
+	public void setEllipse(Rectangle rect) {
+		if (rect == null)
+			throw new IllegalArgumentException("Ellipse must not be null");
+		setEllipse(rect.x, rect.y, rect.width, rect.height);
+	}
+
+	public void setEllipse(int xOff, int yOff, int width, int height) {
+		ellipse.x = xOff;
+		ellipse.y = yOff;
+		ellipse.width = width;
+		ellipse.height = height;
+	}
+
+	public Rectangle getEllipse() {
+		return Utils.copy(ellipse);
+	}
+
 	public SystemObject getSystem(Systems sys) {
 		return systemMap.get(sys);
+	}
+
+	public ImageObject getImage(Images image) {
+		return imageMap.get(image);
 	}
 
 	public RoomObject[] getRooms() {
@@ -71,6 +193,12 @@ public class ShipObject extends GameObject {
 
 	public GibObject[] getGibs() {
 		return gibs.toArray(new GibObject[0]);
+	}
+
+	public RoomObject getRoomById(int id) {
+		RoomObject[] roomz = getRooms();
+		int index = binarySearch(roomz, id, 0, roomz.length);
+		return index == -1 ? null : roomz[index];
 	}
 
 	/**
@@ -118,42 +246,26 @@ public class ShipObject extends GameObject {
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
 	}
 
-	public void setImagePath(String path, Images type) {
-		switch (type) {
-			case HULL:
-				hullPath = path;
-				break;
-			case FLOOR:
-				floorPath = path;
-				break;
-			case CLOAK:
-				cloakPath = path;
-				break;
-			case SHIELD:
-				shieldPath = path;
-				break;
-			case THUMBNAIL:
-				thumbnailPath = path;
-				break;
-			default:
-				throw new IllegalArgumentException();
-		}
+	/**
+	 * Coalesces the rooms by removing "holes" in room numbering.
+	 */
+	public void coalesceRooms() {
+		int id = 0;
+		RoomObject[] roomArray = getRooms();
+		rooms.clear();
+		for (RoomObject room : roomArray)
+			room.setId(id++);
 	}
 
-	public String getImagePath(Images type) {
-		switch (type) {
-			case HULL:
-				return hullPath;
-			case FLOOR:
-				return floorPath;
-			case CLOAK:
-				return cloakPath;
-			case SHIELD:
-				return shieldPath;
-			case THUMBNAIL:
-				return thumbnailPath;
-			default:
-				throw new IllegalArgumentException();
-		}
+	private static int binarySearch(RoomObject[] array, int id, int min, int max) {
+		if (min > max)
+			return -1;
+		int mid = (min + max) / 2;
+		if (array[mid].getId() < id)
+			return binarySearch(array, id, mid + 1, max);
+		else if (array[mid].getId() > id)
+			return binarySearch(array, id, min, mid - 1);
+		else
+			return mid;
 	}
 }

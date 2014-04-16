@@ -71,8 +71,6 @@ public class SuperluminalConfig {
 			configComments += "\n";
 			configComments += " " + GEOMETRY + " - Last saved position/size/etc of the main window.\n";
 			configComments += "\n";
-			configComments += " " + "Hotkeys" + " - Rudimentary hotkey customization is supported - lowercase characters only, accessible\n";
-			configComments += " " + "without any modifiers (Shift, Ctrl or Alt)";
 
 			OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
 			config.store(writer, configComments);

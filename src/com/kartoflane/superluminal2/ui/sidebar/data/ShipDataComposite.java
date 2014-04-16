@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.ui.sidebar;
+package com.kartoflane.superluminal2.ui.sidebar.data;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

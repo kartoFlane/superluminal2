@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.ui.sidebar;
+package com.kartoflane.superluminal2.ui.sidebar.data;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.ui.EditorWindow;

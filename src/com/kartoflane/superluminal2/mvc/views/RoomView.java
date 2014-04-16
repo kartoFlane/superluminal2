@@ -22,6 +22,7 @@ public class RoomView extends BaseView {
 
 	private Color gridColor = null;
 	private Color handleColor = null;
+	private Color denyColor = null;
 	private Triangle[] resizeHandles = null;
 
 	public RoomView() {
@@ -29,6 +30,7 @@ public class RoomView extends BaseView {
 
 		gridColor = Cache.checkOutColor(this, CellView.GRID_RGB);
 		handleColor = Cache.checkOutColor(this, HIGHLIGHT_RGB);
+		denyColor = Cache.checkOutColor(this, DENY_RGB);
 
 		setBorderColor(WALL_RGB);
 		setBackgroundColor(FLOOR_RGB);
@@ -59,8 +61,12 @@ public class RoomView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
+			SystemController systemC = Manager.getCurrentShip().getSystemController(getGameObject().getSystem());
 
 			paintBackground(e, backgroundColor, alpha);
+			// system does not follow room's size, so system's availability has to be painted in the room's view
+			if (!systemC.isAvailableAtStart())
+				paintBackground(e, denyColor, alpha / 2);
 
 			// draw fake grid lines inside of rooms
 			if (controller.getW() > ShipContainer.CELL_SIZE || controller.getH() > ShipContainer.CELL_SIZE) {
@@ -70,8 +76,7 @@ public class RoomView extends BaseView {
 				e.gc.setForeground(prevFgColor);
 			}
 
-			// draw system
-			SystemController systemC = Manager.getCurrentShip().getSystemController(getGameObject().getSystem());
+			// draw system, so that border and handles are drawn on top of it
 			systemC.redraw(e);
 
 			paintBorder(e, borderColor, borderThickness, alpha);
@@ -116,8 +121,10 @@ public class RoomView extends BaseView {
 		super.dispose();
 		Cache.checkInColor(this, CellView.GRID_RGB);
 		Cache.checkInColor(this, HIGHLIGHT_RGB);
+		Cache.checkInColor(this, DENY_RGB);
 		handleColor = null;
 		gridColor = null;
+		denyColor = null;
 	}
 
 	@Override

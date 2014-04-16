@@ -4,11 +4,11 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
@@ -91,44 +91,41 @@ public class StationTool extends Tool {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
-		// handle cursor
-		if (cursor.isVisible() && e.button == 1) {
-			cursor.setVisible(false);
-		}
-	}
-
-	@Override
-	public void mouseUp(MouseEvent e) {
 		if (canPlace && e.button == 1) {
 			if (state == States.PLACEMENT) {
-				// station placement
-				ShipContainer container = Manager.getCurrentShip();
-				RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
-				if (roomC != null) {
-					SystemController system = container.getSystemController(roomC.getSystemId());
-					if (system.canContainStation()) {
-						StationController station = (StationController) container.getController(system.getGameObject().getStation());
-						int id = roomC.getSlotId(cursor.getX(), cursor.getY());
-						// station.setSlotDirection(direction);
-						station.setSlotId(id);
-						roomC.setLocation(roomC.getX(), roomC.getY()); // to update the station's followOffset
-						station.setVisible(true);
+				if (Manager.modShift) {
+					// direction change
+					ShipContainer container = Manager.getCurrentShip();
+					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+					if (roomC != null) {
+						SystemController system = container.getSystemController(roomC.getSystemId());
+						if (system.canContainStation()) {
+							StationController station = (StationController) container.getController(system.getGameObject().getStation());
+							Directions dir = station.getSlotDirection();
+							changeDirection(e.x, e.y, getNextDirection(dir));
+						}
+						roomC.redraw();
 					}
-					roomC.redraw();
+				} else {
+					// station placement
+					ShipContainer container = Manager.getCurrentShip();
+					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+					if (roomC != null) {
+						SystemController system = container.getSystemController(roomC.getSystemId());
+						if (system.canContainStation()) {
+							StationController station = (StationController) container.getController(system.getGameObject().getStation());
+							int id = roomC.getSlotId(cursor.getX(), cursor.getY());
+							// station.setSlotDirection(direction);
+							station.setSlotId(id);
+							station.updateFollowOffset();
+							station.updateFollower();
+							station.setVisible(true);
+						}
+						roomC.redraw();
+					}
 				}
 			} else if (state == States.DIRECTION) {
-				// direction change
-				ShipContainer container = Manager.getCurrentShip();
-				RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
-				if (roomC != null) {
-					SystemController system = container.getSystemController(roomC.getSystemId());
-					if (system.canContainStation()) {
-						StationController station = (StationController) container.getController(system.getGameObject().getStation());
-						station.setSlotDirection(direction);
-						roomC.reposition(roomC.getX(), roomC.getY()); // to update the station's followOffset
-					}
-					roomC.redraw();
-				}
+				changeDirection(e.x, e.y, direction);
 			} else if (state == States.REMOVAL) {
 				removeStation(e.x, e.y);
 			}
@@ -138,6 +135,14 @@ public class StationTool extends Tool {
 			}
 		}
 
+		// handle cursor
+		if (cursor.isVisible() && e.button == 1) {
+			cursor.setVisible(false);
+		}
+	}
+
+	@Override
+	public void mouseUp(MouseEvent e) {
 		// handle cursor
 		if (e.button == 1) {
 			cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
@@ -156,6 +161,38 @@ public class StationTool extends Tool {
 				station.setVisible(false);
 			}
 			roomC.redraw();
+		}
+	}
+
+	private void changeDirection(int x, int y, Directions dir) {
+		ShipContainer container = Manager.getCurrentShip();
+		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
+		if (roomC != null) {
+			SystemController system = container.getSystemController(roomC.getSystemId());
+			if (system.canContainStation()) {
+				StationController station = (StationController) container.getController(system.getGameObject().getStation());
+				station.setSlotDirection(dir);
+				station.updateFollowOffset();
+				station.updateFollower();
+			}
+			roomC.redraw();
+		}
+	}
+
+	private Directions getNextDirection(Directions dir) {
+		switch (dir) {
+			case UP:
+				return Directions.RIGHT;
+			case RIGHT:
+				return Directions.DOWN;
+			case DOWN:
+				return Directions.LEFT;
+			case LEFT:
+				return Directions.UP;
+			case NONE:
+				return null;
+			default:
+				return null;
 		}
 	}
 

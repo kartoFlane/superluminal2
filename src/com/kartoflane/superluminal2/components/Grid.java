@@ -50,37 +50,37 @@ public class Grid {
 		CORNER_BR;
 	}
 
-	private static Grid instance;
+	private static final Grid instance = new Grid();
 
-	private boolean visible = true;
+	private boolean drawGrid = true;
 	private Rectangle bounds = null;
 	private ArrayList<ArrayList<CellController>> cells = null;
 
 	private Grid() {
-		instance = this;
 
 		cells = new ArrayList<ArrayList<CellController>>();
 		bounds = new Rectangle(0, 0, 0, 0);
-	}
-
-	public Grid(int x, int y) {
-		this();
-
-		for (int i = 0; i < x; i++) {
-			cells.add(new ArrayList<CellController>());
-			for (int j = 0; j < y; j++)
-				cells.get(i).add(CellController.newInstance(i, j));
-		}
-
-		updateBounds(x * ShipContainer.CELL_SIZE, y * ShipContainer.CELL_SIZE);
 	}
 
 	public static Grid getInstance() {
 		return instance;
 	}
 
+	public void setCells(int x, int y) {
+		updateBounds(x * ShipContainer.CELL_SIZE, y * ShipContainer.CELL_SIZE);
+	}
+
+	/**
+	 * Updates the grid, instantiating new cells or hiding existing ones, as required
+	 * to accomodate the new size.
+	 * 
+	 * @param width
+	 *            new width of the grid, in pixels
+	 * @param height
+	 *            new height of the grid, in pixels
+	 */
 	public void updateBounds(int width, int height) {
-		// add one after division as a buffer
+		// add one after the division so that cells fill all of the available space
 		bounds.width = (width / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
 		bounds.height = (height / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
 
@@ -109,15 +109,15 @@ public class Grid {
 	}
 
 	public void setVisible(boolean visible) {
-		this.visible = visible;
+		drawGrid = visible;
 		for (ArrayList<CellController> list : cells) {
 			for (CellController c : list)
-				c.setVisible(visible);
+				c.redraw();
 		}
 	}
 
 	public boolean isVisible() {
-		return visible;
+		return drawGrid;
 	}
 
 	/** @return a Cell at the given coordinates, or null if out of grid. */

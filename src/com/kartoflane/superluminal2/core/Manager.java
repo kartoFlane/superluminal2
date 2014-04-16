@@ -3,9 +3,12 @@ package com.kartoflane.superluminal2.core;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
+import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.tools.Tool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -19,21 +22,10 @@ import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
  * 
  */
 public class Manager {
-	public enum Hotkeys {
-		POINTER_TOOL_KEY,
-		CREATE_TOOL_KEY,
-		GIB_TOOL_KEY,
-		PROPERTIES_TOOL_KEY,
-		OVERVIEW_TOOL_KEY,
-		ROOM_TOOL_KEY,
-		DOOR_TOOL_KEY,
-		MOUNT_TOOL_KEY,
-		STATION_TOOL_KEY
-	}
 
 	public static final HashMap<Tools, Tool> TOOL_MAP = new HashMap<Tools, Tool>();
 	public static final LinkedList<Deletable> DELETED_LIST = new LinkedList<Deletable>();
-	public static final HashMap<Hotkeys, Character> HOTKEY_MAP = new HashMap<Hotkeys, Character>();
+	public static final HashMap<Hotkeys, Hotkey> HOTKEY_MAP = new HashMap<Hotkeys, Hotkey>();
 
 	public static boolean leftMouseDown = false;
 	public static boolean rightMouseDown = false;
@@ -73,18 +65,56 @@ public class Manager {
 	}
 
 	public static void createNewShip() {
-		if (currentShip != null)
-			currentShip.dispose();
+		closeShip();
+
 		currentShip = new ShipContainer(new ShipObject(true)); // TODO dialog prompt to choose if player ship?
 		currentShip.getShipController().reposition(2 * ShipContainer.CELL_SIZE, 2 * ShipContainer.CELL_SIZE);
+
+		EditorWindow.getInstance().enableTools(true);
+		// select the manipulation tool by default
+		selectTool(Tools.POINTER);
 	}
 
 	public static void loadShip(ShipObject ship) {
+		closeShip();
+
+		currentShip = new ShipContainer(ship);
+		ShipController sc = currentShip.getShipController();
+		sc.select();
+		sc.reposition(2 * ShipContainer.CELL_SIZE, 2 * ShipContainer.CELL_SIZE);
+		sc.deselect();
+
+		currentShip.updateBoundingArea();
+		currentShip.updateChildBoundingAreas();
+
+		EditorWindow.getInstance().enableTools(true);
+		// select the manipulation tool by default
+		selectTool(Tools.POINTER);
+
+		// TODO load the ship, anything else to do?
+	}
+
+	public static void setCurrenetShip(ShipContainer container) {
+		// TODO allows tabs of open ships?
+	}
+
+	public static void closeShip() {
+		// TODO UI prompts and shit
+
+		// if (saved) {
+		closeShipForce();
+		// } else {
+		// prompt if sure
+	}
+
+	public static void closeShipForce() {
 		if (currentShip != null)
 			currentShip.dispose();
 
-		currentShip = new ShipContainer(ship);
-		// TODO load the ship, anything else to do?
+		currentShip = null;
+
+		EditorWindow.getInstance().enableTools(false);
+		EditorWindow.getInstance().canvasRedraw();
 	}
 
 	/** Returns the currently loaded ship. */
@@ -107,6 +137,7 @@ public class Manager {
 		if (tool != null) {
 			TOOL_MAP.get(tool).select();
 			MouseInputDispatcher.getInstance().setCurrentTool(TOOL_MAP.get(selectedTool));
+			EditorWindow.getInstance().selectTool(tool);
 		}
 	}
 
@@ -120,5 +151,9 @@ public class Manager {
 
 	public static Tool getTool(Tools tool) {
 		return TOOL_MAP.get(tool);
+	}
+
+	public static Hotkey getHotkey(Hotkeys key) {
+		return HOTKEY_MAP.get(key);
 	}
 }

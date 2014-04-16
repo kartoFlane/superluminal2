@@ -13,6 +13,7 @@ public class SystemView extends BaseView {
 	protected String interiorPath = null;
 
 	public SystemView() {
+		setAlpha(255);
 	}
 
 	private SystemController getController() {
@@ -26,7 +27,6 @@ public class SystemView extends BaseView {
 			// interiorImage is the interior image (duh)
 			paintImageCorner(e, interiorImage, controller.getX() - controller.getW() / 2,
 					controller.getY() - controller.getH() / 2, alpha);
-			paintBackground(e, backgroundColor, alpha / 4); // TODO tint RoomView's background instead?
 			paintImage(e, image, alpha);
 		}
 	}
@@ -48,7 +48,7 @@ public class SystemView extends BaseView {
 		}
 	}
 
-	public Rectangle getImageBounds() {
+	public Rectangle getInteriorBounds() {
 		return interiorImage == null ? new Rectangle(0, 0, 0, 0) : interiorImage.getBounds();
 	}
 
@@ -57,12 +57,6 @@ public class SystemView extends BaseView {
 		setImage("/assets/system/" + getController().toString().toLowerCase() + ".png");
 		setInteriorImage(getController().getInteriorPath());
 		setVisible(getController().isAssigned());
-		setAlpha(255);
-		if (getController().isAvailableAtStart()) {
-			setBackgroundColor(null);
-		} else {
-			setBackgroundColor(255, 0, 0);
-		}
 	}
 
 	@Override

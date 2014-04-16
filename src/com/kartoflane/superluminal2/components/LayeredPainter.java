@@ -26,10 +26,9 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
  */
 public class LayeredPainter implements PaintListener {
 	public enum Layers {
-		GRID,
-		SHIELD,
 		MOUNT,
-		HULL,
+		IMAGES,
+		GRID,
 		ROOM,
 		ROOM_ZERO,
 		SYSTEM,
@@ -41,7 +40,7 @@ public class LayeredPainter implements PaintListener {
 	}
 
 	/** Specifies the layer order for selection and highlighting purposes. */
-	private static final Layers[] selectionOrder = { Layers.GRID, Layers.SHIELD, Layers.HULL, Layers.MOUNT,
+	private static final Layers[] selectionOrder = { Layers.GRID, Layers.IMAGES, Layers.MOUNT,
 			Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.STATION, Layers.DOOR, Layers.OVERLAY,
 			Layers.SHIP_ORIGIN, Layers.CURSOR };
 

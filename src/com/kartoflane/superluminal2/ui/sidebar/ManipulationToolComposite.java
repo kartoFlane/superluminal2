@@ -20,6 +20,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
 public class ManipulationToolComposite extends Composite implements SidebarComposite, DataComposite {
 	private Button btnPinned;
@@ -96,6 +97,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 
 		spNudge = new Spinner(boundsContainer, SWT.BORDER);
 		spNudge.setMinimum(1);
+		spNudge.setToolTipText("This determines how much the selected object\nwill be moved when you press the arrows.");
 
 		btnRight = new Button(boundsContainer, SWT.NONE);
 		btnRight.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/right.png"));
@@ -224,7 +226,7 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			} else {
 				// if they are of different types, or no object was previously selected,
 				// create a new composite and insert it into the data container
-				Composite c = getComposite();
+				Composite c = (Composite) getDataComposite();
 				if (c != null)
 					c.dispose();
 
@@ -249,14 +251,6 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 			return null;
 		else
 			return (DataComposite) dataContainer.getChildren()[0];
-	}
-
-	@Override
-	public Composite getComposite() {
-		if (dataContainer.getChildren().length == 0)
-			return null;
-		else
-			return (Composite) dataContainer.getChildren()[0];
 	}
 
 	public void updateData() {

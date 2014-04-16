@@ -34,11 +34,12 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Grid;
+import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Manager.Hotkeys;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
@@ -61,7 +62,7 @@ public class EditorWindow {
 	public static final int SIDEBAR_MIN_WIDTH = 290;
 	public static final int CANVAS_MIN_SIZE = 400;
 
-	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<>();
+	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<Tools, ToolItem>();
 
 	private static EditorWindow instance;
 
@@ -102,6 +103,7 @@ public class EditorWindow {
 		MouseInputDispatcher mouseListener = new MouseInputDispatcher();
 		CursorController.newInstance();
 		new OverviewWindow(shell);
+		new ShipLoaderDialog(shell);
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
@@ -123,11 +125,11 @@ public class EditorWindow {
 		Menu menu_1 = new Menu(mntmFile);
 		mntmFile.setMenu(menu_1);
 
-		MenuItem mntmNewShip = new MenuItem(menu_1, SWT.NONE);
-		mntmNewShip.setText("New Ship\tCtrl+N");
+		final MenuItem mntmNewShip = new MenuItem(menu_1, SWT.NONE);
+		mntmNewShip.setText("New Ship\t" + Manager.getHotkey(Hotkeys.NEW_SHIP));
 
-		MenuItem mntmLoadShip = new MenuItem(menu_1, SWT.NONE);
-		mntmLoadShip.setText("Load Ship\tCtrl+L");
+		final MenuItem mntmLoadShip = new MenuItem(menu_1, SWT.NONE);
+		mntmLoadShip.setText("Load Ship\t" + Manager.getHotkey(Hotkeys.LOAD_SHIP));
 
 		// Edit menu
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
@@ -137,15 +139,15 @@ public class EditorWindow {
 		mntmEdit.setMenu(menu_2);
 
 		mntmUndo = new MenuItem(menu_2, SWT.NONE);
-		mntmUndo.setText("Undo\tCtrl+Z");
+		mntmUndo.setText("Undo\t" + Manager.getHotkey(Hotkeys.UNDO));
 
 		mntmRedo = new MenuItem(menu_2, SWT.NONE);
-		mntmRedo.setText("Redo\tCtrl+Y");
+		mntmRedo.setText("Redo\t" + Manager.getHotkey(Hotkeys.REDO));
 
 		new MenuItem(menu_2, SWT.SEPARATOR);
 
 		mntmDelete = new MenuItem(menu_2, SWT.NONE);
-		mntmDelete.setText("Delete\tShift+D");
+		mntmDelete.setText("Delete\t" + Manager.getHotkey(Hotkeys.DELETE));
 
 		// View menu
 		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
@@ -157,6 +159,12 @@ public class EditorWindow {
 		final MenuItem mntmSidebar = new MenuItem(menu_3, SWT.CHECK);
 		mntmSidebar.setSelection(Superluminal.sidebarOnRightSide);
 		mntmSidebar.setText("Sidebar on Right Side");
+
+		new MenuItem(menu_3, SWT.SEPARATOR);
+
+		final MenuItem mntmGrid = new MenuItem(menu_3, SWT.CHECK);
+		mntmGrid.setText("Show Grid\t" + Manager.getHotkey(Hotkeys.TOGGLE_GRID));
+		mntmGrid.setSelection(true);
 
 		// Help menu
 		MenuItem mntmHelp = new MenuItem(menu, SWT.CASCADE);
@@ -197,7 +205,7 @@ public class EditorWindow {
 		tltmPointer.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/pointer.png"));
 		tltmPointer.addSelectionListener(toolSelectionAdapter);
 		tltmPointer.setData(Tools.POINTER);
-		tltmPointer.setToolTipText("Manipulation Tool");
+		tltmPointer.setToolTipText("Manipulation Tool (" + Manager.getHotkey(Hotkeys.POINTER_TOOL) + ")");
 		toolItemMap.put(Tools.POINTER, tltmPointer);
 
 		// Room tool
@@ -205,7 +213,7 @@ public class EditorWindow {
 		tltmCreation.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/wrench.png"));
 		tltmCreation.addSelectionListener(toolSelectionAdapter);
 		tltmCreation.setData(Tools.CREATOR);
-		tltmCreation.setToolTipText("Creation Tool");
+		tltmCreation.setToolTipText("Creation Tool (" + Manager.getHotkey(Hotkeys.CREATE_TOOL) + ")");
 		toolItemMap.put(Tools.CREATOR, tltmCreation);
 
 		// Gib tool
@@ -213,7 +221,7 @@ public class EditorWindow {
 		tltmGib.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/gib.png"));
 		tltmGib.addSelectionListener(toolSelectionAdapter);
 		tltmGib.setData(Tools.GIB);
-		tltmGib.setToolTipText("Gib Tool");
+		tltmGib.setToolTipText("Gib Tool (" + Manager.getHotkey(Hotkeys.GIB_TOOL) + ")");
 		toolItemMap.put(Tools.GIB, tltmGib);
 
 		// Properties button
@@ -221,7 +229,7 @@ public class EditorWindow {
 		tltmProperties.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/system.png"));
 		tltmProperties.addSelectionListener(toolSelectionAdapter);
 		tltmProperties.setData(Tools.CONFIG);
-		tltmProperties.setToolTipText("Properties");
+		tltmProperties.setToolTipText("Properties (" + Manager.getHotkey(Hotkeys.PROPERTIES_TOOL) + ")");
 		toolItemMap.put(Tools.CONFIG, tltmProperties);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
@@ -229,7 +237,7 @@ public class EditorWindow {
 		// Manager button
 		tltmManager = new ToolItem(toolBar, SWT.PUSH);
 		tltmManager.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/overview.png"));
-		tltmManager.setToolTipText("Overview");
+		tltmManager.setToolTipText("Overview (" + Manager.getHotkey(Hotkeys.OVERVIEW_TOOL) + ")");
 		tltmManager.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -268,7 +276,6 @@ public class EditorWindow {
 			editorContainer.setWeights(new int[] { SIDEBAR_MIN_WIDTH, displaySize.width - SIDEBAR_MIN_WIDTH });
 		}
 
-		// hotkeys
 		shell.getDisplay().addFilter(SWT.KeyDown, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
@@ -285,42 +292,70 @@ public class EditorWindow {
 				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL)
 					Manager.modCtrl = true;
 
-				if (!Manager.modAlt && !Manager.modCtrl && !Manager.modShift && toolsEnabled()) {
-					if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.POINTER_TOOL_KEY)) {
-						selectTool(Tools.POINTER);
+				// Handle hotkeys
+
+				// ====== Menu hotkeys
+				// File
+				if (Manager.getHotkey(Hotkeys.NEW_SHIP).passes(e.keyCode)) {
+					mntmNewShip.notifyListeners(SWT.Selection, null);
+				} else if (Manager.getHotkey(Hotkeys.LOAD_SHIP).passes(e.keyCode)) {
+					mntmLoadShip.notifyListeners(SWT.Selection, null);
+				}
+
+				// Edit
+				else if (Manager.getHotkey(Hotkeys.UNDO).passes(e.keyCode)) {
+					// undo
+					if (Manager.DELETED_LIST.size() > 0)
+						Manager.DELETED_LIST.removeLast().restore();
+				} else if (Manager.getHotkey(Hotkeys.REDO).passes(e.keyCode)) {
+					// TODO
+				}
+
+				// View
+				else if (Manager.getHotkey(Hotkeys.TOGGLE_GRID).passes(e.keyCode)) {
+					mntmGrid.setSelection(!mntmGrid.getSelection());
+					mntmGrid.notifyListeners(SWT.Selection, null);
+				}
+
+				// ====== Tool hotkeys
+				if (toolsEnabled()) {
+					if (Manager.getHotkey(Hotkeys.POINTER_TOOL).passes(e.keyCode)) {
+						Manager.selectTool(Tools.POINTER);
 						e.doit = false;
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.CREATE_TOOL_KEY)) {
-						selectTool(Tools.CREATOR);
+					} else if (Manager.getHotkey(Hotkeys.CREATE_TOOL).passes(e.keyCode)) {
+						Manager.selectTool(Tools.CREATOR);
 						e.doit = false;
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.GIB_TOOL_KEY)) {
-						selectTool(Tools.GIB);
+					} else if (Manager.getHotkey(Hotkeys.GIB_TOOL).passes(e.keyCode)) {
+						Manager.selectTool(Tools.GIB);
 						e.doit = false;
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.PROPERTIES_TOOL_KEY)) {
-						selectTool(Tools.CONFIG);
+					} else if (Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).passes(e.keyCode)) {
+						Manager.selectTool(Tools.CONFIG);
 						e.doit = false;
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.OVERVIEW_TOOL_KEY)) {
-						// TODO
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.ROOM_TOOL_KEY)) {
+					} else if (Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).passes(e.keyCode)) {
+						OverviewWindow.getInstance().open();
+					} else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode)) {
 						if (Manager.getSelectedToolId() != Tools.CREATOR)
-							selectTool(Tools.CREATOR);
+							Manager.selectTool(Tools.CREATOR);
 						((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.ROOM);
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.DOOR_TOOL_KEY)) {
+					} else if (Manager.getHotkey(Hotkeys.DOOR_TOOL).passes(e.keyCode)) {
 						if (Manager.getSelectedToolId() != Tools.CREATOR)
-							selectTool(Tools.CREATOR);
+							Manager.selectTool(Tools.CREATOR);
 						((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.DOOR);
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.MOUNT_TOOL_KEY)) {
+					} else if (Manager.getHotkey(Hotkeys.MOUNT_TOOL).passes(e.keyCode)) {
 						if (Manager.getSelectedToolId() != Tools.CREATOR)
-							selectTool(Tools.CREATOR);
+							Manager.selectTool(Tools.CREATOR);
 						((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.WEAPON);
-					} else if (e.keyCode == Manager.HOTKEY_MAP.get(Hotkeys.STATION_TOOL_KEY)) {
+					} else if (Manager.getHotkey(Hotkeys.STATION_TOOL).passes(e.keyCode)) {
 						if (Manager.getSelectedToolId() != Tools.CREATOR)
-							selectTool(Tools.CREATOR);
+							Manager.selectTool(Tools.CREATOR);
 						((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.STATION);
 					}
 				}
 
+				// ====== Tool-specific hotkeys
+
 				if (Manager.getSelectedToolId() == Tools.POINTER) {
-					// arrow keys movement
+					// Arrow keys movement
 					if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
 							e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {
 						AbstractController selected = Manager.getSelected();
@@ -347,8 +382,8 @@ public class EditorWindow {
 
 							e.doit = false;
 						}
-					} else if ((e.keyCode == 'd' && Manager.modShift) || e.keyCode == SWT.DEL) {
-						// deletion
+					} else if (Manager.getHotkey(Hotkeys.DELETE).passes(e.keyCode) || e.keyCode == SWT.DEL) {
+						// Deletion
 						AbstractController selected = Manager.getSelected();
 						if (selected != null) {
 							try {
@@ -360,7 +395,8 @@ public class EditorWindow {
 								log.trace("Selected object is not deletable: " + selected.getClass().getSimpleName());
 							}
 						}
-					} else if (e.keyCode == SWT.SPACE) {
+					} else if (Manager.getHotkey(Hotkeys.PIN).passes(e.keyCode)) {
+						// Pin
 						AbstractController selected = Manager.getSelected();
 						if (selected != null) {
 							selected.setPinned(!selected.isPinned());
@@ -368,12 +404,6 @@ public class EditorWindow {
 							e.doit = false;
 						}
 					}
-				}
-
-				// undo / redo
-				if (e.keyCode == 'z' && Manager.modCtrl) {
-					if (Manager.DELETED_LIST.size() > 0)
-						Manager.DELETED_LIST.removeLast().restore();
 				}
 			}
 		});
@@ -462,10 +492,13 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Manager.createNewShip();
-				enableTools(true);
-				// select the manipulation tool by default
-				if (Manager.getSelectedToolId() == null)
-					selectTool(Tools.POINTER);
+			}
+		});
+
+		mntmLoadShip.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ShipLoaderDialog.getInstance().open();
 			}
 		});
 
@@ -486,6 +519,16 @@ public class EditorWindow {
 
 				Control[] changed = { sideContainer, editorContainer, canvas };
 				shell.layout(changed);
+			}
+		});
+
+		// TODO mntmUndo
+		// TODO mntmRedo
+		// TODO mntmDelete
+		mntmGrid.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Grid.getInstance().setVisible(mntmGrid.getSelection());
 			}
 		});
 
@@ -517,10 +560,7 @@ public class EditorWindow {
 		canvas.addMouseMoveListener(mouseListener);
 		canvas.addMouseTrackListener(mouseListener);
 
-		new Grid(10, 10);
 		Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
-
-		// shell.setSize(displaySize.width, displaySize.height);
 
 		enableTools(false);
 	}
@@ -606,7 +646,6 @@ public class EditorWindow {
 		if (!toolsEnabled())
 			return;
 
-		Manager.selectTool(tool);
 		for (ToolItem it : toolItemMap.values()) {
 			if (toolItemMap.containsKey(tool))
 				it.setSelection(tool == (Tools) it.getData());

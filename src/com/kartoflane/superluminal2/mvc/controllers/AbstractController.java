@@ -33,8 +33,8 @@ import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
-import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
 public abstract class AbstractController implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
 		MouseInputListener, Collidable, Boundable, Follower, Followable, SizeListener {

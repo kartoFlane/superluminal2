@@ -1,6 +1,5 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
-import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.ftl.GameObject;
 
@@ -32,12 +31,5 @@ public abstract class ObjectController extends AbstractController implements Ali
 	@Override
 	public boolean isLocModifiable() {
 		return model.isLocModifiable();
-	}
-
-	@Override
-	public void dispose() throws NotDeletableException {
-		if (!getGameObject().isDeletable())
-			throw new NotDeletableException();
-		super.dispose();
 	}
 }

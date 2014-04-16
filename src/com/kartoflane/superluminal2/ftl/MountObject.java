@@ -2,19 +2,12 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class MountObject extends GameObject implements Alias, Movable, Comparable<MountObject> {
-
-	public enum Directions {
-		UP,
-		DOWN,
-		LEFT,
-		RIGHT,
-		NONE
-	}
 
 	private static final long serialVersionUID = 2647004106297814245L;
 

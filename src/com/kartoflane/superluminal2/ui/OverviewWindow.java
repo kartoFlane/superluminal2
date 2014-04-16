@@ -92,6 +92,8 @@ public class OverviewWindow {
 		final MenuItem mntmRemoveAlias = new MenuItem(overviewMenu, SWT.NONE);
 		mntmRemoveAlias.setText("Remove Alias");
 
+		new AliasDialog(shell);
+
 		// Finalize
 
 		shell.addListener(SWT.Close, new Listener() {
@@ -168,7 +170,8 @@ public class OverviewWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Alias alias = (Alias) tree.getSelection()[0].getData();
-				AliasDialog dialog = new AliasDialog(shell, alias);
+				AliasDialog dialog = AliasDialog.getInstance();
+				dialog.setAlias(alias);
 				dialog.open();
 				update(tree.getSelection()[0]);
 			}

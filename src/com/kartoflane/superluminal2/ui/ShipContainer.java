@@ -7,11 +7,13 @@ import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
+import com.kartoflane.superluminal2.ftl.ImageObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -21,8 +23,10 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
+import com.kartoflane.superluminal2.mvc.controllers.ImageController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
+import com.kartoflane.superluminal2.mvc.controllers.PropController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
@@ -48,6 +52,8 @@ public class ShipContainer implements Disposable {
 	private ArrayList<SystemController> systemControllers;
 
 	private HashMap<GameObject, AbstractController> objectControllerMap;
+	private HashMap<Images, ImageController> imageControllerMap;
+	private HashMap<AbstractController, ArrayList<PropController>> propMap; // TODO
 
 	private ShipController shipController = null;
 
@@ -59,6 +65,8 @@ public class ShipContainer implements Disposable {
 		systemControllers = new ArrayList<SystemController>();
 
 		objectControllerMap = new HashMap<GameObject, AbstractController>();
+		imageControllerMap = new HashMap<Images, ImageController>();
+		propMap = new HashMap<AbstractController, ArrayList<PropController>>();
 	}
 
 	public ShipContainer(ShipObject ship) {
@@ -66,21 +74,55 @@ public class ShipContainer implements Disposable {
 
 		shipController = ShipController.newInstance(this, ship);
 
-		for (RoomObject room : ship.getRooms())
-			add(RoomController.newInstance(this, room));
-		for (DoorObject door : ship.getDoors())
-			add(DoorController.newInstance(this, door));
+		Grid grid = Grid.getInstance();
+
+		for (RoomObject room : ship.getRooms()) {
+			RoomController rc = RoomController.newInstance(this, room);
+
+			int totalX = (ship.getXOffset() + room.getX() + room.getW() / 2) * CELL_SIZE;
+			int totalY = (ship.getYOffset() + room.getY() + room.getH() / 2) * CELL_SIZE;
+
+			rc.setSize(room.getW() * CELL_SIZE, room.getH() * CELL_SIZE);
+			rc.setLocation(grid.snapToGrid(totalX, totalY, rc.getSnapMode()));
+			rc.updateFollowOffset();
+
+			add(rc);
+		}
+		for (DoorObject door : ship.getDoors()) {
+			DoorController dc = DoorController.newInstance(this, door);
+
+			int totalX = (ship.getXOffset() + door.getX()) * CELL_SIZE;
+			int totalY = (ship.getYOffset() + door.getY()) * CELL_SIZE;
+
+			dc.setLocation(grid.snapToGrid(totalX, totalY, dc.getSnapMode()));
+			dc.updateFollowOffset();
+
+			add(dc);
+		}
 		for (MountObject mount : ship.getMounts())
 			add(MountController.newInstance(this, mount));
 		for (GibObject gib : ship.getGibs())
 			add(GibController.newInstance(this, gib));
+
 		for (Systems sys : Systems.values()) {
 			SystemObject system = ship.getSystem(sys);
 			SystemController systemC = SystemController.newInstance(this, system);
 			add(systemC);
 			if (system.canContainStation())
 				add(StationController.newInstance(this, systemC, system.getStation()));
+
+			RoomController room = (RoomController) getController(system.getRoom());
+			if (room != null)
+				assign(sys, room);
 		}
+
+		ImageController imageController = ImageController.newInstance(shipController, ship.getImage(Images.SHIELD));
+		imageControllerMap.put(Images.SHIELD, imageController);
+		imageController = ImageController.newInstance(shipController, ship.getImage(Images.HULL));
+		imageControllerMap.put(Images.HULL, imageController);
+		imageControllerMap.put(Images.FLOOR, ImageController.newInstance(imageController, ship.getImage(Images.FLOOR)));
+		imageControllerMap.put(Images.CLOAK, ImageController.newInstance(imageController, ship.getImage(Images.CLOAK)));
+		imageControllerMap.put(Images.THUMBNAIL, ImageController.newInstance(shipController, ship.getImage(Images.THUMBNAIL)));
 	}
 
 	public ShipController getShipController() {
@@ -167,17 +209,19 @@ public class ShipContainer implements Disposable {
 		StationController station = getStationController(sys);
 
 		unassign(room.getSystemId());
+		unassign(sys);
 		system.assignTo(room.getGameObject());
 		system.reposition(room.getX(), room.getY());
 		system.setParent(room);
 
 		room.addSizeListener(system);
+		system.notifySizeChanged(room.getW(), room.getH());
 
 		if (system.canContainStation()) {
 			room.addSizeListener(station);
 			station.updateFollowOffset();
 			station.updateFollower();
-			station.setVisible(true);
+			station.setVisible(room.canContainSlotId(station.getSlotId()));
 		}
 	}
 
@@ -188,13 +232,15 @@ public class ShipContainer implements Disposable {
 		StationController station = getStationController(sys);
 		AbstractController room = getController(system.getGameObject().getRoom());
 
-		if (room != null) {
-			room.removeSizeListener(system);
-			room.removeSizeListener(station);
-		}
 		if (system.canContainStation())
 			station.setVisible(false);
 		system.unassign();
+
+		if (room != null) {
+			room.removeSizeListener(system);
+			room.removeSizeListener(station);
+			room.redraw();
+		}
 	}
 
 	public boolean isAssigned(Systems sys) {
@@ -259,6 +305,24 @@ public class ShipContainer implements Disposable {
 			objectControllerMap.remove(((ObjectController) controller).getGameObject());
 	}
 
+	public void setImage(Images imageType, String path) {
+		ImageController image = imageControllerMap.get(imageType);
+
+		if (imageType == Images.THUMBNAIL) { // Thumbnail has no visual representation
+			ImageObject object = image.getGameObject();
+			object.setImagePath(path);
+		} else {
+			image.setVisible(false);
+			image.setImage(path);
+			image.setVisible(path != null);
+		}
+	}
+
+	public String getImage(Images imageType) {
+		ImageController image = imageControllerMap.get(imageType);
+		return image.getImage();
+	}
+
 	private int getNextRoomId() {
 		int id = 0;
 		for (RoomObject object : shipController.getGameObject().getRooms()) {
@@ -275,6 +339,10 @@ public class ShipContainer implements Disposable {
 				id++;
 		}
 		return id;
+	}
+
+	public void coalesceRooms() {
+		shipController.getGameObject().coalesceRooms();
 	}
 
 	public void delete(AbstractController controller) {
@@ -295,22 +363,37 @@ public class ShipContainer implements Disposable {
 		if (shipController == null)
 			return; // nothing loaded yet
 
-		ArrayList<AbstractController> controllers = new ArrayList<AbstractController>();
-		controllers.addAll(roomControllers);
-		controllers.addAll(doorControllers);
-		controllers.addAll(mountControllers);
-		controllers.addAll(gibControllers);
-
-		for (AbstractController ac : controllers) {
-			delete(ac);
+		for (MountController mount : mountControllers) {
+			objectControllerMap.remove(mount.getGameObject());
+			mount.dispose();
+		}
+		for (DoorController door : doorControllers) {
+			objectControllerMap.remove(door.getGameObject());
+			door.dispose();
+		}
+		for (RoomController room : roomControllers) {
+			objectControllerMap.remove(room.getGameObject());
+			room.dispose();
+		}
+		for (SystemController system : systemControllers) {
+			objectControllerMap.remove(system.getGameObject());
+			system.dispose();
+		}
+		for (GibController gib : gibControllers) {
+			objectControllerMap.remove(gib.getGameObject());
+			gib.dispose();
 		}
 
-		controllers.clear();
+		AbstractController[] objectControllers = objectControllerMap.values().toArray(new AbstractController[0]);
+		for (AbstractController ac : objectControllers)
+			ac.dispose();
+
 		roomControllers.clear();
 		doorControllers.clear();
 		mountControllers.clear();
 		gibControllers.clear();
 		systemControllers.clear();
+		objectControllerMap.clear();
 
 		shipController.dispose();
 		shipController = null;

@@ -2,8 +2,8 @@ package com.kartoflane.superluminal2.mvc.controllers;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -29,8 +29,9 @@ public class StationController extends ObjectController implements Controller {
 		setLocModifiable(false);
 
 		setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
-		setSlotDirection(system.getDefaultStationDirection());
-		setSlotId(system.getDefaultStationSlotId());
+
+		setSlotDirection(getGameObject().getSlotDirection());
+		setSlotId(getGameObject().getSlotId());
 
 		setParent(system);
 	}
@@ -44,12 +45,11 @@ public class StationController extends ObjectController implements Controller {
 		StationView view = new StationView();
 		StationController controller = new StationController(container, system, model, view);
 
-		controller.setFollowOffset(0, 0);
 		controller.setVisible(false);
 		controller.updateView();
 
 		if (system.getSystemId() == Systems.MEDBAY || system.getSystemId() == Systems.CLONEBAY) {
-			view.setImage("/assets/station_bay.png");
+			view.setImage("/assets/station_slot.png");
 		} else {
 			view.setImage("/assets/station_console.png");
 		}

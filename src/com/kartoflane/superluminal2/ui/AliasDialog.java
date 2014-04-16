@@ -12,7 +12,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -20,15 +21,13 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 
 public class AliasDialog {
-	private Alias alias;
+	private static AliasDialog instance;
 
+	private Alias alias;
 	private Shell shell;
 	private Text aliasText;
 
-	private static AliasDialog instance;
-
-	public AliasDialog(Shell parent, Alias alias) {
-		this.alias = alias;
+	public AliasDialog(Shell parent) {
 		instance = this;
 
 		shell = new Shell(parent, SWT.TITLE | SWT.APPLICATION_MODAL);
@@ -71,14 +70,22 @@ public class AliasDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				AliasDialog.this.alias.setAlias(aliasText.getText());
-				shell.dispose();
+				shell.setVisible(false);
 			}
 		});
 
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				shell.dispose();
+				shell.setVisible(false);
+			}
+		});
+
+		shell.addListener(SWT.Close, new Listener() {
+			@Override
+			public void handleEvent(Event e) {
+				shell.setVisible(false);
+				e.doit = false;
 			}
 		});
 
@@ -86,8 +93,10 @@ public class AliasDialog {
 	}
 
 	public void open() {
+		if (alias == null)
+			throw new IllegalStateException("Alias is null.");
+
 		Composite parent = shell.getParent();
-		Display display = parent.getDisplay();
 
 		Point pLoc = parent.getLocation();
 		Point pSize = parent.getSize();
@@ -99,11 +108,6 @@ public class AliasDialog {
 		aliasText.selectAll();
 
 		shell.open();
-
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
 	}
 
 	public static AliasDialog getInstance() {
@@ -112,5 +116,13 @@ public class AliasDialog {
 
 	public boolean isVisible() {
 		return !shell.isDisposed() && shell.isVisible();
+	}
+
+	public void setAlias(Alias alias) {
+		this.alias = alias;
+	}
+
+	public Alias getAlias() {
+		return alias;
 	}
 }

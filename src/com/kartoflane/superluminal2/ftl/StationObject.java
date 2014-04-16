@@ -1,6 +1,6 @@
 package com.kartoflane.superluminal2.ftl;
 
-import com.kartoflane.superluminal2.ftl.MountObject.Directions;
+import com.kartoflane.superluminal2.components.Directions;
 
 public class StationObject extends GameObject {
 

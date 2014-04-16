@@ -2,7 +2,7 @@
 <configuration status="warn">
   <appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+      <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY" />
       <PatternLayout>
         <pattern>%-5level %logger{1} - %msg%throwable%n</pattern>
       </PatternLayout>

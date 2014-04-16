@@ -14,13 +14,12 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
 import com.kartoflane.superluminal2.ftl.ShipObject;
-import com.kartoflane.superluminal2.ftl.ShipObject.Images;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.ShipView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import com.kartoflane.superluminal2.ui.sidebar.DataComposite;
-import com.kartoflane.superluminal2.ui.sidebar.ShipDataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.ShipDataComposite;
 
 public class ShipController extends ObjectController {
 
@@ -95,19 +94,6 @@ public class ShipController extends ObjectController {
 		this.view.addToPainter(Layers.SHIP_ORIGIN);
 	}
 
-	public void setImagePath(Images imageId, String path) {
-		if (imageId == null)
-			throw new IllegalArgumentException("Image ID must not be null.");
-
-		getGameObject().setImagePath(path, imageId);
-		updateView();
-		redraw();
-	}
-
-	public String getImagePath(Images imageId) {
-		return getGameObject().getImagePath(imageId);
-	}
-
 	public boolean isPlayerShip() {
 		return getGameObject().isPlayerShip();
 	}
@@ -129,9 +115,12 @@ public class ShipController extends ObjectController {
 		throw new NotImplementedException();
 	}
 
+	/**
+	 * This controller has insufficient information to update its own bounding area (needs data from ShipContainer)<br>
+	 * Use {@link ShipContainer#updateBoundingArea()} instead.
+	 */
 	@Override
 	public void updateBoundingArea() {
-		// this controller has insufficient information to update its own bounding area (needs data from ShipContainer)
 		throw new NotImplementedException();
 	}
 
