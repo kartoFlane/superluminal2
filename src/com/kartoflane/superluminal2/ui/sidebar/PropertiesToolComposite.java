@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -216,7 +217,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 				if (path == null)
 					return;
 
-				File file = new File(path);
+				File file = new File(path); // TODO allow only if protocl is file:
 				if (file.exists()) {
 					if (Desktop.isDesktopSupported()) {
 						Desktop desktop = Desktop.getDesktop();
@@ -259,7 +260,7 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 
 				// path == null only when user cancels
 				if (path != null) {
-					container.setImage(type, path);
+					container.setImage(type, "file:" + path);
 					updateData();
 				}
 			}
@@ -481,30 +482,35 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 	public void updateData() {
 		// btnPlayer.setSelection(ship.isPlayerShip());
 
-		// update image path text fields and scroll them to the end to show the file's name
+		// Update image path text fields and scroll them to the end to show the file's name
+		ShipController controller = container.getShipController();
 		String path = container.getImage(Images.HULL);
 
-		txtHull.setText(path == null ? "" : path);
+		txtHull.setText(path == null ? "" : Utils.trimProtocol(path));
 		txtHull.selectAll();
 		btnHullView.setEnabled(path != null);
 
 		path = container.getImage(Images.FLOOR);
-		txtFloor.setText(path == null ? "" : path);
+		txtFloor.setText(path == null ? "" : Utils.trimProtocol(path));
 		txtFloor.selectAll();
-		btnFloorView.setEnabled(path != null);
+		btnFloorView.setEnabled(controller.isPlayerShip() && path != null);
+		btnFloorBrowse.setEnabled(controller.isPlayerShip());
+		btnFloorClear.setEnabled(controller.isPlayerShip());
 
 		path = container.getImage(Images.CLOAK);
-		txtCloak.setText(path == null ? "" : path);
+		txtCloak.setText(path == null ? "" : Utils.trimProtocol(path));
 		txtCloak.selectAll();
 		btnCloakView.setEnabled(path != null);
 
 		path = container.getImage(Images.SHIELD);
-		txtShield.setText(path == null ? "" : path);
+		txtShield.setText(path == null ? "" : Utils.trimProtocol(path));
 		txtShield.selectAll();
-		btnShieldView.setEnabled(path != null);
+		btnShieldView.setEnabled(controller.isPlayerShip() && path != null);
+		btnShieldBrowse.setEnabled(controller.isPlayerShip());
+		btnShieldClear.setEnabled(controller.isPlayerShip());
 
-		ShipController controller = container.getShipController();
-		txtMini.setText(path == null || !controller.isPlayerShip() ? "" : path);
+		path = container.getImage(Images.THUMBNAIL);
+		txtMini.setText(path == null || !controller.isPlayerShip() ? "" : Utils.trimProtocol(path));
 		txtMini.selectAll();
 		btnMiniView.setEnabled(controller.isPlayerShip() && path != null);
 		btnMiniBrowse.setEnabled(controller.isPlayerShip());

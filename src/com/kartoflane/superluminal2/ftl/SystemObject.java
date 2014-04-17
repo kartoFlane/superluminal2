@@ -82,6 +82,9 @@ public class SystemObject extends GameObject {
 			station.setSlotId(getDefaultSlotId(systemId));
 			station.setSlotDirection(getDefaultSlotDirection(systemId));
 		}
+
+		if (canContainInterior())
+			setInteriorPath(getDefaultInterior(systemId));
 	}
 
 	public Systems getSystemId() {
@@ -171,28 +174,7 @@ public class SystemObject extends GameObject {
 
 	@Override
 	public String toString() {
-		return getSystemName(id);
-	}
-
-	public static String getSystemName(Systems systemId) {
-		switch (systemId) {
-			case EMPTY:
-			case SHIELDS:
-			case ENGINES:
-			case OXYGEN:
-			case WEAPONS:
-			case DRONES:
-			case MEDBAY:
-			case PILOT:
-			case SENSORS:
-			case DOORS:
-			case CLOAKING:
-			case ARTILLERY:
-			case TELEPORTER:
-				return systemId.toString();
-			default:
-				return "";
-		}
+		return id.toString();
 	}
 
 	public static int getDefaultSlotId(Systems systemId) {
@@ -230,6 +212,44 @@ public class SystemObject extends GameObject {
 				return Directions.NONE;
 			default:
 				return Directions.UP;
+		}
+	}
+
+	public static String getDefaultInterior(Systems systemId) {
+		switch (systemId) {
+			case ARTILLERY:
+				return "rdat:img/ship/interior/room_artillery.png";
+			case BATTERY:
+				return "rdat:img/ship/interior/room_battery.png";
+			case CLOAKING:
+				return "rdat:img/ship/interior/room_cloaking.png";
+			case DOORS:
+				return "rdat:img/ship/interior/room_doors.png";
+			case DRONES:
+				return "rdat:img/ship/interior/room_drones.png";
+			case ENGINES:
+				return "rdat:img/ship/interior/room_engines.png";
+			case HACKING:
+				return "rdat:img/ship/interior/room_hacking.png";
+			case MEDBAY:
+				return "rdat:img/ship/interior/room_medbay.png";
+			case MIND:
+				return "rdat:img/ship/interior/room_mind.png";
+			case OXYGEN:
+				return "rdat:img/ship/interior/room_oxygen.png";
+			case PILOT:
+				return "rdat:img/ship/interior/room_pilot.png";
+			case SENSORS:
+				return "rdat:img/ship/interior/room_sensors.png";
+			case SHIELDS:
+				return "rdat:img/ship/interior/room_shields.png";
+			case WEAPONS:
+				return "rdat:img/ship/interior/room_weapons.png";
+			case CLONEBAY: // always uses the clonebay "station", not interior?
+			case TELEPORTER: // can't have interior
+			case EMPTY: // can't have interior
+			default:
+				return null;
 		}
 	}
 }

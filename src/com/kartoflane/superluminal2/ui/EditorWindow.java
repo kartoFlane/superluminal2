@@ -38,7 +38,6 @@ import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -202,7 +201,7 @@ public class EditorWindow {
 
 		// Pointer tool
 		tltmPointer = new ToolItem(toolBar, SWT.RADIO);
-		tltmPointer.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/pointer.png"));
+		tltmPointer.setImage(Cache.checkOutImage(this, "cpath:/assets/pointer.png"));
 		tltmPointer.addSelectionListener(toolSelectionAdapter);
 		tltmPointer.setData(Tools.POINTER);
 		tltmPointer.setToolTipText("Manipulation Tool (" + Manager.getHotkey(Hotkeys.POINTER_TOOL) + ")");
@@ -210,7 +209,7 @@ public class EditorWindow {
 
 		// Room tool
 		tltmCreation = new ToolItem(toolBar, SWT.RADIO);
-		tltmCreation.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/wrench.png"));
+		tltmCreation.setImage(Cache.checkOutImage(this, "cpath:/assets/wrench.png"));
 		tltmCreation.addSelectionListener(toolSelectionAdapter);
 		tltmCreation.setData(Tools.CREATOR);
 		tltmCreation.setToolTipText("Creation Tool (" + Manager.getHotkey(Hotkeys.CREATE_TOOL) + ")");
@@ -218,7 +217,7 @@ public class EditorWindow {
 
 		// Gib tool
 		tltmGib = new ToolItem(toolBar, SWT.RADIO);
-		tltmGib.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/gib.png"));
+		tltmGib.setImage(Cache.checkOutImage(this, "cpath:/assets/gib.png"));
 		tltmGib.addSelectionListener(toolSelectionAdapter);
 		tltmGib.setData(Tools.GIB);
 		tltmGib.setToolTipText("Gib Tool (" + Manager.getHotkey(Hotkeys.GIB_TOOL) + ")");
@@ -226,7 +225,7 @@ public class EditorWindow {
 
 		// Properties button
 		tltmProperties = new ToolItem(toolBar, SWT.RADIO);
-		tltmProperties.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/system.png"));
+		tltmProperties.setImage(Cache.checkOutImage(this, "cpath:/assets/system.png"));
 		tltmProperties.addSelectionListener(toolSelectionAdapter);
 		tltmProperties.setData(Tools.CONFIG);
 		tltmProperties.setToolTipText("Properties (" + Manager.getHotkey(Hotkeys.PROPERTIES_TOOL) + ")");
@@ -236,7 +235,7 @@ public class EditorWindow {
 
 		// Manager button
 		tltmManager = new ToolItem(toolBar, SWT.PUSH);
-		tltmManager.setImage(Cache.checkOutImage(EditorWindow.class, "/assets/overview.png"));
+		tltmManager.setImage(Cache.checkOutImage(this, "cpath:/assets/overview.png"));
 		tltmManager.setToolTipText("Overview (" + Manager.getHotkey(Hotkeys.OVERVIEW_TOOL) + ")");
 		tltmManager.addSelectionListener(new SelectionAdapter() {
 			@Override

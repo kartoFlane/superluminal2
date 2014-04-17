@@ -61,7 +61,6 @@ public class Superluminal {
 	 * - properties: general & armaments & crew tabs
 	 * 
 	 * - entity deletion --> add (to) undo
-	 * - load data directly from archives - don't unpack
 	 * - undo przy pomocy reflection -- UndoableBooleanFieldEdit, etc ?? ...chyba nie
 	 * 
 	 */
@@ -320,62 +319,67 @@ public class Superluminal {
 	}
 
 	private static void loadHotkeys(File f) {
-		Document keyDoc = Utils.loadFile(f);
+		try {
+			Document keyDoc = Utils.readFileXML(f);
 
-		if (keyDoc == null)
-			return;
+			Element root = keyDoc.getRootElement();
+			for (Element bind : root.getChildren("bind")) {
+				String actionName = bind.getValue();
+				if (actionName == null) {
+					log.warn(HOTKEYS_FILE + " contained a bind without an assigned action.");
+					continue;
+				}
 
-		Element root = keyDoc.getRootElement();
-		for (Element bind : root.getChildren("bind")) {
-			String actionName = bind.getValue();
-			if (actionName == null) {
-				log.warn(HOTKEYS_FILE + " contained a bind without an assigned action.");
-				continue;
+				Hotkeys action = null;
+				try {
+					action = Hotkeys.valueOf(actionName);
+				} catch (IllegalArgumentException e) {
+					log.warn("Action '" + actionName + "' was not recognised, and was not loaded.");
+				}
+				String loading = null;
+				String attr = null;
+				try {
+					loading = "shift";
+					attr = bind.getAttributeValue(loading);
+					if (attr == null)
+						throw new NullPointerException();
+					boolean shift = Boolean.valueOf(attr);
+
+					loading = "ctrl";
+					attr = bind.getAttributeValue(loading);
+					if (attr == null)
+						throw new NullPointerException();
+					boolean ctrl = Boolean.valueOf(attr);
+
+					loading = "alt";
+					attr = bind.getAttributeValue(loading);
+					if (attr == null)
+						throw new NullPointerException();
+					boolean alt = Boolean.valueOf(attr);
+
+					loading = "char";
+					attr = bind.getAttributeValue(loading);
+					if (attr.length() != 1)
+						throw new IllegalArgumentException();
+					int ch = attr.charAt(0);
+
+					Hotkey h = Manager.getHotkey(action);
+					h.setShift(shift);
+					h.setCtrl(ctrl);
+					h.setAlt(alt);
+					h.setKey(ch);
+				} catch (IllegalArgumentException e) {
+					log.warn("A keybind for action " + action.name() + " had invalid '" + loading + "' attribute, and was not loaded.");
+				} catch (NullPointerException e) {
+					log.warn("A keybind for action " + action.name() + " was missing attribute '" + loading + "', and was not loaded.");
+				}
 			}
-
-			Hotkeys action = null;
-			try {
-				action = Hotkeys.valueOf(actionName);
-			} catch (IllegalArgumentException e) {
-				log.warn("Action '" + actionName + "' was not recognised, and was not loaded.");
-			}
-			String loading = null;
-			String attr = null;
-			try {
-				loading = "shift";
-				attr = bind.getAttributeValue(loading);
-				if (attr == null)
-					throw new NullPointerException();
-				boolean shift = Boolean.valueOf(attr);
-
-				loading = "ctrl";
-				attr = bind.getAttributeValue(loading);
-				if (attr == null)
-					throw new NullPointerException();
-				boolean ctrl = Boolean.valueOf(attr);
-
-				loading = "alt";
-				attr = bind.getAttributeValue(loading);
-				if (attr == null)
-					throw new NullPointerException();
-				boolean alt = Boolean.valueOf(attr);
-
-				loading = "char";
-				attr = bind.getAttributeValue(loading);
-				if (attr.length() != 1)
-					throw new IllegalArgumentException();
-				int ch = attr.charAt(0);
-
-				Hotkey h = Manager.getHotkey(action);
-				h.setShift(shift);
-				h.setCtrl(ctrl);
-				h.setAlt(alt);
-				h.setKey(ch);
-			} catch (IllegalArgumentException e) {
-				log.warn("A keybind for action " + action.name() + " had invalid '" + loading + "' attribute, and was not loaded.");
-			} catch (NullPointerException e) {
-				log.warn("A keybind for action " + action.name() + " was missing attribute '" + loading + "', and was not loaded.");
-			}
+		} catch (FileNotFoundException ex) {
+			log.warn("Keybind file could not be found: " + f.getAbsolutePath());
+		} catch (IOException ex) {
+			log.error("An error has occured while loading keybind file: ", ex);
+		} catch (JDOMParseException ex) {
+			log.error("JDOM exception occured while loading file " + f.getAbsolutePath(), ex);
 		}
 	}
 
@@ -400,6 +404,6 @@ public class Superluminal {
 		wrapper.addContent(root);
 		keyDoc.setRootElement(wrapper);
 
-		Utils.writeFile(keyDoc, f);
+		Utils.writeFileXML(keyDoc, f);
 	}
 }

@@ -6,8 +6,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
@@ -112,7 +110,7 @@ public class ShipController extends ObjectController {
 
 	@Override
 	public Point getPresentedSize() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -121,7 +119,7 @@ public class ShipController extends ObjectController {
 	 */
 	@Override
 	public void updateBoundingArea() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

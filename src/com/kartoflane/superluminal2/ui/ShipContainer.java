@@ -99,10 +99,25 @@ public class ShipContainer implements Disposable {
 
 			add(dc);
 		}
-		for (MountObject mount : ship.getMounts())
-			add(MountController.newInstance(this, mount));
-		for (GibObject gib : ship.getGibs())
-			add(GibController.newInstance(this, gib));
+		Point hullOffset = ship.getHullOffset();
+		for (MountObject mount : ship.getMounts()) {
+			MountController mc = MountController.newInstance(this, mount);
+
+			int totalX = ship.getXOffset() * CELL_SIZE + mount.getX() + hullOffset.x;
+			int totalY = ship.getYOffset() * CELL_SIZE + mount.getY() + hullOffset.y;
+
+			mc.setLocation(grid.snapToGrid(totalX, totalY, mc.getSnapMode()));
+			mc.updateFollowOffset();
+
+			add(mc);
+		}
+		for (GibObject gib : ship.getGibs()) {
+			GibController gc = GibController.newInstance(this, gib);
+
+			// TODO
+
+			add(gc);
+		}
 
 		for (Systems sys : Systems.values()) {
 			SystemObject system = ship.getSystem(sys);
@@ -116,13 +131,7 @@ public class ShipContainer implements Disposable {
 				assign(sys, room);
 		}
 
-		ImageController imageController = ImageController.newInstance(shipController, ship.getImage(Images.SHIELD));
-		imageControllerMap.put(Images.SHIELD, imageController);
-		imageController = ImageController.newInstance(shipController, ship.getImage(Images.HULL));
-		imageControllerMap.put(Images.HULL, imageController);
-		imageControllerMap.put(Images.FLOOR, ImageController.newInstance(imageController, ship.getImage(Images.FLOOR)));
-		imageControllerMap.put(Images.CLOAK, ImageController.newInstance(imageController, ship.getImage(Images.CLOAK)));
-		imageControllerMap.put(Images.THUMBNAIL, ImageController.newInstance(shipController, ship.getImage(Images.THUMBNAIL)));
+		createImageControllers();
 	}
 
 	public ShipController getShipController() {
@@ -269,8 +278,6 @@ public class ShipContainer implements Disposable {
 		} else if (controller instanceof SystemController) {
 			SystemController system = (SystemController) controller;
 			systemControllers.add(system);
-		} else {
-			// not an ObjectController, nothing to do here
 		}
 
 		if (controller instanceof ObjectController)
@@ -297,8 +304,6 @@ public class ShipContainer implements Disposable {
 		} else if (controller instanceof SystemController) {
 			SystemController system = (SystemController) controller;
 			systemControllers.remove(system);
-		} else {
-			// not an ObjectController, nothing to do here
 		}
 
 		if (controller instanceof ObjectController)
@@ -333,12 +338,7 @@ public class ShipContainer implements Disposable {
 	}
 
 	private int getNextMountId() {
-		int id = 0;
-		for (MountObject object : shipController.getGameObject().getMounts()) {
-			if (id == object.getId())
-				id++;
-		}
-		return id;
+		return shipController.getGameObject().getNextMountId();
 	}
 
 	public void coalesceRooms() {
@@ -361,7 +361,7 @@ public class ShipContainer implements Disposable {
 	@Override
 	public void dispose() throws NotDeletableException {
 		if (shipController == null)
-			return; // nothing loaded yet
+			return;
 
 		for (MountController mount : mountControllers) {
 			objectControllerMap.remove(mount.getGameObject());
@@ -383,6 +383,10 @@ public class ShipContainer implements Disposable {
 			objectControllerMap.remove(gib.getGameObject());
 			gib.dispose();
 		}
+		for (ImageController image : imageControllerMap.values()) {
+			objectControllerMap.remove(image.getGameObject());
+			image.dispose();
+		}
 
 		AbstractController[] objectControllers = objectControllerMap.values().toArray(new AbstractController[0]);
 		for (AbstractController ac : objectControllers)
@@ -393,12 +397,11 @@ public class ShipContainer implements Disposable {
 		mountControllers.clear();
 		gibControllers.clear();
 		systemControllers.clear();
+		imageControllerMap.clear();
 		objectControllerMap.clear();
 
 		shipController.dispose();
 		shipController = null;
-
-		// TODO dispose and clear all lists
 
 		System.gc();
 	}
@@ -421,5 +424,81 @@ public class ShipContainer implements Disposable {
 		Point offset = findShipOffset();
 		Point size = findShipSize();
 		shipController.setBoundingPoints(0, 0, gridSize.x - offset.x - size.x, gridSize.y - offset.y - size.y);
+	}
+
+	private void createImageControllers() {
+		// Instantiation order is important for proper layering
+		ShipObject ship = shipController.getGameObject();
+		ImageObject imgObject = null;
+		Point offset = null;
+		Point center = null;
+
+		// Load shield
+		imgObject = ship.getImage(Images.SHIELD);
+		ImageController shield = ImageController.newInstance(shipController, imgObject);
+		shield.setImage(imgObject.getImagePath());
+
+		offset = findShipOffset();
+		center = findShipSize();
+		center.x = offset.x + center.x / 2;
+		center.y = offset.y + center.y / 2;
+
+		shield.setLocation(center.x + ship.getEllipse().x, center.y + ship.getEllipse().y);
+		shield.updateFollowOffset();
+
+		imageControllerMap.put(Images.SHIELD, shield);
+		add(shield);
+
+		// Load hull
+		imgObject = ship.getImage(Images.HULL);
+		ImageController hull = ImageController.newInstance(shipController, imgObject);
+		hull.setImage(imgObject.getImagePath());
+
+		offset = ship.getHullOffset();
+		offset.x += ship.getXOffset() * CELL_SIZE + ship.getHullSize().x / 2;
+		offset.y += ship.getYOffset() * CELL_SIZE + ship.getHullSize().y / 2;
+		hull.setSize(ship.getHullSize());
+		hull.setLocation(offset);
+		hull.updateFollowOffset();
+
+		imageControllerMap.put(Images.HULL, hull);
+		add(hull);
+
+		// Load cloak
+		imgObject = ship.getImage(Images.CLOAK);
+		ImageController cloak = ImageController.newInstance(hull, imgObject);
+		cloak.setImage(imgObject.getImagePath());
+
+		// The offset is used to center the cloak on the hull image
+		// Since the editor uses center-relative positioning, we don't need to anything here
+		cloak.updateFollower();
+
+		imageControllerMap.put(Images.CLOAK, cloak);
+		add(cloak);
+
+		// Load floor
+		imgObject = ship.getImage(Images.FLOOR);
+		ImageController floor = ImageController.newInstance(hull, imgObject);
+		floor.setImage(imgObject.getImagePath());
+
+		// Floor's offset is relative to hull's top-left corner
+		offset = ship.getFloorOffset();
+		center = hull.getLocation();
+		center.x += -hull.getW() / 2 + offset.x + floor.getW() / 2;
+		center.y += -hull.getH() / 2 + offset.y + floor.getH() / 2;
+		floor.setLocation(center.x, center.y);
+		floor.updateFollowOffset();
+
+		imageControllerMap.put(Images.FLOOR, floor);
+		add(floor);
+
+		// Load thumbnail
+		imgObject = ship.getImage(Images.THUMBNAIL);
+		ImageController thumbnail = ImageController.newInstance(shipController, imgObject);
+		thumbnail.setImage(imgObject.getImagePath());
+
+		imageControllerMap.put(Images.THUMBNAIL, thumbnail);
+		add(thumbnail);
+		thumbnail.setVisible(false);
 	}
 }

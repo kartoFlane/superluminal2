@@ -11,6 +11,7 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.View;
@@ -183,7 +184,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 	}
 
 	public Point getResizeAnchor() {
-		return new Point(resizeAnchor.x, resizeAnchor.y);
+		return Utils.copy(resizeAnchor);
 	}
 
 	@Override
@@ -382,6 +383,9 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 
 	@Override
 	public void dispose() {
+		if (model.isDisposed())
+			return;
+
 		Systems id = getGameObject().getSystem();
 		container.unassign(id);
 

@@ -18,6 +18,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 
 public class MountDataComposite extends Composite implements DataComposite {
 
+	private Label label;
 	private Button btnRotated;
 	private Button btnMirrored;
 	private Combo directionCombo;
@@ -33,9 +34,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 
 		setLayout(new GridLayout(2, false));
 
-		Label label = new Label(this, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
-		label.setText("Weapon Mount");
+		label = new Label(this, SWT.NONE);
+		label.setAlignment(SWT.CENTER);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		label.setText("Mount");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -112,6 +114,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 
 	@Override
 	public void updateData() {
+		String alias = controller.getAlias();
+		label.setText("Mount " + controller.getId() + (alias == null || alias.equals("") ? "" : " (" + alias + ")"));
+
 		btnRotated.setSelection(controller.isRotated());
 		btnMirrored.setSelection(controller.isMirrored());
 

@@ -10,7 +10,7 @@ public class DoorView extends BaseView {
 	public DoorView() {
 		super();
 
-		setImage("/assets/door_object.png");
+		setImage("cpath:/assets/door_object.png");
 		setBorderColor(null);
 		setBackgroundColor(null);
 		setBorderThickness(2);

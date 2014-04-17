@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
@@ -81,8 +82,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		final ShipController shipC = container.getShipController();
 
 		label = new Label(this, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
-		label.setText("Room: " + roomC.getId());
+		label.setAlignment(SWT.CENTER);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		label.setText("Room");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -251,7 +253,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 				// path == null only when user cancels
 				if (path != null) {
-					system.setInteriorPath(path);
+					system.setInteriorPath("file:" + path);
 					updateData();
 				}
 			}
@@ -442,9 +444,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			MenuItem item = getSystemItem(systemId);
 			item.setSelection(roomSystem.getSystemId() == systemId);
 			if (container.isAssigned(systemId))
-				item.setImage(Cache.checkOutImage(item, "/assets/tick.png"));
+				item.setImage(Cache.checkOutImage(item, "cpath:/assets/tick.png"));
 			else {
-				Cache.checkInImage(item, "/assets/tick.png");
+				Cache.checkInImage(item, "cpath:/assets/tick.png");
 				item.setImage(null);
 			}
 		}
@@ -494,7 +496,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleSysLevel.notifyListeners(SWT.Selection, null);
 
 			String temp = system.getInteriorPath();
-			txtInterior.setText(temp == null ? "" : temp);
+			txtInterior.setText(temp == null ? "" : Utils.trimProtocol(temp));
 			txtInterior.selectAll();
 		} else {
 			// no system - reset to default

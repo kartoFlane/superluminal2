@@ -54,7 +54,7 @@ public class SystemView extends BaseView {
 
 	@Override
 	public void updateView() {
-		setImage("/assets/system/" + getController().toString().toLowerCase() + ".png");
+		setImage("cpath:/assets/system/" + getController().toString().toLowerCase() + ".png");
 		setInteriorImage(getController().getInteriorPath());
 		setVisible(getController().isAssigned());
 	}

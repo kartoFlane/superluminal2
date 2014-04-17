@@ -52,25 +52,25 @@ public class CreationToolComposite extends Composite implements SidebarComposite
 		toolBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		tltmRoom = new ToolItem(toolBar, SWT.RADIO);
-		tltmRoom.setImage(Cache.checkOutImage(CreationToolComposite.class, "/assets/room.png"));
+		tltmRoom.setImage(Cache.checkOutImage(this, "cpath:/assets/room.png"));
 		tltmRoom.setData(Tools.ROOM);
 		tltmRoom.setToolTipText("Room Creation");
 		toolItemMap.put(Tools.ROOM, tltmRoom);
 
 		tltmDoor = new ToolItem(toolBar, SWT.RADIO);
-		tltmDoor.setImage(Cache.checkOutImage(CreationToolComposite.class, "/assets/door.png"));
+		tltmDoor.setImage(Cache.checkOutImage(this, "cpath:/assets/door.png"));
 		tltmDoor.setData(Tools.DOOR);
 		tltmDoor.setToolTipText("Door Creation");
 		toolItemMap.put(Tools.DOOR, tltmDoor);
 
 		tltmMount = new ToolItem(toolBar, SWT.RADIO);
-		tltmMount.setImage(Cache.checkOutImage(CreationToolComposite.class, "/assets/mount.png"));
+		tltmMount.setImage(Cache.checkOutImage(this, "cpath:/assets/mount.png"));
 		tltmMount.setData(Tools.WEAPON);
 		tltmMount.setToolTipText("Weapon Mount Creation");
 		toolItemMap.put(Tools.WEAPON, tltmMount);
 
 		tltmStation = new ToolItem(toolBar, SWT.RADIO);
-		tltmStation.setImage(Cache.checkOutImage(CreationToolComposite.class, "/assets/station.png"));
+		tltmStation.setImage(Cache.checkOutImage(this, "cpath:/assets/station.png"));
 		tltmStation.setData(Tools.STATION);
 		tltmStation.setToolTipText("Station Placement");
 		toolItemMap.put(Tools.STATION, tltmStation);

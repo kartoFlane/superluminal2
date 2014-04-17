@@ -26,6 +26,7 @@ import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
 import com.kartoflane.superluminal2.components.interfaces.SizeListener;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
@@ -449,7 +450,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public Point getFollowOffset() {
 		if (followOffset == null)
 			followOffset = new Point(0, 0);
-		return new Point(followOffset.x, followOffset.y);
+		return Utils.copy(followOffset);
 	}
 
 	@Override
@@ -687,6 +688,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void dispose() {
+		if (model.isDisposed())
+			return;
 		model.dispose();
 		view.dispose();
 	}

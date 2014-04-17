@@ -49,9 +49,9 @@ public class StationController extends ObjectController implements Controller {
 		controller.updateView();
 
 		if (system.getSystemId() == Systems.MEDBAY || system.getSystemId() == Systems.CLONEBAY) {
-			view.setImage("/assets/station_slot.png");
+			view.setImage("cpath:/assets/station_slot.png");
 		} else {
-			view.setImage("/assets/station_console.png");
+			view.setImage("cpath:/assets/station_console.png");
 		}
 
 		return controller;

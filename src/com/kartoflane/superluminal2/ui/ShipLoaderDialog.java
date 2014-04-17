@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,11 +20,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.ShipMetadata;
@@ -226,8 +229,14 @@ public class ShipLoaderDialog {
 						ShipObject object = ShipUtils.loadShipXML(metadata.getElement());
 
 						Manager.loadShip(object);
-					} catch (Exception ex) {
-						log.error("An error has occured while loading " + metadata.getBlueprintName() + ":", ex);
+					} catch (IOException ex) { // Multi-catch parameters were introduced in Java7 :(
+						handleException(metadata, ex);
+					} catch (NumberFormatException ex) {
+						handleException(metadata, ex);
+					} catch (IllegalArgumentException ex) {
+						handleException(metadata, ex);
+					} catch (JDOMParseException ex) {
+						handleException(metadata, ex);
 					}
 				}
 			}
@@ -299,6 +308,21 @@ public class ShipLoaderDialog {
 
 	public static ShipLoaderDialog getInstance() {
 		return instance;
+	}
+
+	private void handleException(ShipMetadata metadata, Exception ex) {
+		log.error("An error has occured while loading " + metadata.getBlueprintName() + ":", ex);
+
+		MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+		box.setText(Superluminal.APP_NAME + " - Loading Failed");
+
+		StringBuilder buf = new StringBuilder();
+		buf.append(String.format("%s could not be loaded:", metadata.getBlueprintName()));
+		buf.append("\n\n");
+		buf.append(ex.getMessage());
+
+		box.setMessage(buf.toString());
+		box.open();
 	}
 
 	private class MetadataIterator implements Iterator<String> {

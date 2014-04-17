@@ -45,7 +45,8 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		setLayout(new GridLayout(3, false));
 
 		Label label = new Label(this, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
+		label.setAlignment(SWT.CENTER);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		label.setText("Door");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);

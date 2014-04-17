@@ -17,6 +17,7 @@ public class MountObject extends GameObject implements Alias, Movable, Comparabl
 	private int id = -1;
 	private boolean mirrored = false;
 	private boolean rotated = false;
+	private GibObject gib = null;
 	private Directions direction = Directions.UP;
 
 	private WeaponObject weapon = null;
@@ -97,6 +98,14 @@ public class MountObject extends GameObject implements Alias, Movable, Comparabl
 
 	public boolean isRotated() {
 		return rotated;
+	}
+
+	public void setGib(GibObject gib) {
+		this.gib = gib;
+	}
+
+	public GibObject getGib() {
+		return gib;
 	}
 
 	public void setDirection(Directions direction) {

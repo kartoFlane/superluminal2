@@ -2,6 +2,8 @@ package com.kartoflane.superluminal2.core;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +35,30 @@ public class Cache {
 	private static HashMap<RGB, ArrayList<Object>> colorCustomerMap = new HashMap<RGB, ArrayList<Object>>();
 
 	/**
-	 * Request an Image handle for the given path.
+	 * Request an Image handle for the given path.<br>
+	 * <br>
+	 * All paths must have a protocol decraled at their beginning, like so:
+	 * 
+	 * <pre>
+	 * <tt>file:C://example/absolute/path.txt</tt>
+	 * </pre>
+	 * 
+	 * If a path is missing its protocol, or it is mistyped, the image will not be loaded.<br>
+	 * Protocols that this method recognizes:
+	 * 
+	 * <pre>
+	 * <tt>file:    - for use when the resource is located in the OS' filesystem,
+	 *              eg. an absolute or relative path
+	 * cpath:   - for use when the resource is located inside the jar
+	 *              eg. cpath:/assets/image.png
+	 * rdat:    - for use when the resource is located inside resource.dat
+	 *              eg. rdat:img/ship/kestral_base.png</tt>
+	 * </pre>
+	 * 
+	 * @param customer
+	 *            the object that is checking out the image
+	 * @param path
+	 *            path to the requested resource, beginning with a protocol
 	 */
 	public static Image checkOutImage(Object customer, String path) {
 		Image image = null;
@@ -59,27 +84,42 @@ public class Cache {
 		if (path == null) {
 			throw new NullPointerException("Path is null.");
 		} else {
-			if (image == null) {
-				try {
+			String loadPath = null;
+			String protocol = null;
+			try {
+				if (image == null) {
 					InputStream is = null;
+					loadPath = Utils.trimProtocol(path);
+					protocol = Utils.getProtocol(path);
 
-					is = customer.getClass().getResourceAsStream(path);
-					if (is == null) {
-						try {
-							is = new FileInputStream(new File(path));
-						} catch (Exception ex) {
-							log.warn(String.format("%s - resource not found.", path));
-						}
+					// Employ "protocols" to spare the Cache from having to guess where the file is located
+					if (protocol.equals("rdat:")) {
+						// refers to file in resource.dat
+						is = Database.getInstance().getResourceDat().getInputStream(loadPath);
+					} else if (protocol.equals("cpath:")) {
+						// refers to file in classpath
+						is = customer.getClass().getResourceAsStream(loadPath);
+					} else if (protocol.equals("file:")) {
+						// refers to file in OS' filesystem
+						is = new FileInputStream(new File(loadPath));
+					} else {
+						throw new IllegalArgumentException("Path uses unknown protocol, or doesn't have it:\n" + path);
 					}
 
 					image = new Image(Display.getCurrent(), is);
 					cachedImageMap.put(path, image);
-				} catch (SWTException e) {
-					log.warn(String.format("%s - resource contains invalid data.", path));
 				}
-			}
 
-			customers.add(customer);
+				customers.add(customer);
+			} catch (SWTException e) {
+				log.warn(String.format("%s - resource contains invalid data.", loadPath));
+			} catch (IllegalArgumentException e) {
+				log.warn("", e);
+			} catch (FileNotFoundException e) {
+				log.warn(String.format("%s - resource could not be found.", loadPath));
+			} catch (IOException e) {
+				log.error("An error has occured while loading image: ", e);
+			}
 		}
 
 		return image;
@@ -198,4 +238,5 @@ public class Cache {
 		disposeImages();
 		disposeColors();
 	}
+
 }

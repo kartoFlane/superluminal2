@@ -3,8 +3,8 @@ package com.kartoflane.superluminal2.core;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +49,10 @@ public class Utils {
 
 	public static Point center(int x1, int y1, int x2, int y2) {
 		return new Point((x1 + x2) / 2, (y1 + y2) / 2);
+	}
+
+	public static Point add(Point p1, Point p2) {
+		return new Point(p1.x + p2.x, p1.y + p2.y);
 	}
 
 	public static Rectangle copy(Rectangle r) {
@@ -101,41 +105,24 @@ public class Utils {
 		return tinted;
 	}
 
-	public static String readFile(File f) {
-		FileReader reader = null;
-		String contents = null;
-
-		try {
-			reader = new FileReader(f);
-			char[] buf = new char[(int) f.length()];
-			reader.read(buf);
-
-			contents = new String(buf);
-		} catch (FileNotFoundException e) {
-			log.error("File was not found: " + f.getAbsolutePath());
-		} catch (IOException e) {
-			log.error("IO exception occured while reading file " + f.getAbsolutePath(), e);
-		} finally {
-			try {
-				if (reader != null)
-					reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return contents;
+	public static String readFile(File f) throws FileNotFoundException, IOException {
+		DecodeResult dr = decodeText(new FileInputStream(f), f.getName());
+		return dr.text;
 	}
 
-	public static Document loadFile(File f) {
+	public static Document readFileXML(File f) throws FileNotFoundException, IOException, JDOMParseException {
 		String contents = readFile(f);
-		Document doc = null;
-		try {
-			doc = parseXML(contents);
-		} catch (JDOMParseException e) {
-			log.error("JDOM exception occured while loading file " + f.getAbsolutePath(), e);
-		}
-		return doc;
+		return parseXML(contents);
+	}
+
+	public static String readStream(InputStream is, String label) throws IOException {
+		DecodeResult dr = decodeText(is, label);
+		return dr.text;
+	}
+
+	public static Document readStreamXML(InputStream is, String label) throws IOException, JDOMParseException {
+		String contents = readStream(is, label);
+		return parseXML(contents);
 	}
 
 	public static Document parseXML(String contents) throws JDOMParseException {
@@ -147,7 +134,7 @@ public class Utils {
 		return parser.build(contents);
 	}
 
-	public static boolean writeFile(Document doc, File f) {
+	public static boolean writeFileXML(Document doc, File f) {
 		FileWriter writer = null;
 
 		try {
@@ -168,6 +155,24 @@ public class Utils {
 		}
 
 		return false;
+	}
+
+	public static String trimProtocol(String input) {
+		if (input.startsWith("rdat:") || input.startsWith("file:"))
+			return input.substring(5);
+		else if (input.startsWith("cpath:"))
+			return input.substring(6);
+		else
+			return input;
+	}
+
+	public static String getProtocol(String input) {
+		if (input.startsWith("rdat:") || input.startsWith("file:"))
+			return input.substring(0, 5);
+		else if (input.startsWith("cpath:"))
+			return input.substring(0, 6);
+		else
+			return "";
 	}
 
 	/**

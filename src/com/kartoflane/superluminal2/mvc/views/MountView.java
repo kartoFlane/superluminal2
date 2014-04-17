@@ -23,7 +23,7 @@ public class MountView extends BaseView {
 	public MountView() {
 		super();
 
-		directionArrow = Cache.checkOutImage(this, "/assets/arrow.png");
+		directionArrow = Cache.checkOutImage(this, "cpath:/assets/arrow.png");
 
 		setBorderColor(null);
 		setBackgroundColor(null);

@@ -13,15 +13,19 @@ import net.vhati.ftldat.FTLDat.FTLPack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Directions;
+import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.DoorObject;
+import com.kartoflane.superluminal2.ftl.GibObject;
+import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
@@ -136,14 +140,14 @@ public class ShipUtils {
 	 * @throws IllegalArgumentException
 	 * @throws FileNotFoundException
 	 * @throws IOException
+	 * @throws JDOMParseException
 	 */
 	public static ShipObject loadShipXML(Element e)
-			throws IllegalArgumentException, FileNotFoundException, IOException, NumberFormatException {
+			throws IllegalArgumentException, FileNotFoundException, IOException, NumberFormatException, JDOMParseException {
 		if (e == null)
 			throw new IllegalArgumentException("Element must not be null.");
 
 		FTLPack data = Database.getInstance().getDataDat();
-		FTLPack resource = Database.getInstance().getResourceDat();
 
 		String attr = null;
 		Element child = null;
@@ -171,12 +175,48 @@ public class ShipUtils {
 		InputStream is = data.getInputStream(ship.getLayoutTXT());
 		loadLayoutTXT(ship, is, ship.getLayoutTXT());
 
-		// Load the XML layout of the ship (images, gibs, weapon mounts)
+		// Load ship's images
 		attr = e.getAttributeValue("img");
 		if (attr == null)
 			throw new IllegalArgumentException("Missing 'img' attribute.");
 		ship.setLayoutXML("data/" + attr + ".xml");
 
+		String namespace = attr;
+		String prefix = isPlayer ? "rdat:img/ship/" : "rdat:img/ships_glow/";
+
+		// Load the hull image
+		ship.setImage(Images.HULL, prefix + namespace + "_base.png");
+
+		// Load the cloak image, check for override
+		child = e.getChild("cloakImage");
+		if (child != null)
+			namespace = child.getValue();
+		ship.setImage(Images.CLOAK, prefix + namespace + "_cloak.png");
+		namespace = attr;
+
+		// Floor and shield images are exclusive to player ships.
+		// Enemies use a common shield image that has its dimensions
+		// defined by the ELLIPSE layout object.
+		if (isPlayer) {
+			// Load the floor image, check for override
+			child = e.getChild("floorImage");
+			if (child != null)
+				namespace = child.getValue();
+			ship.setImage(Images.FLOOR, prefix + namespace + "_floor.png");
+			namespace = attr;
+
+			// Load the shield image, check for override
+			child = e.getChild("shieldImage");
+			if (child != null)
+				namespace = child.getValue();
+			ship.setImage(Images.SHIELD, prefix + namespace + "_shields1.png");
+			namespace = attr;
+
+			// Load the thumbnail/miniship image path (not represented in the editor)
+			ship.setImage(Images.THUMBNAIL, "rdat:img/customizeUI/miniship_" + namespace + ".png");
+		}
+
+		// Load the XML layout of the ship (images' offsets, gibs, weapon mounts)
 		if (!data.contains(ship.getLayoutXML()))
 			throw new FileNotFoundException("XML layout file could not be found in game's archives: " + ship.getLayoutXML());
 
@@ -254,14 +294,17 @@ public class ShipUtils {
 				}
 
 				// Get the interior image used for this system
+				// System objects are assigned default interior images on their creation
 				// Optional
 				attr = sysEl.getAttributeValue("img");
 				if (attr != null) {
-					String namepsace = attr;
-
-					// system.setInteriorPath(path); // TODO
-				} else {
-					// TODO defaults
+					prefix = "rdat:img/ship/interior/";
+					system.setInteriorPath(prefix + attr + ".png");
+					// TODO get glows by pruning room_ from attr?
+					// what happens with custom-named interior images?
+				} else if (!isPlayer) {
+					// Enemy ships' systems don't use interior images
+					system.setInteriorPath(null);
 				}
 
 				// Get the weapon used by this system
@@ -279,7 +322,7 @@ public class ShipUtils {
 					Element stEl = sysEl.getChild("slot");
 
 					// Station objects are instantiated with default values for their system
-					// So we only need to do anything if the <slot> element exists
+					// Optional
 					if (stEl != null) {
 						StationObject station = system.getStation();
 
@@ -290,6 +333,11 @@ public class ShipUtils {
 						Element dirEl = stEl.getChild("direction");
 						if (dirEl != null)
 							station.setSlotDirection(Directions.valueOf(dirEl.getValue().toUpperCase()));
+					} else if (!isPlayer) {
+						// Enemy ships' stations are placed and rotated mostly randomly
+						// No reason to try to emulate this, so just hide the station
+						StationObject station = system.getStation();
+						station.setSlotId(-2);
 					}
 				}
 			}
@@ -407,11 +455,197 @@ public class ShipUtils {
 		loadLayoutTXT(ship, new FileInputStream(f), f.getName());
 	}
 
-	public static void loadLayoutXML(ShipObject ship, InputStream is, String fileName) {
-		// TODO
+	public static void loadLayoutXML(ShipObject ship, InputStream is, String fileName)
+			throws IllegalArgumentException, JDOMParseException, IOException {
+		Document doc = Utils.readStreamXML(is, fileName);
+
+		Element root = doc.getRootElement();
+		Element child = null;
+		String attr = null;
+
+		// Load the total offset of the image set
+		child = root.getChild("img");
+		if (child == null)
+			throw new IllegalArgumentException("Missing <img> tag");
+
+		Rectangle hullDimensions = new Rectangle(0, 0, 0, 0);
+		attr = child.getAttributeValue("x");
+		if (attr == null)
+			throw new IllegalArgumentException("Img missing 'x' attribute");
+		hullDimensions.x = Integer.valueOf(attr);
+
+		attr = child.getAttributeValue("y");
+		if (attr == null)
+			throw new IllegalArgumentException("Img missing 'y' attribute");
+		hullDimensions.y = Integer.valueOf(attr);
+
+		attr = child.getAttributeValue("w");
+		if (attr == null)
+			throw new IllegalArgumentException("Img missing 'w' attribute");
+		hullDimensions.width = Integer.valueOf(attr);
+
+		attr = child.getAttributeValue("h");
+		if (attr == null)
+			throw new IllegalArgumentException("Img missing 'h' attribute");
+		hullDimensions.height = Integer.valueOf(attr);
+
+		ship.setHullDimensions(hullDimensions);
+
+		// Ignore <glowOffset> - only concerns iPad version of FTL
+
+		// Load additional offsets for other images
+		Point offset = new Point(0, 0);
+		Element offsets = root.getChild("offsets");
+		if (offsets != null) {
+			child = offsets.getChild("cloak");
+			if (child != null) {
+				attr = child.getAttributeValue("x");
+				if (attr == null)
+					throw new IllegalArgumentException("Cloak missing 'x' attribute");
+				offset.x = Integer.valueOf(attr);
+
+				attr = child.getAttributeValue("y");
+				if (attr == null)
+					throw new IllegalArgumentException("Cloak missing 'y' attribute");
+				offset.y = Integer.valueOf(attr);
+
+				ship.setCloakOffset(offset);
+			}
+
+			child = offsets.getChild("floor");
+			if (child != null) {
+				attr = child.getAttributeValue("x");
+				if (attr == null)
+					throw new IllegalArgumentException("Floor missing 'x' attribute");
+				offset.x = Integer.valueOf(attr);
+
+				attr = child.getAttributeValue("y");
+				if (attr == null)
+					throw new IllegalArgumentException("Floor missing 'y' attribute");
+				offset.y = Integer.valueOf(attr);
+
+				ship.setFloorOffset(offset);
+			}
+		}
+
+		HashMap<MountObject, Integer> gibMap = new HashMap<MountObject, Integer>();
+
+		// Load weapon mounts
+		child = root.getChild("weaponMounts");
+		if (child == null)
+			throw new IllegalArgumentException("Missing <weaponMounts> tag");
+
+		for (Element mountEl : child.getChildren("mount")) {
+			MountObject mount = new MountObject();
+
+			attr = mountEl.getAttributeValue("x");
+			if (attr == null)
+				throw new IllegalArgumentException("Mount missing 'x' attribute");
+			offset.x = Integer.valueOf(attr);
+
+			attr = mountEl.getAttributeValue("y");
+			if (attr == null)
+				throw new IllegalArgumentException("Mount missing 'y' attribute");
+			offset.y = Integer.valueOf(attr);
+
+			mount.setLocation(offset.x, offset.y); // TODO when loading remember that this is offset from the ship's hull
+
+			attr = mountEl.getAttributeValue("rotate");
+			if (attr == null)
+				throw new IllegalArgumentException("Mount missing 'rotate' attribute");
+			mount.setRotated(Boolean.valueOf(attr));
+
+			attr = mountEl.getAttributeValue("mirror");
+			if (attr == null)
+				throw new IllegalArgumentException("Moumt missing 'mirror' attribute");
+			mount.setMirrored(Boolean.valueOf(attr));
+
+			attr = mountEl.getAttributeValue("gib");
+			if (attr == null)
+				throw new IllegalArgumentException("Moumt missing 'gib' attribute");
+			gibMap.put(mount, Integer.valueOf(attr));
+
+			attr = mountEl.getAttributeValue("slide");
+			if (attr != null)
+				mount.setDirection(Directions.parseDir(attr.toUpperCase()));
+			else
+				mount.setDirection(Directions.NONE);
+
+			ship.add(mount);
+		}
+
+		// Load gibs
+		child = root.getChild("explosion");
+		if (child == null)
+			throw new IllegalArgumentException("Missing <explosion> tag");
+
+		for (Element gibEl : child.getChildren()) {
+			if (gibEl.getName().startsWith("gib")) {
+				GibObject gib = new GibObject();
+
+				attr = gibEl.getName().substring(3);
+				gib.setId(Integer.valueOf(attr));
+
+				child = gibEl.getChild("x");
+				if (child == null)
+					throw new IllegalArgumentException("Gib missing <x> tag");
+				offset.x = Integer.valueOf(child.getValue());
+
+				child = gibEl.getChild("y");
+				if (child == null)
+					throw new IllegalArgumentException("Gib missing <y> tag");
+				offset.y = Integer.valueOf(child.getValue());
+
+				gib.setOffset(offset.x, offset.y);
+
+				child = gibEl.getChild("velocity");
+				if (child == null)
+					throw new IllegalArgumentException("Gib missing <velocity> tag");
+
+				attr = child.getAttributeValue("min");
+				if (attr == null)
+					throw new IllegalArgumentException("Velocity missing 'min' attribute");
+				gib.setVelocityMin(Float.valueOf(attr));
+
+				attr = child.getAttributeValue("max");
+				if (attr == null)
+					throw new IllegalArgumentException("Velocity missing 'max' attribute");
+				gib.setVelocityMax(Float.valueOf(attr));
+
+				child = gibEl.getChild("direction");
+				if (child == null)
+					throw new IllegalArgumentException("Missing <direction> tag");
+
+				attr = child.getAttributeValue("min");
+				if (attr == null)
+					throw new IllegalArgumentException("Direction missing 'min' attribute");
+				gib.setDirectionMin(Integer.valueOf(attr));
+
+				attr = child.getAttributeValue("max");
+				if (attr == null)
+					throw new IllegalArgumentException("Direction missing 'max' attribute");
+				gib.setDirectionMax(Integer.valueOf(attr));
+
+				child = gibEl.getChild("velocity");
+				if (child == null)
+					throw new IllegalArgumentException("Missing <angular> tag");
+
+				attr = child.getAttributeValue("min");
+				if (attr == null)
+					throw new IllegalArgumentException("Angular missing 'min' attribute");
+				gib.setAngularMin(Float.valueOf(attr));
+
+				attr = child.getAttributeValue("max");
+				if (attr == null)
+					throw new IllegalArgumentException("Angular missing 'max' attribute");
+				gib.setAngularMax(Float.valueOf(attr));
+
+				ship.add(gib);
+			}
+		}
 	}
 
-	public static void loadLayoutXML(ShipObject ship, File f) throws IllegalArgumentException, FileNotFoundException {
+	public static void loadLayoutXML(ShipObject ship, File f) throws IllegalArgumentException, JDOMParseException, IOException {
 		loadLayoutXML(ship, new FileInputStream(f), f.getName());
 	}
 }

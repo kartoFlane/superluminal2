@@ -28,6 +28,7 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 
 	protected int collisionTolerance = 0;
 
+	protected boolean disposed = false;
 	protected boolean deletable = true;
 	protected boolean bounded = false;
 	protected boolean pinned = false;
@@ -87,7 +88,7 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 
 	@Override
 	public Point getLocation() {
-		return new Point(position.x, position.y);
+		return Utils.copy(position);
 	}
 
 	@Override
@@ -103,7 +104,7 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 	/** @return a new point representing the box's dimensions. */
 	@Override
 	public Point getSize() {
-		return new Point(size.x, size.y);
+		return Utils.copy(size);
 	}
 
 	/** @return width of the box */
@@ -223,7 +224,11 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 
 	@Override
 	public void dispose() {
-		// nothing to do here
+		disposed = true;
+	}
+
+	public boolean isDisposed() {
+		return disposed;
 	}
 
 	@Override

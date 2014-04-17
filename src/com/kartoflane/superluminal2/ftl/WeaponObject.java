@@ -37,7 +37,7 @@ public class WeaponObject extends GameObject {
 		weaponType = null;
 		blueprintName = null;
 		shortName = "No Weapon";
-		sheetPath = "/assets/weapon.png";
+		sheetPath = "cpath:/assets/weapon.png";
 		sheetSize.x = frameSize.x = 16;
 		sheetSize.y = frameSize.y = 50;
 		mountOffset.x = 2;

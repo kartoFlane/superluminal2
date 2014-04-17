@@ -19,10 +19,10 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
+import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
@@ -64,11 +64,11 @@ public class OverviewWindow {
 
 		tltmAlias = new ToolItem(toolBar, SWT.NONE);
 		tltmAlias.setToolTipText("Set Alias\n\nAlias is a short name to help you distinguish between objects.");
-		tltmAlias.setImage(SWTResourceManager.getImage(OverviewWindow.class, "/assets/alias.png"));
+		tltmAlias.setImage(Cache.checkOutImage(this, "cpath:/assets/alias.png"));
 
 		tltmRemove = new ToolItem(toolBar, SWT.NONE);
 		tltmRemove.setToolTipText("Remove Alias");
-		tltmRemove.setImage(SWTResourceManager.getImage(OverviewWindow.class, "/assets/noalias.png"));
+		tltmRemove.setImage(Cache.checkOutImage(this, "cpath:/assets/noalias.png"));
 
 		tree = new Tree(shell, SWT.BORDER);
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));

@@ -4,8 +4,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
@@ -131,7 +129,7 @@ public class DoorController extends ObjectController {
 
 	@Override
 	public Point getPresentedSize() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -141,7 +139,7 @@ public class DoorController extends ObjectController {
 
 	@Override
 	public void setPresentedSize(int w, int h) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

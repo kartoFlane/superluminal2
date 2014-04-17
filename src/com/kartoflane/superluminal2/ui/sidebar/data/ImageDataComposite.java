@@ -15,6 +15,7 @@ public class ImageDataComposite extends Composite implements DataComposite {
 
 	private ManipulationTool tool = null;
 	private ImageController controller = null;
+	private Label label = null;
 
 	public ImageDataComposite(Composite parent, ImageController control) {
 		super(parent, SWT.NONE);
@@ -23,8 +24,9 @@ public class ImageDataComposite extends Composite implements DataComposite {
 		tool = (ManipulationTool) Manager.getSelectedTool();
 		controller = control;
 
-		Label label = new Label(this, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
+		label = new Label(this, SWT.NONE);
+		label.setAlignment(SWT.CENTER);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		String alias = control.getAlias();
 		label.setText("Image" + (alias == null ? "" : " (" + alias + ")"));
 
@@ -34,8 +36,8 @@ public class ImageDataComposite extends Composite implements DataComposite {
 
 	@Override
 	public void updateData() {
-		// TODO Auto-generated method stub
-
+		String alias = controller.getAlias();
+		label.setText("Image" + (alias == null ? "" : " (" + alias + ")"));
 	}
 
 	@Override

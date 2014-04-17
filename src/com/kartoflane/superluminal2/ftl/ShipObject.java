@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Images;
@@ -29,6 +30,11 @@ public class ShipObject extends GameObject {
 	private int horizontal = 0;
 	private int vertical = 0;
 	private Rectangle ellipse = new Rectangle(0, 0, 0, 0);
+
+	private Point hullOffset = new Point(0, 0);
+	private Point hullSize = new Point(0, 0);
+	private Point cloakOffset = new Point(0, 0);
+	private Point floorOffset = new Point(0, 0);
 
 	private TreeSet<RoomObject> rooms;
 	private HashSet<DoorObject> doors;
@@ -171,12 +177,67 @@ public class ShipObject extends GameObject {
 		return Utils.copy(ellipse);
 	}
 
+	public void setHullDimensions(Rectangle rect) {
+		if (rect == null)
+			throw new IllegalArgumentException("Hull dimensions must not be null");
+		setHullDimensions(rect.x, rect.y, rect.width, rect.height);
+	}
+
+	public void setHullDimensions(int x, int y, int w, int h) {
+		hullOffset.x = x;
+		hullOffset.y = y;
+		hullSize.x = w;
+		hullSize.y = h;
+	}
+
+	public Rectangle getHullDimensions() {
+		return new Rectangle(hullOffset.x, hullOffset.y, hullSize.x, hullSize.y);
+	}
+
+	public Point getHullOffset() {
+		return Utils.copy(hullOffset);
+	}
+
+	public Point getHullSize() {
+		return Utils.copy(hullSize);
+	}
+
+	public void setCloakOffset(Point p) {
+		setCloakOffset(p.x, p.y);
+	}
+
+	public void setCloakOffset(int x, int y) {
+		cloakOffset.x = x;
+		cloakOffset.y = y;
+	}
+
+	public Point getCloakOffset() {
+		return Utils.copy(cloakOffset);
+	}
+
+	public void setFloorOffset(Point p) {
+		setFloorOffset(p.x, p.y);
+	}
+
+	public void setFloorOffset(int x, int y) {
+		floorOffset.x = x;
+		floorOffset.y = y;
+	}
+
+	public Point getFloorOffset() {
+		return Utils.copy(floorOffset);
+	}
+
 	public SystemObject getSystem(Systems sys) {
 		return systemMap.get(sys);
 	}
 
 	public ImageObject getImage(Images image) {
 		return imageMap.get(image);
+	}
+
+	public void setImage(Images image, String path) {
+		imageMap.get(image).setImagePath(path);
 	}
 
 	public RoomObject[] getRooms() {
@@ -216,9 +277,10 @@ public class ShipObject extends GameObject {
 			rooms.add((RoomObject) object);
 		else if (object instanceof DoorObject)
 			doors.add((DoorObject) object);
-		else if (object instanceof MountObject)
+		else if (object instanceof MountObject) {
+			((MountObject) object).setId(getNextMountId());
 			mounts.add((MountObject) object);
-		else if (object instanceof GibObject)
+		} else if (object instanceof GibObject)
 			gibs.add((GibObject) object);
 		else
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
@@ -255,6 +317,15 @@ public class ShipObject extends GameObject {
 		rooms.clear();
 		for (RoomObject room : roomArray)
 			room.setId(id++);
+	}
+
+	public int getNextMountId() {
+		int id = 0;
+		for (MountObject object : mounts) {
+			if (id == object.getId())
+				id++;
+		}
+		return id;
 	}
 
 	private static int binarySearch(RoomObject[] array, int id, int min, int max) {

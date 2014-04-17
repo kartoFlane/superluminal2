@@ -54,9 +54,10 @@ public class Manager {
 		if (controller != null) {
 			controller.select();
 			selectedController = controller;
+		}
+
+		if (selectedTool == Tools.POINTER)
 			((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).setController(controller);
-		} else
-			((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).setController(null);
 	}
 
 	/** Returns the currently selected controller. */
@@ -68,7 +69,7 @@ public class Manager {
 		closeShip();
 
 		currentShip = new ShipContainer(new ShipObject(true)); // TODO dialog prompt to choose if player ship?
-		currentShip.getShipController().reposition(2 * ShipContainer.CELL_SIZE, 2 * ShipContainer.CELL_SIZE);
+		currentShip.getShipController().reposition(3 * ShipContainer.CELL_SIZE, 3 * ShipContainer.CELL_SIZE);
 
 		EditorWindow.getInstance().enableTools(true);
 		// select the manipulation tool by default
@@ -81,7 +82,7 @@ public class Manager {
 		currentShip = new ShipContainer(ship);
 		ShipController sc = currentShip.getShipController();
 		sc.select();
-		sc.reposition(2 * ShipContainer.CELL_SIZE, 2 * ShipContainer.CELL_SIZE);
+		sc.reposition(3 * ShipContainer.CELL_SIZE, 3 * ShipContainer.CELL_SIZE);
 		sc.deselect();
 
 		currentShip.updateBoundingArea();
@@ -111,6 +112,7 @@ public class Manager {
 		if (currentShip != null)
 			currentShip.dispose();
 
+		setSelected(null);
 		currentShip = null;
 
 		EditorWindow.getInstance().enableTools(false);
