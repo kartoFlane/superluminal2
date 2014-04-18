@@ -469,8 +469,12 @@ public class ShipContainer implements Disposable {
 		ImageController cloak = ImageController.newInstance(hull, imgObject);
 		cloak.setImage(imgObject.getImagePath());
 
-		// The offset is used to center the cloak on the hull image
-		// Since the editor uses center-relative positioning, we don't need to anything here
+		// Floor's offset is relative to hull's top-left corner
+		offset = ship.getCloakOffset();
+		center = hull.getLocation();
+		center.x += -Math.round(hull.getW() / 2f) + offset.x + Math.round(cloak.getW() / 2f);
+		center.y += -Math.round(hull.getH() / 2f) + offset.y + Math.round(cloak.getH() / 2f);
+		cloak.setLocation(center.x, center.y);
 		cloak.updateFollower();
 
 		imageControllerMap.put(Images.CLOAK, cloak);
@@ -484,8 +488,8 @@ public class ShipContainer implements Disposable {
 		// Floor's offset is relative to hull's top-left corner
 		offset = ship.getFloorOffset();
 		center = hull.getLocation();
-		center.x += -hull.getW() / 2 + offset.x + floor.getW() / 2;
-		center.y += -hull.getH() / 2 + offset.y + floor.getH() / 2;
+		center.x += -Math.round(hull.getW() / 2f) + offset.x + Math.round(floor.getW() / 2f);
+		center.y += -Math.round(hull.getH() / 2f) + offset.y + Math.round(floor.getH() / 2f);
 		floor.setLocation(center.x, center.y);
 		floor.updateFollowOffset();
 
