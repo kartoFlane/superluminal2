@@ -24,7 +24,7 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.mvc.Controller;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
@@ -37,7 +37,7 @@ public class OverviewWindow {
 
 	private ShipContainer ship;
 	private ObjectController highlightedController = null;
-	private HashMap<Controller, TreeItem> controllerMap = new HashMap<Controller, TreeItem>();
+	private HashMap<AbstractController, TreeItem> controllerMap = new HashMap<AbstractController, TreeItem>();
 
 	private Shell shell;
 	private TreeItem trtmRooms;
@@ -173,7 +173,6 @@ public class OverviewWindow {
 				AliasDialog dialog = AliasDialog.getInstance();
 				dialog.setAlias(alias);
 				dialog.open();
-				update(tree.getSelection()[0]);
 			}
 		};
 		mntmSetAlias.addSelectionListener(setAliasListener);
@@ -215,13 +214,16 @@ public class OverviewWindow {
 
 		for (RoomController r : ship.getRoomControllers())
 			createItem(r);
+		trtmRooms.setText(String.format("Rooms (%s)", trtmRooms.getItemCount()));
 		for (DoorController d : ship.getDoorControllers())
 			createItem(d);
+		trtmDoors.setText(String.format("Doors (%s)", trtmDoors.getItemCount()));
 		for (MountController m : ship.getMountControllers())
 			createItem(m);
+		trtmMounts.setText(String.format("Mounts (%s)", trtmMounts.getItemCount()));
 	}
 
-	public void update(Controller controller) {
+	public void update(AbstractController controller) {
 		TreeItem item = controllerMap.get(controller);
 		if (item == null) {
 			item = createItem(controller);
@@ -291,7 +293,7 @@ public class OverviewWindow {
 		return tree.isFocusControl();
 	}
 
-	private TreeItem createItem(Controller controller) {
+	private TreeItem createItem(AbstractController controller) {
 		TreeItem parent = controller instanceof RoomController ? trtmRooms :
 				controller instanceof DoorController ? trtmDoors : trtmMounts;
 		TreeItem item = new TreeItem(parent, SWT.NONE);

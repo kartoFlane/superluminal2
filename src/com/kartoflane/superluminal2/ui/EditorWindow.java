@@ -124,58 +124,107 @@ public class EditorWindow {
 		MenuItem mntmFile = new MenuItem(menu, SWT.CASCADE);
 		mntmFile.setText("File");
 
-		Menu menu_1 = new Menu(mntmFile);
-		mntmFile.setMenu(menu_1);
+		Menu menuFile = new Menu(mntmFile);
+		mntmFile.setMenu(menuFile);
 
-		final MenuItem mntmNewShip = new MenuItem(menu_1, SWT.NONE);
+		final MenuItem mntmNewShip = new MenuItem(menuFile, SWT.NONE);
 		mntmNewShip.setText("New Ship\t" + Manager.getHotkey(Hotkeys.NEW_SHIP));
 
-		final MenuItem mntmLoadShip = new MenuItem(menu_1, SWT.NONE);
+		final MenuItem mntmLoadShip = new MenuItem(menuFile, SWT.NONE);
 		mntmLoadShip.setText("Load Ship\t" + Manager.getHotkey(Hotkeys.LOAD_SHIP));
 
 		// Edit menu
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
 		mntmEdit.setText("Edit");
 
-		Menu menu_2 = new Menu(mntmEdit);
-		mntmEdit.setMenu(menu_2);
+		Menu menuEdit = new Menu(mntmEdit);
+		mntmEdit.setMenu(menuEdit);
 
-		mntmUndo = new MenuItem(menu_2, SWT.NONE);
+		mntmUndo = new MenuItem(menuEdit, SWT.NONE);
 		mntmUndo.setText("Undo\t" + Manager.getHotkey(Hotkeys.UNDO));
 
-		mntmRedo = new MenuItem(menu_2, SWT.NONE);
+		mntmRedo = new MenuItem(menuEdit, SWT.NONE);
 		mntmRedo.setText("Redo\t" + Manager.getHotkey(Hotkeys.REDO));
 
-		new MenuItem(menu_2, SWT.SEPARATOR);
+		new MenuItem(menuEdit, SWT.SEPARATOR);
 
-		mntmDelete = new MenuItem(menu_2, SWT.NONE);
+		mntmDelete = new MenuItem(menuEdit, SWT.NONE);
 		mntmDelete.setText("Delete\t" + Manager.getHotkey(Hotkeys.DELETE));
+
+		new MenuItem(menuEdit, SWT.SEPARATOR);
+
+		MenuItem mntmPreferences = new MenuItem(menuEdit, SWT.NONE);
+		mntmPreferences.setText("Preferences");
 
 		// View menu
 		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
 		mntmView.setText("View");
 
-		Menu menu_3 = new Menu(mntmView);
-		mntmView.setMenu(menu_3);
+		Menu menuView = new Menu(mntmView);
+		mntmView.setMenu(menuView);
 
-		final MenuItem mntmSidebar = new MenuItem(menu_3, SWT.CHECK);
+		final MenuItem mntmSidebar = new MenuItem(menuView, SWT.CHECK);
 		mntmSidebar.setSelection(Superluminal.sidebarOnRightSide);
 		mntmSidebar.setText("Sidebar on Right Side");
 
-		new MenuItem(menu_3, SWT.SEPARATOR);
+		new MenuItem(menuView, SWT.SEPARATOR);
 
-		final MenuItem mntmGrid = new MenuItem(menu_3, SWT.CHECK);
+		final MenuItem mntmGrid = new MenuItem(menuView, SWT.CHECK);
 		mntmGrid.setText("Show Grid\t" + Manager.getHotkey(Hotkeys.TOGGLE_GRID));
 		mntmGrid.setSelection(true);
+
+		MenuItem mntmShipComponents = new MenuItem(menuView, SWT.CASCADE);
+		mntmShipComponents.setText("Ship Components");
+
+		Menu menuViewShip = new Menu(mntmShipComponents);
+		mntmShipComponents.setMenu(menuViewShip);
+
+		MenuItem mntmShowAnchor = new MenuItem(menuViewShip, SWT.CHECK);
+		mntmShowAnchor.setSelection(true);
+		mntmShowAnchor.setText("Show Ship Origin\t" + Manager.getHotkey(Hotkeys.SHOW_ANCHOR));
+
+		MenuItem mntmShowMounts = new MenuItem(menuViewShip, SWT.CHECK);
+		mntmShowMounts.setSelection(true);
+		mntmShowMounts.setText("Show Mounts\t" + Manager.getHotkey(Hotkeys.SHOW_MOUNTS));
+
+		MenuItem mntmShowRooms = new MenuItem(menuViewShip, SWT.CHECK);
+		mntmShowRooms.setSelection(true);
+		mntmShowRooms.setText("Show Rooms\t" + Manager.getHotkey(Hotkeys.SHOW_ROOMS));
+
+		MenuItem mntmShowDoors = new MenuItem(menuViewShip, SWT.CHECK);
+		mntmShowDoors.setText("Show Doors\t" + Manager.getHotkey(Hotkeys.SHOW_DOORS));
+		mntmShowDoors.setSelection(true);
+
+		MenuItem mntmShowStations = new MenuItem(menuViewShip, SWT.CHECK);
+		mntmShowStations.setText("Show Stations\t" + Manager.getHotkey(Hotkeys.SHOW_STATIONS));
+		mntmShowStations.setSelection(true);
+
+		MenuItem mntmShipImages = new MenuItem(menuView, SWT.CASCADE);
+		mntmShipImages.setText("Ship Images");
+
+		Menu menuViewImages = new Menu(mntmShipImages);
+		mntmShipImages.setMenu(menuViewImages);
+
+		MenuItem mntmShowHull = new MenuItem(menuViewImages, SWT.CHECK);
+		mntmShowHull.setText("Show Hull\t" + Manager.getHotkey(Hotkeys.SHOW_HULL));
+		mntmShowHull.setSelection(true);
+
+		MenuItem mntmShowFloor = new MenuItem(menuViewImages, SWT.CHECK);
+		mntmShowFloor.setText("Show Floor\t" + Manager.getHotkey(Hotkeys.SHOW_FLOOR));
+		mntmShowFloor.setSelection(true);
+
+		MenuItem mntmShowShield = new MenuItem(menuViewImages, SWT.CHECK);
+		mntmShowShield.setText("Show Shield\t" + Manager.getHotkey(Hotkeys.SHOW_SHIELD));
+		mntmShowShield.setSelection(true);
 
 		// Help menu
 		MenuItem mntmHelp = new MenuItem(menu, SWT.CASCADE);
 		mntmHelp.setText("Help");
 
-		Menu menu_4 = new Menu(mntmView);
-		mntmHelp.setMenu(menu_4);
+		Menu menuHelp = new Menu(mntmView);
+		mntmHelp.setMenu(menuHelp);
 
-		MenuItem mntmAbout = new MenuItem(menu_4, SWT.NONE);
+		MenuItem mntmAbout = new MenuItem(menuHelp, SWT.NONE);
 		mntmAbout.setText("About");
 
 		// Main container - contains everything else

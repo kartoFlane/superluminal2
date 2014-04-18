@@ -311,7 +311,7 @@ public class ShipLoaderDialog {
 	}
 
 	private void handleException(ShipMetadata metadata, Exception ex) {
-		log.error("An error has occured while loading " + metadata.getBlueprintName() + ":", ex);
+		log.warn("An error has occured while loading " + metadata.getBlueprintName() + ":", ex);
 
 		MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
 		box.setText(Superluminal.APP_NAME + " - Loading Failed");

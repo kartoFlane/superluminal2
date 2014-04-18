@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 
 public class AliasDialog {
 	private static AliasDialog instance;
@@ -69,8 +70,9 @@ public class AliasDialog {
 		btnOk.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				AliasDialog.this.alias.setAlias(aliasText.getText());
+				alias.setAlias(aliasText.getText());
 				shell.setVisible(false);
+				OverviewWindow.getInstance().update((AbstractController) alias);
 			}
 		});
 
