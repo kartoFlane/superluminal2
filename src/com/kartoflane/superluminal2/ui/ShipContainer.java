@@ -10,6 +10,7 @@ import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -106,8 +107,8 @@ public class ShipContainer implements Disposable {
 			int totalX = ship.getXOffset() * CELL_SIZE + mount.getX() + hullOffset.x;
 			int totalY = ship.getYOffset() * CELL_SIZE + mount.getY() + hullOffset.y;
 
-			mc.setLocation(grid.snapToGrid(totalX, totalY, mc.getSnapMode()));
-			mc.updateFollowOffset();
+			mc.setFollowOffset(totalX, totalY);
+			mc.updateFollower();
 
 			add(mc);
 		}
@@ -443,8 +444,7 @@ public class ShipContainer implements Disposable {
 		center.x = offset.x + center.x / 2;
 		center.y = offset.y + center.y / 2;
 
-		shield.setLocation(center.x + ship.getEllipse().x, center.y + ship.getEllipse().y);
-		shield.updateFollowOffset();
+		shield.setFollowOffset(center.x + ship.getEllipse().x, center.y + ship.getEllipse().y);
 
 		imageControllerMap.put(Images.SHIELD, shield);
 		add(shield);
@@ -458,8 +458,8 @@ public class ShipContainer implements Disposable {
 		offset.x += ship.getXOffset() * CELL_SIZE + ship.getHullSize().x / 2;
 		offset.y += ship.getYOffset() * CELL_SIZE + ship.getHullSize().y / 2;
 		hull.setSize(ship.getHullSize());
-		hull.setLocation(offset);
-		hull.updateFollowOffset();
+		hull.setFollowOffset(offset);
+		hull.updateFollower();
 
 		imageControllerMap.put(Images.HULL, hull);
 		add(hull);
@@ -471,14 +471,13 @@ public class ShipContainer implements Disposable {
 
 		// Floor's offset is relative to hull's top-left corner
 		offset = ship.getCloakOffset();
-		center = hull.getLocation();
-		center.x += -Math.round(hull.getW() / 2f) + offset.x + Math.round(cloak.getW() / 2f);
-		center.y += -Math.round(hull.getH() / 2f) + offset.y + Math.round(cloak.getH() / 2f);
-		cloak.setLocation(center.x, center.y);
-		cloak.updateFollower();
+		center = Utils.add(hull.getLocationCorner(), ship.getCloakOffset());
+		cloak.setLocationCorner(center.x, center.y);
+		cloak.updateFollowOffset();
 
 		imageControllerMap.put(Images.CLOAK, cloak);
 		add(cloak);
+		// cloak.setVisible(false); // Cloak is only displayed when View Cloak is enabled
 
 		// Load floor
 		imgObject = ship.getImage(Images.FLOOR);
@@ -487,11 +486,9 @@ public class ShipContainer implements Disposable {
 
 		// Floor's offset is relative to hull's top-left corner
 		offset = ship.getFloorOffset();
-		center = hull.getLocation();
-		center.x += -Math.round(hull.getW() / 2f) + offset.x + Math.round(floor.getW() / 2f);
-		center.y += -Math.round(hull.getH() / 2f) + offset.y + Math.round(floor.getH() / 2f);
-		floor.setLocation(center.x, center.y);
-		floor.updateFollowOffset();
+		center.x = (int) Math.round((floor.getW() - hull.getW()) / 2.0) + offset.x;
+		center.y = (int) Math.round((floor.getH() - hull.getH()) / 2.0) + offset.y;
+		floor.setFollowOffset(center.x, center.y);
 
 		imageControllerMap.put(Images.FLOOR, floor);
 		add(floor);

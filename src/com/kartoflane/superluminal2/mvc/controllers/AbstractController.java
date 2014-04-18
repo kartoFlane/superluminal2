@@ -125,6 +125,19 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return model.getLocation();
 	}
 
+	public boolean setLocationCorner(int x, int y) {
+		Rectangle b = model.getBounds();
+		x -= b.x;
+		y -= b.y;
+
+		return translate(x, y);
+	}
+
+	public Point getLocationCorner() {
+		Rectangle b = model.getBounds();
+		return new Point(b.x, b.y);
+	}
+
 	@Override
 	public boolean translate(int dx, int dy) {
 		// if the new location falls outside of the area the object is
@@ -461,6 +474,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			followOffset.x = x;
 			followOffset.y = y;
 		}
+	}
+
+	public void setFollowOffset(Point p) {
+		setFollowOffset(p.x, p.y);
 	}
 
 	@Override
