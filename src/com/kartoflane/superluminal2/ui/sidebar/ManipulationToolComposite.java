@@ -15,8 +15,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
-import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -82,14 +82,14 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		spY.setMinimum(-999);
 
 		btnUp = new Button(boundsContainer, SWT.NONE);
-		btnUp.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/up.png"));
+		btnUp.setImage(Cache.checkOutImage(this, "cpath:/assets/up.png"));
 		GridData gd_btnUp = new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1);
 		gd_btnUp.heightHint = 36;
 		gd_btnUp.widthHint = 36;
 		btnUp.setLayoutData(gd_btnUp);
 
 		btnLeft = new Button(boundsContainer, SWT.NONE);
-		btnLeft.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/left.png"));
+		btnLeft.setImage(Cache.checkOutImage(this, "cpath:/assets/left.png"));
 		GridData gd_btnLeft = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
 		gd_btnLeft.heightHint = 36;
 		gd_btnLeft.widthHint = 36;
@@ -100,14 +100,14 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		spNudge.setToolTipText("This determines how much the selected object\nwill be moved when you press the arrows.");
 
 		btnRight = new Button(boundsContainer, SWT.NONE);
-		btnRight.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/right.png"));
+		btnRight.setImage(Cache.checkOutImage(this, "cpath:/assets/right.png"));
 		GridData gd_btnRight = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
 		gd_btnRight.widthHint = 36;
 		gd_btnRight.heightHint = 36;
 		btnRight.setLayoutData(gd_btnRight);
 
 		btnDown = new Button(boundsContainer, SWT.NONE);
-		btnDown.setImage(SWTResourceManager.getImage(ManipulationToolComposite.class, "/assets/down.png"));
+		btnDown.setImage(Cache.checkOutImage(this, "cpath:/assets/down.png"));
 		GridData gd_btnDown = new GridData(SWT.CENTER, SWT.CENTER, false, false, 3, 1);
 		gd_btnDown.widthHint = 36;
 		gd_btnDown.heightHint = 36;

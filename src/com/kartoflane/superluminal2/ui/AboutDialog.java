@@ -5,6 +5,8 @@ import java.net.URL;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -16,9 +18,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.core.Cache;
 
 public class AboutDialog {
 	private static AboutDialog instance;
@@ -26,6 +28,8 @@ public class AboutDialog {
 	private String message = "";
 	private String linkFaceText = "";
 	private URL linkURL = null;
+
+	private Color color = null;
 
 	private Shell shell;
 	private Link linkWidget;
@@ -46,8 +50,10 @@ public class AboutDialog {
 		gl_shell.horizontalSpacing = 0;
 		shell.setLayout(gl_shell);
 
+		color = Cache.checkOutColor(this, new RGB(255, 255, 255));
+
 		Composite composite = new Composite(shell, SWT.NONE);
-		composite.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		composite.setBackground(color);
 		GridLayout gl_composite = new GridLayout(2, false);
 		gl_composite.marginWidth = 10;
 		gl_composite.marginHeight = 10;
@@ -57,14 +63,14 @@ public class AboutDialog {
 		Label lblIcon = new Label(composite, SWT.NONE);
 		lblIcon.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 2));
 		lblIcon.setImage(display.getSystemImage(SWT.ICON_INFORMATION));
-		lblIcon.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		lblIcon.setBackground(color);
 
 		lblText = new Label(composite, SWT.NONE);
-		lblText.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		lblText.setBackground(color);
 		lblText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		linkWidget = new Link(composite, SWT.NONE);
-		linkWidget.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		linkWidget.setBackground(color);
 		linkWidget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		container = new Composite(shell, SWT.NONE);
@@ -118,6 +124,8 @@ public class AboutDialog {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
+
+		Cache.checkInColor(this, color.getRGB());
 
 		return SWT.OK;
 	}

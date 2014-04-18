@@ -53,6 +53,7 @@ public class Superluminal {
 
 	/**
 	 * TODO:
+	 * - include fine offsets in ship positioning
 	 * - optimize anchor moving against its bounds with some rooms loaded -> stutters
 	 * - clear() in ShipObject -> wipe txt layout, + something else?
 	 * - figure out glow images
@@ -72,6 +73,7 @@ public class Superluminal {
 		log.debug(String.format("%s v%s", APP_NAME, APP_VERSION));
 		log.debug(String.format("%s %s", System.getProperty("os.name"), System.getProperty("os.version")));
 		log.debug(String.format("%s, %s, %s", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("os.arch")));
+		log.debug(String.format("SWT v%s", SWT.getVersion()));
 
 		File configFile = new File("editor.cfg");
 

@@ -13,7 +13,9 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
@@ -30,7 +32,6 @@ import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Grid;
@@ -62,6 +63,7 @@ public class EditorWindow {
 	public static final int CANVAS_MIN_SIZE = 400;
 
 	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<Tools, ToolItem>();
+	private final RGB canvasRGB = new RGB(164, 164, 164);
 
 	private static EditorWindow instance;
 
@@ -81,6 +83,7 @@ public class EditorWindow {
 	private MenuItem mntmDelete;
 
 	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
+	private Color canvasColor = null;
 	private boolean shellResizing = false;
 
 	public EditorWindow(Display display) {
@@ -254,8 +257,9 @@ public class EditorWindow {
 		editorContainer.setLayout(new FormLayout());
 		editorContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
+		canvasColor = Cache.checkOutColor(this, canvasRGB);
 		canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
-		canvas.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
+		canvas.setBackground(canvasColor);
 		canvas.addPaintListener(painter);
 
 		sideContainer = new ScrolledComposite(shell, SWT.BORDER | SWT.V_SCROLL);
@@ -684,7 +688,7 @@ public class EditorWindow {
 	}
 
 	public void dispose() {
-		if (!shell.isDisposed())
-			shell.dispose();
+		Cache.checkInColor(this, canvasRGB);
+		shell.dispose();
 	}
 }
