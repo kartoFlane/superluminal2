@@ -191,7 +191,8 @@ public class ShipUtils {
 		child = e.getChild("cloakImage");
 		if (child != null)
 			namespace = child.getValue();
-		ship.setImage(Images.CLOAK, prefix + namespace + "_cloak.png");
+		// For whatever reason, cloak images for enemy ships are located in img/ship... durr FTL devs
+		ship.setImage(Images.CLOAK, "rdat:img/ship/" + namespace + "_cloak.png");
 		namespace = attr;
 
 		// Floor and shield images are exclusive to player ships.
