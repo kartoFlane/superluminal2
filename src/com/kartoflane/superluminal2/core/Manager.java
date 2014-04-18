@@ -12,6 +12,7 @@ import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.tools.Tool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 
@@ -91,6 +92,8 @@ public class Manager {
 		EditorWindow.getInstance().enableTools(true);
 		// select the manipulation tool by default
 		selectTool(Tools.POINTER);
+		if (OverviewWindow.getInstance().isVisible())
+			OverviewWindow.getInstance().update();
 
 		// TODO load the ship, anything else to do?
 	}

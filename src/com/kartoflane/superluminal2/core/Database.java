@@ -31,6 +31,8 @@ public class Database {
 	// private HashMap<DroneTypes, ArrayList<DroneObject>> droneTypeObjectMap = new HashMap<DroneTypes, ArrayList<DroneObject>>();
 
 	private Database() {
+		playerShipBlueprintNames.add("PLAYER_SHIP_EASY");
+		playerShipBlueprintNames.add("PLAYER_SHIP_TUTORIAL");
 		playerShipBlueprintNames.add("PLAYER_SHIP_HARD");
 		playerShipBlueprintNames.add("PLAYER_SHIP_HARD_2");
 		playerShipBlueprintNames.add("PLAYER_SHIP_HARD_3");

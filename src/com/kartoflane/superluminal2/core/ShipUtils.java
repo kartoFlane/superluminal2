@@ -120,13 +120,40 @@ public class ShipUtils {
 		if (e == null)
 			throw new IllegalArgumentException("Element must not be null.");
 
-		ShipMetadata metadata = new ShipMetadata(e, e.getAttributeValue("name"));
-		metadata.setShipLayoutTXT(e.getAttributeValue("layout"));
-		metadata.setShipLayoutXML(e.getAttributeValue("img"));
-		metadata.setShipClass(e.getChild("class").getValue());
+		String attr = null;
+		Element child = null;
+
+		attr = e.getAttributeValue("name");
+		if (attr == null)
+			throw new IllegalArgumentException("Unidentified: missing 'name' attribute.");
+		ShipMetadata metadata = new ShipMetadata(e, attr);
+
+		attr = e.getAttributeValue("layout");
+		if (attr == null)
+			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing 'layout' attribute.");
+		metadata.setShipLayoutTXT(attr);
+
+		attr = e.getAttributeValue("img");
+		if (attr == null)
+			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing 'img' attribute.");
+		metadata.setShipLayoutXML(attr);
+
+		child = e.getChild("class");
+		if (child == null)
+			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing <class> tag.");
+		metadata.setShipClass(child.getValue());
+
 		if (metadata.isPlayerShip()) {
-			metadata.setShipName(e.getChild("name").getValue());
-			metadata.setShipDescription(e.getChild("desc").getValue());
+			child = e.getChild("name");
+			if (child == null)
+				throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing <name> tag.");
+			metadata.setShipName(child.getValue());
+
+			child = e.getChild("desc");
+			if (child == null)
+				metadata.setShipDescription("<desc> tag was missing!");
+			else
+				metadata.setShipDescription(child.getValue());
 		}
 
 		return metadata;
@@ -244,8 +271,9 @@ public class ShipUtils {
 		if (isPlayer) {
 			child = e.getChild("desc");
 			if (child == null)
-				throw new IllegalArgumentException("Missing <desc> tag.");
-			ship.setShipDescription(child.getValue());
+				ship.setShipDescription("<desc> tag was missing!");
+			else
+				ship.setShipDescription(child.getValue());
 		}
 
 		// Get the list of systems installed on the ship
