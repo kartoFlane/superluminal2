@@ -18,11 +18,21 @@ public class Hotkey {
 		// Commands
 		DELETE,
 		PIN,
-		TOGGLE_GRID,
 		NEW_SHIP,
 		LOAD_SHIP,
 		UNDO,
-		REDO
+		REDO,
+
+		// View
+		TOGGLE_GRID,
+		SHOW_ANCHOR,
+		SHOW_MOUNTS,
+		SHOW_ROOMS,
+		SHOW_DOORS,
+		SHOW_STATIONS,
+		SHOW_HULL,
+		SHOW_FLOOR,
+		SHOW_SHIELD;
 	}
 
 	private final Hotkeys id;

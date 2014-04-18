@@ -197,8 +197,13 @@ public class Superluminal {
 					is = data.getInputStream(innerPath);
 					ArrayList<Element> shipElements = ShipUtils.findShips(is, innerPath);
 
-					for (Element e : shipElements)
-						db.storeShipMetadata(ShipUtils.loadShipMetadata(e));
+					for (Element e : shipElements) {
+						try {
+							db.storeShipMetadata(ShipUtils.loadShipMetadata(e));
+						} catch (IllegalArgumentException ex) {
+							log.warn("Could not load ship metadata: " + ex.getMessage());
+						}
+					}
 				} catch (FileNotFoundException e) {
 					log.error("Could not find file: " + innerPath);
 				} catch (IOException e) {
@@ -296,7 +301,6 @@ public class Superluminal {
 		Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).setKey('o');
 
 		// Command hotkeys
-		Manager.getHotkey(Hotkeys.TOGGLE_GRID).setKey('x');
 		Manager.getHotkey(Hotkeys.PIN).setKey(' ');
 
 		hotkey = Manager.getHotkey(Hotkeys.DELETE);
@@ -318,6 +322,17 @@ public class Superluminal {
 		hotkey = Manager.getHotkey(Hotkeys.LOAD_SHIP);
 		hotkey.setKey('l');
 		hotkey.setShift(true);
+
+		// View hotkeys
+		Manager.getHotkey(Hotkeys.TOGGLE_GRID).setKey('x');
+		Manager.getHotkey(Hotkeys.SHOW_ANCHOR).setKey('1');
+		Manager.getHotkey(Hotkeys.SHOW_MOUNTS).setKey('2');
+		Manager.getHotkey(Hotkeys.SHOW_ROOMS).setKey('3');
+		Manager.getHotkey(Hotkeys.SHOW_DOORS).setKey('4');
+		Manager.getHotkey(Hotkeys.SHOW_STATIONS).setKey('5');
+		Manager.getHotkey(Hotkeys.SHOW_HULL).setKey('6');
+		Manager.getHotkey(Hotkeys.SHOW_FLOOR).setKey('7');
+		Manager.getHotkey(Hotkeys.SHOW_SHIELD).setKey('8');
 	}
 
 	private static void loadHotkeys(File f) {
