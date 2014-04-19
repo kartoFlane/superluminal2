@@ -270,7 +270,6 @@ public class ManipulationTool extends Tool {
 			// always redraw it - prevents an odd visual bug where the controller sometimes doesn't register that it was moved
 			cursor.reposition(p.x, p.y);
 			cursor.updateView();
-
 		}
 
 		// faciliate mouseExit event for controllers

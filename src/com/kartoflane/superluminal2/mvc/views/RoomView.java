@@ -10,6 +10,7 @@ import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.RoomObject;
+import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -61,7 +62,8 @@ public class RoomView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			SystemController systemC = Manager.getCurrentShip().getSystemController(getGameObject().getSystem());
+			Systems sys = Manager.getCurrentShip().getAssignedSystem(getGameObject());
+			SystemController systemC = Manager.getCurrentShip().getSystemController(sys);
 
 			paintBackground(e, backgroundColor, alpha);
 			// system does not follow room's size, so system's availability has to be painted in the room's view
@@ -81,7 +83,8 @@ public class RoomView extends BaseView {
 
 			paintBorder(e, borderColor, borderThickness, alpha);
 
-			paintResizeHandles(e);
+			if (controller.isSelected() && !controller.isPinned())
+				paintResizeHandles(e, handleColor, alpha / 2);
 		}
 	}
 
@@ -100,20 +103,18 @@ public class RoomView extends BaseView {
 						controller.getY() - controller.getH() / 2 + i * ShipContainer.CELL_SIZE);
 	}
 
-	private void paintResizeHandles(PaintEvent e) {
-		if (controller.isSelected() && !controller.isPinned()) {
-			int prevAlpha = e.gc.getAlpha();
-			Color prevColor = e.gc.getBackground();
+	private void paintResizeHandles(PaintEvent e, Color color, int alpha) {
+		int prevAlpha = e.gc.getAlpha();
+		Color prevColor = e.gc.getBackground();
 
-			e.gc.setAlpha(alpha / 3);
-			e.gc.setBackground(handleColor);
+		e.gc.setAlpha(alpha);
+		e.gc.setBackground(color);
 
-			for (int i = 0; i < 4; i++)
-				resizeHandles[i].paintControl(e);
+		for (int i = 0; i < 4; i++)
+			resizeHandles[i].paintControl(e);
 
-			e.gc.setAlpha(prevAlpha);
-			e.gc.setBackground(prevColor);
-		}
+		e.gc.setAlpha(prevAlpha);
+		e.gc.setBackground(prevColor);
 	}
 
 	@Override

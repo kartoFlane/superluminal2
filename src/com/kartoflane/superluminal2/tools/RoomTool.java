@@ -73,6 +73,9 @@ public class RoomTool extends Tool {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
+		// Check the conditions again in case the variable is outdated
+		canCreate = canCreate(cursor.getDimensions());
+
 		if (e.button == 1 && EditorWindow.getInstance().isFocusControl()) {
 			// room creation begin
 			if (Grid.getInstance().isLocAccessible(e.x, e.y)) {
@@ -85,7 +88,6 @@ public class RoomTool extends Tool {
 
 				creating = true;
 				cursor.updateView();
-				// mouseMove(e);
 			}
 		} else if (e.button == 3) {
 		}
@@ -222,6 +224,10 @@ public class RoomTool extends Tool {
 
 	private boolean canCreate(Rectangle createBounds) {
 		ShipContainer container = Manager.getCurrentShip();
+
+		if (!container.isRoomsVisible())
+			return false;
+
 		Rectangle anchorBounds = container.getShipController().getBounds();
 		if (createBounds.x <= anchorBounds.x || createBounds.y <= anchorBounds.y)
 			return false;

@@ -2,10 +2,12 @@ package com.kartoflane.superluminal2.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
 
 import com.kartoflane.superluminal2.components.ShipMetadata;
+import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class Database {
@@ -25,7 +27,8 @@ public class Database {
 
 	private ArrayList<String> playerShipBlueprintNames = new ArrayList<String>();
 	private HashMap<String, ArrayList<ShipMetadata>> shipMetadata = new HashMap<String, ArrayList<ShipMetadata>>();
-	private HashMap<WeaponTypes, ArrayList<WeaponObject>> weaponTypeObjectMap = new HashMap<WeaponTypes, ArrayList<WeaponObject>>();
+	private TreeSet<WeaponObject> weaponObjects = new TreeSet<WeaponObject>();
+	private TreeSet<DroneObject> droneObjects = new TreeSet<DroneObject>();
 
 	// TODO
 	// private HashMap<DroneTypes, ArrayList<DroneObject>> droneTypeObjectMap = new HashMap<DroneTypes, ArrayList<DroneObject>>();
@@ -91,6 +94,52 @@ public class Database {
 		return playerShipBlueprintNames.toArray(new String[0]);
 	}
 
+	public WeaponObject getWeapon(String blueprint) {
+		WeaponObject[] weapons = weaponObjects.toArray(new WeaponObject[0]);
+		try {
+			return weapons[binarySearch(weapons, blueprint, 0, weapons.length)];
+		} catch (IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	public ArrayList<WeaponObject> getWeaponsByType(WeaponTypes type) {
+		ArrayList<WeaponObject> typeWeapons = new ArrayList<WeaponObject>();
+		for (WeaponObject weapon : weaponObjects) {
+			if (weapon.getType() == type)
+				typeWeapons.add(weapon);
+		}
+
+		return typeWeapons;
+	}
+
+	public void storeWeapon(WeaponObject weapon) {
+		weaponObjects.add(weapon);
+	}
+
+	public void storeDrone(DroneObject drone) {
+		droneObjects.add(drone);
+	}
+
+	public DroneObject getDrone(String blueprint) {
+		DroneObject[] drones = droneObjects.toArray(new DroneObject[0]);
+		try {
+			return drones[binarySearch(drones, blueprint, 0, drones.length)];
+		} catch (IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	public ArrayList<DroneObject> getDronesByType(DroneTypes type) {
+		ArrayList<DroneObject> typeDrones = new ArrayList<DroneObject>();
+		for (DroneObject drone : droneObjects) {
+			if (drone.getType() == type)
+				typeDrones.add(drone);
+		}
+
+		return typeDrones;
+	}
+
 	public void storeShipMetadata(ShipMetadata metadata) {
 		ArrayList<ShipMetadata> dataList = shipMetadata.get(metadata.getBlueprintName());
 		if (dataList == null) {
@@ -113,5 +162,33 @@ public class Database {
 
 	public ShipMetadata[] listShipMetadata() {
 		return shipMetadata.values().toArray(new ShipMetadata[0]);
+	}
+
+	private static int binarySearch(WeaponObject[] array, String blueprint, int min, int max) {
+		if (min > max)
+			return -1;
+		int mid = (min + max) / 2;
+		int result = blueprint.compareTo(array[mid].getBlueprintName());
+		if (result > 0) {
+			return binarySearch(array, blueprint, mid + 1, max);
+		} else if (result < 0) {
+			return binarySearch(array, blueprint, min, mid - 1);
+		} else {
+			return mid;
+		}
+	}
+
+	private static int binarySearch(DroneObject[] array, String blueprint, int min, int max) {
+		if (min > max)
+			return -1;
+		int mid = (min + max) / 2;
+		int result = blueprint.compareTo(array[mid].getBlueprintName());
+		if (result > 0) {
+			return binarySearch(array, blueprint, mid + 1, max);
+		} else if (result < 0) {
+			return binarySearch(array, blueprint, min, mid - 1);
+		} else {
+			return mid;
+		}
 	}
 }

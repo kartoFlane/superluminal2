@@ -122,7 +122,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		scaleSysLevel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SystemController system = container.getSystemController(roomC.getSystemId());
+				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				SystemController system = container.getSystemController(sys);
 				system.setLevel(scaleSysLevel.getSelection());
 				txtSysLevel.setText("" + scaleSysLevel.getSelection());
 			}
@@ -149,7 +150,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleMaxLevel.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					SystemController system = container.getSystemController(roomC.getSystemId());
+					Systems sys = container.getAssignedSystem(roomC.getGameObject());
+					SystemController system = container.getSystemController(sys);
 					system.setLevelMax(scaleMaxLevel.getSelection());
 					txtMaxLevel.setText("" + scaleMaxLevel.getSelection());
 					if (!shipC.isPlayerShip()) {
@@ -194,7 +196,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		glowCombo = new Combo(imagesComposite, SWT.READ_ONLY);
 		glowCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
-		// TODO figure out cloak handling
 		// TODO read and add glow sets
 
 		glowCombo.add("Define new glow set...");
@@ -214,7 +215,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnAvailable.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SystemController system = container.getSystemController(roomC.getSystemId());
+				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				SystemController system = container.getSystemController(sys);
 				system.setAvailableAtStart(btnAvailable.getSelection());
 				roomC.redraw();
 			}
@@ -223,7 +225,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageViewListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SystemController system = container.getSystemController(roomC.getSystemId());
+				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				SystemController system = container.getSystemController(sys);
 				File file = new File(system.getInteriorPath());
 
 				if (file != null && file.exists()) {
@@ -246,7 +249,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SystemController system = container.getSystemController(roomC.getSystemId());
+				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				SystemController system = container.getSystemController(sys);
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
 				dialog.setFilterExtensions(new String[] { "*.png" });
 				String path = dialog.open();
@@ -263,7 +267,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageClearListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SystemController system = container.getSystemController(roomC.getSystemId());
+				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				SystemController system = container.getSystemController(sys);
 
 				system.setInteriorPath(null);
 				updateData();
@@ -438,7 +443,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	public void showSystemMenu() {
 		systemMenu.setVisible(true);
 
-		SystemController roomSystem = container.getSystemController(roomC.getSystemId());
+		Systems sys = container.getAssignedSystem(roomC.getGameObject());
+		SystemController roomSystem = container.getSystemController(sys);
 		mntmEmpty.setSelection(roomSystem.getSystemId() == Systems.EMPTY);
 		for (Systems systemId : Systems.getSystems()) {
 			MenuItem item = getSystemItem(systemId);
@@ -450,19 +456,14 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				item.setImage(null);
 			}
 		}
-
-		// medbay and clonebay are mutually exclusive, and occupy the same room
-		MenuItem medbay = getSystemItem(Systems.MEDBAY);
-		MenuItem clonebay = getSystemItem(Systems.CLONEBAY);
-		medbay.setEnabled(!container.isAssigned(Systems.CLONEBAY));
-		clonebay.setEnabled(!container.isAssigned(Systems.MEDBAY));
 	}
 
 	public void updateData() {
 		if (roomC == null)
 			return;
 
-		SystemController system = container.getSystemController(roomC.getSystemId());
+		Systems sys = container.getAssignedSystem(roomC.getGameObject());
+		SystemController system = container.getSystemController(sys);
 		ShipController shipController = container.getShipController();
 		boolean playerShip = shipController.isPlayerShip();
 

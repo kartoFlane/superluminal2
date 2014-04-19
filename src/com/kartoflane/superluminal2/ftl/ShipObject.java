@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.ftl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
@@ -8,6 +9,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Images;
+import com.kartoflane.superluminal2.components.Races;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
@@ -25,6 +27,16 @@ public class ShipObject extends GameObject {
 	private String shipName = null;
 	private String shipDescription = null;
 
+	private TreeSet<RoomObject> rooms;
+	private HashSet<DoorObject> doors;
+	private TreeSet<MountObject> mounts;
+	private HashSet<GibObject> gibs;
+	private ArrayList<AugmentObject> augments;
+	private HashMap<Systems, SystemObject> systemMap;
+	private HashMap<Images, ImageObject> imageMap;
+	private HashMap<Races, Integer> crewCountMap;
+	private HashMap<Races, Integer> crewMaxMap;
+
 	private int xOffset = 0;
 	private int yOffset = 0;
 	private int horizontal = 0;
@@ -36,12 +48,12 @@ public class ShipObject extends GameObject {
 	private Point cloakOffset = new Point(0, 0);
 	private Point floorOffset = new Point(0, 0);
 
-	private TreeSet<RoomObject> rooms;
-	private HashSet<DoorObject> doors;
-	private TreeSet<MountObject> mounts;
-	private HashSet<GibObject> gibs;
-	private HashMap<Systems, SystemObject> systemMap;
-	private HashMap<Images, ImageObject> imageMap;
+	private int weaponSlots = 0;
+	private int droneSlots = 0;
+	private int hullHealth = 0;
+	private int maxPower = 0;
+	private int missiles = 0;
+	private int droneParts = 0;
 
 	private ShipObject() {
 		setDeletable(false);
@@ -52,6 +64,9 @@ public class ShipObject extends GameObject {
 		gibs = new HashSet<GibObject>();
 		systemMap = new HashMap<Systems, SystemObject>();
 		imageMap = new HashMap<Images, ImageObject>();
+		augments = new ArrayList<AugmentObject>();
+		crewCountMap = new HashMap<Races, Integer>();
+		crewMaxMap = new HashMap<Races, Integer>();
 
 		for (Systems system : Systems.values())
 			systemMap.put(system, new SystemObject(system));
@@ -240,6 +255,58 @@ public class ShipObject extends GameObject {
 		imageMap.get(image).setImagePath(path);
 	}
 
+	public void setHealth(int hp) {
+		hullHealth = hp;
+	}
+
+	public int getHealth() {
+		return hullHealth;
+	}
+
+	public void setPower(int power) {
+		maxPower = power;
+	}
+
+	public int getPower() {
+		return maxPower;
+	}
+
+	public void setWeaponSlots(int slots) {
+		weaponSlots = slots;
+	}
+
+	public int getWeaponSlots() {
+		return weaponSlots;
+	}
+
+	public void setDroneSlots(int slots) {
+		droneSlots = slots;
+	}
+
+	public int getDroneSlots() {
+		return droneSlots;
+	}
+
+	public void setMissilesAmount(int amount) {
+		missiles = amount;
+	}
+
+	public int getMissilesAmount() {
+		return missiles;
+	}
+
+	public void setDronePartsAmount(int amount) {
+		droneParts = amount;
+	}
+
+	public int getDronePartsAmount() {
+		return droneParts;
+	}
+
+	public AugmentObject[] getAugments() {
+		return augments.toArray(new AugmentObject[0]);
+	}
+
 	public RoomObject[] getRooms() {
 		return rooms.toArray(new RoomObject[0]);
 	}
@@ -282,6 +349,8 @@ public class ShipObject extends GameObject {
 			mounts.add((MountObject) object);
 		} else if (object instanceof GibObject)
 			gibs.add((GibObject) object);
+		else if (object instanceof AugmentObject)
+			augments.add((AugmentObject) object);
 		else
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
 	}
@@ -297,13 +366,15 @@ public class ShipObject extends GameObject {
 	 */
 	public void remove(GameObject object) {
 		if (object instanceof RoomObject)
-			rooms.remove((RoomObject) object);
+			rooms.remove(object);
 		else if (object instanceof DoorObject)
-			doors.remove((DoorObject) object);
+			doors.remove(object);
 		else if (object instanceof MountObject)
-			mounts.remove((MountObject) object);
+			mounts.remove(object);
 		else if (object instanceof GibObject)
-			gibs.remove((GibObject) object);
+			gibs.remove(object);
+		else if (object instanceof AugmentObject)
+			augments.remove(object);
 		else
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
 	}

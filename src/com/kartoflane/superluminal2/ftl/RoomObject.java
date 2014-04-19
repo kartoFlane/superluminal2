@@ -6,6 +6,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
@@ -19,7 +20,6 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	private int sizeW = 0;
 	private int sizeH = 0;
 
-	private Systems system = Systems.EMPTY;
 	private String alias = null;
 
 	public RoomObject() {
@@ -37,14 +37,6 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 
 	public int getId() {
 		return id;
-	}
-
-	public void setSystem(Systems system) {
-		this.system = system;
-	}
-
-	public Systems getSystem() {
-		return system;
 	}
 
 	@Override
@@ -186,7 +178,9 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 
 	@Override
 	public String toString() {
-		String result = getId() + ": " + getSystem();
+		Systems sys = Manager.getCurrentShip().getAssignedSystem(this);
+		String result = getId() + ": " + sys.toString();
+
 		if (getAlias() != null && !getAlias().equals(""))
 			result += " (" + getAlias() + ")";
 		return result;

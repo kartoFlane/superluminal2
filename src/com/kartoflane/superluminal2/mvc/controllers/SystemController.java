@@ -84,11 +84,7 @@ public class SystemController extends ObjectController implements Controller {
 	 * Use {@link ShipContainer#unassign(Systems)} instead.
 	 */
 	public void unassign() {
-		RoomObject room = getGameObject().getRoom();
-		if (room != null) {
-			room.setSystem(Systems.EMPTY);
-			getGameObject().setRoom(null);
-		}
+		getGameObject().setRoom(null);
 		setParent(null);
 		updateView();
 	}
@@ -100,9 +96,7 @@ public class SystemController extends ObjectController implements Controller {
 	 */
 	public void assignTo(RoomObject room) {
 		unassign();
-
 		getGameObject().setRoom(room);
-		room.setSystem(getSystemId());
 		updateView();
 	}
 

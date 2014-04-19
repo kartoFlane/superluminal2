@@ -119,6 +119,10 @@ public class MountController extends ObjectController implements Comparable<Moun
 		return getGameObject().getDirection();
 	}
 
+	public void setId(int id) {
+		getGameObject().setId(id);
+	}
+
 	public int getId() {
 		return getGameObject().getId();
 	}

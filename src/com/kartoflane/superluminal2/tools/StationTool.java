@@ -91,6 +91,10 @@ public class StationTool extends Tool {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
+		// Check the conditions again in case the variable is outdated
+		Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
+		canPlace = canPlace(p.x, p.y);
+
 		if (canPlace && e.button == 1) {
 			if (state == States.PLACEMENT) {
 				if (Manager.modShift) {
@@ -98,7 +102,8 @@ public class StationTool extends Tool {
 					ShipContainer container = Manager.getCurrentShip();
 					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
-						SystemController system = container.getSystemController(roomC.getSystemId());
+						Systems sys = container.getAssignedSystem(roomC.getGameObject());
+						SystemController system = container.getSystemController(sys);
 						if (system.canContainStation()) {
 							StationController station = (StationController) container.getController(system.getGameObject().getStation());
 							Directions dir = station.getSlotDirection();
@@ -111,7 +116,8 @@ public class StationTool extends Tool {
 					ShipContainer container = Manager.getCurrentShip();
 					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
-						SystemController system = container.getSystemController(roomC.getSystemId());
+						Systems sys = container.getAssignedSystem(roomC.getGameObject());
+						SystemController system = container.getSystemController(sys);
 						if (system.canContainStation()) {
 							StationController station = (StationController) container.getController(system.getGameObject().getStation());
 							int id = roomC.getSlotId(cursor.getX(), cursor.getY());
@@ -154,7 +160,8 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			SystemController system = container.getSystemController(roomC.getSystemId());
+			Systems sys = container.getAssignedSystem(roomC.getGameObject());
+			SystemController system = container.getSystemController(sys);
 			if (system.canContainStation()) {
 				StationController station = (StationController) container.getController(system.getGameObject().getStation());
 				station.setSlotId(-2);
@@ -168,7 +175,8 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			SystemController system = container.getSystemController(roomC.getSystemId());
+			Systems sys = container.getAssignedSystem(roomC.getGameObject());
+			SystemController system = container.getSystemController(sys);
 			if (system.canContainStation()) {
 				StationController station = (StationController) container.getController(system.getGameObject().getStation());
 				station.setSlotDirection(dir);
@@ -198,17 +206,8 @@ public class StationTool extends Tool {
 
 	@Override
 	public void mouseMove(MouseEvent e) {
-		ShipContainer container = Manager.getCurrentShip();
 		Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
-		RoomController roomC = (RoomController) window.getPainter().getControllerAt(p.x, p.y, Layers.ROOM);
-		if (roomC != null) {
-			SystemController system = container.getSystemController(roomC.getSystemId());
-			Systems id = system.getSystemId();
-			canPlace = system.canContainStation() && roomC.getDimensions().contains(p.x, p.y);
-			canPlace &= !(isStateDirection() && (id == Systems.MEDBAY || id == Systems.CLONEBAY));
-		} else {
-			canPlace = false;
-		}
+		canPlace = canPlace(p.x, p.y);
 
 		// move the cursor around to follow mouse
 		cursor.updateView();
@@ -230,6 +229,22 @@ public class StationTool extends Tool {
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
 		cursor.redraw();
+	}
+
+	public boolean canPlace(int x, int y) {
+		boolean result = true;
+		ShipContainer container = Manager.getCurrentShip();
+		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
+		if (roomC != null) {
+			Systems id = container.getAssignedSystem(roomC.getGameObject());
+			SystemController system = container.getSystemController(id);
+			result = container.isStationsVisible() && container.isRoomsVisible();
+			result &= system.canContainStation() && roomC.getDimensions().contains(x, y);
+			result &= !(isStateDirection() && (id == Systems.MEDBAY || id == Systems.CLONEBAY));
+		} else
+			result = false;
+
+		return result;
 	}
 
 	public boolean canPlace() {

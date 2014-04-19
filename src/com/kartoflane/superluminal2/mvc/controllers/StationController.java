@@ -126,10 +126,10 @@ public class StationController extends ObjectController implements Controller {
 		if (system.isAssigned()) {
 			RoomController room = (RoomController) container.getController(system.getRoom());
 			Point slotLoc = room.getSlotLocation(getSlotId());
-			if (slotLoc != null) {
+			if (slotLoc != null)
 				setFollowOffset(slotLoc.x - room.getW() / 2, slotLoc.y - room.getH() / 2);
-			}
-			setVisible(slotLoc != null); // hide the station if the room cannot contain the slot
+			// hide the station if the room cannot contain the slot
+			setVisible(slotLoc != null && container.getAssignedSystem(system.getRoom()) == system.getSystemId());
 		} else {
 			setVisible(false);
 		}
@@ -137,7 +137,6 @@ public class StationController extends ObjectController implements Controller {
 
 	@Override
 	public void notifySizeChanged(int w, int h) {
-		// TODO change the slot id and see if it still fits inside the room, hide if it doesn't
 		updateFollowOffset();
 	}
 

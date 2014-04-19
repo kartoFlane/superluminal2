@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -21,9 +20,8 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Images;
-import com.kartoflane.superluminal2.components.ShipMetadata;
-import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.DoorObject;
+import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
@@ -31,9 +29,9 @@ import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
+import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class ShipUtils {
-	public static final Logger log = LogManager.getLogger(ShipUtils.class);
 
 	private enum LayoutObjects {
 		X_OFFSET,
@@ -45,119 +43,7 @@ public class ShipUtils {
 		DOOR
 	}
 
-	/**
-	 * Finds all ships with the specified blueprintName within the file.
-	 * 
-	 * @param f
-	 * @param blueprintName
-	 * @return
-	 * @throws JDOMParseException
-	 *             when the contents of the stream could not be parsed.
-	 * @throws IOException
-	 */
-	public static ArrayList<Element> findShipsWithName(String blueprintName, InputStream is, String fileName)
-			throws IllegalArgumentException, JDOMParseException, IOException {
-		if (blueprintName == null)
-			throw new IllegalArgumentException("Blueprint name must not be null.");
-
-		DecodeResult dr = Utils.decodeText(is, null);
-		String contents = dr.text;
-		Document doc = Utils.parseXML(contents);
-
-		ArrayList<Element> shipList = new ArrayList<Element>();
-
-		Element root = doc.getRootElement();
-
-		for (Element e : root.getChildren("shipBlueprint")) {
-			String blueprint = e.getAttributeValue("name");
-
-			if (blueprint != null && blueprint.equals(blueprintName))
-				shipList.add(e);
-		}
-
-		return shipList;
-	}
-
-	public static ArrayList<Element> findShipsWithName(File f, String blueprintName)
-			throws IllegalArgumentException, JDOMParseException, IOException {
-		return findShipsWithName(blueprintName, new FileInputStream(f), f.getName());
-	}
-
-	public static ArrayList<Element> findShips(InputStream is, String fileName)
-			throws IllegalArgumentException, JDOMParseException, IOException {
-		Document doc = null;
-		DecodeResult dr = Utils.decodeText(is, null);
-		String contents = dr.text;
-		try {
-			doc = Utils.parseXML(contents);
-		} catch (JDOMParseException e) {
-			System.out.println(contents);
-			throw e;
-		}
-		ArrayList<Element> shipList = new ArrayList<Element>();
-
-		Element root = doc.getRootElement();
-
-		for (Element e : root.getChildren("shipBlueprint"))
-			shipList.add(e);
-
-		return shipList;
-	}
-
-	public static ArrayList<Element> findShips(File f)
-			throws IllegalArgumentException, JDOMParseException, IOException {
-		return findShips(new FileInputStream(f), f.getName());
-	}
-
-	/**
-	 * Loads the ship's metadata from the supplied Element
-	 * 
-	 * @param e
-	 *            XML element for the shipBlueprint tag
-	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
-	 */
-	public static ShipMetadata loadShipMetadata(Element e) {
-		if (e == null)
-			throw new IllegalArgumentException("Element must not be null.");
-
-		String attr = null;
-		Element child = null;
-
-		attr = e.getAttributeValue("name");
-		if (attr == null)
-			throw new IllegalArgumentException("Unidentified: missing 'name' attribute.");
-		ShipMetadata metadata = new ShipMetadata(e, attr);
-
-		attr = e.getAttributeValue("layout");
-		if (attr == null)
-			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing 'layout' attribute.");
-		metadata.setShipLayoutTXT(attr);
-
-		attr = e.getAttributeValue("img");
-		if (attr == null)
-			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing 'img' attribute.");
-		metadata.setShipLayoutXML(attr);
-
-		child = e.getChild("class");
-		if (child == null)
-			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing <class> tag.");
-		metadata.setShipClass(child.getValue());
-
-		if (metadata.isPlayerShip()) {
-			child = e.getChild("name");
-			if (child == null)
-				throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing <name> tag.");
-			metadata.setShipName(child.getValue());
-
-			child = e.getChild("desc");
-			if (child == null)
-				metadata.setShipDescription("<desc> tag was missing!");
-			else
-				metadata.setShipDescription(child.getValue());
-		}
-
-		return metadata;
-	}
+	public static final Logger log = LogManager.getLogger(ShipUtils.class);
 
 	/**
 	 * ------------------------------------------------------ TODO documentation
@@ -175,6 +61,7 @@ public class ShipUtils {
 			throw new IllegalArgumentException("Element must not be null.");
 
 		FTLPack data = Database.getInstance().getDataDat();
+		FTLPack resource = Database.getInstance().getResourceDat();
 
 		String attr = null;
 		Element child = null;
@@ -195,6 +82,7 @@ public class ShipUtils {
 		if (attr == null)
 			throw new IllegalArgumentException("Missing 'layout' attribute.");
 		ship.setLayoutTXT("data/" + attr + ".txt");
+		ship.setLayoutXML("data/" + attr + ".xml");
 
 		if (!data.contains(ship.getLayoutTXT()))
 			throw new FileNotFoundException("TXT layout file could not be found in game's archives: " + ship.getLayoutTXT());
@@ -206,20 +94,19 @@ public class ShipUtils {
 		attr = e.getAttributeValue("img");
 		if (attr == null)
 			throw new IllegalArgumentException("Missing 'img' attribute.");
-		ship.setLayoutXML("data/" + attr + ".xml");
 
 		String namespace = attr;
-		String prefix = isPlayer ? "rdat:img/ship/" : "rdat:img/ships_glow/";
+		// Ship images can be located in either ship/, ships_glow/ or ships_noglow/
+		String[] prefixes = { "rdat:img/ship/", "rdat:img/ships_glow/", "rdat:img/ships_noglow/" };
 
 		// Load the hull image
-		ship.setImage(Images.HULL, prefix + namespace + "_base.png");
+		ship.setImage(Images.HULL, firstExisting(prefixes, namespace + "_base.png", resource));
 
 		// Load the cloak image, check for override
 		child = e.getChild("cloakImage");
 		if (child != null)
 			namespace = child.getValue();
-		// For whatever reason, cloak images for enemy ships are located in img/ship... durr FTL devs
-		ship.setImage(Images.CLOAK, "rdat:img/ship/" + namespace + "_cloak.png");
+		ship.setImage(Images.CLOAK, firstExisting(prefixes, namespace + "_cloak.png", resource));
 		namespace = attr;
 
 		// Floor and shield images are exclusive to player ships.
@@ -230,14 +117,14 @@ public class ShipUtils {
 			child = e.getChild("floorImage");
 			if (child != null)
 				namespace = child.getValue();
-			ship.setImage(Images.FLOOR, prefix + namespace + "_floor.png");
+			ship.setImage(Images.FLOOR, firstExisting(prefixes, namespace + "_floor.png", resource));
 			namespace = attr;
 
 			// Load the shield image, check for override
 			child = e.getChild("shieldImage");
 			if (child != null)
 				namespace = child.getValue();
-			ship.setImage(Images.SHIELD, prefix + namespace + "_shields1.png");
+			ship.setImage(Images.SHIELD, firstExisting(prefixes, namespace + "_shields1.png", resource));
 			namespace = attr;
 
 			// Load the thumbnail/miniship image path (not represented in the editor)
@@ -319,7 +206,8 @@ public class ShipUtils {
 				if (attr != null) {
 					system.setAvailable(Boolean.valueOf(attr));
 				} else {
-					// TODO default to true?
+					// Default to true
+					system.setAvailable(true);
 				}
 
 				// Get the interior image used for this system
@@ -327,8 +215,7 @@ public class ShipUtils {
 				// Optional
 				attr = sysEl.getAttributeValue("img");
 				if (attr != null) {
-					prefix = "rdat:img/ship/interior/";
-					system.setInteriorPath(prefix + attr + ".png");
+					system.setInteriorPath("rdat:img/ship/interior/" + attr + ".png");
 					// TODO get glows by pruning room_ from attr?
 					// what happens with custom-named interior images?
 				} else if (!isPlayer) {
@@ -343,7 +230,7 @@ public class ShipUtils {
 					if (attr == null)
 						throw new IllegalArgumentException("Artillery is missing 'weapon' attribute.");
 					String artilleryWeapon = attr;
-					// TODO
+					// TODO ??????
 				}
 
 				// Load station position and direction for this system
@@ -372,7 +259,95 @@ public class ShipUtils {
 			}
 		}
 
-		// TODO weapons / drones / reactor / hull
+		child = e.getChild("weaponSlots");
+		if (child == null) {
+			ship.setWeaponSlots(4); // default
+		} else {
+			ship.setWeaponSlots(Integer.valueOf(child.getValue()));
+		}
+
+		child = e.getChild("droneSlots");
+		if (child == null) {
+			ship.setDroneSlots(2); // default
+		} else {
+			ship.setDroneSlots(Integer.valueOf(child.getValue()));
+		}
+
+		child = e.getChild("weaponList");
+		if (child == null) {
+			ship.setMissilesAmount(0);
+		} else {
+			attr = child.getAttributeValue("missiles");
+			if (attr == null)
+				ship.setMissilesAmount(0);
+			else
+				ship.setMissilesAmount(Integer.valueOf(attr));
+
+			attr = child.getAttributeValue("count");
+			int count = -1;
+			if (attr != null)
+				count = Integer.valueOf(attr);
+
+			int loaded = 0;
+			MountObject[] mounts = ship.getMounts();
+			for (Element weapon : child.getChildren("weapon")) {
+				if (count != -1 && loaded >= count)
+					break;
+
+				// Artillery always uses fifth weapon mount TODO what if no artillery system?
+				MountObject mount = mounts[loaded >= 4 ? loaded + 1 : loaded];
+				attr = weapon.getAttributeValue("name");
+				if (attr == null)
+					throw new IllegalArgumentException("Weapon in <weaponList> is missing 'name' attribute.");
+				WeaponObject weaponObject = Database.getInstance().getWeapon(attr);
+				if (weaponObject == null)
+					throw new IllegalArgumentException("WeaponBlueprint not found: " + attr);
+				mount.setWeapon(weaponObject);
+
+				loaded++;
+			}
+		}
+
+		child = e.getChild("droneList");
+		if (child == null) {
+			ship.setDronePartsAmount(0);
+		} else {
+			attr = child.getAttributeValue("drones");
+			if (attr == null)
+				ship.setDronePartsAmount(0);
+			else
+				ship.setDronePartsAmount(Integer.valueOf(attr));
+
+			attr = child.getAttributeValue("count");
+			int count = -1;
+			if (attr != null)
+				count = Integer.valueOf(attr);
+
+			int loaded = 0;
+			for (Element drone : child.getChildren("drone")) {
+				if (count != -1 && loaded >= count)
+					break;
+
+				attr = drone.getAttributeValue("name");
+				if (attr == null)
+					throw new IllegalArgumentException("Drone in <droneList> is missing 'name' attribute.");
+				DroneObject droneObject = Database.getInstance().getDrone(attr);
+				if (droneObject == null)
+					throw new IllegalArgumentException("DroneBlueprint not found: " + attr);
+
+				// TODO add drone to ship
+
+				loaded++;
+			}
+		}
+
+		child = e.getChild("health");
+		if (child == null)
+			throw new IllegalArgumentException("Missing <health> tag");
+
+		child = e.getChild("maxPower");
+		if (child == null)
+			throw new IllegalArgumentException("Missing <maxPower> tag");
 
 		return ship;
 	}
@@ -424,7 +399,7 @@ public class ShipUtils {
 					try {
 						Integer.parseInt(line);
 					} catch (NumberFormatException ex) {
-						// not a number
+						// Not a number
 						throw new IllegalArgumentException(fileName + " contained an unknown layout object: " + line);
 					}
 				}
@@ -676,5 +651,13 @@ public class ShipUtils {
 
 	public static void loadLayoutXML(ShipObject ship, File f) throws IllegalArgumentException, JDOMParseException, IOException {
 		loadLayoutXML(ship, new FileInputStream(f), f.getName());
+	}
+
+	private static String firstExisting(String[] prefixes, String suffix, FTLPack archive) {
+		for (String prefix : prefixes) {
+			if (archive.contains(Utils.trimProtocol(prefix) + suffix))
+				return prefix + suffix;
+		}
+		return null;
 	}
 }

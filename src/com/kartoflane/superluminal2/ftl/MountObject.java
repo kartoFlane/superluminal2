@@ -14,7 +14,7 @@ public class MountObject extends GameObject implements Alias, Movable, Comparabl
 	private int locX = 0;
 	private int locY = 0;
 
-	private int id = -1;
+	private int id = -2;
 	private boolean mirrored = false;
 	private boolean rotated = false;
 	private GibObject gib = null;

@@ -94,6 +94,9 @@ public class MountTool extends Tool {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
+		// Check the conditions again in case the variable is outdated
+		canCreate = canPlace();
+
 		if (e.button == 1 && canCreate) {
 			ShipContainer container = Manager.getCurrentShip();
 			MountObject object = new MountObject();
@@ -171,7 +174,8 @@ public class MountTool extends Tool {
 	}
 
 	private boolean canPlace() {
-		return Manager.getCurrentShip().getMountControllers().length < 8;
+		ShipContainer container = Manager.getCurrentShip();
+		return container.isMountsVisible() && container.getMountControllers().length < 8;
 	}
 
 	public boolean canCreate() {

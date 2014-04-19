@@ -56,6 +56,13 @@ public class ShipContainer implements Disposable {
 	private HashMap<Images, ImageController> imageControllerMap;
 	private HashMap<AbstractController, ArrayList<PropController>> propMap; // TODO
 
+	private boolean mountsVisible = true;
+	private boolean roomsVisible = true;
+	private boolean doorsVisible = true;
+	private boolean stationsVisible = true;
+
+	private Systems currentlyActiveBay = Systems.MEDBAY;
+
 	private ShipController shipController = null;
 
 	private ShipContainer() {
@@ -120,13 +127,17 @@ public class ShipContainer implements Disposable {
 			add(gc);
 		}
 
+		// Instantiate first, assign later
 		for (Systems sys : Systems.values()) {
 			SystemObject system = ship.getSystem(sys);
 			SystemController systemC = SystemController.newInstance(this, system);
 			add(systemC);
 			if (system.canContainStation())
 				add(StationController.newInstance(this, systemC, system.getStation()));
+		}
 
+		for (Systems sys : Systems.getSystems()) {
+			SystemObject system = ship.getSystem(sys);
 			RoomController room = (RoomController) getController(system.getRoom());
 			if (room != null)
 				assign(sys, room);
@@ -218,38 +229,92 @@ public class ShipContainer implements Disposable {
 		SystemController system = getSystemController(sys);
 		StationController station = getStationController(sys);
 
-		unassign(room.getSystemId());
-		unassign(sys);
-		system.assignTo(room.getGameObject());
-		system.reposition(room.getX(), room.getY());
-		system.setParent(room);
+		// Medbay and Clonebay are coupled together...
+		if (sys == Systems.MEDBAY || sys == Systems.CLONEBAY) {
+			currentlyActiveBay = sys;
+			SystemController other = getSystemController(sys == Systems.MEDBAY ? Systems.CLONEBAY : Systems.MEDBAY);
+			StationController otherStation = getStationController(other.getSystemId());
 
-		room.addSizeListener(system);
-		system.notifySizeChanged(room.getW(), room.getH());
+			unassign(getAssignedSystem(room.getGameObject()));
+			unassign(sys);
 
-		if (system.canContainStation()) {
+			other.assignTo(room.getGameObject());
+			other.reposition(room.getX(), room.getY());
+			other.setParent(room);
+			system.assignTo(room.getGameObject());
+			system.reposition(room.getX(), room.getY());
+			system.setParent(room);
+
+			room.addSizeListener(system);
 			room.addSizeListener(station);
+			system.notifySizeChanged(room.getW(), room.getH());
+			room.addSizeListener(other);
+			room.addSizeListener(otherStation);
+			other.notifySizeChanged(room.getW(), room.getH());
+
 			station.updateFollowOffset();
 			station.updateFollower();
+			otherStation.updateFollowOffset();
+			otherStation.updateFollower();
 			station.setVisible(room.canContainSlotId(station.getSlotId()));
+			otherStation.setVisible(false);
+		} else {
+			unassign(getAssignedSystem(room.getGameObject()));
+			unassign(sys);
+			system.assignTo(room.getGameObject());
+			system.reposition(room.getX(), room.getY());
+			system.setParent(room);
+
+			room.addSizeListener(system);
+			system.notifySizeChanged(room.getW(), room.getH());
+
+			if (system.canContainStation()) {
+				room.addSizeListener(station);
+				station.updateFollowOffset();
+				station.updateFollower();
+				station.setVisible(room.canContainSlotId(station.getSlotId()));
+			}
 		}
 	}
 
 	public void unassign(Systems sys) {
 		if (sys == null)
 			throw new NullPointerException("System id must not be null.");
+
 		SystemController system = getSystemController(sys);
 		StationController station = getStationController(sys);
 		AbstractController room = getController(system.getGameObject().getRoom());
 
-		if (system.canContainStation())
-			station.setVisible(false);
-		system.unassign();
+		if (sys == Systems.MEDBAY || sys == Systems.CLONEBAY) {
+			SystemController other = getSystemController(sys == Systems.MEDBAY ? Systems.CLONEBAY : Systems.MEDBAY);
+			StationController otherStation = getStationController(other.getSystemId());
+			AbstractController otherRoom = getController(other.getGameObject().getRoom());
 
-		if (room != null) {
-			room.removeSizeListener(system);
-			room.removeSizeListener(station);
-			room.redraw();
+			station.setVisible(false);
+			otherStation.setVisible(false);
+			system.unassign();
+			other.unassign();
+
+			if (room != null) {
+				room.removeSizeListener(system);
+				room.removeSizeListener(station);
+				room.redraw();
+			}
+			if (otherRoom != null) {
+				otherRoom.removeSizeListener(other);
+				otherRoom.removeSizeListener(otherStation);
+				otherRoom.redraw();
+			}
+		} else {
+			if (system.canContainStation())
+				station.setVisible(false);
+			system.unassign();
+
+			if (room != null) {
+				room.removeSizeListener(system);
+				room.removeSizeListener(station);
+				room.redraw();
+			}
 		}
 	}
 
@@ -260,7 +325,8 @@ public class ShipContainer implements Disposable {
 	public void add(AbstractController controller) {
 		if (controller instanceof RoomController) {
 			RoomController room = (RoomController) controller;
-			room.getGameObject().setId(getNextRoomId());
+			if (room.getId() == -2)
+				room.setId(getNextRoomId());
 			roomControllers.add(room);
 			shipController.getGameObject().add(room.getGameObject());
 		} else if (controller instanceof DoorController) {
@@ -269,7 +335,8 @@ public class ShipContainer implements Disposable {
 			shipController.getGameObject().add(door.getGameObject());
 		} else if (controller instanceof MountController) {
 			MountController mount = (MountController) controller;
-			mount.getGameObject().setId(getNextMountId());
+			if (mount.getId() == -2)
+				mount.setId(getNextMountId());
 			mountControllers.add(mount);
 			shipController.getGameObject().add(mount.getGameObject());
 		} else if (controller instanceof GibController) {
@@ -288,6 +355,8 @@ public class ShipContainer implements Disposable {
 	public void remove(AbstractController controller) {
 		if (controller instanceof RoomController) {
 			RoomController room = (RoomController) controller;
+			Systems id = getAssignedSystem(room.getGameObject());
+			unassign(id);
 			roomControllers.remove(room);
 			shipController.getGameObject().remove(room.getGameObject());
 		} else if (controller instanceof DoorController) {
@@ -327,6 +396,10 @@ public class ShipContainer implements Disposable {
 	public String getImage(Images imageType) {
 		ImageController image = imageControllerMap.get(imageType);
 		return image.getImage();
+	}
+
+	public ImageController getImageController(Images imageType) {
+		return imageControllerMap.get(imageType);
 	}
 
 	private int getNextRoomId() {
@@ -477,7 +550,7 @@ public class ShipContainer implements Disposable {
 
 		imageControllerMap.put(Images.CLOAK, cloak);
 		add(cloak);
-		// cloak.setVisible(false); // Cloak is only displayed when View Cloak is enabled
+		cloak.setVisible(false); // Cloak is only displayed when View Cloak is enabled
 
 		// Load floor
 		imgObject = ship.getImage(Images.FLOOR);
@@ -501,5 +574,81 @@ public class ShipContainer implements Disposable {
 		imageControllerMap.put(Images.THUMBNAIL, thumbnail);
 		add(thumbnail);
 		thumbnail.setVisible(false);
+	}
+
+	public void setAnchorVisible(boolean vis) {
+		shipController.setVisible(vis);
+	}
+
+	public boolean isAnchorVisible() {
+		return shipController.isVisible();
+	}
+
+	public void setRoomsVisible(boolean vis) {
+		roomsVisible = vis;
+		for (RoomController r : roomControllers)
+			r.setVisible(vis);
+		applyStationVisibility(vis && stationsVisible);
+	}
+
+	public boolean isRoomsVisible() {
+		return roomsVisible;
+	}
+
+	public void setDoorsVisible(boolean vis) {
+		doorsVisible = vis;
+		for (DoorController d : doorControllers)
+			d.setVisible(vis);
+	}
+
+	public boolean isDoorsVisible() {
+		return doorsVisible;
+	}
+
+	public void setMountsVisible(boolean vis) {
+		mountsVisible = vis;
+		for (MountController m : mountControllers)
+			m.setVisible(vis);
+	}
+
+	public boolean isMountsVisible() {
+		return mountsVisible;
+	}
+
+	public void setStationsVisible(boolean vis) {
+		stationsVisible = vis;
+		applyStationVisibility(vis && roomsVisible);
+	}
+
+	public boolean isStationsVisible() {
+		return stationsVisible;
+	}
+
+	private void applyStationVisibility(boolean vis) {
+		for (SystemController s : systemControllers) {
+			if (s.isAssigned() && s.canContainStation()) {
+				StationController st = (StationController) getController(s.getGameObject().getStation());
+				st.setVisible(vis && st.getSlotId() != -2);
+			}
+		}
+	}
+
+	public Systems getAssignedSystem(RoomObject room) {
+		for (Systems sys : Systems.getSystems()) {
+			if (sys == Systems.MEDBAY || sys == Systems.CLONEBAY) {
+				// If medbay and clonebay are occupying the same room, need to return the
+				// currently displayed system
+				SystemObject medbay = shipController.getGameObject().getSystem(Systems.MEDBAY);
+				SystemObject clonebay = shipController.getGameObject().getSystem(Systems.CLONEBAY);
+
+				if (medbay.getRoom() == clonebay.getRoom() && medbay.getRoom() == room)
+					return currentlyActiveBay;
+			}
+
+			SystemObject system = shipController.getGameObject().getSystem(sys);
+			if (system.getRoom() == room)
+				return sys;
+		}
+		return Systems.EMPTY;
 	}
 }

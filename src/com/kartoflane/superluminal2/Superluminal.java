@@ -26,11 +26,12 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
+import com.kartoflane.superluminal2.core.DataUtils;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.ShipUtils;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipLoaderDialog;
 
@@ -38,7 +39,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 pre-alpha");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 alpha");
 	public static final String APP_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
 
@@ -187,40 +188,8 @@ public class Superluminal {
 			}
 		}
 
-		log.trace("Loading ship metadata...");
-		Database db = Database.getInstance();
-		FTLPack data = db.getDataDat();
-		for (String innerPath : data.list()) {
-			if (innerPath.endsWith(".xml")) {
-				InputStream is = null;
-				try {
-					is = data.getInputStream(innerPath);
-					ArrayList<Element> shipElements = ShipUtils.findShips(is, innerPath);
-
-					for (Element e : shipElements) {
-						try {
-							db.storeShipMetadata(ShipUtils.loadShipMetadata(e));
-						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load ship metadata: " + ex.getMessage());
-						}
-					}
-				} catch (FileNotFoundException e) {
-					log.error("Could not find file: " + innerPath);
-				} catch (IOException e) {
-					log.error("An error has occured while loading file " + innerPath + ":", e);
-				} catch (JDOMParseException e) {
-					log.error("An error has occured while parsing file " + innerPath + ":", e);
-				} finally {
-					try {
-						if (is != null)
-							is.close();
-					} catch (IOException e) {
-					}
-				}
-			}
-		}
-
-		ShipLoaderDialog.getInstance().loadShipList(Database.getInstance().getShipMetadata());
+		log.trace("Loading database...");
+		loadDatabase();
 
 		// open the main window's shell - make it visible
 		editorWindow.open();
@@ -278,6 +247,62 @@ public class Superluminal {
 		box.setMessage(message);
 
 		box.open();
+	}
+
+	private static void loadDatabase() {
+		Database db = Database.getInstance();
+		FTLPack data = db.getDataDat();
+
+		for (String innerPath : data.list()) {
+			if (innerPath.endsWith(".xml")) {
+				InputStream is = null;
+				try {
+					is = data.getInputStream(innerPath);
+					DecodeResult dr = Utils.decodeText(is, null);
+
+					ArrayList<Element> shipElements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
+					for (Element e : shipElements) {
+						try {
+							db.storeShipMetadata(DataUtils.loadShipMetadata(e));
+						} catch (IllegalArgumentException ex) {
+							log.warn("Could not load ship metadata: " + ex.getMessage());
+						}
+					}
+
+					ArrayList<Element> weaponElements = DataUtils.findTagsNamed(dr.text, "weaponBlueprint");
+					for (Element e : weaponElements) {
+						try {
+							db.storeWeapon(DataUtils.loadWeapon(e));
+						} catch (IllegalArgumentException ex) {
+							log.warn("Could not load weapon: " + ex.getMessage());
+						}
+					}
+
+					ArrayList<Element> droneElements = DataUtils.findTagsNamed(dr.text, "droneBlueprint");
+					for (Element e : droneElements) {
+						try {
+							db.storeDrone(DataUtils.loadDrone(e));
+						} catch (IllegalArgumentException ex) {
+							log.warn("Could not load drone: " + ex.getMessage());
+						}
+					}
+				} catch (FileNotFoundException e) {
+					log.error("Could not find file: " + innerPath);
+				} catch (IOException e) {
+					log.error("An error has occured while loading file " + innerPath + ":", e);
+				} catch (JDOMParseException e) {
+					log.error("An error has occured while parsing file " + innerPath + ":", e);
+				} finally {
+					try {
+						if (is != null)
+							is.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
+
+		ShipLoaderDialog.getInstance().loadShipList(Database.getInstance().getShipMetadata());
 	}
 
 	private static void initHotkeys() {

@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.core.Database.WeaponTypes;
 import com.kartoflane.superluminal2.core.Utils;
 
 /**
@@ -12,17 +13,13 @@ import com.kartoflane.superluminal2.core.Utils;
  * @author kartoFlane
  * 
  */
-public class WeaponObject extends GameObject {
+public class WeaponObject extends GameObject implements Comparable<WeaponObject> {
 
 	private static final long serialVersionUID = 7968532944693929010L;
 
-	public enum WeaponTypes {
-		LASER, MISSILES, BOMB, BEAM, BURST;
-	}
-
-	private final WeaponTypes weaponType;
-
+	private WeaponTypes weaponType;
 	private String blueprintName;
+	private String title;
 	private String shortName;
 	private String sheetPath;
 
@@ -36,6 +33,7 @@ public class WeaponObject extends GameObject {
 	public WeaponObject() {
 		weaponType = null;
 		blueprintName = null;
+		title = "No Weapon";
 		shortName = "No Weapon";
 		sheetPath = "cpath:/assets/weapon.png";
 		sheetSize.x = frameSize.x = 16;
@@ -44,35 +42,48 @@ public class WeaponObject extends GameObject {
 		mountOffset.y = 36;
 	}
 
-	public WeaponObject(WeaponTypes type) {
-		if (type == null)
-			throw new NullPointerException("Type must not be null.");
+	public WeaponObject(String blueprintName) {
+		if (blueprintName == null)
+			throw new IllegalArgumentException("Blueprint name must not be null.");
+		this.blueprintName = blueprintName;
+	}
+
+	public void setType(WeaponTypes type) {
 		weaponType = type;
-		// TODO ?
 	}
 
 	public WeaponTypes getType() {
 		return weaponType;
 	}
 
+	public void setBlueprintName(String name) {
+		if (name == null)
+			throw new IllegalArgumentException("Name must not be null.");
+		blueprintName = name;
+	}
+
 	public String getBlueprintName() {
 		return blueprintName;
 	}
 
-	public void setBlueprintName(String name) {
-		if (name == null)
-			throw new NullPointerException("Name must not be null.");
-		blueprintName = name;
+	public void setTitle(String title) {
+		if (title == null)
+			throw new IllegalArgumentException("Title must not be null.");
+		this.title = title;
 	}
 
-	public String getShortName() {
-		return shortName;
+	public String getTitle() {
+		return title;
 	}
 
 	public void setShortName(String name) {
 		if (name == null)
-			throw new NullPointerException("Name must not be null.");
+			throw new IllegalArgumentException("Name must not be null.");
 		shortName = name;
+	}
+
+	public String getShortName() {
+		return shortName;
 	}
 
 	public Point getSheetSize() {
@@ -120,7 +131,12 @@ public class WeaponObject extends GameObject {
 
 	public void setSheetPath(String path) {
 		if (path == null)
-			throw new NullPointerException("Path must not be null.");
+			throw new IllegalArgumentException("Path must not be null.");
 		sheetPath = path;
+	}
+
+	@Override
+	public int compareTo(WeaponObject o) {
+		return blueprintName.compareTo(o.blueprintName);
 	}
 }

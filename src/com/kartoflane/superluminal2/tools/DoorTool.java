@@ -55,6 +55,9 @@ public class DoorTool extends Tool {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
+		// Check the conditions again in case the variable is outdated
+		canCreate = canCreate();
+
 		if (e.button == 1 && canCreate) {
 			ShipContainer container = Manager.getCurrentShip();
 			DoorObject object = new DoorObject(horizontal);
@@ -127,6 +130,9 @@ public class DoorTool extends Tool {
 	}
 
 	private boolean canCreate() {
+		if (!Manager.getCurrentShip().isDoorsVisible())
+			return false;
+
 		AbstractController control = window.getPainter().getSelectableControllerAt(cursor.getLocation());
 		if (control != null && control instanceof RoomController) {
 			return control.getBounds().intersects(cursor.getBounds()) && !Utils.contains(control.getBounds(), cursor.getBounds());

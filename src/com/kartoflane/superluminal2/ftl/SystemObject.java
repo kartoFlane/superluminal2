@@ -162,7 +162,7 @@ public class SystemObject extends GameObject {
 
 	/** Returns true if the system can have a interior image, false otherwise */
 	public boolean canContainInterior() {
-		return id != Systems.EMPTY;
+		return id != Systems.EMPTY && id != Systems.CLONEBAY; // TODO can clonebays have interiors?
 	}
 
 	/** Returns true if the system can have a glow image, false otherwise. */

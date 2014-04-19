@@ -13,7 +13,6 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.RoomObject;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.RoomView;
@@ -159,12 +158,12 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		return ShipContainer.CELL_SIZE;
 	}
 
-	public int getId() {
-		return getGameObject().getId();
+	public void setId(int id) {
+		getGameObject().setId(id);
 	}
 
-	public Systems getSystemId() {
-		return getGameObject().getSystem();
+	public int getId() {
+		return getGameObject().getId();
 	}
 
 	public boolean isResizing() {
@@ -176,7 +175,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 
 		if (res)
 			((ManipulationTool) Manager.getSelectedTool()).setStateRoomResize();
-		// tool reverses to normal state on its own
+		// tool returns to normal state on its own
 	}
 
 	public boolean canResize() {
@@ -374,20 +373,9 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 	}
 
 	@Override
-	public void delete() {
-		Systems id = getGameObject().getSystem();
-		container.unassign(id);
-
-		super.delete();
-	}
-
-	@Override
 	public void dispose() {
 		if (model.isDisposed())
 			return;
-
-		Systems id = getGameObject().getSystem();
-		container.unassign(id);
 
 		super.dispose();
 	}
@@ -406,9 +394,6 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 	@Override
 	public String toString() {
 		RoomObject room = getGameObject();
-		String result = room.getId() + ": " + room.getSystem();
-		if (getAlias() != null && !getAlias().equals(""))
-			result += " (" + room.getAlias() + ")";
-		return result;
+		return room.toString();
 	}
 }
