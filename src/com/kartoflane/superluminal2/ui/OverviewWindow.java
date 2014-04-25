@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -152,6 +154,25 @@ public class OverviewWindow {
 			}
 		});
 
+		tree.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				if (e.button == 1 && tree.getSelectionCount() != 0) {
+					TreeItem selectedItem = tree.getSelection()[0];
+					if (selectedItem.getItemCount() != 0)
+						selectedItem.setExpanded(!selectedItem.getExpanded());
+				}
+			}
+
+			@Override
+			public void mouseDown(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseUp(MouseEvent e) {
+			}
+		});
+
 		overviewMenu.addMenuListener(new MenuListener() {
 			@Override
 			public void menuHidden(MenuEvent e) {
@@ -212,15 +233,17 @@ public class OverviewWindow {
 			it.dispose();
 		controllerMap.clear();
 
-		for (RoomController r : ship.getRoomControllers())
-			createItem(r);
-		trtmRooms.setText(String.format("Rooms (%s)", trtmRooms.getItemCount()));
-		for (DoorController d : ship.getDoorControllers())
-			createItem(d);
-		trtmDoors.setText(String.format("Doors (%s)", trtmDoors.getItemCount()));
-		for (MountController m : ship.getMountControllers())
-			createItem(m);
-		trtmMounts.setText(String.format("Mounts (%s)", trtmMounts.getItemCount()));
+		if (ship != null) {
+			for (RoomController r : ship.getRoomControllers())
+				createItem(r);
+			trtmRooms.setText(String.format("Rooms (%s)", trtmRooms.getItemCount()));
+			for (DoorController d : ship.getDoorControllers())
+				createItem(d);
+			trtmDoors.setText(String.format("Doors (%s)", trtmDoors.getItemCount()));
+			for (MountController m : ship.getMountControllers())
+				createItem(m);
+			trtmMounts.setText(String.format("Mounts (%s)", trtmMounts.getItemCount()));
+		}
 	}
 
 	public void update(AbstractController controller) {
@@ -303,5 +326,9 @@ public class OverviewWindow {
 
 		controllerMap.put(controller, item);
 		return item;
+	}
+
+	public void dispose() {
+		shell.dispose();
 	}
 }

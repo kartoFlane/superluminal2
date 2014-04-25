@@ -4,8 +4,8 @@ import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.ftl.StationObject;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -79,6 +79,7 @@ public class StationController extends ObjectController implements Controller {
 	public void setSlotId(int id) {
 		getGameObject().setSlotId(id);
 		updateFollowOffset();
+		updateView();
 	}
 
 	public int getSlotId() {
@@ -113,10 +114,21 @@ public class StationController extends ObjectController implements Controller {
 				throw new IllegalArgumentException();
 		}
 		updateFollowOffset();
+		updateView();
 	}
 
 	public Directions getSlotDirection() {
 		return getGameObject().getSlotDirection();
+	}
+
+	@Override
+	public void notifySizeChanged(int w, int h) {
+		updateFollowOffset();
+		updateView();
+	}
+
+	public Systems getSystemId() {
+		return id;
 	}
 
 	@Override
@@ -128,19 +140,18 @@ public class StationController extends ObjectController implements Controller {
 			Point slotLoc = room.getSlotLocation(getSlotId());
 			if (slotLoc != null)
 				setFollowOffset(slotLoc.x - room.getW() / 2, slotLoc.y - room.getH() / 2);
-			// hide the station if the room cannot contain the slot
-			setVisible(slotLoc != null && container.getAssignedSystem(system.getRoom()) == system.getSystemId());
-		} else {
-			setVisible(false);
 		}
 	}
 
 	@Override
-	public void notifySizeChanged(int w, int h) {
-		updateFollowOffset();
-	}
-
-	public Systems getSystemId() {
-		return id;
+	public void updateView() {
+		SystemController system = container.getSystemController(id);
+		if (system.isAssigned()) {
+			RoomController room = (RoomController) container.getController(system.getRoom());
+			// hide the station if the room cannot contain the slot, or the system is not active
+			setVisible(room.canContainSlotId(getSlotId()) && container.getActiveSystem(system.getRoom()) == id);
+		} else {
+			setVisible(false);
+		}
 	}
 }

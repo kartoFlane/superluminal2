@@ -2,7 +2,6 @@ package com.kartoflane.superluminal2.tools;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.PropertiesToolComposite;
@@ -15,9 +14,7 @@ public class PropertyTool extends Tool {
 
 	@Override
 	public void select() {
-		Control c = (Control) window.getSidebarContent();
-		if (c != null && !c.isDisposed())
-			c.dispose();
+		disposeSidebarContent();
 
 		PropertiesToolComposite createC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(createC);
@@ -28,13 +25,16 @@ public class PropertyTool extends Tool {
 	}
 
 	@Override
-	public PropertyTool getInstance() {
-		return (PropertyTool) instance;
+	public PropertiesToolComposite getToolComposite(Composite parent) {
+		return (PropertiesToolComposite) super.getToolComposite(parent);
 	}
 
 	@Override
-	public PropertiesToolComposite getToolComposite(Composite parent) {
-		return new PropertiesToolComposite(parent);
+	public PropertiesToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new PropertiesToolComposite(parent);
+		return (PropertiesToolComposite) compositeInstance;
 	}
 
 	@Override

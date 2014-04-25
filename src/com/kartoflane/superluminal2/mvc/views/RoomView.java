@@ -5,12 +5,12 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.components.Triangle;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.RoomObject;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -62,7 +62,7 @@ public class RoomView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			Systems sys = Manager.getCurrentShip().getAssignedSystem(getGameObject());
+			Systems sys = Manager.getCurrentShip().getActiveSystem(getGameObject());
 			SystemController systemC = Manager.getCurrentShip().getSystemController(sys);
 
 			paintBackground(e, backgroundColor, alpha);

@@ -81,10 +81,12 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		setAlpha(255);
 	}
 
+	/** In radians, 0 = north */
 	public void setRotation(float rotation) {
 		this.rotation = rotation;
 	}
 
+	/** In radians, 0 = north */
 	public float getRotation() {
 		return rotation;
 	}
@@ -227,6 +229,8 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			paintControl(e);
 
 			if (trans) {
+				e.gc.setTransform(null);
+
 				transform.dispose();
 				transform = null;
 
@@ -262,7 +266,38 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			e.gc.setAlpha(alpha);
 
 			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x - imageRect.width, y - imageRect.height, imageRect.width, imageRect.height);
+			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x - imageRect.width / 2, y - imageRect.height / 2, imageRect.width, imageRect.height);
+
+			e.gc.setAlpha(prevAlpha);
+		}
+	}
+
+	/**
+	 * Paints part of the image without any modifications, centered at the given location (relative to the canvas).
+	 * 
+	 * @param srcX
+	 *            x coordinate in the source image to copy from
+	 * @param srcY
+	 *            y coordinate in the source image to copy from
+	 * @param srcW
+	 *            width of the area that will be copied
+	 * @param srcH
+	 *            height of the area that will be copied
+	 * @param x
+	 *            x coordinate of the destination location at which the image will be drawn
+	 * @param y
+	 *            y coordinate of the destination location at which the image will be drawn
+	 * @param w
+	 *            width of the destination area at which the image will be drawn
+	 * @param h
+	 *            height of the destination area at which the image will be drawn
+	 */
+	protected void paintImage(PaintEvent e, Image image, int srcX, int srcY, int srcW, int srcH, int x, int y, int w, int h, int alpha) {
+		if (image != null) {
+			int prevAlpha = e.gc.getAlpha();
+			e.gc.setAlpha(alpha);
+
+			e.gc.drawImage(image, srcX, srcY, srcW, srcH, x - w / 2, y - h / 2, w, h);
 
 			e.gc.setAlpha(prevAlpha);
 		}
@@ -278,6 +313,41 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 			Rectangle imageRect = image.getBounds();
 			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x, y, imageRect.width, imageRect.height);
+
+			e.gc.setAlpha(prevAlpha);
+		}
+	}
+
+	/**
+	 * Paints part of the image without any modifications, with the image's top left corner at the given location.
+	 * 
+	 * @param srcX
+	 *            x coordinate in the source image to copy from
+	 * @param srcY
+	 *            y coordinate in the source image to copy from
+	 * @param srcW
+	 *            width of the area that will be copied
+	 * @param srcH
+	 *            height of the area that will be copied
+	 * @param x
+	 *            x coordinate of the destination location at which the image will be drawn
+	 * @param y
+	 *            y coordinate of the destination location at which the image will be drawn
+	 * @param w
+	 *            width of the destination area at which the image will be drawn
+	 * @param h
+	 *            height of the destination area at which the image will be drawn
+	 */
+	protected void paintImageCorner(PaintEvent e, Image image, int srcX, int srcY, int srcW, int srcH, int x, int y, int w, int h, int alpha) {
+		if (image != null) {
+			int prevAlpha = e.gc.getAlpha();
+			e.gc.setAlpha(alpha);
+
+			Rectangle b = image.getBounds();
+			srcW = Math.min(srcW, b.width);
+			srcH = Math.min(srcH, b.height);
+
+			e.gc.drawImage(image, srcX, srcY, srcW, srcH, x, y, w, h);
 
 			e.gc.setAlpha(prevAlpha);
 		}

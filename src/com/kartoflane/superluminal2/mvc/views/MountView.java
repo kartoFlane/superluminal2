@@ -19,6 +19,7 @@ public class MountView extends BaseView {
 
 	private Image directionArrow = null;
 	private Point weaponOffset = null;
+	private Point frameSize = null;
 
 	public MountView() {
 		super();
@@ -37,9 +38,15 @@ public class MountView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			paintImage(e, image, controller.getX() + controller.getW() - weaponOffset.x, controller.getY() + controller.getH() - weaponOffset.y, alpha);
-			paintBorder(e, controller.getX() - weaponOffset.x, controller.getY() - weaponOffset.y,
-					controller.getW(), controller.getH(), borderColor, borderThickness, alpha);
+			paintImageCorner(e, image, 0, 0, frameSize.x, frameSize.y,
+					controller.getX() - weaponOffset.x,
+					controller.getY() - weaponOffset.y,
+					frameSize.x, frameSize.y, alpha);
+
+			paintBorder(e, controller.getX() - weaponOffset.x,
+					controller.getY() - weaponOffset.y,
+					frameSize.x, frameSize.y, borderColor, borderThickness, alpha);
+
 			if (getController().getDirection() != Directions.NONE)
 				paintDirectionArrow(e, directionArrow, alpha);
 		}
@@ -110,6 +117,7 @@ public class MountView extends BaseView {
 	public void updateView() {
 		setImage(getController().getWeapon().getSheetPath());
 		weaponOffset = getGameObject().getWeapon().getMountOffset();
+		frameSize = getGameObject().getWeapon().getFrameSize();
 
 		if (controller.isSelected()) {
 			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);

@@ -1,13 +1,15 @@
 package com.kartoflane.superluminal2.ftl;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class RoomObject extends GameObject implements Alias, Movable, Resizable, Comparable<RoomObject> {
@@ -178,8 +180,17 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 
 	@Override
 	public String toString() {
-		Systems sys = Manager.getCurrentShip().getAssignedSystem(this);
-		String result = getId() + ": " + sys.toString();
+		ArrayList<Systems> systems = Manager.getCurrentShip().getAllAssignedSystems(this);
+		String result = getId() + ": ";
+		if (systems.size() == 0) {
+			result += Systems.EMPTY.toString();
+		} else {
+			for (int i = 0; i < systems.size(); i++) {
+				result += systems.get(i).toString();
+				if (i != systems.size() - 1)
+					result += " / ";
+			}
+		}
 
 		if (getAlias() != null && !getAlias().equals(""))
 			result += " (" + getAlias() + ")";

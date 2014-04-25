@@ -3,23 +3,28 @@ package com.kartoflane.superluminal2.core;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Scanner;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.jdom2.Comment;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Images;
+import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -28,7 +33,6 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class ShipUtils {
@@ -42,8 +46,6 @@ public class ShipUtils {
 		ROOM,
 		DOOR
 	}
-
-	public static final Logger log = LogManager.getLogger(ShipUtils.class);
 
 	/**
 	 * ------------------------------------------------------ TODO documentation
@@ -60,6 +62,7 @@ public class ShipUtils {
 		if (e == null)
 			throw new IllegalArgumentException("Element must not be null.");
 
+		Database db = Database.getInstance();
 		FTLPack data = Database.getInstance().getDataDat();
 		FTLPack resource = Database.getInstance().getResourceDat();
 
@@ -73,7 +76,7 @@ public class ShipUtils {
 		String blueprintName = attr;
 
 		// Create the ship object
-		boolean isPlayer = Database.getInstance().isPlayerShip(blueprintName);
+		boolean isPlayer = db.isPlayerShip(blueprintName);
 		ShipObject ship = new ShipObject(isPlayer);
 		ship.setBlueprintName(blueprintName);
 
@@ -81,8 +84,7 @@ public class ShipUtils {
 		attr = e.getAttributeValue("layout");
 		if (attr == null)
 			throw new IllegalArgumentException("Missing 'layout' attribute.");
-		ship.setLayoutTXT("data/" + attr + ".txt");
-		ship.setLayoutXML("data/" + attr + ".xml");
+		ship.setLayout(attr);
 
 		if (!data.contains(ship.getLayoutTXT()))
 			throw new FileNotFoundException("TXT layout file could not be found in game's archives: " + ship.getLayoutTXT());
@@ -94,6 +96,7 @@ public class ShipUtils {
 		attr = e.getAttributeValue("img");
 		if (attr == null)
 			throw new IllegalArgumentException("Missing 'img' attribute.");
+		ship.setImageNamespace(attr);
 
 		String namespace = attr;
 		// Ship images can be located in either ship/, ships_glow/ or ships_noglow/
@@ -298,10 +301,12 @@ public class ShipUtils {
 				MountObject mount = mounts[loaded >= 4 ? loaded + 1 : loaded];
 				attr = weapon.getAttributeValue("name");
 				if (attr == null)
-					throw new IllegalArgumentException("Weapon in <weaponList> is missing 'name' attribute.");
-				WeaponObject weaponObject = Database.getInstance().getWeapon(attr);
+					throw new IllegalArgumentException("A weapon in <weaponList> is missing 'name' attribute.");
+
+				WeaponObject weaponObject = db.getWeapon(attr);
 				if (weaponObject == null)
 					throw new IllegalArgumentException("WeaponBlueprint not found: " + attr);
+
 				mount.setWeapon(weaponObject);
 
 				loaded++;
@@ -330,12 +335,13 @@ public class ShipUtils {
 
 				attr = drone.getAttributeValue("name");
 				if (attr == null)
-					throw new IllegalArgumentException("Drone in <droneList> is missing 'name' attribute.");
-				DroneObject droneObject = Database.getInstance().getDrone(attr);
+					throw new IllegalArgumentException("A drone in <droneList> is missing 'name' attribute.");
+
+				DroneObject droneObject = db.getDrone(attr);
 				if (droneObject == null)
 					throw new IllegalArgumentException("DroneBlueprint not found: " + attr);
 
-				// TODO add drone to ship
+				ship.add(droneObject);
 
 				loaded++;
 			}
@@ -344,17 +350,179 @@ public class ShipUtils {
 		child = e.getChild("health");
 		if (child == null)
 			throw new IllegalArgumentException("Missing <health> tag");
+		attr = child.getAttributeValue("amount");
+		if (attr == null)
+			throw new IllegalArgumentException("<health> tag is missing 'amount' attribute.");
+		ship.setHealth(Integer.valueOf(attr));
 
 		child = e.getChild("maxPower");
 		if (child == null)
 			throw new IllegalArgumentException("Missing <maxPower> tag");
+		attr = child.getAttributeValue("amount");
+		if (attr == null)
+			throw new IllegalArgumentException("<maxPower> tag is missing 'amount' attribute.");
+		ship.setPower(Integer.valueOf(attr));
+
+		// TODO crew
+
+		for (Element aug : e.getChildren("aug")) {
+			attr = aug.getAttributeValue("name");
+			if (attr == null)
+				throw new IllegalArgumentException("An augment is missing 'name' attribute.");
+
+			AugmentObject augmentObject = db.getAugment(attr);
+			if (augmentObject == null)
+				throw new IllegalArgumentException("AugBlueprint not found: " + attr);
+
+			ship.add(augmentObject);
+		}
 
 		return ship;
 	}
 
-	public static boolean saveShipXML(File f, ShipObject ship) {
-		// TODO
-		return false;
+	public static void saveShipXML(File destination, ShipObject ship) throws IllegalArgumentException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (destination == null)
+			throw new IllegalArgumentException("Destination file must not be null.");
+		if (!destination.isDirectory())
+			throw new IllegalArgumentException("Not a directory: " + destination.getName());
+
+		Document doc = new Document();
+		Element root = new Element("wrapper");
+		Element e = null;
+
+		// Prepare the document
+		Element shipBlueprint = new Element("shipBlueprint");
+		shipBlueprint.setAttribute("name", ship.getBlueprintName());
+		shipBlueprint.setAttribute("layout", ship.getLayout());
+		shipBlueprint.setAttribute("img", ship.getImageNamespace());
+
+		e = new Element("class");
+		e.setText(ship.getShipClass());
+		shipBlueprint.addContent(e);
+
+		e = new Element("name");
+		e.setText(ship.getShipName());
+		shipBlueprint.addContent(e);
+
+		e = new Element("desc");
+		e.setText(ship.getShipDescription());
+		shipBlueprint.addContent(e);
+
+		ship.coalesceRooms();
+
+		Element systemList = new Element("systemList");
+		for (Systems sys : Systems.getSystems()) {
+			SystemObject system = ship.getSystem(sys);
+
+			if (system.isAssigned()) {
+				Element sysEl = new Element(sys.toString().toLowerCase());
+
+				sysEl.setAttribute("power", "" + system.getLevelStart());
+				// Enemy ships' system have a 'max' attribute which determines the max level of the system
+				if (!ship.isPlayerShip())
+					sysEl.setAttribute("max", "" + system.getLevelMax());
+				sysEl.setAttribute("room", "" + system.getRoom().getId());
+				sysEl.setAttribute("start", "" + system.isAvailable());
+				if (system.canContainInterior() && ship.isPlayerShip())
+					sysEl.setAttribute("img", system.getInteriorPath()); // TODO namespace, not path
+				// Artillery has a special 'weapon' attribute to determine which weapon is used as artillery weapon
+				if (sys == Systems.ARTILLERY)
+					sysEl.setAttribute("weapon", ""); // TODO artillery weapon
+
+				StationObject station = system.getStation();
+
+				if (sys.canContainStation() && station.getSlotId() != -2) {
+					Element slotEl = new Element("slot");
+
+					// Medbay and Clonebay slots don't have a direction - they're always NONE
+					if (sys != Systems.MEDBAY && sys != Systems.CLONEBAY) {
+						e = new Element("direction");
+						e.setText(station.getSlotDirection().toString());
+						slotEl.addContent(e);
+					}
+
+					e = new Element("number");
+					e.setText("" + station.getSlotId());
+					slotEl.addContent(e);
+
+					sysEl.addContent(slotEl);
+				}
+
+				systemList.addContent(sysEl);
+			}
+		}
+		shipBlueprint.addContent(systemList);
+
+		e = new Element("weaponSlots");
+		e.setText("" + ship.getWeaponSlots());
+		shipBlueprint.addContent(e);
+
+		e = new Element("droneSlots");
+		e.setText("" + ship.getDroneSlots());
+		shipBlueprint.addContent(e);
+
+		e = new Element("weaponList");
+		e.setAttribute("missiles", "" + ship.getMissilesAmount());
+
+		// Player ships' weapons have to be declared explicitly, ie. listed by name
+		// Only the first 'count' weapons are loaded in-game
+		if (ship.isPlayerShip()) {
+			e.setAttribute("count", "4"); // TODO weapon count
+		}
+		// Enemy ships' weapons are randomly drafted from a list of weapons
+		// 'count' determines how many weapons are drafted
+		else {
+			// TODO load="" + count
+		}
+		shipBlueprint.addContent(e);
+
+		e = new Element("droneList");
+		e.setAttribute("drones", "" + ship.getDronePartsAmount());
+
+		// Player ships' drones have to be declared explicitly, ie. listed by name
+		// Only the first 'count' drones are loaded in-game
+		if (ship.isPlayerShip()) {
+			e.setAttribute("count", "4"); // TODO drone count
+		}
+		// Enemy ships' drones are randomly drafted from a list of drones
+		// 'count' determines how many drones are drafted
+		else {
+			// TODO load="" + count
+		}
+		shipBlueprint.addContent(e);
+
+		e = new Element("health");
+		e.setAttribute("amount", "" + ship.getHealth());
+		shipBlueprint.addContent(e);
+
+		e = new Element("maxPower");
+		e.setAttribute("amount", "" + ship.getPower());
+		shipBlueprint.addContent(e);
+
+		// TODO crew
+
+		for (AugmentObject aug : ship.getAugments()) {
+			e = new Element("aug");
+			e.setAttribute("name", aug.getBlueprintName());
+			shipBlueprint.addContent(e);
+		}
+
+		root.addContent(shipBlueprint);
+		doc.setRootElement(root);
+
+		// Write the files
+		File blueprints = new File(destination.getAbsolutePath() + "/" +
+				Database.getInstance().getAssociatedFile(ship.getBlueprintName()) + ".append");
+		Utils.writeFileXML(doc, blueprints);
+
+		// TODO automatically link doors
+		File fileTXT = new File(destination.getAbsolutePath() + "/" + ship.getLayout() + ".txt");
+		saveLayoutTXT(ship, fileTXT);
+
+		File fileXML = new File(destination.getAbsolutePath() + "/" + ship.getLayout() + ".xml");
+		saveLayoutXML(ship, fileXML);
 	}
 
 	public static ShipObject loadShipSHPO(File f) {
@@ -362,24 +530,28 @@ public class ShipUtils {
 		return null;
 	}
 
-	public static boolean saveShipSHPO(File f, ShipObject ship) {
+	public static void saveShipSHPO(File f, ShipObject ship) {
 		// TODO
-		return false;
 	}
 
 	/**
 	 * Loads the layout from the given stream, and adds it to the given ship object.
 	 * 
 	 * @param ship
-	 *            the ship object to which any added layout object will be added
+	 *            the ship object in which the loaded data will be saved
 	 * @param is
-	 *            input stream of the file that is to be read. The stream is always closed by this method.
+	 *            input stream from which the data is read. The stream is always closed by this method.
 	 * @param fileName
-	 *            name of the file being read (for logging purposes)
+	 *            how error messages will refer to the stream
 	 * @throws IllegalArgumentException
-	 *             when an error occurs during reading of the file, for example when the file is malformed.
+	 *             when the file is wrongly formatted
 	 */
 	public static void loadLayoutTXT(ShipObject ship, InputStream is, String fileName) throws IllegalArgumentException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (is == null)
+			throw new IllegalArgumentException("Stream must not be null.");
+
 		Scanner sc = new Scanner(is);
 
 		HashMap<DoorObject, Integer> leftMap = new HashMap<DoorObject, Integer>();
@@ -440,7 +612,7 @@ public class ShipUtils {
 						ship.add(door);
 						break;
 					default:
-						throw new Exception("Unrecognised layout object: " + layoutObject);
+						throw new IllegalArgumentException("Unrecognised layout object: " + layoutObject);
 				}
 			}
 
@@ -448,209 +620,446 @@ public class ShipUtils {
 				door.setLeftRoom(ship.getRoomById(leftMap.get(door)));
 				door.setRightRoom(ship.getRoomById(rightMap.get(door)));
 			}
-		} catch (Exception e) {
-			throw new IllegalArgumentException(fileName + " is wrongly formatted: " + e.getMessage());
 		} finally {
 			sc.close();
 		}
 	}
 
-	public static void loadLayoutTXT(ShipObject ship, File f) throws IllegalArgumentException, FileNotFoundException {
+	/**
+	 * Loads the layout from the given file, and adds it to the given ship object.
+	 * 
+	 * @param ship
+	 *            the ship object in which the loaded data will be saved
+	 * @param f
+	 *            file from which the data is read
+	 * @throws IllegalArgumentException
+	 *             when the file is wrongly formatted
+	 * @throws IOException
+	 *             when a general IO error occurs
+	 */
+	public static void loadLayoutTXT(ShipObject ship, File f) throws IllegalArgumentException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (f == null)
+			throw new IllegalArgumentException("File must not be null.");
 		loadLayoutTXT(ship, new FileInputStream(f), f.getName());
 	}
 
-	public static void loadLayoutXML(ShipObject ship, InputStream is, String fileName)
-			throws IllegalArgumentException, JDOMParseException, IOException {
-		Document doc = Utils.readStreamXML(is, fileName);
+	public static void saveLayoutTXT(ShipObject ship, File f) throws FileNotFoundException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (f == null)
+			throw new IllegalArgumentException("File must not be null.");
 
-		Element root = doc.getRootElement();
-		Element child = null;
-		String attr = null;
+		FileWriter writer = null;
 
-		// Load the total offset of the image set
-		child = root.getChild("img");
-		if (child == null)
-			throw new IllegalArgumentException("Missing <img> tag");
+		StringBuilder buf = new StringBuilder();
 
-		Rectangle hullDimensions = new Rectangle(0, 0, 0, 0);
-		attr = child.getAttributeValue("x");
-		if (attr == null)
-			throw new IllegalArgumentException("Img missing 'x' attribute");
-		hullDimensions.x = Integer.valueOf(attr);
+		buf.append(LayoutObjects.X_OFFSET);
+		buf.append("\r\n");
+		buf.append("" + ship.getXOffset());
+		buf.append("\r\n");
 
-		attr = child.getAttributeValue("y");
-		if (attr == null)
-			throw new IllegalArgumentException("Img missing 'y' attribute");
-		hullDimensions.y = Integer.valueOf(attr);
+		buf.append(LayoutObjects.Y_OFFSET);
+		buf.append("\r\n");
+		buf.append("" + ship.getYOffset());
+		buf.append("\r\n");
 
-		attr = child.getAttributeValue("w");
-		if (attr == null)
-			throw new IllegalArgumentException("Img missing 'w' attribute");
-		hullDimensions.width = Integer.valueOf(attr);
+		buf.append(LayoutObjects.HORIZONTAL);
+		buf.append("\r\n");
+		buf.append("" + ship.getHorizontal());
+		buf.append("\r\n");
 
-		attr = child.getAttributeValue("h");
-		if (attr == null)
-			throw new IllegalArgumentException("Img missing 'h' attribute");
-		hullDimensions.height = Integer.valueOf(attr);
+		buf.append(LayoutObjects.VERTICAL);
+		buf.append("\r\n");
+		buf.append("" + ship.getVertical());
+		buf.append("\r\n");
 
-		ship.setHullDimensions(hullDimensions);
+		buf.append(LayoutObjects.ELLIPSE);
+		buf.append("\r\n");
+		Rectangle ellipse = ship.getEllipse();
+		buf.append("" + ellipse.width);
+		buf.append("\r\n");
+		buf.append("" + ellipse.height);
+		buf.append("\r\n");
+		buf.append("" + ellipse.x);
+		buf.append("\r\n");
+		buf.append("" + ellipse.y);
+		buf.append("\r\n");
 
-		// Ignore <glowOffset> - only concerns iPad version of FTL
-
-		// Load additional offsets for other images
-		Point offset = new Point(0, 0);
-		Element offsets = root.getChild("offsets");
-		if (offsets != null) {
-			child = offsets.getChild("cloak");
-			if (child != null) {
-				attr = child.getAttributeValue("x");
-				if (attr == null)
-					throw new IllegalArgumentException("Cloak missing 'x' attribute");
-				offset.x = Integer.valueOf(attr);
-
-				attr = child.getAttributeValue("y");
-				if (attr == null)
-					throw new IllegalArgumentException("Cloak missing 'y' attribute");
-				offset.y = Integer.valueOf(attr);
-
-				ship.setCloakOffset(offset);
-			}
-
-			child = offsets.getChild("floor");
-			if (child != null) {
-				attr = child.getAttributeValue("x");
-				if (attr == null)
-					throw new IllegalArgumentException("Floor missing 'x' attribute");
-				offset.x = Integer.valueOf(attr);
-
-				attr = child.getAttributeValue("y");
-				if (attr == null)
-					throw new IllegalArgumentException("Floor missing 'y' attribute");
-				offset.y = Integer.valueOf(attr);
-
-				ship.setFloorOffset(offset);
-			}
+		for (RoomObject room : ship.getRooms()) {
+			buf.append(LayoutObjects.ROOM);
+			buf.append("\r\n");
+			buf.append("" + room.getId());
+			buf.append("\r\n");
+			buf.append("" + room.getX());
+			buf.append("\r\n");
+			buf.append("" + room.getY());
+			buf.append("\r\n");
+			buf.append("" + room.getW());
+			buf.append("\r\n");
+			buf.append("" + room.getH());
+			buf.append("\r\n");
 		}
 
-		HashMap<MountObject, Integer> gibMap = new HashMap<MountObject, Integer>();
-
-		// Load weapon mounts
-		child = root.getChild("weaponMounts");
-		if (child == null)
-			throw new IllegalArgumentException("Missing <weaponMounts> tag");
-
-		for (Element mountEl : child.getChildren("mount")) {
-			MountObject mount = new MountObject();
-
-			attr = mountEl.getAttributeValue("x");
-			if (attr == null)
-				throw new IllegalArgumentException("Mount missing 'x' attribute");
-			offset.x = Integer.valueOf(attr);
-
-			attr = mountEl.getAttributeValue("y");
-			if (attr == null)
-				throw new IllegalArgumentException("Mount missing 'y' attribute");
-			offset.y = Integer.valueOf(attr);
-
-			mount.setLocation(offset.x, offset.y); // TODO when loading remember that this is offset from the ship's hull
-
-			attr = mountEl.getAttributeValue("rotate");
-			if (attr == null)
-				throw new IllegalArgumentException("Mount missing 'rotate' attribute");
-			mount.setRotated(Boolean.valueOf(attr));
-
-			attr = mountEl.getAttributeValue("mirror");
-			if (attr == null)
-				throw new IllegalArgumentException("Moumt missing 'mirror' attribute");
-			mount.setMirrored(Boolean.valueOf(attr));
-
-			attr = mountEl.getAttributeValue("gib");
-			if (attr == null)
-				throw new IllegalArgumentException("Moumt missing 'gib' attribute");
-			gibMap.put(mount, Integer.valueOf(attr));
-
-			attr = mountEl.getAttributeValue("slide");
-			if (attr != null)
-				mount.setDirection(Directions.parseDir(attr.toUpperCase()));
-			else
-				mount.setDirection(Directions.NONE);
-
-			ship.add(mount);
+		RoomObject linked = null;
+		for (DoorObject door : ship.getDoors()) {
+			buf.append(LayoutObjects.DOOR);
+			buf.append("\r\n");
+			buf.append("" + door.getX());
+			buf.append("\r\n");
+			buf.append("" + door.getY());
+			buf.append("\r\n");
+			linked = door.getLeftRoom();
+			buf.append(linked == null ? "-1" : linked.getId());
+			buf.append("\r\n");
+			linked = door.getRightRoom();
+			buf.append(linked == null ? "-1" : linked.getId());
+			buf.append("\r\n");
+			buf.append("" + (door.isHorizontal() ? "0" : "1"));
+			buf.append("\r\n");
 		}
 
-		// Load gibs
-		child = root.getChild("explosion");
-		if (child == null)
-			throw new IllegalArgumentException("Missing <explosion> tag");
-
-		for (Element gibEl : child.getChildren()) {
-			if (gibEl.getName().startsWith("gib")) {
-				GibObject gib = new GibObject();
-
-				attr = gibEl.getName().substring(3);
-				gib.setId(Integer.valueOf(attr));
-
-				child = gibEl.getChild("x");
-				if (child == null)
-					throw new IllegalArgumentException("Gib missing <x> tag");
-				offset.x = Integer.valueOf(child.getValue());
-
-				child = gibEl.getChild("y");
-				if (child == null)
-					throw new IllegalArgumentException("Gib missing <y> tag");
-				offset.y = Integer.valueOf(child.getValue());
-
-				gib.setOffset(offset.x, offset.y);
-
-				child = gibEl.getChild("velocity");
-				if (child == null)
-					throw new IllegalArgumentException("Gib missing <velocity> tag");
-
-				attr = child.getAttributeValue("min");
-				if (attr == null)
-					throw new IllegalArgumentException("Velocity missing 'min' attribute");
-				gib.setVelocityMin(Float.valueOf(attr));
-
-				attr = child.getAttributeValue("max");
-				if (attr == null)
-					throw new IllegalArgumentException("Velocity missing 'max' attribute");
-				gib.setVelocityMax(Float.valueOf(attr));
-
-				child = gibEl.getChild("direction");
-				if (child == null)
-					throw new IllegalArgumentException("Missing <direction> tag");
-
-				attr = child.getAttributeValue("min");
-				if (attr == null)
-					throw new IllegalArgumentException("Direction missing 'min' attribute");
-				gib.setDirectionMin(Integer.valueOf(attr));
-
-				attr = child.getAttributeValue("max");
-				if (attr == null)
-					throw new IllegalArgumentException("Direction missing 'max' attribute");
-				gib.setDirectionMax(Integer.valueOf(attr));
-
-				child = gibEl.getChild("velocity");
-				if (child == null)
-					throw new IllegalArgumentException("Missing <angular> tag");
-
-				attr = child.getAttributeValue("min");
-				if (attr == null)
-					throw new IllegalArgumentException("Angular missing 'min' attribute");
-				gib.setAngularMin(Float.valueOf(attr));
-
-				attr = child.getAttributeValue("max");
-				if (attr == null)
-					throw new IllegalArgumentException("Angular missing 'max' attribute");
-				gib.setAngularMax(Float.valueOf(attr));
-
-				ship.add(gib);
-			}
+		try {
+			writer = new FileWriter(f);
+			writer.write(buf.toString());
+		} finally {
+			if (writer != null)
+				writer.close();
 		}
 	}
 
+	/**
+	 * Loads the XML layout from the stream.
+	 * 
+	 * @param ship
+	 *            ship object in which the loaded data will be saved
+	 * @param is
+	 *            stream from which the data is read. The stream is always closed by this method.
+	 * @param fileName
+	 *            how error messages will refer to the stream
+	 * @throws IllegalArgumentException
+	 *             when the file is wrongly formatted - a tag or an attribute is missing
+	 * @throws JDOMParseException
+	 *             when a parsing error occurs
+	 * @throws IOException
+	 *             when a general IO error occurs
+	 */
+	public static void loadLayoutXML(ShipObject ship, InputStream is, String fileName)
+			throws IllegalArgumentException, JDOMParseException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (is == null)
+			throw new IllegalArgumentException("Stream must not be null.");
+
+		try {
+			Document doc = Utils.readStreamXML(is, fileName);
+
+			Element root = doc.getRootElement();
+			Element child = null;
+			String attr = null;
+
+			// Load the total offset of the image set
+			child = root.getChild("img");
+			if (child == null)
+				throw new IllegalArgumentException("Missing <img> tag");
+
+			Rectangle hullDimensions = new Rectangle(0, 0, 0, 0);
+			attr = child.getAttributeValue("x");
+			if (attr == null)
+				throw new IllegalArgumentException("Img missing 'x' attribute");
+			hullDimensions.x = Integer.valueOf(attr);
+
+			attr = child.getAttributeValue("y");
+			if (attr == null)
+				throw new IllegalArgumentException("Img missing 'y' attribute");
+			hullDimensions.y = Integer.valueOf(attr);
+
+			attr = child.getAttributeValue("w");
+			if (attr == null)
+				throw new IllegalArgumentException("Img missing 'w' attribute");
+			hullDimensions.width = Integer.valueOf(attr);
+
+			attr = child.getAttributeValue("h");
+			if (attr == null)
+				throw new IllegalArgumentException("Img missing 'h' attribute");
+			hullDimensions.height = Integer.valueOf(attr);
+
+			ship.setHullDimensions(hullDimensions);
+
+			// Ignore <glowOffset> - only concerns iPad version of FTL
+
+			// Load additional offsets for other images
+			Point offset = new Point(0, 0);
+			Element offsets = root.getChild("offsets");
+			if (offsets != null) {
+				child = offsets.getChild("cloak");
+				if (child != null) {
+					attr = child.getAttributeValue("x");
+					if (attr == null)
+						throw new IllegalArgumentException("Cloak missing 'x' attribute");
+					offset.x = Integer.valueOf(attr);
+
+					attr = child.getAttributeValue("y");
+					if (attr == null)
+						throw new IllegalArgumentException("Cloak missing 'y' attribute");
+					offset.y = Integer.valueOf(attr);
+
+					ship.setCloakOffset(offset);
+				}
+
+				child = offsets.getChild("floor");
+				if (child != null) {
+					attr = child.getAttributeValue("x");
+					if (attr == null)
+						throw new IllegalArgumentException("Floor missing 'x' attribute");
+					offset.x = Integer.valueOf(attr);
+
+					attr = child.getAttributeValue("y");
+					if (attr == null)
+						throw new IllegalArgumentException("Floor missing 'y' attribute");
+					offset.y = Integer.valueOf(attr);
+
+					ship.setFloorOffset(offset);
+				}
+			}
+
+			HashMap<MountObject, Integer> gibMap = new HashMap<MountObject, Integer>();
+
+			// Load weapon mounts
+			child = root.getChild("weaponMounts");
+			if (child == null)
+				throw new IllegalArgumentException("Missing <weaponMounts> tag");
+
+			int id = 0;
+			for (Element mountEl : child.getChildren("mount")) {
+				MountObject mount = new MountObject();
+				mount.setId(id++);
+
+				attr = mountEl.getAttributeValue("x");
+				if (attr == null)
+					throw new IllegalArgumentException("Mount missing 'x' attribute");
+				offset.x = Integer.valueOf(attr);
+
+				attr = mountEl.getAttributeValue("y");
+				if (attr == null)
+					throw new IllegalArgumentException("Mount missing 'y' attribute");
+				offset.y = Integer.valueOf(attr);
+
+				mount.setLocation(offset.x, offset.y);
+
+				attr = mountEl.getAttributeValue("rotate");
+				if (attr == null)
+					throw new IllegalArgumentException("Mount missing 'rotate' attribute");
+				mount.setRotated(Boolean.valueOf(attr));
+
+				attr = mountEl.getAttributeValue("mirror");
+				if (attr == null)
+					throw new IllegalArgumentException("Moumt missing 'mirror' attribute");
+				mount.setMirrored(Boolean.valueOf(attr));
+
+				attr = mountEl.getAttributeValue("gib");
+				if (attr == null)
+					throw new IllegalArgumentException("Moumt missing 'gib' attribute");
+				gibMap.put(mount, Integer.valueOf(attr));
+
+				attr = mountEl.getAttributeValue("slide");
+				if (attr != null)
+					mount.setDirection(Directions.parseDir(attr.toUpperCase()));
+				else
+					mount.setDirection(Directions.NONE);
+
+				ship.add(mount);
+			}
+
+			// Load gibs
+			child = root.getChild("explosion");
+			if (child == null)
+				throw new IllegalArgumentException("Missing <explosion> tag");
+
+			for (Element gibEl : child.getChildren()) {
+				if (gibEl.getName().startsWith("gib")) {
+					GibObject gib = new GibObject();
+
+					attr = gibEl.getName().substring(3);
+					gib.setId(Integer.valueOf(attr));
+
+					child = gibEl.getChild("x");
+					if (child == null)
+						throw new IllegalArgumentException("Gib missing <x> tag");
+					offset.x = Integer.valueOf(child.getValue());
+
+					child = gibEl.getChild("y");
+					if (child == null)
+						throw new IllegalArgumentException("Gib missing <y> tag");
+					offset.y = Integer.valueOf(child.getValue());
+
+					gib.setOffset(offset.x, offset.y);
+
+					child = gibEl.getChild("velocity");
+					if (child == null)
+						throw new IllegalArgumentException("Gib missing <velocity> tag");
+
+					attr = child.getAttributeValue("min");
+					if (attr == null)
+						throw new IllegalArgumentException("Velocity missing 'min' attribute");
+					gib.setVelocityMin(Float.valueOf(attr));
+
+					attr = child.getAttributeValue("max");
+					if (attr == null)
+						throw new IllegalArgumentException("Velocity missing 'max' attribute");
+					gib.setVelocityMax(Float.valueOf(attr));
+
+					child = gibEl.getChild("direction");
+					if (child == null)
+						throw new IllegalArgumentException("Missing <direction> tag");
+
+					attr = child.getAttributeValue("min");
+					if (attr == null)
+						throw new IllegalArgumentException("Direction missing 'min' attribute");
+					gib.setDirectionMin(Integer.valueOf(attr));
+
+					attr = child.getAttributeValue("max");
+					if (attr == null)
+						throw new IllegalArgumentException("Direction missing 'max' attribute");
+					gib.setDirectionMax(Integer.valueOf(attr));
+
+					child = gibEl.getChild("velocity");
+					if (child == null)
+						throw new IllegalArgumentException("Missing <angular> tag");
+
+					attr = child.getAttributeValue("min");
+					if (attr == null)
+						throw new IllegalArgumentException("Angular missing 'min' attribute");
+					gib.setAngularMin(Float.valueOf(attr));
+
+					attr = child.getAttributeValue("max");
+					if (attr == null)
+						throw new IllegalArgumentException("Angular missing 'max' attribute");
+					gib.setAngularMax(Float.valueOf(attr));
+
+					ship.add(gib);
+				}
+			}
+
+			// Link mounts to gibs
+			for (MountObject mount : gibMap.keySet())
+				mount.setGib(ship.getGibById(gibMap.get(mount)));
+
+			gibMap.clear();
+		} finally {
+			is.close();
+		}
+	}
+
+	/**
+	 * 
+	 * @param ship
+	 *            ship object in which the loaded data will be saved
+	 * @param f
+	 *            file from which the data is read
+	 * @throws IllegalArgumentException
+	 *             when the file is wrongly formatted - a tag or an attribute is missing
+	 * @throws JDOMParseException
+	 *             when a parsing error occurs
+	 * @throws IOException
+	 *             when a general IO error occurs
+	 */
 	public static void loadLayoutXML(ShipObject ship, File f) throws IllegalArgumentException, JDOMParseException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (f == null)
+			throw new IllegalArgumentException("File must not be null.");
 		loadLayoutXML(ship, new FileInputStream(f), f.getName());
+	}
+
+	public static void saveLayoutXML(ShipObject ship, File f) throws IllegalArgumentException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (f == null)
+			throw new IllegalArgumentException("File must not be null.");
+
+		Document doc = new Document();
+		Element root = new Element("wrapper");
+		Element e = null;
+
+		Comment c = new Comment("Copyright (c) 2012 by Subset Games. All rights reserved.");
+		root.addContent(c);
+
+		e = new Element("img");
+		Rectangle hullDimensions = ship.getHullDimensions();
+		e.setAttribute("x", "" + hullDimensions.x);
+		e.setAttribute("y", "" + hullDimensions.y);
+		e.setAttribute("w", "" + hullDimensions.width);
+		e.setAttribute("h", "" + hullDimensions.height);
+		root.addContent(e);
+
+		Element offsets = new Element("offsets");
+
+		e = new Element("floor");
+		e.setAttribute("x", "");
+		e.setAttribute("y", "");
+		offsets.addContent(e);
+
+		e = new Element("cloak");
+		e.setAttribute("x", "");
+		e.setAttribute("y", "");
+		offsets.addContent(e);
+
+		root.addContent(offsets);
+
+		Element weaponMounts = new Element("weaponMounts");
+
+		MountObject[] mounts = ship.getMounts();
+		for (int i = 0; i < mounts.length; i++) {
+			e = new Element("mount");
+			e.setAttribute("x", "" + mounts[i].getX());
+			e.setAttribute("y", "" + mounts[i].getY());
+			e.setAttribute("rotate", "" + mounts[i].isRotated());
+			e.setAttribute("mirror", "" + mounts[i].isMirrored());
+			e.setAttribute("gib", "" + mounts[i].getGib().getId());
+			e.setAttribute("slide", "" + mounts[i].getDirection().toString());
+			weaponMounts.addContent(e);
+		}
+		root.addContent(weaponMounts);
+
+		Element explosion = new Element("explosion");
+
+		DecimalFormat decimal = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.ENGLISH));
+		GibObject[] gibs = ship.getGibs();
+		for (int i = 0; i < gibs.length; i++) {
+			Element gib = new Element("gib" + (i + 1));
+
+			e = new Element("velocity");
+			e.setAttribute("min", "" + decimal.format(gibs[i].getVelocityMin()));
+			e.setAttribute("max", "" + decimal.format(gibs[i].getVelocityMax()));
+			gib.addContent(e);
+
+			e = new Element("angular");
+			e.setAttribute("min", "" + decimal.format(gibs[i].getAngularMin()));
+			e.setAttribute("max", "" + decimal.format(gibs[i].getAngularMax()));
+			gib.addContent(e);
+
+			e = new Element("direction");
+			e.setAttribute("min", "" + gibs[i].getDirectionMin());
+			e.setAttribute("max", "" + gibs[i].getDirectionMax());
+			gib.addContent(e);
+
+			e = new Element("x");
+			e.setText("" + gibs[i].getX());
+			gib.addContent(e);
+
+			e = new Element("y");
+			e.setText("" + gibs[i].getY());
+			gib.addContent(e);
+
+			explosion.addContent(gib);
+		}
+		root.addContent(explosion);
+
+		doc.setRootElement(root);
+
+		Utils.writeFileXML(doc, f);
 	}
 
 	private static String firstExisting(String[] prefixes, String suffix, FTLPack archive) {

@@ -57,7 +57,6 @@ public class Grid {
 	private ArrayList<ArrayList<CellController>> cells = null;
 
 	private Grid() {
-
 		cells = new ArrayList<ArrayList<CellController>>();
 		bounds = new Rectangle(0, 0, 0, 0);
 	}
@@ -80,7 +79,7 @@ public class Grid {
 	 *            new height of the grid, in pixels
 	 */
 	public void updateBounds(int width, int height) {
-		// add one after the division so that cells fill all of the available space
+		// Add one after the division so that cells fill all of the available space
 		bounds.width = (width / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
 		bounds.height = (height / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
 
@@ -181,7 +180,7 @@ public class Grid {
 	 * @see Snapmodes#CORNER_BR
 	 */
 	public Point snapToGrid(int x, int y, Snapmodes snapmode) {
-		// don't want values outside of the canvas area
+		// Don't want values outside of the canvas area
 		x = Math.min(Math.max(x, 0), bounds.width);
 		y = Math.min(Math.max(y, 0), bounds.height);
 
@@ -196,7 +195,7 @@ public class Grid {
 				break;
 			case CELL:
 				p = c.getLocation();
-				// correct by 1 so that boxes appear centered
+				// Correct by 1 so that boxes appear centered
 				p.x--;
 				p.y--;
 				break;
@@ -249,8 +248,8 @@ public class Grid {
 					p = b;
 				break;
 			case ANY:
-				// round to any multiple of 17.5 (ShipContainer.CELL_SIZE / 2.0)
-				// just subtract the remainder of division, and add 1 to correct
+				// Round to any multiple of 17.5 (ShipContainer.CELL_SIZE / 2.0)
+				// Just subtract the remainder of division, and add 1 to correct
 				p.x += -p.x % 17.5 + 1;
 				p.y += -p.y % 17.5 + 1;
 				break;

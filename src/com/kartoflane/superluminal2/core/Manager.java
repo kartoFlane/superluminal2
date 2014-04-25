@@ -3,6 +3,8 @@ package com.kartoflane.superluminal2.core;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import org.eclipse.swt.widgets.Control;
+
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
@@ -28,6 +30,13 @@ public class Manager {
 	public static final LinkedList<Deletable> DELETED_LIST = new LinkedList<Deletable>();
 	public static final HashMap<Hotkeys, Hotkey> HOTKEY_MAP = new HashMap<Hotkeys, Hotkey>();
 
+	// Config variables
+	public static boolean sidebarOnRightSide = true;
+	public static boolean rememberGeometry = true;
+	public static boolean allowRoomOverlap = false;
+	public static String resourcePath = "";
+
+	// Runtime variables
 	public static boolean leftMouseDown = false;
 	public static boolean rightMouseDown = false;
 	public static boolean modShift = false;
@@ -73,8 +82,12 @@ public class Manager {
 		currentShip.getShipController().reposition(3 * ShipContainer.CELL_SIZE, 3 * ShipContainer.CELL_SIZE);
 
 		EditorWindow.getInstance().enableTools(true);
+		EditorWindow.getInstance().enableOptions(true);
+		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
 		selectTool(Tools.POINTER);
+		if (OverviewWindow.getInstance().isVisible())
+			OverviewWindow.getInstance().update();
 	}
 
 	public static void loadShip(ShipObject ship) {
@@ -82,6 +95,8 @@ public class Manager {
 
 		currentShip = new ShipContainer(ship);
 		ShipController sc = currentShip.getShipController();
+		// Selecting the anchor makes children non-collidable
+		// Prevents rooms and doors from bugging out when repositioning
 		sc.select();
 		sc.reposition(3 * ShipContainer.CELL_SIZE, 3 * ShipContainer.CELL_SIZE);
 		sc.deselect();
@@ -90,36 +105,39 @@ public class Manager {
 		currentShip.updateChildBoundingAreas();
 
 		EditorWindow.getInstance().enableTools(true);
+		EditorWindow.getInstance().enableOptions(true);
+		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
 		selectTool(Tools.POINTER);
 		if (OverviewWindow.getInstance().isVisible())
 			OverviewWindow.getInstance().update();
-
-		// TODO load the ship, anything else to do?
-	}
-
-	public static void setCurrenetShip(ShipContainer container) {
-		// TODO allows tabs of open ships?
 	}
 
 	public static void closeShip() {
-		// TODO UI prompts and shit
+		if (currentShip == null)
+			return;
 
-		// if (saved) {
-		closeShipForce();
-		// } else {
-		// prompt if sure
+		if (currentShip.isSaved()) {
+			closeShipForce();
+		} else {
+			// TODO UI prompts and shit
+		}
 	}
 
 	public static void closeShipForce() {
+		setSelected(null);
+
 		if (currentShip != null)
 			currentShip.dispose();
 
-		setSelected(null);
 		currentShip = null;
 
 		EditorWindow.getInstance().enableTools(false);
+		EditorWindow.getInstance().enableOptions(false);
 		EditorWindow.getInstance().canvasRedraw();
+		selectTool(null);
+		if (OverviewWindow.getInstance().isVisible())
+			OverviewWindow.getInstance().update();
 	}
 
 	/** Returns the currently loaded ship. */
@@ -131,7 +149,7 @@ public class Manager {
 	 * Select the given tool item, also triggering the tools' {@link Tool#select() select()} and {@link Tool#deselect() deselect()} methods, as needed.
 	 */
 	public static void selectTool(Tools tool) {
-		// deny trying to select the same tool twice
+		// Deny trying to select the same tool twice
 		if (selectedTool != null && selectedTool == tool)
 			return;
 
@@ -140,9 +158,15 @@ public class Manager {
 
 		selectedTool = tool;
 		if (tool != null) {
-			TOOL_MAP.get(tool).select();
-			MouseInputDispatcher.getInstance().setCurrentTool(TOOL_MAP.get(selectedTool));
+			MouseInputDispatcher.getInstance().setCurrentTool(TOOL_MAP.get(tool));
 			EditorWindow.getInstance().selectTool(tool);
+			TOOL_MAP.get(tool).select();
+		} else {
+			MouseInputDispatcher.getInstance().setCurrentTool(null);
+			EditorWindow.getInstance().selectTool(null);
+			Control c = (Control) EditorWindow.getInstance().getSidebarContent();
+			if (c != null && !c.isDisposed())
+				c.dispose();
 		}
 	}
 

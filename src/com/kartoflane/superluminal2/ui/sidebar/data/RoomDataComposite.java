@@ -15,16 +15,13 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
-import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
@@ -32,24 +29,11 @@ import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.SystemsMenu;
 
 public class RoomDataComposite extends Composite implements DataComposite {
 
 	private Button btnSystem;
-	private Menu systemMenu;
-	private MenuItem mntmEmpty;
-	private MenuItem mntmEngines;
-	private MenuItem mntmMedbay;
-	private MenuItem mntmOxygen;
-	private MenuItem mntmShields;
-	private MenuItem mntmWeapons;
-	private MenuItem mntmArtillery;
-	private MenuItem mntmCloaking;
-	private MenuItem mntmDrones;
-	private MenuItem mntmTeleporter;
-	private MenuItem mntmDoors;
-	private MenuItem mntmPilot;
-	private MenuItem mntmSensors;
 	private Label lblSysLevel;
 	private Label lblMaxLevel;
 	private Scale scaleSysLevel;
@@ -65,10 +49,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 	private RoomController roomC = null;
 	private ShipContainer container = null;
-	private MenuItem mntmClonebay;
-	private MenuItem mntmBattery;
-	private MenuItem mntmHacking;
-	private MenuItem mntmMind;
 	private Label label;
 	private Label lblGlow;
 	private Combo glowCombo;
@@ -122,7 +102,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		scaleSysLevel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				Systems sys = container.getActiveSystem(roomC.getGameObject());
 				SystemController system = container.getSystemController(sys);
 				system.setLevel(scaleSysLevel.getSelection());
 				txtSysLevel.setText("" + scaleSysLevel.getSelection());
@@ -150,7 +130,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleMaxLevel.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Systems sys = container.getAssignedSystem(roomC.getGameObject());
+					Systems sys = container.getActiveSystem(roomC.getGameObject());
 					SystemController system = container.getSystemController(sys);
 					system.setLevelMax(scaleMaxLevel.getSelection());
 					txtMaxLevel.setText("" + scaleMaxLevel.getSelection());
@@ -207,15 +187,16 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Point p = btnSystem.getLocation();
-				systemMenu.setLocation(toDisplay(p.x, p.y + btnSystem.getSize().y));
-				showSystemMenu();
+				SystemsMenu sysMenu = SystemsMenu.getInstance();
+				sysMenu.setLocation(toDisplay(p.x, p.y + btnSystem.getSize().y));
+				sysMenu.open();
 			}
 		});
 
 		btnAvailable.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				Systems sys = container.getActiveSystem(roomC.getGameObject());
 				SystemController system = container.getSystemController(sys);
 				system.setAvailableAtStart(btnAvailable.getSelection());
 				roomC.redraw();
@@ -225,7 +206,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageViewListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				Systems sys = container.getActiveSystem(roomC.getGameObject());
 				SystemController system = container.getSystemController(sys);
 				File file = new File(system.getInteriorPath());
 
@@ -249,7 +230,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				Systems sys = container.getActiveSystem(roomC.getGameObject());
 				SystemController system = container.getSystemController(sys);
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
 				dialog.setFilterExtensions(new String[] { "*.png" });
@@ -267,7 +248,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		SelectionAdapter imageClearListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getAssignedSystem(roomC.getGameObject());
+				Systems sys = container.getActiveSystem(roomC.getGameObject());
 				SystemController system = container.getSystemController(sys);
 
 				system.setInteriorPath(null);
@@ -276,193 +257,21 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		};
 		btnInteriorClear.addSelectionListener(imageClearListener);
 
-		/*
-		 * =========================
-		 * Context menu with systems
-		 * =========================
-		 */
-		systemMenu = new Menu(this);
-		setMenu(systemMenu);
-
-		mntmEmpty = new MenuItem(systemMenu, SWT.RADIO);
-		mntmEmpty.setText("Empty");
-
-		MenuItem mntmSystem = new MenuItem(systemMenu, SWT.CASCADE);
-		mntmSystem.setText("Systems");
-
-		Menu menu = new Menu(mntmSystem);
-		mntmSystem.setMenu(menu);
-
-		mntmEngines = new MenuItem(menu, SWT.RADIO);
-		mntmEngines.setText("Engines");
-
-		mntmMedbay = new MenuItem(menu, SWT.RADIO);
-		mntmMedbay.setText("Medbay");
-
-		mntmClonebay = new MenuItem(menu, SWT.RADIO);
-		mntmClonebay.setText("Clonebay");
-
-		mntmOxygen = new MenuItem(menu, SWT.RADIO);
-		mntmOxygen.setText("Oxygen");
-
-		mntmShields = new MenuItem(menu, SWT.RADIO);
-		mntmShields.setText("Shields");
-
-		mntmWeapons = new MenuItem(menu, SWT.RADIO);
-		mntmWeapons.setText("Weapons");
-
-		MenuItem mntmSubsystem = new MenuItem(systemMenu, SWT.CASCADE);
-		mntmSubsystem.setText("Subsystems");
-
-		Menu menu_1 = new Menu(mntmSubsystem);
-		mntmSubsystem.setMenu(menu_1);
-
-		mntmBattery = new MenuItem(menu_1, SWT.RADIO);
-		mntmBattery.setText("Battery");
-
-		mntmDoors = new MenuItem(menu_1, SWT.RADIO);
-		mntmDoors.setText("Doors");
-
-		mntmPilot = new MenuItem(menu_1, SWT.RADIO);
-		mntmPilot.setText("Pilot");
-
-		mntmSensors = new MenuItem(menu_1, SWT.RADIO);
-		mntmSensors.setText("Sensors");
-
-		MenuItem mntmSpecial = new MenuItem(systemMenu, SWT.CASCADE);
-		mntmSpecial.setText("Special");
-
-		Menu menu_2 = new Menu(mntmSpecial);
-		mntmSpecial.setMenu(menu_2);
-
-		mntmArtillery = new MenuItem(menu_2, SWT.RADIO);
-		mntmArtillery.setText("Artillery");
-
-		mntmCloaking = new MenuItem(menu_2, SWT.RADIO);
-		mntmCloaking.setText("Cloaking");
-
-		mntmDrones = new MenuItem(menu_2, SWT.RADIO);
-		mntmDrones.setText("Drone Control");
-
-		mntmHacking = new MenuItem(menu_2, SWT.RADIO);
-		mntmHacking.setText("Hacking");
-
-		mntmMind = new MenuItem(menu_2, SWT.RADIO);
-		mntmMind.setText("Mind Control");
-
-		mntmTeleporter = new MenuItem(menu_2, SWT.RADIO);
-		mntmTeleporter.setText("Teleporter");
-
-		SelectionAdapter systemListener = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (e.getSource() == mntmEmpty) {
-					container.assign(Systems.EMPTY, roomC);
-					btnSystem.setText(Systems.EMPTY.toString());
-				} else if (e.getSource() == mntmEngines) {
-					container.assign(Systems.ENGINES, roomC);
-					btnSystem.setText(Systems.ENGINES.toString());
-				} else if (e.getSource() == mntmMedbay) {
-					container.assign(Systems.MEDBAY, roomC);
-					btnSystem.setText(Systems.MEDBAY.toString());
-				} else if (e.getSource() == mntmOxygen) {
-					container.assign(Systems.OXYGEN, roomC);
-					btnSystem.setText(Systems.OXYGEN.toString());
-				} else if (e.getSource() == mntmShields) {
-					container.assign(Systems.SHIELDS, roomC);
-					btnSystem.setText(Systems.SHIELDS.toString());
-				} else if (e.getSource() == mntmWeapons) {
-					container.assign(Systems.WEAPONS, roomC);
-					btnSystem.setText(Systems.WEAPONS.toString());
-				} else if (e.getSource() == mntmArtillery) {
-					container.assign(Systems.ARTILLERY, roomC);
-					btnSystem.setText(Systems.ARTILLERY.toString());
-				} else if (e.getSource() == mntmCloaking) {
-					container.assign(Systems.CLOAKING, roomC);
-					btnSystem.setText(Systems.CLOAKING.toString());
-				} else if (e.getSource() == mntmDrones) {
-					container.assign(Systems.DRONES, roomC);
-					btnSystem.setText(Systems.DRONES.toString());
-				} else if (e.getSource() == mntmTeleporter) {
-					container.assign(Systems.TELEPORTER, roomC);
-					btnSystem.setText(Systems.TELEPORTER.toString());
-				} else if (e.getSource() == mntmDoors) {
-					container.assign(Systems.DOORS, roomC);
-					btnSystem.setText(Systems.DOORS.toString());
-				} else if (e.getSource() == mntmPilot) {
-					container.assign(Systems.PILOT, roomC);
-					btnSystem.setText(Systems.PILOT.toString());
-				} else if (e.getSource() == mntmSensors) {
-					container.assign(Systems.SENSORS, roomC);
-					btnSystem.setText(Systems.SENSORS.toString());
-
-					// AE contenet:
-				} else if (e.getSource() == mntmClonebay) {
-					container.assign(Systems.CLONEBAY, roomC);
-					btnSystem.setText(Systems.CLONEBAY.toString());
-				} else if (e.getSource() == mntmHacking) {
-					container.assign(Systems.HACKING, roomC);
-					btnSystem.setText(Systems.HACKING.toString());
-				} else if (e.getSource() == mntmMind) {
-					container.assign(Systems.MIND, roomC);
-					btnSystem.setText(Systems.MIND.toString());
-				} else if (e.getSource() == mntmBattery) {
-					container.assign(Systems.BATTERY, roomC);
-					btnSystem.setText(Systems.BATTERY.toString());
-				}
-
-				updateData();
-				roomC.redraw();
-				OverviewWindow.getInstance().update(roomC);
-			}
-		};
-
-		mntmEmpty.addSelectionListener(systemListener);
-		mntmEngines.addSelectionListener(systemListener);
-		mntmMedbay.addSelectionListener(systemListener);
-		mntmOxygen.addSelectionListener(systemListener);
-		mntmShields.addSelectionListener(systemListener);
-		mntmWeapons.addSelectionListener(systemListener);
-		mntmArtillery.addSelectionListener(systemListener);
-		mntmCloaking.addSelectionListener(systemListener);
-		mntmDrones.addSelectionListener(systemListener);
-		mntmTeleporter.addSelectionListener(systemListener);
-		mntmDoors.addSelectionListener(systemListener);
-		mntmPilot.addSelectionListener(systemListener);
-		mntmSensors.addSelectionListener(systemListener);
-		mntmClonebay.addSelectionListener(systemListener);
-		mntmBattery.addSelectionListener(systemListener);
-		mntmHacking.addSelectionListener(systemListener);
-		mntmMind.addSelectionListener(systemListener);
-
 		updateData();
 
 		pack();
-	}
-
-	public void showSystemMenu() {
-		systemMenu.setVisible(true);
-
-		Systems sys = container.getAssignedSystem(roomC.getGameObject());
-		SystemController roomSystem = container.getSystemController(sys);
-		mntmEmpty.setSelection(roomSystem.getSystemId() == Systems.EMPTY);
-		for (Systems systemId : Systems.getSystems()) {
-			MenuItem item = getSystemItem(systemId);
-			item.setSelection(roomSystem.getSystemId() == systemId);
-			if (container.isAssigned(systemId))
-				item.setImage(Cache.checkOutImage(item, "cpath:/assets/tick.png"));
-			else {
-				Cache.checkInImage(item, "cpath:/assets/tick.png");
-				item.setImage(null);
-			}
-		}
 	}
 
 	public void updateData() {
 		if (roomC == null)
 			return;
 
-		Systems sys = container.getAssignedSystem(roomC.getGameObject());
+		SystemsMenu sysMenu = SystemsMenu.getInstance();
+		sysMenu.setController(roomC);
+		sysMenu.disposeSystemSubmenus();
+		sysMenu.createSystemSubmenus();
+
+		Systems sys = container.getActiveSystem(roomC.getGameObject());
 		SystemController system = container.getSystemController(sys);
 		ShipController shipController = container.getShipController();
 		boolean playerShip = shipController.isPlayerShip();
@@ -472,7 +281,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 		btnSystem.setText(system.toString());
 
-		// enable/disable buttons
+		// Enable/disable buttons
 		btnInteriorBrowse.setEnabled(system.canContainInterior());
 		btnInteriorClear.setEnabled(system.canContainInterior());
 		btnInteriorView.setEnabled(system.getInteriorPath() != null);
@@ -484,7 +293,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleMaxLevel.setEnabled(system.getSystemId() != Systems.EMPTY);
 
 		if (system.getSystemId() != Systems.EMPTY) {
-			// update widgets with the system's data
+			// Update widgets with the system's data
 			btnAvailable.setSelection(system.isAvailableAtStart());
 
 			if (!playerShip) {
@@ -500,7 +309,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtInterior.setText(temp == null ? "" : Utils.trimProtocol(temp));
 			txtInterior.selectAll();
 		} else {
-			// no system - reset to default
+			// No system - reset to default
 			if (!playerShip) {
 				scaleMaxLevel.setMaximum(2);
 				scaleMaxLevel.setSelection(1);
@@ -515,45 +324,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		OverviewWindow overview = OverviewWindow.getInstance();
 		if (overview != null && overview.isVisible())
 			overview.update(roomC);
-	}
-
-	private MenuItem getSystemItem(Systems systemId) {
-		switch (systemId) {
-			case ENGINES:
-				return mntmEngines;
-			case MEDBAY:
-				return mntmMedbay;
-			case OXYGEN:
-				return mntmOxygen;
-			case SHIELDS:
-				return mntmShields;
-			case WEAPONS:
-				return mntmWeapons;
-			case ARTILLERY:
-				return mntmArtillery;
-			case CLOAKING:
-				return mntmCloaking;
-			case DRONES:
-				return mntmDrones;
-			case TELEPORTER:
-				return mntmTeleporter;
-			case DOORS:
-				return mntmDoors;
-			case PILOT:
-				return mntmPilot;
-			case SENSORS:
-				return mntmSensors;
-			case CLONEBAY:
-				return mntmClonebay;
-			case BATTERY:
-				return mntmBattery;
-			case HACKING:
-				return mntmHacking;
-			case MIND:
-				return mntmMind;
-			default:
-				return null;
-		}
 	}
 
 	@Override

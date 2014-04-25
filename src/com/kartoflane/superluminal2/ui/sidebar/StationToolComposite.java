@@ -41,7 +41,6 @@ public class StationToolComposite extends Composite {
 
 		final Combo directionCombo = new Combo(this, SWT.READ_ONLY);
 		GridData gd_directionCombo = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
-		gd_directionCombo.heightHint = 17;
 		gd_directionCombo.widthHint = 80;
 		directionCombo.setLayoutData(gd_directionCombo);
 		directionCombo.add("Up");

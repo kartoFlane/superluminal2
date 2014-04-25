@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
@@ -40,7 +41,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 		MountView view = new MountView();
 		MountController controller = new MountController(container, model, view);
 
-		controller.setWeapon(ShipContainer.DEFAULT_WEAPON_OBJ);
+		controller.setWeapon(object.getWeapon());
 
 		return controller;
 	}
@@ -139,20 +140,20 @@ public class MountController extends ObjectController implements Comparable<Moun
 
 	@Override
 	public Rectangle getBounds() {
-		Rectangle b = super.getBounds();
+		Rectangle b = model.getBounds();
 		Point offset = getGameObject().getWeapon().getMountOffset();
 
 		int s = isMirrored() ? -1 : 1;
 
 		if (isRotated()) {
-			b.x += b.height / 2 + 1;
-			b.y += s * (b.height / 2 - offset.x - 1);
+			b.x += -getH() / 2 + offset.y - 1;
+			b.y += s * (b.width / 2 - offset.x);
 		} else {
 			b.x += s * (b.width / 2 - offset.x);
-			b.y -= b.width / 2 + 1;
+			b.y += b.height / 2 - offset.y;
 		}
 
-		return b;
+		return Utils.rotate(b, isRotated() ? 90 : 0);
 	}
 
 	@Override

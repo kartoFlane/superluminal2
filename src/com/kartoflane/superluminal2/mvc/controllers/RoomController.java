@@ -20,6 +20,7 @@ import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.SystemsMenu;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.RoomDataComposite;
@@ -251,8 +252,9 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 					setResizing(false);
 					setMoving(false);
 				} else if (selected && getBounds().contains(e.x, e.y)) {
-					// open system popup menu
-					((RoomDataComposite) ((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).getDataComposite()).showSystemMenu();
+					// Open system popup menu
+					SystemsMenu sysMenu = SystemsMenu.getInstance();
+					sysMenu.open();
 				}
 			}
 		}

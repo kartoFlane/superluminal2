@@ -5,7 +5,7 @@ import org.eclipse.swt.graphics.Point;
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
-import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.core.Database;
 
 public class MountObject extends GameObject implements Alias, Movable, Comparable<MountObject> {
 
@@ -26,7 +26,7 @@ public class MountObject extends GameObject implements Alias, Movable, Comparabl
 
 	public MountObject() {
 		setDeletable(true);
-		setWeapon(ShipContainer.DEFAULT_WEAPON_OBJ);
+		setWeapon(Database.DEFAULT_WEAPON_OBJ);
 	}
 
 	public void setId(int id) {

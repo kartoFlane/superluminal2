@@ -22,7 +22,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
-public class ManipulationToolComposite extends Composite implements SidebarComposite, DataComposite {
+public class ManipulationToolComposite extends Composite implements DataComposite {
 	private Button btnPinned;
 
 	private Composite boundsContainer;
@@ -245,7 +245,6 @@ public class ManipulationToolComposite extends Composite implements SidebarCompo
 		EditorWindow.getInstance().updateSidebarScroll();
 	}
 
-	@Override
 	public DataComposite getDataComposite() {
 		if (dataContainer.getChildren().length == 0)
 			return null;

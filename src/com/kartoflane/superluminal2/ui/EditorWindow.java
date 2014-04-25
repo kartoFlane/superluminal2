@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -42,6 +44,8 @@ import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
+import com.kartoflane.superluminal2.core.ShipUtils;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.tools.CreationTool;
@@ -53,9 +57,7 @@ import com.kartoflane.superluminal2.tools.PropertyTool;
 import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
-import com.kartoflane.superluminal2.ui.sidebar.CreationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
-import com.kartoflane.superluminal2.ui.sidebar.SidebarComposite;
 
 public class EditorWindow {
 	private static final Logger log = LogManager.getLogger(EditorWindow.class);
@@ -63,10 +65,16 @@ public class EditorWindow {
 	public static final int SIDEBAR_MIN_WIDTH = 290;
 	public static final int CANVAS_MIN_SIZE = 400;
 
+	private static EditorWindow instance;
+
 	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<Tools, ToolItem>();
 	private final RGB canvasRGB = new RGB(164, 164, 164);
 
-	private static EditorWindow instance;
+	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
+	private Color canvasColor = null;
+	private boolean shellResizing = false;
+
+	private File saveDestination = null;
 
 	private Shell shell;
 	private ScrolledComposite sideContainer;
@@ -83,9 +91,6 @@ public class EditorWindow {
 	private MenuItem mntmRedo;
 	private MenuItem mntmDelete;
 
-	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
-	private Color canvasColor = null;
-	private boolean shellResizing = false;
 	private MenuItem mntmShowAnchor;
 	private MenuItem mntmShowMounts;
 	private MenuItem mntmShowRooms;
@@ -96,8 +101,11 @@ public class EditorWindow {
 	private MenuItem mntmShowShield;
 	private MenuItem mntmNewShip;
 	private MenuItem mntmLoadShip;
-	private MenuItem mntmPreferences;
+	private MenuItem mntmSettings;
 	private MenuItem mntmGrid;
+	private MenuItem mntmSaveShip;
+	private MenuItem mntmSaveShipAs;
+	private MenuItem mntmCloseShip;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -119,6 +127,8 @@ public class EditorWindow {
 		CursorController.newInstance();
 		new OverviewWindow(shell);
 		new ShipLoaderDialog(shell);
+		new SettingsDialog(shell);
+		new SystemsMenu(shell);
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
@@ -146,6 +156,19 @@ public class EditorWindow {
 		mntmLoadShip = new MenuItem(menuFile, SWT.NONE);
 		mntmLoadShip.setText("Load Ship\t" + Manager.getHotkey(Hotkeys.LOAD_SHIP));
 
+		new MenuItem(menuFile, SWT.SEPARATOR);
+
+		mntmSaveShip = new MenuItem(menuFile, SWT.NONE);
+		mntmSaveShip.setText("Save Ship\t" + Manager.getHotkey(Hotkeys.SAVE_SHIP));
+
+		mntmSaveShipAs = new MenuItem(menuFile, SWT.NONE);
+		mntmSaveShipAs.setText("Save Ship As...");
+
+		new MenuItem(menuFile, SWT.SEPARATOR);
+
+		mntmCloseShip = new MenuItem(menuFile, SWT.NONE);
+		mntmCloseShip.setText("Close Ship");
+
 		// Edit menu
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
 		mntmEdit.setText("Edit");
@@ -166,8 +189,8 @@ public class EditorWindow {
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
-		mntmPreferences = new MenuItem(menuEdit, SWT.NONE);
-		mntmPreferences.setText("Preferences");
+		mntmSettings = new MenuItem(menuEdit, SWT.NONE);
+		mntmSettings.setText("Settings");
 
 		// View menu
 		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
@@ -177,7 +200,7 @@ public class EditorWindow {
 		mntmView.setMenu(menuView);
 
 		final MenuItem mntmSidebar = new MenuItem(menuView, SWT.CHECK);
-		mntmSidebar.setSelection(Superluminal.sidebarOnRightSide);
+		mntmSidebar.setSelection(Manager.sidebarOnRightSide);
 		mntmSidebar.setText("Sidebar on Right Side");
 
 		new MenuItem(menuView, SWT.SEPARATOR);
@@ -331,7 +354,7 @@ public class EditorWindow {
 		sideContainer.setExpandVertical(true);
 		sideContainer.getVerticalBar().setIncrement(15);
 
-		if (Superluminal.sidebarOnRightSide) {
+		if (Manager.sidebarOnRightSide) {
 			canvas.setParent(editorContainer);
 			sideContainer.setParent(editorContainer);
 			editorContainer.setWeights(new int[] { displaySize.width - SIDEBAR_MIN_WIDTH, SIDEBAR_MIN_WIDTH });
@@ -452,7 +475,7 @@ public class EditorWindow {
 				if (ship != null) {
 					ship.updateBoundingArea();
 					ship.updateChildBoundingAreas();
-					ship.getShipController().setVisible(true); // to update the view
+					ship.getShipController().updateView();
 					ship.getShipController().redraw();
 				}
 
@@ -476,7 +499,7 @@ public class EditorWindow {
 				if (ship != null) {
 					ship.updateBoundingArea();
 					ship.updateChildBoundingAreas();
-					ship.getShipController().setVisible(true); // to update the view
+					ship.getShipController().updateView();
 					ship.getShipController().redraw();
 				}
 
@@ -484,11 +507,11 @@ public class EditorWindow {
 				int[] weights = editorContainer.getWeights();
 
 				if (width >= sidebarWidth + CANVAS_MIN_SIZE) {
-					weights[Superluminal.sidebarOnRightSide ? 1 : 0] = 1000000 * sidebarWidth / width;
-					weights[Superluminal.sidebarOnRightSide ? 0 : 1] = 1000000 - weights[Superluminal.sidebarOnRightSide ? 1 : 0];
+					weights[Manager.sidebarOnRightSide ? 1 : 0] = 1000000 * sidebarWidth / width;
+					weights[Manager.sidebarOnRightSide ? 0 : 1] = 1000000 - weights[Manager.sidebarOnRightSide ? 1 : 0];
 				} else {
-					weights[Superluminal.sidebarOnRightSide ? 1 : 0] = 1000000 * sidebarWidth / (sidebarWidth + CANVAS_MIN_SIZE);
-					weights[Superluminal.sidebarOnRightSide ? 0 : 1] = 1000000 * CANVAS_MIN_SIZE / (sidebarWidth + CANVAS_MIN_SIZE);
+					weights[Manager.sidebarOnRightSide ? 1 : 0] = 1000000 * sidebarWidth / (sidebarWidth + CANVAS_MIN_SIZE);
+					weights[Manager.sidebarOnRightSide ? 0 : 1] = 1000000 * CANVAS_MIN_SIZE / (sidebarWidth + CANVAS_MIN_SIZE);
 				}
 
 				editorContainer.setWeights(weights);
@@ -509,14 +532,80 @@ public class EditorWindow {
 			}
 		});
 
+		mntmSaveShip.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ShipContainer container = Manager.getCurrentShip();
+				// Prevent Ctrl+S spammers from overstressing the program...
+				if (container.isSaved())
+					return;
+
+				File temp = null;
+				// Only prompt for save directory if the user hasn't chosen any yet
+				if (saveDestination == null)
+					temp = promptForDirectory("Save As...", "Please select the folder where you wish to save the ship.");
+
+				if (temp != null) { // User could've aborted selection, which returns null.
+					saveDestination = temp;
+
+					try {
+						ShipUtils.saveShipXML(saveDestination, container.getShipController().getGameObject());
+					} catch (Exception ex) {
+						log.error("An error occured while saving the ship: ", ex);
+						Utils.showWarningDialog(shell, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+					}
+				}
+			}
+		});
+
+		mntmSaveShipAs.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ShipContainer container = Manager.getCurrentShip();
+
+				File temp = null;
+				// Always prompt for save directory
+				temp = promptForDirectory("Save As...", "Please select the folder where you wish to save the ship.");
+
+				if (temp != null) { // User could've aborted selection, which returns null.
+					saveDestination = temp;
+
+					try {
+						ShipUtils.saveShipXML(saveDestination, container.getShipController().getGameObject());
+					} catch (Exception ex) {
+						log.error("An error occured while saving the ship: ", ex);
+						Utils.showWarningDialog(shell, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+					}
+				}
+			}
+		});
+
+		mntmCloseShip.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.closeShip();
+			}
+		});
+
+		mntmSettings.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				SettingsDialog.getInstance().open();
+			}
+		});
+
+		// TODO mntmUndo
+		// TODO mntmRedo
+		// TODO mntmDelete
+
 		mntmSidebar.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Superluminal.sidebarOnRightSide = mntmSidebar.getSelection();
+				Manager.sidebarOnRightSide = mntmSidebar.getSelection();
 
 				sideContainer.setParent(shell);
 				canvas.setParent(shell);
-				if (Superluminal.sidebarOnRightSide) {
+				if (Manager.sidebarOnRightSide) {
 					canvas.setParent(editorContainer);
 					sideContainer.setParent(editorContainer);
 				} else {
@@ -529,33 +618,10 @@ public class EditorWindow {
 			}
 		});
 
-		// TODO mntmUndo
-		// TODO mntmRedo
-		// TODO mntmDelete
 		mntmGrid.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Grid.getInstance().setVisible(mntmGrid.getSelection());
-			}
-		});
-
-		mntmAbout.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				StringBuilder buf = new StringBuilder();
-				buf.append(Superluminal.APP_NAME + " - a ship editor for FTL: Faster Than Light");
-				buf.append("\nVersion " + Superluminal.APP_VERSION);
-				buf.append("\n\nCreated by " + Superluminal.APP_AUTHOR);
-				buf.append("\n ");
-
-				AboutDialog aboutDialog = new AboutDialog(shell);
-				aboutDialog.setMessage(buf.toString());
-				try {
-					aboutDialog.setLink(new URL(Superluminal.APP_URL), "Editor's thread at the official FTL forums");
-				} catch (MalformedURLException ex) {
-				}
-
-				aboutDialog.open();
 			}
 		});
 
@@ -615,6 +681,26 @@ public class EditorWindow {
 			}
 		});
 
+		mntmAbout.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				StringBuilder buf = new StringBuilder();
+				buf.append(Superluminal.APP_NAME + " - a ship editor for FTL: Faster Than Light");
+				buf.append("\nVersion " + Superluminal.APP_VERSION);
+				buf.append("\n\nCreated by " + Superluminal.APP_AUTHOR);
+				buf.append("\n ");
+
+				AboutDialog aboutDialog = new AboutDialog(shell);
+				aboutDialog.setMessage(buf.toString());
+				try {
+					aboutDialog.setLink(new URL(Superluminal.APP_URL), "Editor's thread at the official FTL forums");
+				} catch (MalformedURLException ex) {
+				}
+
+				aboutDialog.open();
+			}
+		});
+
 		sideContainer.setFocus();
 
 		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
@@ -626,6 +712,8 @@ public class EditorWindow {
 		Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
 		enableTools(false);
+		enableOptions(false);
+		setVisibilityOptions(true);
 	}
 
 	public static EditorWindow getInstance() {
@@ -663,8 +751,14 @@ public class EditorWindow {
 	}
 
 	/** @return the Composite currently held by the sidebar. */
-	public SidebarComposite getSidebarContent() {
-		return (SidebarComposite) sideContainer.getContent();
+	public Composite getSidebarContent() {
+		Control c = sideContainer.getContent();
+		if (c instanceof Composite)
+			return (Composite) sideContainer.getContent();
+		else if (c != null)
+			throw new IllegalStateException("Content of the sidebar is not a Composite: " + c.getClass().getSimpleName());
+		else
+			return null;
 	}
 
 	/** @return the sidebar ScrolledComposite itself. */
@@ -730,9 +824,17 @@ public class EditorWindow {
 	}
 
 	public void enableOptions(boolean enable) {
+		// File
+		mntmSaveShip.setEnabled(enable);
+		mntmSaveShipAs.setEnabled(enable);
+		mntmCloseShip.setEnabled(enable);
+
+		// Edit
 		mntmUndo.setEnabled(enable);
 		mntmRedo.setEnabled(enable);
 		mntmDelete.setEnabled(enable);
+
+		// View
 		mntmShowAnchor.setEnabled(enable);
 		mntmShowMounts.setEnabled(enable);
 		mntmShowRooms.setEnabled(enable);
@@ -741,6 +843,36 @@ public class EditorWindow {
 		mntmShowHull.setEnabled(enable);
 		mntmShowFloor.setEnabled(enable);
 		mntmShowShield.setEnabled(enable);
+	}
+
+	public boolean optionsEnabled() {
+		return mntmSaveShip.isEnabled();
+	}
+
+	/**
+	 * Toggles all visibility-related options.
+	 * 
+	 * @param set
+	 */
+	public void setVisibilityOptions(boolean set) {
+		ShipContainer container = Manager.getCurrentShip();
+
+		mntmShowAnchor.setSelection(set);
+		mntmShowMounts.setSelection(set);
+		mntmShowRooms.setSelection(set);
+		mntmShowDoors.setSelection(set);
+		mntmShowStations.setSelection(set);
+		mntmShowHull.setSelection(set);
+		mntmShowFloor.setSelection(set);
+		mntmShowShield.setSelection(set);
+
+		if (container != null) {
+			container.setAnchorVisible(set);
+			container.setMountsVisible(set);
+			container.setRoomsVisible(set);
+			container.setDoorsVisible(set);
+			container.setStationsVisible(set);
+		}
 	}
 
 	/**
@@ -763,6 +895,11 @@ public class EditorWindow {
 
 	public void dispose() {
 		Cache.checkInColor(this, canvasRGB);
+		Grid.getInstance().dispose();
+		OverviewWindow.getInstance().dispose();
+		ShipLoaderDialog.getInstance().dispose();
+		SettingsDialog.getInstance().dispose();
+		Cache.dispose();
 		shell.dispose();
 	}
 
@@ -775,11 +912,17 @@ public class EditorWindow {
 		} else if (Manager.getHotkey(Hotkeys.LOAD_SHIP).passes(e.keyCode)) {
 			if (mntmLoadShip.isEnabled())
 				mntmLoadShip.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SAVE_SHIP).passes(e.keyCode)) {
+			if (mntmSaveShip.isEnabled())
+				mntmSaveShip.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.CLOSE_SHIP).passes(e.keyCode)) {
+			if (mntmCloseShip.isEnabled())
+				mntmCloseShip.notifyListeners(SWT.Selection, null);
 		}
 
 		// Edit
 		else if (Manager.getHotkey(Hotkeys.UNDO).passes(e.keyCode)) {
-			// undo
+			// Undo
 			// TODO
 			if (Manager.DELETED_LIST.size() > 0)
 				Manager.DELETED_LIST.removeLast().restore();
@@ -793,50 +936,36 @@ public class EditorWindow {
 				mntmGrid.setSelection(!mntmGrid.getSelection());
 				mntmGrid.notifyListeners(SWT.Selection, null);
 			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_ANCHOR).passes(e.keyCode)) {
-			if (mntmShowAnchor.isEnabled()) {
+		} else if (optionsEnabled()) {
+			if (Manager.getHotkey(Hotkeys.SHOW_ANCHOR).passes(e.keyCode)) {
 				mntmShowAnchor.setSelection(!mntmShowAnchor.getSelection());
 				mntmShowAnchor.notifyListeners(SWT.Selection, null);
-			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_MOUNTS).passes(e.keyCode)) {
-			if (mntmShowMounts.isEnabled()) {
+			} else if (Manager.getHotkey(Hotkeys.SHOW_MOUNTS).passes(e.keyCode)) {
 				mntmShowMounts.setSelection(!mntmShowMounts.getSelection());
 				mntmShowMounts.notifyListeners(SWT.Selection, null);
-			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_ROOMS).passes(e.keyCode)) {
-			if (mntmShowRooms.isEnabled()) {
+			} else if (Manager.getHotkey(Hotkeys.SHOW_ROOMS).passes(e.keyCode)) {
 				mntmShowRooms.setSelection(!mntmShowRooms.getSelection());
 				mntmShowRooms.notifyListeners(SWT.Selection, null);
-			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_DOORS).passes(e.keyCode)) {
-			if (mntmShowDoors.isEnabled()) {
+			} else if (Manager.getHotkey(Hotkeys.SHOW_DOORS).passes(e.keyCode)) {
 				mntmShowDoors.setSelection(!mntmShowDoors.getSelection());
 				mntmShowDoors.notifyListeners(SWT.Selection, null);
-			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_STATIONS).passes(e.keyCode)) {
-			if (mntmShowStations.isEnabled()) {
+			} else if (Manager.getHotkey(Hotkeys.SHOW_STATIONS).passes(e.keyCode)) {
 				mntmShowStations.setSelection(!mntmShowStations.getSelection());
 				mntmShowStations.notifyListeners(SWT.Selection, null);
-			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_HULL).passes(e.keyCode)) {
-			if (mntmShowHull.isEnabled()) {
+			} else if (Manager.getHotkey(Hotkeys.SHOW_HULL).passes(e.keyCode)) {
 				mntmShowHull.setSelection(!mntmShowHull.getSelection());
 				mntmShowHull.notifyListeners(SWT.Selection, null);
-			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_FLOOR).passes(e.keyCode)) {
-			if (mntmShowFloor.isEnabled()) {
+			} else if (Manager.getHotkey(Hotkeys.SHOW_FLOOR).passes(e.keyCode)) {
 				mntmShowFloor.setSelection(!mntmShowFloor.getSelection());
 				mntmShowFloor.notifyListeners(SWT.Selection, null);
-			}
-		} else if (Manager.getHotkey(Hotkeys.SHOW_SHIELD).passes(e.keyCode)) {
-			if (mntmShowShield.isEnabled()) {
+			} else if (Manager.getHotkey(Hotkeys.SHOW_SHIELD).passes(e.keyCode)) {
 				mntmShowShield.setSelection(!mntmShowShield.getSelection());
 				mntmShowShield.notifyListeners(SWT.Selection, null);
 			}
 		}
 
 		// ====== Tool hotkeys
-		else if (toolsEnabled()) {
+		if (toolsEnabled()) {
 			if (Manager.getHotkey(Hotkeys.POINTER_TOOL).passes(e.keyCode)) {
 				Manager.selectTool(Tools.POINTER);
 				e.doit = false;
@@ -854,20 +983,41 @@ public class EditorWindow {
 			} else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode)) {
 				if (Manager.getSelectedToolId() != Tools.CREATOR)
 					Manager.selectTool(Tools.CREATOR);
-				((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.ROOM);
+				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+				ctool.selectSubtool(Tools.ROOM);
 			} else if (Manager.getHotkey(Hotkeys.DOOR_TOOL).passes(e.keyCode)) {
 				if (Manager.getSelectedToolId() != Tools.CREATOR)
 					Manager.selectTool(Tools.CREATOR);
-				((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.DOOR);
+				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+				ctool.selectSubtool(Tools.DOOR);
 			} else if (Manager.getHotkey(Hotkeys.MOUNT_TOOL).passes(e.keyCode)) {
 				if (Manager.getSelectedToolId() != Tools.CREATOR)
 					Manager.selectTool(Tools.CREATOR);
-				((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.WEAPON);
+				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+				ctool.selectSubtool(Tools.WEAPON);
 			} else if (Manager.getHotkey(Hotkeys.STATION_TOOL).passes(e.keyCode)) {
 				if (Manager.getSelectedToolId() != Tools.CREATOR)
 					Manager.selectTool(Tools.CREATOR);
-				((CreationToolComposite) instance.getSidebarContent()).selectTool(Tools.STATION);
+				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+				ctool.selectSubtool(Tools.STATION);
 			}
 		}
+	}
+
+	private File promptForDirectory(String title, String message) {
+		File result = null;
+		DirectoryDialog dialog = new DirectoryDialog(shell);
+		dialog.setText(title);
+		dialog.setMessage(message);
+
+		String path = dialog.open();
+		if (path == null) {
+			// User aborted selection
+			// Nothing to do here
+		} else {
+			result = new File(path);
+		}
+
+		return result;
 	}
 }

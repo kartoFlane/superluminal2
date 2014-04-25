@@ -32,9 +32,8 @@ import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
-public class PropertiesToolComposite extends Composite implements SidebarComposite {
+public class PropertiesToolComposite extends Composite {
 	private Text txtHull;
 	private Button btnHullBrowse;
 	private Button btnHullClear;
@@ -515,11 +514,6 @@ public class PropertiesToolComposite extends Composite implements SidebarComposi
 		btnMiniView.setEnabled(controller.isPlayerShip() && path != null);
 		btnMiniBrowse.setEnabled(controller.isPlayerShip());
 		btnMiniClear.setEnabled(controller.isPlayerShip());
-	}
-
-	@Override
-	public DataComposite getDataComposite() {
-		return null; // no data container
 	}
 
 	@Override

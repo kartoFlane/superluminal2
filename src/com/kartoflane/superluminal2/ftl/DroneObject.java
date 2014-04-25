@@ -12,9 +12,7 @@ public class DroneObject extends GameObject implements Comparable<DroneObject> {
 	private String shortName;
 
 	public DroneObject(String blueprint) {
-		if (blueprint == null)
-			throw new IllegalArgumentException("Blueprint name must not be null.");
-		this.blueprintName = blueprint;
+		setBlueprintName(blueprint);
 	}
 
 	public void setType(DroneTypes type) {
@@ -37,7 +35,7 @@ public class DroneObject extends GameObject implements Comparable<DroneObject> {
 
 	public void setTitle(String title) {
 		if (title == null)
-			throw new IllegalArgumentException("Title must not be null.");
+			throw new IllegalArgumentException(blueprintName + ": title must not be null.");
 		this.title = title;
 	}
 
@@ -47,7 +45,7 @@ public class DroneObject extends GameObject implements Comparable<DroneObject> {
 
 	public void setShortName(String name) {
 		if (name == null)
-			throw new IllegalArgumentException("Name must not be null.");
+			throw new IllegalArgumentException(blueprintName + ": name must not be null.");
 		shortName = name;
 	}
 

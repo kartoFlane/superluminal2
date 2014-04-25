@@ -32,21 +32,33 @@ public class DoorTool extends Tool {
 	public void select() {
 		cursor.setSnapMode(Snapmodes.EDGES);
 		cursor.setVisible(false);
+
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
+		Composite dataC = ctool.getToolComposite(null).getDataContainer();
+		createToolComposite(dataC);
+		dataC.layout(true);
 	}
 
 	@Override
 	public void deselect() {
 		cursor.setVisible(false);
+
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
 	}
 
 	@Override
-	public DoorTool getInstance() {
-		return (DoorTool) instance;
+	public DoorToolComposite getToolComposite(Composite parent) {
+		return (DoorToolComposite) super.getToolComposite(parent);
 	}
 
 	@Override
-	public Composite getToolComposite(Composite parent) {
-		return new DoorToolComposite(parent);
+	public DoorToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new DoorToolComposite(parent);
+		return (DoorToolComposite) compositeInstance;
 	}
 
 	@Override

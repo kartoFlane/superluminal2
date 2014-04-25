@@ -1,5 +1,7 @@
 package com.kartoflane.superluminal2.ui.sidebar.data;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,6 +14,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.kartoflane.superluminal2.components.Directions;
+import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Database.WeaponTypes;
+import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -24,6 +29,8 @@ public class MountDataComposite extends Composite implements DataComposite {
 	private Combo directionCombo;
 	private Combo categoryCombo;
 	private Combo weaponCombo;
+
+	private ArrayList<WeaponObject> weaponList = null;
 
 	private MountController controller = null;
 
@@ -77,6 +84,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		categoryCombo.add("Beam");
 		categoryCombo.add("Missile");
 		categoryCombo.add("Bomb");
+		categoryCombo.add("Burst");
 		categoryCombo.select(0);
 
 		weaponCombo = new Combo(this, SWT.READ_ONLY);
@@ -109,6 +117,33 @@ public class MountDataComposite extends Composite implements DataComposite {
 			}
 		});
 
+		categoryCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int selection = categoryCombo.getSelectionIndex();
+				weaponCombo.setEnabled(selection != 0);
+				weaponCombo.removeAll();
+				WeaponTypes type = indexToType(selection);
+				if (type != null)
+					loadWeapons(type);
+			}
+		});
+
+		weaponCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				controller.setVisible(false);
+				if (weaponCombo.getSelectionIndex() > 0) {
+					WeaponObject weapon = weaponList.get(weaponCombo.getSelectionIndex() - 1);
+					controller.setWeapon(weapon);
+				} else {
+					controller.setWeapon(Database.DEFAULT_WEAPON_OBJ);
+				}
+				controller.reposition(controller.getX(), controller.getY());
+				controller.setVisible(true);
+			}
+		});
+
 		updateData();
 	}
 
@@ -121,11 +156,34 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnMirrored.setSelection(controller.isMirrored());
 
 		directionCombo.select(directionToIndex(controller.getDirection()));
+
+		WeaponObject weapon = controller.getWeapon();
+		WeaponTypes type = weapon.getType();
+		categoryCombo.select(typeToIndex(type));
+		categoryCombo.notifyListeners(SWT.Selection, null);
+		if (type != null) {
+			int i = 0;
+			for (WeaponObject o : weaponList) {
+				i++;
+				if (o == weapon)
+					break;
+			}
+			weaponCombo.select(i);
+		}
 	}
 
 	@Override
 	public void setController(AbstractController controller) {
 		this.controller = (MountController) controller;
+	}
+
+	private void loadWeapons(WeaponTypes type) {
+		weaponList = Database.getInstance().getWeaponsByType(type);
+		weaponCombo.add("No Weapon");
+		weaponCombo.select(0);
+		for (WeaponObject weapon : weaponList) {
+			weaponCombo.add(String.format("%-30s [%s]", weapon.getTitle(), weapon.getBlueprintName()));
+		}
 	}
 
 	private int directionToIndex(Directions dir) {
@@ -157,6 +215,44 @@ public class MountDataComposite extends Composite implements DataComposite {
 				return Directions.DOWN;
 			case 4:
 				return Directions.NONE;
+			default:
+				throw new IllegalArgumentException("Unknown index: " + index);
+		}
+	}
+
+	private int typeToIndex(WeaponTypes type) {
+		if (type == null)
+			return 0;
+		switch (type) {
+			case LASER:
+				return 1;
+			case BEAM:
+				return 2;
+			case MISSILES:
+				return 3;
+			case BOMB:
+				return 4;
+			case BURST:
+				return 5;
+			default:
+				throw new IllegalArgumentException("Unknown type: " + type);
+		}
+	}
+
+	private WeaponTypes indexToType(int index) {
+		switch (index) {
+			case 0: // No weapon
+				return null;
+			case 1: // Laser / Ion
+				return WeaponTypes.LASER;
+			case 2: // Beam
+				return WeaponTypes.BEAM;
+			case 3: // Missile
+				return WeaponTypes.MISSILES;
+			case 4: // Bomb
+				return WeaponTypes.BOMB;
+			case 5: // Burst
+				return WeaponTypes.BURST;
 			default:
 				throw new IllegalArgumentException("Unknown index: " + index);
 		}

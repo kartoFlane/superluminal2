@@ -18,4 +18,9 @@ public enum Directions {
 		else
 			return valueOf(value);
 	}
+
+	@Override
+	public String toString() {
+		return name().toLowerCase();
+	}
 }

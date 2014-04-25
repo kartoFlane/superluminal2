@@ -44,6 +44,12 @@ public class MountTool extends Tool {
 		toolMount.setVisible(cursor.isVisible());
 
 		cursor.resize(MountController.DEFAULT_WIDTH, MountController.DEFAULT_HEIGHT);
+
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
+		Composite dataC = ctool.getToolComposite(null).getDataContainer();
+		createToolComposite(dataC);
+		dataC.layout(true);
 	}
 
 	@Override
@@ -52,11 +58,9 @@ public class MountTool extends Tool {
 		cursor.setVisible(false);
 		toolMount.setParent(null);
 		toolMount.setVisible(false);
-	}
 
-	@Override
-	public MountTool getInstance() {
-		return (MountTool) instance;
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
 	}
 
 	public void setRotated(boolean rot) {
@@ -84,8 +88,16 @@ public class MountTool extends Tool {
 	}
 
 	@Override
-	public Composite getToolComposite(Composite parent) {
-		return new MountToolComposite(parent);
+	public MountToolComposite getToolComposite(Composite parent) {
+		return (MountToolComposite) super.getToolComposite(parent);
+	}
+
+	@Override
+	public MountToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new MountToolComposite(parent);
+		return (MountToolComposite) compositeInstance;
 	}
 
 	@Override

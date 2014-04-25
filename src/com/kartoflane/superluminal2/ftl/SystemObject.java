@@ -1,30 +1,9 @@
 package com.kartoflane.superluminal2.ftl;
 
 import com.kartoflane.superluminal2.components.Directions;
+import com.kartoflane.superluminal2.components.Systems;
 
 public class SystemObject extends GameObject {
-
-	public enum Systems {
-		EMPTY,
-		ARTILLERY, CLOAKING, DOORS, DRONES, ENGINES, MEDBAY,
-		OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
-		MIND, HACKING, BATTERY, CLONEBAY; // AE
-
-		@Override
-		public String toString() {
-			String result = super.toString().toLowerCase();
-			result = result.substring(0, 1).toUpperCase() + result.substring(1);
-			return result;
-		}
-
-		/** @return array of all systems, excluding {@link #EMPTY} */
-		public static Systems[] getSystems() {
-			return new Systems[] {
-					ARTILLERY, BATTERY, CLOAKING, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
-					MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
-			};
-		}
-	}
 
 	private static final long serialVersionUID = -4784249566049070706L;
 
@@ -154,22 +133,17 @@ public class SystemObject extends GameObject {
 
 	/** Returns true if the system can have a station, false otherwise. */
 	public boolean canContainStation() {
-		return id == Systems.SHIELDS || id == Systems.ENGINES ||
-				id == Systems.WEAPONS || id == Systems.MEDBAY ||
-				id == Systems.PILOT || id == Systems.DOORS ||
-				id == Systems.SENSORS || id == Systems.CLONEBAY;
+		return id.canContainStation();
 	}
 
 	/** Returns true if the system can have a interior image, false otherwise */
 	public boolean canContainInterior() {
-		return id != Systems.EMPTY && id != Systems.CLONEBAY; // TODO can clonebays have interiors?
+		return id.canContainInterior();
 	}
 
 	/** Returns true if the system can have a glow image, false otherwise. */
 	public boolean canContainGlow() {
-		return id == Systems.SHIELDS || id == Systems.ENGINES ||
-				id == Systems.WEAPONS || id == Systems.PILOT ||
-				id == Systems.CLOAKING;
+		return id.canContainGlow();
 	}
 
 	@Override
@@ -178,78 +152,14 @@ public class SystemObject extends GameObject {
 	}
 
 	public static int getDefaultSlotId(Systems systemId) {
-		switch (systemId) {
-			case PILOT:
-			case DOORS:
-			case SHIELDS:
-				return 0;
-			case WEAPONS:
-			case MEDBAY:
-			case CLONEBAY:
-			case SENSORS:
-				return 1;
-			case ENGINES:
-				return 2;
-			default:
-				return -2;
-		}
+		return systemId.getDefaultSlotId();
 	}
 
 	public static Directions getDefaultSlotDirection(Systems systemId) {
-		switch (systemId) {
-			case ENGINES:
-				return Directions.DOWN;
-			case PILOT:
-				return Directions.RIGHT;
-			case SHIELDS:
-				return Directions.LEFT;
-			case WEAPONS:
-			case DOORS:
-			case SENSORS:
-				return Directions.UP;
-			case MEDBAY:
-			case CLONEBAY:
-				return Directions.NONE;
-			default:
-				return Directions.UP;
-		}
+		return systemId.getDefaultSlotDirection();
 	}
 
 	public static String getDefaultInterior(Systems systemId) {
-		switch (systemId) {
-			case ARTILLERY:
-				return "rdat:img/ship/interior/room_artillery.png";
-			case BATTERY:
-				return "rdat:img/ship/interior/room_battery.png";
-			case CLOAKING:
-				return "rdat:img/ship/interior/room_cloaking.png";
-			case DOORS:
-				return "rdat:img/ship/interior/room_doors.png";
-			case DRONES:
-				return "rdat:img/ship/interior/room_drones.png";
-			case ENGINES:
-				return "rdat:img/ship/interior/room_engines.png";
-			case HACKING:
-				return "rdat:img/ship/interior/room_hacking.png";
-			case MEDBAY:
-				return "rdat:img/ship/interior/room_medbay.png";
-			case MIND:
-				return "rdat:img/ship/interior/room_mind.png";
-			case OXYGEN:
-				return "rdat:img/ship/interior/room_oxygen.png";
-			case PILOT:
-				return "rdat:img/ship/interior/room_pilot.png";
-			case SENSORS:
-				return "rdat:img/ship/interior/room_sensors.png";
-			case SHIELDS:
-				return "rdat:img/ship/interior/room_shields.png";
-			case WEAPONS:
-				return "rdat:img/ship/interior/room_weapons.png";
-			case CLONEBAY: // always uses the clonebay "station", not interior?
-			case TELEPORTER: // can't have interior
-			case EMPTY: // can't have interior
-			default:
-				return null;
-		}
+		return systemId.getDefaultInterior();
 	}
 }

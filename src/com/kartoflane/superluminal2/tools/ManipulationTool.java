@@ -3,7 +3,6 @@ package com.kartoflane.superluminal2.tools;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
@@ -34,9 +33,7 @@ public class ManipulationTool extends Tool {
 
 	@Override
 	public void select() {
-		Control c = (Control) window.getSidebarContent();
-		if (c != null && !c.isDisposed())
-			c.dispose();
+		disposeSidebarContent();
 
 		ManipulationToolComposite pointerC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(pointerC);
@@ -64,13 +61,16 @@ public class ManipulationTool extends Tool {
 	}
 
 	@Override
-	public ManipulationTool getInstance() {
-		return (ManipulationTool) instance;
+	public ManipulationToolComposite getToolComposite(Composite parent) {
+		return (ManipulationToolComposite) super.getToolComposite(parent);
 	}
 
 	@Override
-	public ManipulationToolComposite getToolComposite(Composite parent) {
-		return new ManipulationToolComposite(parent, true, false);
+	public ManipulationToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new ManipulationToolComposite(parent, true, false);
+		return (ManipulationToolComposite) compositeInstance;
 	}
 
 	public void setStateManipulate() {

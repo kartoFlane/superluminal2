@@ -16,6 +16,8 @@ import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.core.Database.DroneTypes;
 import com.kartoflane.superluminal2.core.Database.WeaponTypes;
 import com.kartoflane.superluminal2.core.Utils.DecodeResult;
+import com.kartoflane.superluminal2.ftl.AnimationObject;
+import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
@@ -63,12 +65,7 @@ public class DataUtils {
 
 	public static ArrayList<Element> findTagsNamed(String contents, String tagName) throws JDOMParseException {
 		Document doc = null;
-		try {
-			doc = Utils.parseXML(contents);
-		} catch (JDOMParseException e) {
-			System.out.println(contents);
-			throw e;
-		}
+		doc = Utils.parseXML(contents);
 		ArrayList<Element> tagList = new ArrayList<Element>();
 
 		Element root = doc.getRootElement();
@@ -106,28 +103,28 @@ public class DataUtils {
 
 		attr = e.getAttributeValue("name");
 		if (attr == null)
-			throw new IllegalArgumentException("Unidentified: missing 'name' attribute.");
+			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
 		ShipMetadata metadata = new ShipMetadata(e, attr);
 
 		attr = e.getAttributeValue("layout");
 		if (attr == null)
-			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing 'layout' attribute.");
+			throw new IllegalArgumentException(metadata.getBlueprintName() + " is missing 'layout' attribute.");
 		metadata.setShipLayoutTXT(attr);
 
 		attr = e.getAttributeValue("img");
 		if (attr == null)
-			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing 'img' attribute.");
+			throw new IllegalArgumentException(metadata.getBlueprintName() + " is missing 'img' attribute.");
 		metadata.setShipLayoutXML(attr);
 
 		child = e.getChild("class");
 		if (child == null)
-			throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing <class> tag.");
+			throw new IllegalArgumentException(metadata.getBlueprintName() + " is missing <class> tag.");
 		metadata.setShipClass(child.getValue());
 
 		if (metadata.isPlayerShip()) {
 			child = e.getChild("name");
 			if (child == null)
-				throw new IllegalArgumentException(metadata.getBlueprintName() + ": missing <name> tag.");
+				throw new IllegalArgumentException(metadata.getBlueprintName() + " is missing <name> tag.");
 			metadata.setShipName(child.getValue());
 
 			child = e.getChild("desc");
@@ -140,6 +137,77 @@ public class DataUtils {
 		return metadata;
 	}
 
+	public static AnimationObject loadAnim(Element e) {
+		if (e == null)
+			throw new IllegalArgumentException("Element must not be null.");
+
+		String attr = null;
+		Element child = null;
+
+		attr = e.getAttributeValue("name");
+		if (attr == null)
+			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
+
+		AnimationObject anim = new AnimationObject(attr);
+
+		// Load mount offset
+		child = e.getChild("mountPoint");
+		if (child == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing <mountPoint> tag");
+
+		attr = child.getAttributeValue("x");
+		if (attr == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'x' attribute.");
+		int x = Integer.valueOf(attr);
+
+		attr = child.getAttributeValue("y");
+		if (attr == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'y' attribute.");
+		int y = Integer.valueOf(attr);
+
+		anim.setMountOffset(x, y);
+
+		// Load the anim sheet
+		child = e.getChild("sheet");
+		if (child == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing <sheet> tag");
+
+		Element sheet = Database.getInstance().getAnimSheetElement(child.getValue());
+		if (sheet == null)
+			throw new IllegalArgumentException(anim.getAnimName() + "'s animSheet could not be found: " + child.getValue());
+
+		// Load sheet dimensions
+		attr = sheet.getAttributeValue("w");
+		if (attr == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'w' attribute.");
+		x = Integer.valueOf(attr);
+
+		attr = sheet.getAttributeValue("h");
+		if (attr == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'h' attribute.");
+		y = Integer.valueOf(attr);
+
+		anim.setSheetSize(x, y);
+
+		// Load frame dimensions
+		attr = sheet.getAttributeValue("fw");
+		if (attr == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'fw' attribute.");
+		x = Integer.valueOf(attr);
+
+		attr = sheet.getAttributeValue("fh");
+		if (attr == null)
+			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'fh' attribute.");
+		y = Integer.valueOf(attr);
+
+		anim.setFrameSize(x, y);
+
+		// Load the anim sheet image path
+		anim.setSheetPath("rdat:img/" + sheet.getValue());
+
+		return anim;
+	}
+
 	public static WeaponObject loadWeapon(Element e) {
 		if (e == null)
 			throw new IllegalArgumentException("Element must not be null.");
@@ -149,17 +217,17 @@ public class DataUtils {
 
 		attr = e.getAttributeValue("name");
 		if (attr == null)
-			throw new IllegalArgumentException("Unidentified: missing 'name' attribute.");
+			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
 		WeaponObject weapon = new WeaponObject(attr);
 
 		child = e.getChild("type");
 		if (child == null)
-			throw new IllegalArgumentException(weapon.getBlueprintName() + ": missing <type> tag.");
+			throw new IllegalArgumentException(weapon.getBlueprintName() + " is missing <type> tag.");
 		weapon.setType(WeaponTypes.valueOf(child.getValue()));
 
 		child = e.getChild("title");
 		if (child == null)
-			throw new IllegalArgumentException(weapon.getBlueprintName() + ": missing <title> tag.");
+			throw new IllegalArgumentException(weapon.getBlueprintName() + " is missing <title> tag.");
 		weapon.setTitle(child.getValue());
 
 		child = e.getChild("short");
@@ -168,12 +236,15 @@ public class DataUtils {
 		else
 			weapon.setShortName(child.getValue());
 
-		// TODO Get animations first
-
 		child = e.getChild("weaponArt");
 		if (child == null)
-			throw new IllegalArgumentException(weapon.getBlueprintName() + ": missing <weaponArt> tag.");
-		weapon.setSheetPath("rdat:/img/weapons/" + child.getValue());
+			throw new IllegalArgumentException(weapon.getBlueprintName() + " is missing <weaponArt> tag.");
+		try {
+			weapon.setAnimation(Database.getInstance().getAnimation(child.getValue()));
+		} catch (IllegalArgumentException ex) {
+			// Catch an re-throw the error to provide more information
+			throw new IllegalArgumentException(weapon.getBlueprintName() + ": could not find animation '" + child.getValue() + "'.", ex);
+		}
 
 		return weapon;
 	}
@@ -187,17 +258,17 @@ public class DataUtils {
 
 		attr = e.getAttributeValue("name");
 		if (attr == null)
-			throw new IllegalArgumentException("Unidentified: missing 'name' attribute.");
+			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
 		DroneObject drone = new DroneObject(attr);
 
 		child = e.getChild("type");
 		if (child == null)
-			throw new IllegalArgumentException(drone.getBlueprintName() + ": missing <type> tag.");
+			throw new IllegalArgumentException(drone.getBlueprintName() + " is missing <type> tag.");
 		drone.setType(DroneTypes.valueOf(child.getValue()));
 
 		child = e.getChild("title");
 		if (child == null)
-			throw new IllegalArgumentException(drone.getBlueprintName() + ": missing <title> tag.");
+			throw new IllegalArgumentException(drone.getBlueprintName() + " is missing <title> tag.");
 		drone.setTitle(child.getValue());
 
 		child = e.getChild("short");
@@ -207,5 +278,30 @@ public class DataUtils {
 			drone.setShortName(child.getValue());
 
 		return drone;
+	}
+
+	public static AugmentObject loadAugment(Element e) {
+		if (e == null)
+			throw new IllegalArgumentException("Element must not be null.");
+
+		String attr = null;
+		Element child = null;
+
+		attr = e.getAttributeValue("name");
+		if (attr == null)
+			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
+		AugmentObject augment = new AugmentObject(attr);
+
+		child = e.getChild("title");
+		if (child == null)
+			throw new IllegalArgumentException(augment.getBlueprintName() + " is missing <title> tag.");
+		augment.setTitle(child.getValue());
+
+		child = e.getChild("desc");
+		if (child == null)
+			throw new IllegalArgumentException(augment.getBlueprintName() + " is missing <desc> tag.");
+		augment.setDescription(child.getValue());
+
+		return augment;
 	}
 }

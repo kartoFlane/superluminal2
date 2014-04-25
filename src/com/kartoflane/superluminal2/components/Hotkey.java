@@ -20,6 +20,8 @@ public class Hotkey {
 		PIN,
 		NEW_SHIP,
 		LOAD_SHIP,
+		SAVE_SHIP,
+		CLOSE_SHIP,
 		UNDO,
 		REDO,
 

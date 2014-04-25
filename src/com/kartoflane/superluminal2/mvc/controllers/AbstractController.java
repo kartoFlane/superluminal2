@@ -215,39 +215,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return model.getH();
 	}
 
-	@Override
 	public Rectangle getBounds() {
-		Rectangle b = model.getBounds();
-		correctBounds(b);
-		return b;
-	}
-
-	/**
-	 * Corrects the bounds by including rotation. This way bounds
-	 * cover the entire area of the controller, and can be reliably
-	 * used to redraw it.
-	 * 
-	 * @param b
-	 *            the rectangle representing the controller's bounds
-	 */
-	protected void correctBounds(Rectangle b) {
-		if (getRotation() % 180 == 0) {
-			// no need to do anything
-		} else if (getRotation() % 90 == 0) {
-			int cX = b.x + b.width / 2;
-			int cY = b.y + b.height / 2;
-			b.x = cX - b.height / 2;
-			b.y = cY - b.width / 2;
-			cX = b.width;
-			b.width = b.height;
-			b.height = cX;
-		} else if (getRotation() % 45 == 0) {
-			// TODO ?
-		} else {
-			// TODO perform sine/cosine calculations, or approximations of those...
-			// end.x = (int) (start.x + Math.cos(rad) * distance - Math.sin(rad) * distance);
-			// end.y = (int) (start.y + Math.sin(rad) * distance + Math.cos(rad) * distance);
-		}
+		return Utils.rotate(model.getBounds(), getRotation());
 	}
 
 	private float getRotation() {

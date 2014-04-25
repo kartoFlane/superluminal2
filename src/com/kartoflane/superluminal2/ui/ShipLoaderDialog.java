@@ -1,6 +1,5 @@
 package com.kartoflane.superluminal2.ui;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,6 +12,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -20,19 +21,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.ShipUtils;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 
 public class ShipLoaderDialog {
@@ -149,10 +149,9 @@ public class ShipLoaderDialog {
 			public void mouseDoubleClick(MouseEvent e) {
 				if (e.button == 1 && tree.getSelectionCount() != 0) {
 					TreeItem selectedItem = tree.getSelection()[0];
-
 					if (selectedItem.getItemCount() == 0 && btnLoad.isEnabled())
 						btnLoad.notifyListeners(SWT.Selection, null);
-					else
+					else if (selectedItem.getBounds().contains(e.x, e.y))
 						selectedItem.setExpanded(!selectedItem.getExpanded());
 				}
 			}
@@ -229,14 +228,14 @@ public class ShipLoaderDialog {
 						ShipObject object = ShipUtils.loadShipXML(metadata.getElement());
 
 						Manager.loadShip(object);
-					} catch (IOException ex) { // Multi-catch parameters were introduced in Java7 :(
-						handleException(metadata, ex);
-					} catch (NumberFormatException ex) {
-						handleException(metadata, ex);
-					} catch (IllegalArgumentException ex) {
-						handleException(metadata, ex);
-					} catch (JDOMParseException ex) {
-						handleException(metadata, ex);
+					} catch (Exception ex) {
+						log.warn("An error has occured while loading " + metadata.getBlueprintName() + ":", ex);
+						StringBuilder buf = new StringBuilder();
+						buf.append(String.format("%s could not be loaded:", metadata.getBlueprintName()));
+						buf.append("\n");
+						buf.append(ex.getStackTrace()[0].toString());
+						buf.append("\n\nCheck log for details.");
+						Utils.showWarningDialog(shell, buf.toString());
 					}
 				}
 			}
@@ -254,6 +253,19 @@ public class ShipLoaderDialog {
 			public void handleEvent(Event e) {
 				shell.setVisible(false);
 				e.doit = false;
+			}
+		});
+
+		shell.addTraverseListener(new TraverseListener() {
+			@Override
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_RETURN && tree.getSelectionCount() != 0) {
+					TreeItem selectedItem = tree.getSelection()[0];
+					if (selectedItem.getItemCount() == 0 && btnLoad.isEnabled())
+						btnLoad.notifyListeners(SWT.Selection, null);
+					else
+						selectedItem.setExpanded(!selectedItem.getExpanded());
+				}
 			}
 		});
 
@@ -310,21 +322,6 @@ public class ShipLoaderDialog {
 		return instance;
 	}
 
-	private void handleException(ShipMetadata metadata, Exception ex) {
-		log.warn("An error has occured while loading " + metadata.getBlueprintName() + ":", ex);
-
-		MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
-		box.setText(Superluminal.APP_NAME + " - Loading Failed");
-
-		StringBuilder buf = new StringBuilder();
-		buf.append(String.format("%s could not be loaded:", metadata.getBlueprintName()));
-		buf.append("\n\n");
-		buf.append(ex.getMessage());
-
-		box.setMessage(buf.toString());
-		box.open();
-	}
-
 	private class MetadataIterator implements Iterator<String> {
 		private final HashMap<String, ArrayList<ShipMetadata>> map;
 		private final MetadataComparator comparator;
@@ -336,7 +333,7 @@ public class ShipLoaderDialog {
 			this.map = map;
 		}
 
-		private String getLargestElement() {
+		private String getSmallestElement() {
 			String result = null;
 			for (String blueprint : map.keySet()) {
 				if (result == null || comparator.compare(blueprint, result) < 0)
@@ -347,7 +344,7 @@ public class ShipLoaderDialog {
 		}
 
 		public void first() {
-			current = getLargestElement();
+			current = getSmallestElement();
 		}
 
 		public String current() {
@@ -362,7 +359,7 @@ public class ShipLoaderDialog {
 		@Override
 		public String next() {
 			remove();
-			current = getLargestElement();
+			current = getSmallestElement();
 			return current;
 		}
 
@@ -394,10 +391,14 @@ public class ShipLoaderDialog {
 				m1 = map.get(o1).get(0);
 				m2 = map.get(o2).get(0);
 				int result = m1.getShipClass().compareTo(m2.getShipClass());
-				if (result == 0) // if class names are the same, fall back to sorting by blueprint
+				if (result == 0) // If class names are the same, fall back to sorting by blueprint
 					result = o1.compareTo(o2);
 				return result;
 			}
 		}
+	}
+
+	public void dispose() {
+		shell.dispose();
 	}
 }

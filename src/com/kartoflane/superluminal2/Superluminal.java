@@ -18,12 +18,10 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
 import com.kartoflane.superluminal2.core.DataUtils;
@@ -45,17 +43,27 @@ public class Superluminal {
 
 	public static final String HOTKEYS_FILE = "hotkeys.xml";
 
-	// config variables
-	public static boolean sidebarOnRightSide = true;
-	public static boolean rememberGeometry = true;
-	public static String resourcePath = "";
-
 	public static Display display = null;
 
 	/**
+	 * settings ideas:
+	 * - close ship loader after loading
+	 * -
+	 * -
+	 * -
+	 * - feature creeeeeeep
+	 * 
 	 * TODO:
-	 * - include fine offsets in ship positioning
+	 * - move systems menu to its own class, so that it can be referenced without having to go through RoomDataComposite
+	 * - same as above goes for door linking
+	 * - include fine offsets in ship positioning?
+	 * - come up with a way to set which system is first when assigned to the same room?
+	 * - come up with another way of choosing weapons/drones -- combos are ugly
+	 * ---- also need a way to select weapon lists for enemy ships
 	 * - optimize anchor moving against its bounds with some rooms loaded -> stutters
+	 * - rework interior drawing -> currently drawn on room layer, so higher rooms obscur the image -> bad
+	 * - finish (ie. create) the props system
+	 * - rework stuff to use props system (anchor lines, room resize handles perhaps?)
 	 * - clear() in ShipObject -> wipe txt layout, + something else?
 	 * - figure out glow images
 	 * - add gibs
@@ -79,12 +87,12 @@ public class Superluminal {
 		File configFile = new File("editor.cfg");
 
 		Properties config = new Properties();
-		// setup defaults
+		// Setup defaults
 		config.setProperty(SuperluminalConfig.FTL_RESOURCE, "");
 		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "true");
 		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "true");
 
-		// read the config file
+		// Read the config file
 		InputStream in = null;
 		try {
 			if (configFile.exists()) {
@@ -94,7 +102,7 @@ public class Superluminal {
 			}
 		} catch (IOException e) {
 			log.error("Error loading config.", e);
-			showErrorDialog("Error loading config from " + configFile.getPath());
+			Utils.showErrorDialog(null, "Error loading config from " + configFile.getPath());
 		} finally {
 			try {
 				if (in != null)
@@ -103,22 +111,22 @@ public class Superluminal {
 			}
 		}
 
-		// read config values
-		sidebarOnRightSide = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SIDEBAR_SIDE));
-		rememberGeometry = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SAVE_GEOMETRY));
+		// Read config values
+		Manager.sidebarOnRightSide = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SIDEBAR_SIDE));
+		Manager.rememberGeometry = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SAVE_GEOMETRY));
 
 		initHotkeys();
 		File hotkeysFile = new File(HOTKEYS_FILE);
 		if (hotkeysFile.exists())
 			loadHotkeys(hotkeysFile);
 
-		// read FTL resources path
+		// Read FTL resources path
 		File datsDir = null;
-		resourcePath = config.getProperty(SuperluminalConfig.FTL_RESOURCE, "");
+		Manager.resourcePath = config.getProperty(SuperluminalConfig.FTL_RESOURCE, "");
 
-		if (resourcePath.length() > 0) {
-			log.info("Using FTL dats path from config: " + resourcePath);
-			datsDir = new File(resourcePath);
+		if (Manager.resourcePath.length() > 0) {
+			log.info("Using FTL dats path from config: " + Manager.resourcePath);
+			datsDir = new File(Manager.resourcePath);
 			if (FTLUtilities.isDatsDirValid(datsDir) == false) {
 				log.error("The config's ftlResourcePath does not exist, or it lacks data.dat.");
 				datsDir = null;
@@ -127,17 +135,18 @@ public class Superluminal {
 			log.trace("No FTL dats path previously set.");
 		}
 
-		// create the main window instance
+		// Create the main window instance
 		EditorWindow editorWindow = null;
 		try {
 			display = Display.getDefault();
 			editorWindow = new EditorWindow(display);
 		} catch (Exception e) {
-			log.error("Exception while creating EditorWindow.", e);
+			log.error("Exception occured while creating EditorWindow: ", e);
+			Utils.showErrorDialog(null, "An error has occured while creating the editor's GUI: " + e.getMessage());
 			System.exit(1);
 		}
 
-		// find/prompt for the path to set in the config
+		// Find / prompt for the path to set in the config
 		if (datsDir == null) {
 			datsDir = FTLUtilities.findDatsDir();
 			if (datsDir != null) {
@@ -151,23 +160,24 @@ public class Superluminal {
 
 			if (datsDir == null) {
 				log.debug("FTL dats path was not located automatically. Prompting user for location.");
-				datsDir = FTLUtilities.promptForDatsDir(editorWindow.getShell());
+				datsDir = Utils.promptForDatsDir(editorWindow.getShell());
 			}
 
 			if (datsDir != null) {
-				resourcePath = datsDir.getAbsolutePath();
-				config.setProperty(SuperluminalConfig.FTL_RESOURCE, resourcePath);
-				log.info("FTL dats located at: " + resourcePath);
+				Manager.resourcePath = datsDir.getAbsolutePath();
+				config.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
+				log.info("FTL dats located at: " + Manager.resourcePath);
 			}
 		}
 
+		// Exit program if dats were not found, or load them if they were
 		if (datsDir == null) {
-			showErrorDialog("FTL resources were not found.\nThe editor will now exit.");
+			Utils.showErrorDialog(editorWindow.getShell(), "FTL resources were not found.\nThe editor will now exit.");
 			log.debug("No FTL dats path found, exiting.");
 			System.exit(1);
 		} else {
-			log.trace("Loading dat archives...");
 			try {
+				log.trace("Loading dat archives...");
 				File dataFile = new File(datsDir + "/data.dat");
 				File resourceFile = new File(datsDir + "/resource.dat");
 				FTLPack data = new FTLPack(dataFile, "r");
@@ -176,6 +186,9 @@ public class Superluminal {
 				Database db = Database.getInstance();
 				db.setDataDat(data);
 				db.setResourceDat(resource);
+
+				log.trace("Loading database...");
+				loadDatabase();
 			} catch (IOException e) {
 				log.error("An error occured while loading dat archives:", e);
 
@@ -183,15 +196,12 @@ public class Superluminal {
 				buf.append("An error has occured while loading the game's resources.\n\n");
 				buf.append("Please check editor-log.txt in the editor's directory, and post it\n");
 				buf.append("in the editor's thread on the FTL forums.");
-				showErrorDialog(buf.toString());
+				Utils.showErrorDialog(editorWindow.getShell(), buf.toString());
 				System.exit(1);
 			}
 		}
 
-		log.trace("Loading database...");
-		loadDatabase();
-
-		// open the main window's shell - make it visible
+		// Open the main window's shell
 		editorWindow.open();
 
 		log.info("Running...");
@@ -207,18 +217,19 @@ public class Superluminal {
 			buf.append(APP_NAME + " has encountered a problem and needs to close.\n\n");
 			buf.append("Please check editor-log.txt in the editor's directory, and post it\n");
 			buf.append("in the editor's thread on the FTL forums.");
-			showErrorDialog(buf.toString());
+			Utils.showErrorDialog(editorWindow.getShell(), buf.toString());
 		}
 
 		log.info("Exiting...");
 
 		saveHotkeys(hotkeysFile);
 
+		// Save config
 		SuperluminalConfig appConfig = new SuperluminalConfig(config, configFile);
 		try {
-			appConfig.setProperty(SuperluminalConfig.FTL_RESOURCE, resourcePath);
-			appConfig.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "" + rememberGeometry);
-			appConfig.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + sidebarOnRightSide);
+			appConfig.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
+			appConfig.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "" + Manager.rememberGeometry);
+			appConfig.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
 			for (Hotkeys hotkey : Hotkeys.values()) {
 				appConfig.setProperty(hotkey.toString(), Manager.getHotkey(hotkey).toString());
 			}
@@ -226,32 +237,19 @@ public class Superluminal {
 		} catch (IOException e) {
 			String errorMsg = String.format("Error writing config to \"%s\".", configFile.getPath());
 			log.error(errorMsg, e);
-			showErrorDialog(errorMsg);
+			Utils.showErrorDialog(editorWindow.getShell(), errorMsg);
 		}
 
-		Grid.getInstance().dispose();
 		editorWindow.dispose();
 		display.dispose();
-	}
-
-	public static void showErrorDialog(String message) {
-		Shell shell = null;
-		if (EditorWindow.getInstance() == null || EditorWindow.getInstance().getShell() == null)
-			shell = new Shell(display);
-		else
-			shell = EditorWindow.getInstance().getShell();
-
-		MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-
-		box.setText(String.format("%s - Error", APP_NAME));
-		box.setMessage(message);
-
-		box.open();
 	}
 
 	private static void loadDatabase() {
 		Database db = Database.getInstance();
 		FTLPack data = db.getDataDat();
+
+		// Animations need to be loaded before weapons, since they reference them
+		db.preloadAnims();
 
 		for (String innerPath : data.list()) {
 			if (innerPath.endsWith(".xml")) {
@@ -260,8 +258,8 @@ public class Superluminal {
 					is = data.getInputStream(innerPath);
 					DecodeResult dr = Utils.decodeText(is, null);
 
-					ArrayList<Element> shipElements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
-					for (Element e : shipElements) {
+					ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
+					for (Element e : elements) {
 						try {
 							db.storeShipMetadata(DataUtils.loadShipMetadata(e));
 						} catch (IllegalArgumentException ex) {
@@ -269,8 +267,10 @@ public class Superluminal {
 						}
 					}
 
-					ArrayList<Element> weaponElements = DataUtils.findTagsNamed(dr.text, "weaponBlueprint");
-					for (Element e : weaponElements) {
+					elements.clear();
+					elements = null;
+					elements = DataUtils.findTagsNamed(dr.text, "weaponBlueprint");
+					for (Element e : elements) {
 						try {
 							db.storeWeapon(DataUtils.loadWeapon(e));
 						} catch (IllegalArgumentException ex) {
@@ -278,12 +278,25 @@ public class Superluminal {
 						}
 					}
 
-					ArrayList<Element> droneElements = DataUtils.findTagsNamed(dr.text, "droneBlueprint");
-					for (Element e : droneElements) {
+					elements.clear();
+					elements = null;
+					elements = DataUtils.findTagsNamed(dr.text, "droneBlueprint");
+					for (Element e : elements) {
 						try {
 							db.storeDrone(DataUtils.loadDrone(e));
 						} catch (IllegalArgumentException ex) {
 							log.warn("Could not load drone: " + ex.getMessage());
+						}
+					}
+
+					elements.clear();
+					elements = null;
+					elements = DataUtils.findTagsNamed(dr.text, "augBlueprint");
+					for (Element e : elements) {
+						try {
+							db.storeAugment(DataUtils.loadAugment(e));
+						} catch (IllegalArgumentException ex) {
+							log.warn("Could not load augment: " + ex.getMessage());
 						}
 					}
 				} catch (FileNotFoundException e) {
@@ -301,6 +314,9 @@ public class Superluminal {
 				}
 			}
 		}
+
+		// Clear anim sheets, as they're no longer needed
+		db.clearAnimSheets();
 
 		ShipLoaderDialog.getInstance().loadShipList(Database.getInstance().getShipMetadata());
 	}
@@ -342,11 +358,19 @@ public class Superluminal {
 
 		hotkey = Manager.getHotkey(Hotkeys.NEW_SHIP);
 		hotkey.setKey('n');
-		hotkey.setShift(true);
+		hotkey.setCtrl(true);
 
 		hotkey = Manager.getHotkey(Hotkeys.LOAD_SHIP);
 		hotkey.setKey('l');
-		hotkey.setShift(true);
+		hotkey.setCtrl(true);
+
+		hotkey = Manager.getHotkey(Hotkeys.SAVE_SHIP);
+		hotkey.setKey('s');
+		hotkey.setCtrl(true);
+
+		hotkey = Manager.getHotkey(Hotkeys.CLOSE_SHIP);
+		hotkey.setKey('w');
+		hotkey.setCtrl(true);
 
 		// View hotkeys
 		Manager.getHotkey(Hotkeys.TOGGLE_GRID).setKey('x');
@@ -446,6 +470,10 @@ public class Superluminal {
 		wrapper.addContent(root);
 		keyDoc.setRootElement(wrapper);
 
-		Utils.writeFileXML(keyDoc, f);
+		try {
+			Utils.writeFileXML(keyDoc, f);
+		} catch (IOException e) {
+			log.warn("An error occured while saving hotkeys file: ", e);
+		}
 	}
 }

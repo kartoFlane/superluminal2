@@ -9,6 +9,7 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.components.NotDeletableException;
+import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -19,8 +20,6 @@ import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
-import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
@@ -44,7 +43,6 @@ public class ShipContainer implements Disposable {
 
 	/** The size of a single cell. Both width and height are equal to this value. */
 	public static final int CELL_SIZE = 35;
-	public static final WeaponObject DEFAULT_WEAPON_OBJ = new WeaponObject();
 
 	private ArrayList<RoomController> roomControllers;
 	private ArrayList<DoorController> doorControllers;
@@ -55,13 +53,15 @@ public class ShipContainer implements Disposable {
 	private HashMap<GameObject, AbstractController> objectControllerMap;
 	private HashMap<Images, ImageController> imageControllerMap;
 	private HashMap<AbstractController, ArrayList<PropController>> propMap; // TODO
+	private HashMap<RoomObject, Systems> activeSystemMap;
 
+	private boolean anchorVisible = true;
 	private boolean mountsVisible = true;
 	private boolean roomsVisible = true;
 	private boolean doorsVisible = true;
 	private boolean stationsVisible = true;
 
-	private Systems currentlyActiveBay = Systems.MEDBAY;
+	private boolean shipSaved = true;
 
 	private ShipController shipController = null;
 
@@ -75,6 +75,7 @@ public class ShipContainer implements Disposable {
 		objectControllerMap = new HashMap<GameObject, AbstractController>();
 		imageControllerMap = new HashMap<Images, ImageController>();
 		propMap = new HashMap<AbstractController, ArrayList<PropController>>();
+		activeSystemMap = new HashMap<RoomObject, Systems>();
 	}
 
 	public ShipContainer(ShipObject ship) {
@@ -132,7 +133,7 @@ public class ShipContainer implements Disposable {
 			SystemObject system = ship.getSystem(sys);
 			SystemController systemC = SystemController.newInstance(this, system);
 			add(systemC);
-			if (system.canContainStation())
+			if (sys.canContainStation())
 				add(StationController.newInstance(this, systemC, system.getStation()));
 		}
 
@@ -144,6 +145,10 @@ public class ShipContainer implements Disposable {
 		}
 
 		createImageControllers();
+	}
+
+	public boolean isSaved() {
+		return shipSaved;
 	}
 
 	public ShipController getShipController() {
@@ -224,56 +229,26 @@ public class ShipContainer implements Disposable {
 		if (sys == null)
 			throw new NullPointerException("System id must not be null.");
 		if (room == null)
-			throw new NullPointerException("Room controller is null. Use system.unassign() instead.");
+			throw new NullPointerException("Room controller is null. Use unassign() instead.");
 
 		SystemController system = getSystemController(sys);
 		StationController station = getStationController(sys);
 
-		// Medbay and Clonebay are coupled together...
-		if (sys == Systems.MEDBAY || sys == Systems.CLONEBAY) {
-			currentlyActiveBay = sys;
-			SystemController other = getSystemController(sys == Systems.MEDBAY ? Systems.CLONEBAY : Systems.MEDBAY);
-			StationController otherStation = getStationController(other.getSystemId());
+		unassign(sys);
+		system.assignTo(room.getGameObject());
+		system.reposition(room.getX(), room.getY());
+		system.setParent(room);
 
-			unassign(getAssignedSystem(room.getGameObject()));
-			unassign(sys);
+		setActiveSystem(room.getGameObject(), sys);
 
-			other.assignTo(room.getGameObject());
-			other.reposition(room.getX(), room.getY());
-			other.setParent(room);
-			system.assignTo(room.getGameObject());
-			system.reposition(room.getX(), room.getY());
-			system.setParent(room);
+		room.addSizeListener(system);
+		system.notifySizeChanged(room.getW(), room.getH());
 
-			room.addSizeListener(system);
+		if (sys.canContainStation()) {
 			room.addSizeListener(station);
-			system.notifySizeChanged(room.getW(), room.getH());
-			room.addSizeListener(other);
-			room.addSizeListener(otherStation);
-			other.notifySizeChanged(room.getW(), room.getH());
-
 			station.updateFollowOffset();
 			station.updateFollower();
-			otherStation.updateFollowOffset();
-			otherStation.updateFollower();
-			station.setVisible(room.canContainSlotId(station.getSlotId()));
-			otherStation.setVisible(false);
-		} else {
-			unassign(getAssignedSystem(room.getGameObject()));
-			unassign(sys);
-			system.assignTo(room.getGameObject());
-			system.reposition(room.getX(), room.getY());
-			system.setParent(room);
-
-			room.addSizeListener(system);
-			system.notifySizeChanged(room.getW(), room.getH());
-
-			if (system.canContainStation()) {
-				room.addSizeListener(station);
-				station.updateFollowOffset();
-				station.updateFollower();
-				station.setVisible(room.canContainSlotId(station.getSlotId()));
-			}
+			station.updateView();
 		}
 	}
 
@@ -283,37 +258,23 @@ public class ShipContainer implements Disposable {
 
 		SystemController system = getSystemController(sys);
 		StationController station = getStationController(sys);
-		AbstractController room = getController(system.getGameObject().getRoom());
+		RoomController room = (RoomController) getController(system.getGameObject().getRoom());
 
-		if (sys == Systems.MEDBAY || sys == Systems.CLONEBAY) {
-			SystemController other = getSystemController(sys == Systems.MEDBAY ? Systems.CLONEBAY : Systems.MEDBAY);
-			StationController otherStation = getStationController(other.getSystemId());
-			AbstractController otherRoom = getController(other.getGameObject().getRoom());
-
+		if (sys.canContainStation())
 			station.setVisible(false);
-			otherStation.setVisible(false);
-			system.unassign();
-			other.unassign();
+		system.unassign();
 
-			if (room != null) {
-				room.removeSizeListener(system);
-				room.removeSizeListener(station);
-				room.redraw();
-			}
-			if (otherRoom != null) {
-				otherRoom.removeSizeListener(other);
-				otherRoom.removeSizeListener(otherStation);
-				otherRoom.redraw();
-			}
-		} else {
-			if (system.canContainStation())
-				station.setVisible(false);
-			system.unassign();
+		if (room != null) {
+			room.removeSizeListener(system);
+			room.removeSizeListener(station);
+			room.redraw();
 
-			if (room != null) {
-				room.removeSizeListener(system);
-				room.removeSizeListener(station);
-				room.redraw();
+			if (activeSystemMap.get(room.getGameObject()) == sys) {
+				ArrayList<Systems> systems = getAllAssignedSystems(room.getGameObject());
+				if (systems.size() > 0)
+					setActiveSystem(room.getGameObject(), systems.get(0));
+				else
+					activeSystemMap.remove(room.getGameObject());
 			}
 		}
 	}
@@ -355,7 +316,7 @@ public class ShipContainer implements Disposable {
 	public void remove(AbstractController controller) {
 		if (controller instanceof RoomController) {
 			RoomController room = (RoomController) controller;
-			Systems id = getAssignedSystem(room.getGameObject());
+			Systems id = getActiveSystem(room.getGameObject());
 			unassign(id);
 			roomControllers.remove(room);
 			shipController.getGameObject().remove(room.getGameObject());
@@ -577,11 +538,12 @@ public class ShipContainer implements Disposable {
 	}
 
 	public void setAnchorVisible(boolean vis) {
+		anchorVisible = vis;
 		shipController.setVisible(vis);
 	}
 
 	public boolean isAnchorVisible() {
-		return shipController.isVisible();
+		return anchorVisible;
 	}
 
 	public void setRoomsVisible(boolean vis) {
@@ -628,27 +590,44 @@ public class ShipContainer implements Disposable {
 		for (SystemController s : systemControllers) {
 			if (s.isAssigned() && s.canContainStation()) {
 				StationController st = (StationController) getController(s.getGameObject().getStation());
-				st.setVisible(vis && st.getSlotId() != -2);
+				st.setVisible(vis && st.getSlotId() != -2 && getActiveSystem(s.getGameObject().getRoom()) == s.getSystemId());
 			}
 		}
 	}
 
-	public Systems getAssignedSystem(RoomObject room) {
+	public void setActiveSystem(RoomObject room, Systems sys) {
+		if (room == null)
+			throw new IllegalArgumentException("Room must not be null.");
+		if (sys == null)
+			throw new IllegalArgumentException("System must not be null.");
+
+		Systems prevSystem = getActiveSystem(room);
+
+		activeSystemMap.put(room, sys);
+
+		if (prevSystem != null && prevSystem.canContainStation())
+			getStationController(prevSystem).updateView();
+
+		getSystemController(sys).updateView();
+		if (sys.canContainStation())
+			getStationController(sys).updateView();
+		getController(room).redraw();
+	}
+
+	public Systems getActiveSystem(RoomObject room) {
+		if (activeSystemMap.containsKey(room))
+			return activeSystemMap.get(room);
+		return Systems.EMPTY;
+	}
+
+	public ArrayList<Systems> getAllAssignedSystems(RoomObject room) {
+		ArrayList<Systems> systems = new ArrayList<Systems>();
+
 		for (Systems sys : Systems.getSystems()) {
-			if (sys == Systems.MEDBAY || sys == Systems.CLONEBAY) {
-				// If medbay and clonebay are occupying the same room, need to return the
-				// currently displayed system
-				SystemObject medbay = shipController.getGameObject().getSystem(Systems.MEDBAY);
-				SystemObject clonebay = shipController.getGameObject().getSystem(Systems.CLONEBAY);
-
-				if (medbay.getRoom() == clonebay.getRoom() && medbay.getRoom() == room)
-					return currentlyActiveBay;
-			}
-
 			SystemObject system = shipController.getGameObject().getSystem(sys);
 			if (system.getRoom() == room)
-				return sys;
+				systems.add(sys);
 		}
-		return Systems.EMPTY;
+		return systems;
 	}
 }

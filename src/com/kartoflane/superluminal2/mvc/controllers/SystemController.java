@@ -3,10 +3,11 @@ package com.kartoflane.superluminal2.mvc.controllers;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Directions;
+import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.ftl.GlowObject.Glows;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -115,6 +116,9 @@ public class SystemController extends ObjectController implements Controller {
 		return getGameObject().isAvailable();
 	}
 
+	/**
+	 * @see {@link Cache#checkOutImage(Object, String)}
+	 */
 	public void setInteriorPath(String interiorPath) {
 		getGameObject().setInteriorPath(interiorPath);
 		updateView();

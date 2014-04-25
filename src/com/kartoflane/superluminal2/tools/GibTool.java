@@ -15,9 +15,7 @@ public class GibTool extends Tool {
 
 	@Override
 	public void select() {
-		Control c = (Control) window.getSidebarContent();
-		if (c != null && !c.isDisposed())
-			c.dispose();
+		disposeSidebarContent();
 
 		GibToolComposite gibC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(gibC);
@@ -28,13 +26,16 @@ public class GibTool extends Tool {
 	}
 
 	@Override
-	public GibTool getInstance() {
-		return (GibTool) instance;
+	public GibToolComposite getToolComposite(Composite parent) {
+		return (GibToolComposite) super.getToolComposite(parent);
 	}
 
 	@Override
-	public GibToolComposite getToolComposite(Composite parent) {
-		return new GibToolComposite(parent);
+	public GibToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new GibToolComposite(parent);
+		return (GibToolComposite) compositeInstance;
 	}
 
 	@Override

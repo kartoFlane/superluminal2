@@ -35,6 +35,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 	private Button btnSelectRight;
 	private Label lblIdLeft;
 	private Label lblIdRight;
+	private Label label;
 
 	public DoorDataComposite(Composite parent, DoorController control) {
 		super(parent, SWT.NONE);
@@ -44,7 +45,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 
 		setLayout(new GridLayout(3, false));
 
-		Label label = new Label(this, SWT.NONE);
+		label = new Label(this, SWT.NONE);
 		label.setAlignment(SWT.CENTER);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		label.setText("Door");
@@ -154,6 +155,9 @@ public class DoorDataComposite extends Composite implements DataComposite {
 	@Override
 	public void updateData() {
 		controller.verifyLinkedDoors();
+
+		String alias = controller.getAlias();
+		label.setText("Door" + (alias == null || alias.equals("") ? "" : " (" + alias + ")"));
 
 		btnHorizontal.setSelection(controller.isHorizontal());
 

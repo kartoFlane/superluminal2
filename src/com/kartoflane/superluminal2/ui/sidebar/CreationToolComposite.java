@@ -15,11 +15,10 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
-import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
-public class CreationToolComposite extends Composite implements SidebarComposite {
-	private static Tools selectedTool = Tools.ROOM;
+public class CreationToolComposite extends Composite {
 
 	private Composite toolContainer;
 	private Composite dataContainer;
@@ -85,7 +84,7 @@ public class CreationToolComposite extends Composite implements SidebarComposite
 		SelectionAdapter listener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				selectTool((ToolItem) e.getSource());
+				selectSubtool((ToolItem) e.getSource());
 			}
 		};
 
@@ -93,50 +92,42 @@ public class CreationToolComposite extends Composite implements SidebarComposite
 		tltmDoor.addSelectionListener(listener);
 		tltmMount.addSelectionListener(listener);
 		tltmStation.addSelectionListener(listener);
-
-		selectTool(selectedTool);
 	}
 
-	private void selectTool(ToolItem item) {
-		selectedTool = (Tools) item.getData();
-		Manager.selectTool(selectedTool);
-		setToolComposite(selectedTool);
+	public void updateData() {
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		selectSubtool(ctool.getSelectedSubtool());
 	}
 
-	public void selectTool(Tools toolId) {
+	private void selectSubtool(Tools toolId) {
 		for (Tools key : toolItemMap.keySet()) {
 			ToolItem it = toolItemMap.get(key);
 			it.setSelection(key == toolId);
 			if (key == toolId)
-				selectTool(it);
+				selectSubtool(it);
 		}
 	}
 
-	public void setToolComposite(Tools t) {
-		Composite c = getComposite();
-		if (c != null)
+	private void selectSubtool(ToolItem item) {
+		Tools subtool = (Tools) item.getData();
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.setSelectedSubtool(subtool);
+		Manager.selectTool(subtool);
+	}
+
+	/**
+	 * @return the composite that serves as a container for other composites, supplied by subtools.
+	 */
+	public Composite getDataContainer() {
+		return dataContainer;
+	}
+
+	/**
+	 * Disposes all contents of the data container, without disposing the container itself.
+	 */
+	public void clearDataContainer() {
+		for (Control c : dataContainer.getChildren())
 			c.dispose();
-
-		c = Manager.getTool(t).getToolComposite(dataContainer);
-		if (c != null) {
-			Control[] changed = { c };
-			dataContainer.layout(changed);
-		}
-	}
-
-	public Tools getSelectedTool() {
-		return selectedTool;
-	}
-
-	@Override
-	public DataComposite getDataComposite() {
-		return null;
-	}
-
-	private Composite getComposite() {
-		if (dataContainer.getChildren().length == 0)
-			return null;
-		else
-			return (Composite) dataContainer.getChildren()[0];
+		dataContainer.layout(true);
 	}
 }

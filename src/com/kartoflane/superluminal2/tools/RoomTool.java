@@ -22,7 +22,7 @@ import com.kartoflane.superluminal2.ui.sidebar.RoomToolComposite;
 public class RoomTool extends Tool {
 	public static final int COLLISION_TOLERANCE = ShipContainer.CELL_SIZE / 2;
 
-	// room creation helper variables
+	// Room creation helper variables
 	private Point createOrigin;
 	private Rectangle createBounds;
 	private boolean canCreate = false;
@@ -41,22 +41,34 @@ public class RoomTool extends Tool {
 		cursor.setSnapMode(Snapmodes.CELL);
 		cursor.updateView();
 		cursor.setVisible(false);
+
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
+		Composite dataC = ctool.getToolComposite(null).getDataContainer();
+		createToolComposite(dataC);
+		dataC.layout(true);
 	}
 
 	@Override
 	public void deselect() {
 		cursor.updateView();
 		cursor.setVisible(false);
+
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
 	}
 
 	@Override
-	public RoomTool getInstance() {
-		return (RoomTool) instance;
+	public RoomToolComposite getToolComposite(Composite parent) {
+		return (RoomToolComposite) super.getToolComposite(parent);
 	}
 
 	@Override
-	public Composite getToolComposite(Composite parent) {
-		return new RoomToolComposite(parent);
+	public RoomToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new RoomToolComposite(parent);
+		return (RoomToolComposite) compositeInstance;
 	}
 
 	public boolean isCreating() {

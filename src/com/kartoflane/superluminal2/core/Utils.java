@@ -21,16 +21,24 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.vhati.modmanager.core.FTLUtilities;
 import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
 import net.vhati.modmanager.core.SloppyXMLParser;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
+
+import com.kartoflane.superluminal2.Superluminal;
 
 public class Utils {
 	public static final Logger log = LogManager.getLogger(Utils.class);
@@ -61,6 +69,34 @@ public class Utils {
 
 	public static Point copy(Point p) {
 		return new Point(p.x, p.y);
+	}
+
+	/**
+	 * Corrects the bounds by including rotation. This way bounds
+	 * cover the entire area of the controller, and can be reliably
+	 * used to redraw it.
+	 * 
+	 * @param b
+	 *            the rectangle representing the controller's bounds
+	 */
+	public static Rectangle rotate(Rectangle r, float rotation) {
+		Rectangle b = copy(r);
+		if (rotation % 180 == 0) {
+			// no need to do anything
+		} else if ((int) (rotation % 90) == 0) {
+			b.x += b.width / 2 - b.height / 2;
+			b.y += b.height / 2 - b.width / 2;
+			int a = b.width;
+			b.width = b.height;
+			b.height = a;
+		} else if (rotation % 45 == 0) {
+			// TODO ?
+		} else {
+			// TODO perform sine/cosine calculations, or approximations of those...
+			// end.x = (int) (start.x + Math.cos(rad) * distance - Math.sin(rad) * distance);
+			// end.y = (int) (start.y + Math.sin(rad) * distance + Math.cos(rad) * distance);
+		}
+		return b;
 	}
 
 	/**
@@ -134,7 +170,25 @@ public class Utils {
 		return parser.build(contents);
 	}
 
-	public static boolean writeFileXML(Document doc, File f) {
+	/**
+	 * Writes the Document to the file in XML format.<br>
+	 * This method uses the {@link SloppyXMLOutputProcessor}, which
+	 * omitts the root element when writing the document.
+	 * 
+	 * @param doc
+	 *            the document to be written
+	 * @param f
+	 *            file in which the document will be saved
+	 * @return true if operation was completed successfully, false otherwise
+	 */
+	public static boolean writeFileXML(Document doc, File f) throws IOException {
+		if (doc == null)
+			throw new IllegalArgumentException("Document must not be null.");
+		if (f == null)
+			throw new IllegalArgumentException("File must not be null.");
+		if (f.isDirectory())
+			throw new IllegalArgumentException("File must not be a directory.");
+
 		FileWriter writer = null;
 
 		try {
@@ -143,18 +197,10 @@ public class Utils {
 			SloppyXMLOutputProcessor.sloppyPrint(doc, writer, null);
 
 			return true;
-		} catch (IOException e) {
-			log.error("IO exception occured while writing file " + f.getAbsolutePath(), e);
 		} finally {
-			try {
-				if (writer != null)
-					writer.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			if (writer != null)
+				writer.close();
 		}
-
-		return false;
 	}
 
 	public static String trimProtocol(String input) {
@@ -175,6 +221,94 @@ public class Utils {
 			return "";
 	}
 
+	public static void showErrorDialog(Shell parentShell, String message) {
+		boolean dispose = false;
+
+		if (parentShell == null) {
+			parentShell = new Shell(Display.getCurrent());
+			dispose = true;
+		}
+
+		MessageBox box = new MessageBox(parentShell, SWT.ICON_ERROR | SWT.OK);
+
+		box.setText(String.format("%s - Error", Superluminal.APP_NAME));
+		box.setMessage(message);
+
+		box.open();
+
+		if (dispose)
+			parentShell.dispose();
+	}
+
+	public static void showWarningDialog(Shell parentShell, String message) {
+		boolean dispose = false;
+
+		if (parentShell == null) {
+			parentShell = new Shell(Display.getCurrent());
+			dispose = true;
+		}
+
+		MessageBox box = new MessageBox(parentShell, SWT.ICON_WARNING | SWT.OK);
+
+		box.setText(String.format("%s - Warning", Superluminal.APP_NAME));
+		box.setMessage(message);
+
+		box.open();
+
+		if (dispose)
+			parentShell.dispose();
+	}
+
+	/**
+	 * Modally prompts the user for the FTL resources dir.
+	 * 
+	 * @param parentShell
+	 *            parent for the SWT dialog
+	 * 
+	 * @author Vhati - original method wth Swing dialogs
+	 * @author kartoFlane - modified to work with SWT dialogs
+	 */
+	public static File promptForDatsDir(Shell parentShell) {
+		File result = null;
+
+		String message = "";
+		message += "You will now be prompted to locate FTL manually.\n";
+		message += "Select '(FTL dir)/resources/data.dat'.\n";
+		message += "Or 'FTL.app', if you're on OSX.";
+
+		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
+		box.setText("Find FTL");
+		box.setMessage(message);
+
+		FileDialog fd = new FileDialog(parentShell, SWT.OPEN);
+		fd.setText("Find data.dat or FTL.app");
+		fd.setFilterExtensions(new String[] { "*.dat", "*.app" });
+		fd.setFilterNames(new String[] { "FTL Data File - (FTL dir)/resources/data.dat", "FTL Application Bundle" });
+
+		String filePath = fd.open();
+
+		if (filePath == null) {
+			// User aborted selection
+			// Nothing to do here
+		} else {
+			File f = new File(filePath);
+			if (f.getName().equals("data.dat")) {
+				result = f.getParentFile();
+			} else if (f.getName().endsWith(".app")) {
+				File contentsPath = new File(f, "Contents");
+				if (contentsPath.exists() && contentsPath.isDirectory() && new File(contentsPath, "Resources").exists())
+					result = new File(contentsPath, "Resources");
+				// TODO test whether this works on OSX
+			}
+		}
+
+		if (result != null && FTLUtilities.isDatsDirValid(result)) {
+			return result;
+		}
+
+		return null;
+	}
+
 	/**
 	 * Encodes a string (throwing an exception on bad chars) to bytes in a stream.
 	 * Line endings will not be normalized.
@@ -185,6 +319,8 @@ public class Utils {
 	 *            the name of a Charset
 	 * @param description
 	 *            how error messages should refer to the string, or null
+	 * 
+	 * @author Vhati
 	 */
 	public static InputStream encodeText(String text, String encoding, String description) throws IOException {
 		CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
@@ -207,6 +343,8 @@ public class Utils {
 	 *            a stream to read
 	 * @param description
 	 *            how error messages should refer to the stream, or null
+	 * 
+	 * @author Vhati
 	 */
 	public static DecodeResult decodeText(InputStream is, String description) throws IOException {
 		String result = null;
@@ -295,6 +433,8 @@ public class Utils {
 	 * encoding - The encoding used.
 	 * eol - A constant describing the original line endings.
 	 * bom - The BOM bytes found, or null.
+	 * 
+	 * @author Vhati
 	 */
 	public static class DecodeResult {
 		public static final int EOL_NONE = 0;

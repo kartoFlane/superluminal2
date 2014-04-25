@@ -8,8 +8,8 @@ import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
@@ -32,20 +32,23 @@ public class StationTool extends Tool {
 	}
 
 	@Override
-	public StationTool getInstance() {
-		return (StationTool) instance;
-	}
-
-	@Override
 	public void select() {
 		cursor.updateView();
 		cursor.setSnapMode(Snapmodes.CELL);
 		cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
 		cursor.setVisible(false);
+
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
+		Composite dataC = ctool.getToolComposite(null).getDataContainer();
+		createToolComposite(dataC);
+		dataC.layout(true);
 	}
 
 	@Override
 	public void deselect() {
+		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		ctool.getToolComposite(null).clearDataContainer();
 	}
 
 	public void setDirection(Directions dir) {
@@ -81,8 +84,16 @@ public class StationTool extends Tool {
 	}
 
 	@Override
-	public Composite getToolComposite(Composite parent) {
-		return new StationToolComposite(parent);
+	public StationToolComposite getToolComposite(Composite parent) {
+		return (StationToolComposite) super.getToolComposite(parent);
+	}
+
+	@Override
+	public StationToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new StationToolComposite(parent);
+		return (StationToolComposite) compositeInstance;
 	}
 
 	@Override
@@ -102,7 +113,7 @@ public class StationTool extends Tool {
 					ShipContainer container = Manager.getCurrentShip();
 					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
-						Systems sys = container.getAssignedSystem(roomC.getGameObject());
+						Systems sys = container.getActiveSystem(roomC.getGameObject());
 						SystemController system = container.getSystemController(sys);
 						if (system.canContainStation()) {
 							StationController station = (StationController) container.getController(system.getGameObject().getStation());
@@ -116,7 +127,7 @@ public class StationTool extends Tool {
 					ShipContainer container = Manager.getCurrentShip();
 					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
-						Systems sys = container.getAssignedSystem(roomC.getGameObject());
+						Systems sys = container.getActiveSystem(roomC.getGameObject());
 						SystemController system = container.getSystemController(sys);
 						if (system.canContainStation()) {
 							StationController station = (StationController) container.getController(system.getGameObject().getStation());
@@ -160,7 +171,7 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			Systems sys = container.getAssignedSystem(roomC.getGameObject());
+			Systems sys = container.getActiveSystem(roomC.getGameObject());
 			SystemController system = container.getSystemController(sys);
 			if (system.canContainStation()) {
 				StationController station = (StationController) container.getController(system.getGameObject().getStation());
@@ -175,7 +186,7 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			Systems sys = container.getAssignedSystem(roomC.getGameObject());
+			Systems sys = container.getActiveSystem(roomC.getGameObject());
 			SystemController system = container.getSystemController(sys);
 			if (system.canContainStation()) {
 				StationController station = (StationController) container.getController(system.getGameObject().getStation());
@@ -236,7 +247,7 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			Systems id = container.getAssignedSystem(roomC.getGameObject());
+			Systems id = container.getActiveSystem(roomC.getGameObject());
 			SystemController system = container.getSystemController(id);
 			result = container.isStationsVisible() && container.isRoomsVisible();
 			result &= system.canContainStation() && roomC.getDimensions().contains(x, y);

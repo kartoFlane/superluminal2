@@ -1,6 +1,6 @@
 package com.kartoflane.superluminal2.ftl;
 
-public class AugmentObject extends GameObject {
+public class AugmentObject extends GameObject implements Comparable<AugmentObject> {
 
 	private static final long serialVersionUID = 7946331800522010830L;
 
@@ -12,11 +12,19 @@ public class AugmentObject extends GameObject {
 		this.blueprintName = blueprintName;
 	}
 
+	public void setBlueprintName(String name) {
+		if (name == null)
+			throw new IllegalArgumentException("Blueprint name must not be null.");
+		blueprintName = name;
+	}
+
 	public String getBlueprintName() {
 		return blueprintName;
 	}
 
 	public void setTitle(String title) {
+		if (title == null)
+			throw new IllegalArgumentException(blueprintName + ": title must not be null.");
 		this.title = title;
 	}
 
@@ -25,10 +33,17 @@ public class AugmentObject extends GameObject {
 	}
 
 	public void setDescription(String desc) {
+		if (desc == null)
+			throw new IllegalArgumentException(blueprintName + ": description must not be null.");
 		description = desc;
 	}
 
 	public String getDescription() {
 		return description;
+	}
+
+	@Override
+	public int compareTo(AugmentObject o) {
+		return blueprintName.compareTo(o.getBlueprintName());
 	}
 }

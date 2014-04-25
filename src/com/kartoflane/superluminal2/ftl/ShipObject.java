@@ -10,8 +10,8 @@ import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.components.Races;
+import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.core.Utils;
-import com.kartoflane.superluminal2.ftl.SystemObject.Systems;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 
 public class ShipObject extends GameObject {
@@ -20,8 +20,8 @@ public class ShipObject extends GameObject {
 
 	private boolean isPlayer = false;
 	private String blueprintName = null;
-	private String layoutTXT = null;
-	private String layoutXML = null;
+	private String layout = null;
+	private String img = null;
 
 	private String shipClass = null;
 	private String shipName = null;
@@ -31,6 +31,7 @@ public class ShipObject extends GameObject {
 	private HashSet<DoorObject> doors;
 	private TreeSet<MountObject> mounts;
 	private HashSet<GibObject> gibs;
+	private ArrayList<DroneObject> drones;
 	private ArrayList<AugmentObject> augments;
 	private HashMap<Systems, SystemObject> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
@@ -50,10 +51,10 @@ public class ShipObject extends GameObject {
 
 	private int weaponSlots = 0;
 	private int droneSlots = 0;
-	private int hullHealth = 0;
-	private int maxPower = 0;
 	private int missiles = 0;
 	private int droneParts = 0;
+	private int hullHealth = 0;
+	private int maxPower = 0;
 
 	private ShipObject() {
 		setDeletable(false);
@@ -62,6 +63,7 @@ public class ShipObject extends GameObject {
 		doors = new HashSet<DoorObject>();
 		mounts = new TreeSet<MountObject>();
 		gibs = new HashSet<GibObject>();
+		drones = new ArrayList<DroneObject>();
 		systemMap = new HashMap<Systems, SystemObject>();
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
@@ -74,6 +76,10 @@ public class ShipObject extends GameObject {
 			ImageObject object = new ImageObject();
 			object.setAlias(image.name().toLowerCase());
 			imageMap.put(image, object);
+		}
+		for (Races race : Races.values()) {
+			crewCountMap.put(race, 0);
+			crewMaxMap.put(race, 0);
 		}
 	}
 
@@ -95,24 +101,32 @@ public class ShipObject extends GameObject {
 		return blueprintName;
 	}
 
-	public void setLayoutTXT(String layout) {
+	public void setLayout(String layout) {
 		if (layout == null)
-			throw new IllegalArgumentException("Name of the layout.txt must not be null.");
-		layoutTXT = layout;
+			throw new IllegalArgumentException("Layout namespace must not be null.");
+		this.layout = layout;
+	}
+
+	public String getLayout() {
+		return layout;
 	}
 
 	public String getLayoutTXT() {
-		return layoutTXT;
-	}
-
-	public void setLayoutXML(String layout) {
-		if (layout == null)
-			throw new IllegalArgumentException("Name of the layout.xml must not be null.");
-		layoutXML = layout;
+		return "data/" + layout + ".txt";
 	}
 
 	public String getLayoutXML() {
-		return layoutXML;
+		return "data/" + layout + ".xml";
+	}
+
+	public void setImageNamespace(String image) {
+		if (image == null)
+			throw new IllegalArgumentException("Image namespace must not be null.");
+		img = image;
+	}
+
+	public String getImageNamespace() {
+		return img;
 	}
 
 	public void setShipClass(String className) {
@@ -325,8 +339,27 @@ public class ShipObject extends GameObject {
 
 	public RoomObject getRoomById(int id) {
 		RoomObject[] roomz = getRooms();
-		int index = binarySearch(roomz, id, 0, roomz.length);
-		return index == -1 ? null : roomz[index];
+		try {
+			return roomz[binarySearch(roomz, id, 0, roomz.length)];
+		} catch (IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	public MountObject getMountById(int id) {
+		for (MountObject mount : mounts) {
+			if (mount.getId() == id)
+				return mount;
+		}
+		return null;
+	}
+
+	public GibObject getGibById(int id) {
+		for (GibObject gib : gibs) {
+			if (gib.getId() == id)
+				return gib;
+		}
+		return null;
 	}
 
 	/**
@@ -345,10 +378,11 @@ public class ShipObject extends GameObject {
 		else if (object instanceof DoorObject)
 			doors.add((DoorObject) object);
 		else if (object instanceof MountObject) {
-			((MountObject) object).setId(getNextMountId());
 			mounts.add((MountObject) object);
 		} else if (object instanceof GibObject)
 			gibs.add((GibObject) object);
+		else if (object instanceof DroneObject)
+			drones.add((DroneObject) object);
 		else if (object instanceof AugmentObject)
 			augments.add((AugmentObject) object);
 		else
@@ -373,6 +407,8 @@ public class ShipObject extends GameObject {
 			mounts.remove(object);
 		else if (object instanceof GibObject)
 			gibs.remove(object);
+		else if (object instanceof DroneObject)
+			drones.remove(object);
 		else if (object instanceof AugmentObject)
 			augments.remove(object);
 		else
@@ -386,8 +422,10 @@ public class ShipObject extends GameObject {
 		int id = 0;
 		RoomObject[] roomArray = getRooms();
 		rooms.clear();
-		for (RoomObject room : roomArray)
+		for (RoomObject room : roomArray) {
 			room.setId(id++);
+			rooms.add(room);
+		}
 	}
 
 	public int getNextMountId() {

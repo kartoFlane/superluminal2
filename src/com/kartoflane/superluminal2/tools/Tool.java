@@ -5,6 +5,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
@@ -36,13 +37,12 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 
 	protected static Layers[] selectableLayerIds;
 
-	protected Tool instance = null;
+	protected Composite compositeInstance = null;
 	protected CursorController cursor = null;
 	protected EditorWindow window = null;
 
 	public Tool(EditorWindow window) {
 		this.window = window;
-		instance = this;
 
 		cursor = CursorController.getInstance();
 
@@ -80,9 +80,30 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 	/** Override this to execute actions when the tool is deselected. */
 	public abstract void deselect();
 
-	public abstract Tool getInstance();
+	/**
+	 * Returns an instance of a composite that represents this tool.<br>
+	 * If no instance is available, a new instance will be created for the supplied parent.
+	 * 
+	 * 
+	 * @param parent
+	 *            the parent that this tool's composite will be created for
+	 * @return composite that represents this tool
+	 */
+	public Composite getToolComposite(Composite parent) {
+		if (compositeInstance == null || compositeInstance.isDisposed() ||
+				(compositeInstance.getParent() != parent && parent != null))
+			createToolComposite(parent);
+		return compositeInstance;
+	}
 
-	public abstract Composite getToolComposite(Composite parent);
+	/** Creates a new instance of the composite that represents the tool. */
+	protected abstract Composite createToolComposite(Composite parent);
+
+	protected void disposeSidebarContent() {
+		Control c = (Control) window.getSidebarContent();
+		if (c != null)
+			c.dispose();
+	}
 
 	public void mouseMove(MouseEvent e) {
 		cursor.mouseMove(e);

@@ -2,7 +2,6 @@ package com.kartoflane.superluminal2.tools;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.CreationToolComposite;
@@ -19,32 +18,54 @@ import com.kartoflane.superluminal2.ui.sidebar.CreationToolComposite;
  */
 public class CreationTool extends Tool {
 
+	private Tools selectedSubtool = Tools.ROOM;
+
 	public CreationTool(EditorWindow window) {
 		super(window);
 	}
 
 	@Override
 	public void select() {
-		Control c = (Control) window.getSidebarContent();
-		if (c != null && !c.isDisposed())
-			c.dispose();
+		disposeSidebarContent();
 
 		CreationToolComposite createC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(createC);
+		createC.updateData();
 	}
 
 	@Override
 	public void deselect() {
 	}
 
-	@Override
-	public CreationTool getInstance() {
-		return (CreationTool) instance;
+	public void setSelectedSubtool(Tools subtool) {
+		selectedSubtool = subtool;
+	}
+
+	public Tools getSelectedSubtool() {
+		return selectedSubtool;
+	}
+
+	public void selectSubtool(Tools subtool) {
+		try {
+			CreationToolComposite composite = getToolComposite(null);
+			setSelectedSubtool(subtool);
+			composite.updateData();
+		} catch (IllegalArgumentException e) {
+			throw new IllegalStateException("Sidebar widget for Creation Tool does not exist.");
+		}
 	}
 
 	@Override
 	public CreationToolComposite getToolComposite(Composite parent) {
-		return new CreationToolComposite(parent);
+		return (CreationToolComposite) super.getToolComposite(parent);
+	}
+
+	@Override
+	protected CreationToolComposite createToolComposite(Composite parent) {
+		if (parent == null)
+			throw new IllegalArgumentException("Parent must not be null.");
+		compositeInstance = new CreationToolComposite(parent);
+		return (CreationToolComposite) compositeInstance;
 	}
 
 	@Override
