@@ -58,7 +58,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnMirrored.setText("Mirrored");
 
 		Label lblDirection = new Label(this, SWT.NONE);
-		lblDirection.setText("Direction:");
+		lblDirection.setText("Power-up Direction:");
 
 		directionCombo = new Combo(this, SWT.READ_ONLY);
 		GridData gd_directionCombo = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);

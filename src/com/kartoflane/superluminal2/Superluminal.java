@@ -48,27 +48,26 @@ public class Superluminal {
 	/**
 	 * settings ideas:
 	 * - close ship loader after loading
-	 * -
+	 * - pin all elements after loading a ship?
 	 * -
 	 * -
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - move systems menu to its own class, so that it can be referenced without having to go through RoomDataComposite
-	 * - same as above goes for door linking
-	 * - include fine offsets in ship positioning?
+	 * - automatic version check
+	 * - add blueprint name selection to general tab?
+	 * - rework door linking so that it doesn't have to be done through the DoorDataComposite (like SystemsMenu)
+	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
 	 * - come up with a way to set which system is first when assigned to the same room?
-	 * - come up with another way of choosing weapons/drones -- combos are ugly
+	 * - come up with another way of choosing weapons/drones -- combos are ugly ---> TREE -> like ship loader, but with categories instead of player/enemy
 	 * ---- also need a way to select weapon lists for enemy ships
 	 * - optimize anchor moving against its bounds with some rooms loaded -> stutters
 	 * - rework interior drawing -> currently drawn on room layer, so higher rooms obscur the image -> bad
-	 * - finish (ie. create) the props system
-	 * - rework stuff to use props system (anchor lines, room resize handles perhaps?)
 	 * - clear() in ShipObject -> wipe txt layout, + something else?
 	 * - figure out glow images
 	 * - add gibs
 	 * - add reordering to ship overview
-	 * - properties: general & armaments & crew tabs
+	 * - properties: armaments & crew tabs
 	 * 
 	 * - entity deletion --> add (to) undo
 	 * - undo przy pomocy reflection -- UndoableBooleanFieldEdit, etc ?? ...chyba nie

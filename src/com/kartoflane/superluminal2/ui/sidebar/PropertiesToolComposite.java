@@ -29,11 +29,17 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class PropertiesToolComposite extends Composite {
+
+	private static int selectedTab = 0;
+	private ShipContainer container;
+	private static int crewBudget = 8;
+
 	private Text txtHull;
 	private Button btnHullBrowse;
 	private Button btnHullClear;
@@ -70,15 +76,17 @@ public class PropertiesToolComposite extends Composite {
 	private TreeItem trtmCrewSlot6;
 	private TreeItem trtmCrewSlot7;
 	private TreeItem trtmCrewSlot8;
-
-	private ShipContainer container;
-	private int crewBudget = 8;
+	private Label lblDesc;
+	private Spinner spMinSec;
+	private Spinner spMaxSec;
+	private TabFolder tabFolder;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(1, false));
 
 		container = Manager.getCurrentShip();
+		final boolean[] created = { false };
 
 		Label lblPropertiesTool = new Label(this, SWT.NONE);
 		lblPropertiesTool.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
@@ -87,8 +95,15 @@ public class PropertiesToolComposite extends Composite {
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
-		final TabFolder tabFolder = new TabFolder(this, SWT.NONE);
+		tabFolder = new TabFolder(this, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		tabFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (created[0])
+					selectedTab = tabFolder.getSelectionIndex();
+			}
+		});
 
 		/*
 		 * =========================================================================
@@ -302,6 +317,7 @@ public class PropertiesToolComposite extends Composite {
 		 * XXX: General tab
 		 * =========================================================================
 		 */
+
 		TabItem tbtmGeneral = new TabItem(tabFolder, SWT.NONE);
 		tbtmGeneral.setText("General");
 
@@ -323,7 +339,7 @@ public class PropertiesToolComposite extends Composite {
 		txtClass = new Text(generalComposite, SWT.BORDER);
 		txtClass.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-		final Label lblDesc = new Label(generalComposite, SWT.NONE);
+		lblDesc = new Label(generalComposite, SWT.NONE);
 		lblDesc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		lblDesc.setText("Description: (0/255)");
 
@@ -358,19 +374,19 @@ public class PropertiesToolComposite extends Composite {
 			Label lblMinSector = new Label(generalComposite, SWT.NONE);
 			lblMinSector.setText("Min Sector:");
 
-			Spinner spMinSec = new Spinner(generalComposite, SWT.BORDER);
+			spMinSec = new Spinner(generalComposite, SWT.BORDER);
 			spMinSec.setTextLimit(1);
-			spMinSec.setMaximum(7);
+			spMinSec.setMaximum(8);
 			spMinSec.setMinimum(1);
 			spMinSec.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
 			Label lblMaxSector = new Label(generalComposite, SWT.NONE);
 			lblMaxSector.setText("Max Sector:");
 
-			Spinner spMaxSec = new Spinner(generalComposite, SWT.BORDER);
+			spMaxSec = new Spinner(generalComposite, SWT.BORDER);
 			spMaxSec.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			spMaxSec.setTextLimit(1);
-			spMaxSec.setMaximum(7);
+			spMaxSec.setMaximum(8);
 			spMaxSec.setMinimum(1);
 		}
 
@@ -476,44 +492,61 @@ public class PropertiesToolComposite extends Composite {
 
 		pack();
 		updateData();
+		created[0] = true;
+		tabFolder.setSelection(selectedTab);
 	}
 
 	public void updateData() {
-		// btnPlayer.setSelection(ship.isPlayerShip());
+		ShipController controller = container.getShipController();
+		ShipObject ship = controller.getGameObject();
 
 		// Update image path text fields and scroll them to the end to show the file's name
-		ShipController controller = container.getShipController();
-		String path = container.getImage(Images.HULL);
+		String content = container.getImage(Images.HULL);
 
-		txtHull.setText(path == null ? "" : Utils.trimProtocol(path));
+		txtHull.setText(content == null ? "" : Utils.trimProtocol(content));
 		txtHull.selectAll();
-		btnHullView.setEnabled(path != null);
+		btnHullView.setEnabled(content != null);
 
-		path = container.getImage(Images.FLOOR);
-		txtFloor.setText(path == null ? "" : Utils.trimProtocol(path));
+		content = container.getImage(Images.FLOOR);
+		txtFloor.setText(content == null ? "" : Utils.trimProtocol(content));
 		txtFloor.selectAll();
-		btnFloorView.setEnabled(controller.isPlayerShip() && path != null);
-		btnFloorBrowse.setEnabled(controller.isPlayerShip());
-		btnFloorClear.setEnabled(controller.isPlayerShip());
+		btnFloorView.setEnabled(ship.isPlayerShip() && content != null);
+		btnFloorBrowse.setEnabled(ship.isPlayerShip());
+		btnFloorClear.setEnabled(ship.isPlayerShip());
 
-		path = container.getImage(Images.CLOAK);
-		txtCloak.setText(path == null ? "" : Utils.trimProtocol(path));
+		content = container.getImage(Images.CLOAK);
+		txtCloak.setText(content == null ? "" : Utils.trimProtocol(content));
 		txtCloak.selectAll();
-		btnCloakView.setEnabled(path != null);
+		btnCloakView.setEnabled(content != null);
 
-		path = container.getImage(Images.SHIELD);
-		txtShield.setText(path == null ? "" : Utils.trimProtocol(path));
+		content = container.getImage(Images.SHIELD);
+		txtShield.setText(content == null ? "" : Utils.trimProtocol(content));
 		txtShield.selectAll();
-		btnShieldView.setEnabled(controller.isPlayerShip() && path != null);
-		btnShieldBrowse.setEnabled(controller.isPlayerShip());
-		btnShieldClear.setEnabled(controller.isPlayerShip());
+		btnShieldView.setEnabled(ship.isPlayerShip() && content != null);
+		btnShieldBrowse.setEnabled(ship.isPlayerShip());
+		btnShieldClear.setEnabled(ship.isPlayerShip());
 
-		path = container.getImage(Images.THUMBNAIL);
-		txtMini.setText(path == null || !controller.isPlayerShip() ? "" : Utils.trimProtocol(path));
+		content = container.getImage(Images.THUMBNAIL);
+		txtMini.setText(content == null || !ship.isPlayerShip() ? "" : Utils.trimProtocol(content));
 		txtMini.selectAll();
-		btnMiniView.setEnabled(controller.isPlayerShip() && path != null);
-		btnMiniBrowse.setEnabled(controller.isPlayerShip());
-		btnMiniClear.setEnabled(controller.isPlayerShip());
+		btnMiniView.setEnabled(ship.isPlayerShip() && content != null);
+		btnMiniBrowse.setEnabled(ship.isPlayerShip());
+		btnMiniClear.setEnabled(ship.isPlayerShip());
+
+		content = ship.getShipName();
+		txtName.setText(ship.isPlayerShip() && content != null ? content : "");
+		txtName.setEnabled(ship.isPlayerShip());
+
+		content = ship.getShipClass();
+		txtClass.setText(content == null ? "" : content);
+
+		content = ship.getShipDescription();
+		txtDesc.setText(ship.isPlayerShip() && content != null ? content : "");
+		txtDesc.setEnabled(ship.isPlayerShip());
+		lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
+
+		spHealth.setSelection(ship.getHealth());
+		spPower.setSelection(ship.getPower());
 	}
 
 	@Override
