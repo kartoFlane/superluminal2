@@ -39,6 +39,8 @@ public class LayeredPainter implements PaintListener {
 		CURSOR
 	}
 
+	private static final LayeredPainter instance = new LayeredPainter();
+
 	/** Specifies the layer order for selection and highlighting purposes. */
 	private static final Layers[] selectionOrder = { Layers.GRID, Layers.IMAGES, Layers.MOUNT,
 			Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.STATION, Layers.DOOR, Layers.OVERLAY,
@@ -51,6 +53,10 @@ public class LayeredPainter implements PaintListener {
 		// Add a bunch of empty lists to hold layers.
 		for (Layers layer : Layers.values())
 			layerMap.put(layer, new ArrayList<AbstractController>());
+	}
+
+	public static LayeredPainter getInstance() {
+		return instance;
 	}
 
 	/**

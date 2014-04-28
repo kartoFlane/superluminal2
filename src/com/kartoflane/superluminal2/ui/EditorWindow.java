@@ -79,7 +79,6 @@ public class EditorWindow {
 	private Shell shell;
 	private ScrolledComposite sideContainer;
 	private Canvas canvas;
-	private LayeredPainter painter;
 
 	private ToolItem tltmPointer;
 	private ToolItem tltmCreation;
@@ -122,8 +121,8 @@ public class EditorWindow {
 		displaySize.width = (displaySize.width / 5) * 4;
 		displaySize.height = (displaySize.height / 5) * 4;
 
-		painter = new LayeredPainter();
-		MouseInputDispatcher mouseListener = new MouseInputDispatcher();
+		// Instantiate quasi-singletons
+		new MouseInputDispatcher();
 		CursorController.newInstance();
 		new OverviewWindow(shell);
 		new ShipLoaderDialog(shell);
@@ -167,7 +166,7 @@ public class EditorWindow {
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmCloseShip = new MenuItem(menuFile, SWT.NONE);
-		mntmCloseShip.setText("Close Ship");
+		mntmCloseShip.setText("Close Ship\t" + Manager.getHotkey(Hotkeys.CLOSE_SHIP));
 
 		// Edit menu
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
@@ -345,7 +344,7 @@ public class EditorWindow {
 		canvasColor = Cache.checkOutColor(this, canvasRGB);
 		canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
 		canvas.setBackground(canvasColor);
-		canvas.addPaintListener(painter);
+		canvas.addPaintListener(LayeredPainter.getInstance());
 
 		sideContainer = new ScrolledComposite(shell, SWT.BORDER | SWT.V_SCROLL);
 		sideContainer.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
@@ -414,17 +413,7 @@ public class EditorWindow {
 						}
 					} else if (Manager.getHotkey(Hotkeys.DELETE).passes(e.keyCode) || e.keyCode == SWT.DEL) {
 						// Deletion
-						AbstractController selected = Manager.getSelected();
-						if (selected != null) {
-							try {
-								Manager.getCurrentShip().delete(selected);
-								selected.redraw();
-
-								Manager.setSelected(null);
-							} catch (NotDeletableException ex) {
-								log.trace("Selected object is not deletable: " + selected.getClass().getSimpleName());
-							}
-						}
+						mntmDelete.notifyListeners(SWT.Selection, null);
 					} else if (Manager.getHotkey(Hotkeys.PIN).passes(e.keyCode)) {
 						// Pin
 						AbstractController selected = Manager.getSelected();
@@ -537,19 +526,23 @@ public class EditorWindow {
 			public void widgetSelected(SelectionEvent e) {
 				ShipContainer container = Manager.getCurrentShip();
 				// Prevent Ctrl+S spammers from overstressing the program...
-				if (container.isSaved())
+				if (container.isSaved()) {
+					log.trace("Ship already saved - aborting.");
 					return;
+				}
 
-				File temp = null;
+				File temp = saveDestination;
 				// Only prompt for save directory if the user hasn't chosen any yet
 				if (saveDestination == null)
 					temp = promptForDirectory("Save As...", "Please select the folder where you wish to save the ship.");
 
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
+					log.trace("Saving ship to " + saveDestination.getAbsolutePath());
 
 					try {
-						ShipUtils.saveShipXML(saveDestination, container.getShipController().getGameObject());
+						ShipUtils.saveShipXML(saveDestination, container);
+						log.trace("Ship saved successfully.");
 					} catch (Exception ex) {
 						log.error("An error occured while saving the ship: ", ex);
 						Utils.showWarningDialog(shell, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
@@ -563,15 +556,16 @@ public class EditorWindow {
 			public void widgetSelected(SelectionEvent e) {
 				ShipContainer container = Manager.getCurrentShip();
 
-				File temp = null;
 				// Always prompt for save directory
-				temp = promptForDirectory("Save As...", "Please select the folder where you wish to save the ship.");
+				File temp = promptForDirectory("Save As...", "Please select the folder where you wish to save the ship.");
 
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
+					log.trace("Saving ship to " + saveDestination.getAbsolutePath());
 
 					try {
-						ShipUtils.saveShipXML(saveDestination, container.getShipController().getGameObject());
+						ShipUtils.saveShipXML(saveDestination, container);
+						log.trace("Ship saved successfully.");
 					} catch (Exception ex) {
 						log.error("An error occured while saving the ship: ", ex);
 						Utils.showWarningDialog(shell, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
@@ -587,16 +581,45 @@ public class EditorWindow {
 			}
 		});
 
+		mntmUndo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO
+				if (Manager.DELETED_LIST.size() > 0)
+					Manager.DELETED_LIST.removeLast().restore();
+			}
+		});
+
+		mntmRedo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO
+			}
+		});
+
+		mntmDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				AbstractController selected = Manager.getSelected();
+				if (selected != null) {
+					try {
+						Manager.getCurrentShip().delete(selected);
+						selected.redraw();
+
+						Manager.setSelected(null);
+					} catch (NotDeletableException ex) {
+						log.trace("Selected object is not deletable: " + selected.getClass().getSimpleName());
+					}
+				}
+			}
+		});
+
 		mntmSettings.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				SettingsDialog.getInstance().open();
 			}
 		});
-
-		// TODO mntmUndo
-		// TODO mntmRedo
-		// TODO mntmDelete
 
 		mntmSidebar.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -613,8 +636,7 @@ public class EditorWindow {
 					canvas.setParent(editorContainer);
 				}
 
-				Control[] changed = { sideContainer, editorContainer, canvas };
-				shell.layout(changed);
+				editorContainer.layout();
 			}
 		});
 
@@ -705,9 +727,9 @@ public class EditorWindow {
 
 		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
 
-		canvas.addMouseListener(mouseListener);
-		canvas.addMouseMoveListener(mouseListener);
-		canvas.addMouseTrackListener(mouseListener);
+		canvas.addMouseListener(MouseInputDispatcher.getInstance());
+		canvas.addMouseMoveListener(MouseInputDispatcher.getInstance());
+		canvas.addMouseTrackListener(MouseInputDispatcher.getInstance());
 
 		Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
@@ -722,10 +744,6 @@ public class EditorWindow {
 
 	public void open() {
 		shell.open();
-	}
-
-	public LayeredPainter getPainter() {
-		return painter;
 	}
 
 	/**
@@ -922,12 +940,11 @@ public class EditorWindow {
 
 		// Edit
 		else if (Manager.getHotkey(Hotkeys.UNDO).passes(e.keyCode)) {
-			// Undo
-			// TODO
-			if (Manager.DELETED_LIST.size() > 0)
-				Manager.DELETED_LIST.removeLast().restore();
+			if (mntmUndo.isEnabled())
+				mntmUndo.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.REDO).passes(e.keyCode)) {
-			// TODO
+			if (mntmRedo.isEnabled())
+				mntmRedo.notifyListeners(SWT.Selection, null);
 		}
 
 		// View
