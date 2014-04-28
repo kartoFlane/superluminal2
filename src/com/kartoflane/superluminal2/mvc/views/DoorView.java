@@ -27,7 +27,7 @@ public class DoorView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			paintImage(e, image, alpha);
+			paintImage(e, image, cachedImageBounds, alpha);
 			paintBorder(e, borderColor, getBorderThickness(), alpha);
 		}
 	}

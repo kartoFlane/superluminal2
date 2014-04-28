@@ -12,7 +12,7 @@ public class PropView extends BaseView {
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
 			paintBackground(e, backgroundColor, alpha);
-			paintImage(e, image, alpha);
+			paintImage(e, image, cachedImageBounds, alpha);
 			paintBorder(e, borderColor, borderThickness, alpha);
 		}
 	}

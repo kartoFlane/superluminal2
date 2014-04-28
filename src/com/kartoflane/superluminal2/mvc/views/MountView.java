@@ -38,7 +38,7 @@ public class MountView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			paintImageCorner(e, image, 0, 0, frameSize.x, frameSize.y,
+			paintImageCorner(e, image, cachedImageBounds, 0, 0, frameSize.x, frameSize.y,
 					controller.getX() - weaponOffset.x,
 					controller.getY() - weaponOffset.y,
 					frameSize.x, frameSize.y, alpha);

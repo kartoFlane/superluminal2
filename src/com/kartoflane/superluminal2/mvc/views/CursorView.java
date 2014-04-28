@@ -5,6 +5,7 @@ import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -19,7 +20,6 @@ import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
-import com.kartoflane.superluminal2.ui.EditorWindow;
 
 public class CursorView extends BaseView {
 
@@ -31,7 +31,7 @@ public class CursorView extends BaseView {
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
 			paintBackground(e, backgroundColor, alpha);
-			paintImage(e, image, alpha);
+			paintImage(e, image, cachedImageBounds, alpha);
 			paintBorder(e, borderColor, borderThickness, alpha);
 		}
 	}
@@ -197,7 +197,7 @@ public class CursorView extends BaseView {
 		AbstractController anyC = null;
 		for (int i = selectableLayerIds.length - 1; i >= 0 && anyC == null; i--) {
 			if (selectableLayerIds[i] != null)
-				anyC = EditorWindow.getInstance().getPainter().getSelectableControllerAt(m.x, m.y, selectableLayerIds[i]);
+				anyC = LayeredPainter.getInstance().getSelectableControllerAt(m.x, m.y, selectableLayerIds[i]);
 		}
 		setVisible(!Manager.leftMouseDown && anyC == null && Grid.getInstance().isLocAccessible(m.x, m.y));
 	}

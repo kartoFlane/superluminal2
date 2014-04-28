@@ -13,13 +13,13 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Redrawable;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
-import com.kartoflane.superluminal2.ui.EditorWindow;
 
 public abstract class BaseView implements View, Disposable, Redrawable {
 
@@ -37,6 +37,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 	protected String imagePath = null;
 	protected Image image = null;
+	protected Rectangle cachedImageBounds = null;
 	protected Color borderColor = null;
 	protected Color backgroundColor = null;
 	protected int borderThickness = 0;
@@ -146,6 +147,8 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 		if (path != null) {
 			image = Cache.checkOutImage(this, path);
+			if (image != null)
+				cachedImageBounds = image.getBounds();
 			imagePath = path;
 		}
 	}
@@ -155,7 +158,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	}
 
 	public Rectangle getImageBounds() {
-		return image == null ? new Rectangle(0, 0, 0, 0) : image.getBounds();
+		return image == null ? new Rectangle(0, 0, 0, 0) : Utils.copy(cachedImageBounds);
 	}
 
 	public void setBorderColor(RGB rgb) {
@@ -243,30 +246,48 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	}
 
 	/**
-	 * Paints the image without any modifications at the center of the View.
+	 * Paints the image in the given area, modifying the image to fit.
 	 */
-	protected void paintImage(PaintEvent e, Image image, int alpha) {
+	protected void paintImage(PaintEvent e, Image image, Rectangle cachedBounds, int x, int y, int w, int h, int alpha) {
 		if (image != null) {
 			int prevAlpha = e.gc.getAlpha();
 			e.gc.setAlpha(alpha);
 
-			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, model.getX() - imageRect.width / 2, model.getY() - imageRect.height / 2);
+			e.gc.drawImage(image, 0, 0, cachedBounds.width, cachedBounds.height, x, y, w, h);
 
 			e.gc.setAlpha(prevAlpha);
 		}
 	}
 
 	/**
+	 * Paints the image in the given area, modifying the image to fit.
+	 */
+	protected void paintImage(PaintEvent e, Image image, Rectangle cachedBounds, Rectangle rect, int alpha) {
+		if (image != null) {
+			paintImage(e, image, cachedBounds, rect.x, rect.y, rect.width, rect.height, alpha);
+		}
+	}
+
+	/**
+	 * Paints the image without any modifications at the center of the View.
+	 */
+	protected void paintImage(PaintEvent e, Image image, Rectangle cachedBounds, int alpha) {
+		if (image != null) {
+			paintImage(e, image, cachedBounds, model.getX() - cachedBounds.width / 2, model.getY() - cachedBounds.height / 2,
+					cachedBounds.width, cachedBounds.height, alpha);
+		}
+	}
+
+	/**
 	 * Paints the image without any modifications, centered at the given location (relative to the canvas)
 	 */
-	protected void paintImage(PaintEvent e, Image image, int x, int y, int alpha) {
+	protected void paintImage(PaintEvent e, Image image, Rectangle cachedBounds, int x, int y, int alpha) {
 		if (image != null) {
 			int prevAlpha = e.gc.getAlpha();
 			e.gc.setAlpha(alpha);
 
-			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x - imageRect.width / 2, y - imageRect.height / 2, imageRect.width, imageRect.height);
+			e.gc.drawImage(image, 0, 0, cachedBounds.width, cachedBounds.height, x - cachedBounds.width / 2,
+					y - cachedBounds.height / 2, cachedBounds.width, cachedBounds.height);
 
 			e.gc.setAlpha(prevAlpha);
 		}
@@ -306,13 +327,12 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	/**
 	 * Paints the image without any modifications, with the image's top left corner at the given location.
 	 */
-	protected void paintImageCorner(PaintEvent e, Image image, int x, int y, int alpha) {
+	protected void paintImageCorner(PaintEvent e, Image image, Rectangle cachedBounds, int x, int y, int alpha) {
 		if (image != null) {
 			int prevAlpha = e.gc.getAlpha();
 			e.gc.setAlpha(alpha);
 
-			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x, y, imageRect.width, imageRect.height);
+			e.gc.drawImage(image, 0, 0, cachedBounds.width, cachedBounds.height, x, y, cachedBounds.width, cachedBounds.height);
 
 			e.gc.setAlpha(prevAlpha);
 		}
@@ -338,14 +358,13 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	 * @param h
 	 *            height of the destination area at which the image will be drawn
 	 */
-	protected void paintImageCorner(PaintEvent e, Image image, int srcX, int srcY, int srcW, int srcH, int x, int y, int w, int h, int alpha) {
+	protected void paintImageCorner(PaintEvent e, Image image, Rectangle cachedBounds, int srcX, int srcY, int srcW, int srcH, int x, int y, int w, int h, int alpha) {
 		if (image != null) {
 			int prevAlpha = e.gc.getAlpha();
 			e.gc.setAlpha(alpha);
 
-			Rectangle b = image.getBounds();
-			srcW = Math.min(srcW, b.width);
-			srcH = Math.min(srcH, b.height);
+			srcW = Math.min(srcW, cachedBounds.width);
+			srcH = Math.min(srcH, cachedBounds.height);
 
 			e.gc.drawImage(image, srcX, srcY, srcW, srcH, x, y, w, h);
 
@@ -353,64 +372,16 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		}
 	}
 
-	/**
-	 * Paints the image in the given area, modifying the image to fit.
-	 */
-	protected void paintImage(PaintEvent e, Image image, Rectangle rect, int alpha) {
-		if (image != null) {
-			int prevAlpha = e.gc.getAlpha();
-			e.gc.setAlpha(alpha);
-
-			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height,
-					rect.x, rect.y, rect.width, rect.height);
-
-			e.gc.setAlpha(prevAlpha);
-		}
-	}
-
-	/**
-	 * Paints the image in the given area, modifying the image to fit.
-	 */
-	protected void paintImage(PaintEvent e, Image image, int x, int y, int w, int h, int alpha) {
-		if (image != null) {
-			int prevAlpha = e.gc.getAlpha();
-			e.gc.setAlpha(alpha);
-
-			Rectangle imageRect = image.getBounds();
-			e.gc.drawImage(image, 0, 0, imageRect.width, imageRect.height, x, y, w, h);
-
-			e.gc.setAlpha(prevAlpha);
-		}
-	}
-
 	protected void paintBackground(PaintEvent e, Color backgroundColor, int alpha) {
 		if (backgroundColor != null) {
-			Color prevBgColor = e.gc.getBackground();
-			int prevAlpha = e.gc.getAlpha();
-
-			e.gc.setBackground(backgroundColor);
-			e.gc.setAlpha(alpha);
-
-			e.gc.fillRectangle(model.getX() - model.getW() / 2, model.getY() - model.getH() / 2, model.getW(), model.getH());
-
-			e.gc.setBackground(prevBgColor);
-			e.gc.setAlpha(prevAlpha);
+			paintBackground(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
+					model.getW(), model.getH(), backgroundColor, alpha);
 		}
 	}
 
 	protected void paintBackground(PaintEvent e, Rectangle rect, Color backgroundColor, int alpha) {
 		if (backgroundColor != null) {
-			Color prevBgColor = e.gc.getBackground();
-			int prevAlpha = e.gc.getAlpha();
-
-			e.gc.setBackground(backgroundColor);
-			e.gc.setAlpha(alpha);
-
-			e.gc.fillRectangle(rect);
-
-			e.gc.setBackground(prevBgColor);
-			e.gc.setAlpha(prevAlpha);
+			paintBackground(e, rect.x, rect.y, rect.width, rect.height, backgroundColor, alpha);
 		}
 	}
 
@@ -431,42 +402,14 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 	protected void paintBorder(PaintEvent e, Color borderColor, int borderThickness, int alpha) {
 		if (borderColor != null) {
-			Color prevBgColor = e.gc.getBackground();
-			int prevAlpha = e.gc.getAlpha();
-			int prevWidth = e.gc.getLineWidth();
-
-			e.gc.setForeground(borderColor);
-			e.gc.setAlpha(alpha);
-			e.gc.setLineWidth(borderThickness);
-
-			// lines are drawn from the center, which makes the math a little funky
-			e.gc.drawRectangle(model.getX() - model.getW() / 2 + borderThickness / 2,
-					model.getY() - model.getH() / 2 + borderThickness / 2,
-					model.getW() - 1 - borderThickness / 2, model.getH() - 1 - borderThickness / 2);
-
-			e.gc.setForeground(prevBgColor);
-			e.gc.setAlpha(prevAlpha);
-			e.gc.setLineWidth(prevWidth);
+			paintBorder(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
+					model.getW(), model.getH(), borderColor, borderThickness, alpha);
 		}
 	}
 
 	protected void paintBorder(PaintEvent e, Rectangle rect, Color borderColor, int borderThickness, int alpha) {
 		if (borderColor != null) {
-			Color prevBgColor = e.gc.getBackground();
-			int prevAlpha = e.gc.getAlpha();
-			int prevWidth = e.gc.getLineWidth();
-
-			e.gc.setForeground(borderColor);
-			e.gc.setAlpha(alpha);
-			e.gc.setLineWidth(borderThickness);
-
-			// lines are drawn from the center, which makes the math a little funky
-			e.gc.drawRectangle(rect.x + borderThickness / 2, rect.y + borderThickness / 2,
-					rect.width - 1 - borderThickness / 2, rect.height - 1 - borderThickness / 2);
-
-			e.gc.setForeground(prevBgColor);
-			e.gc.setAlpha(prevAlpha);
-			e.gc.setLineWidth(prevWidth);
+			paintBorder(e, rect.x, rect.y, rect.width, rect.height, borderColor, borderThickness, alpha);
 		}
 	}
 
@@ -480,7 +423,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			e.gc.setAlpha(alpha);
 			e.gc.setLineWidth(borderThickness);
 
-			// lines are drawn from the center, which makes the math a little funky
+			// Lines are drawn from the center, which makes the math a little funky
 			e.gc.drawRectangle(x + borderThickness / 2, y + borderThickness / 2,
 					w - 1 - borderThickness / 2, h - 1 - borderThickness / 2);
 
@@ -491,13 +434,13 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	}
 
 	/**
-	 * Registers this box with the LayeredPainter object, also remembering the layer for use during deserialization.
+	 * Registers this view with the LayeredPainter object.
 	 * 
 	 * @param layer
-	 *            Id of the layer to which the box will be added
+	 *            Id of the layer to which the view will be added
 	 */
 	public void addToPainter(Layers layer) {
-		LayeredPainter painter = EditorWindow.getInstance().getPainter();
+		LayeredPainter painter = LayeredPainter.getInstance();
 		if (layer == null || !painter.getLayers().contains(layer))
 			throw new IllegalArgumentException("Illegal layer.");
 
@@ -505,9 +448,9 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		painter.add(controller, layer);
 	}
 
-	/** Unregisters this box from the LayeredPainter object */
+	/** Unregisters this view from the LayeredPainter object */
 	public void removeFromPainter() {
-		EditorWindow.getInstance().getPainter().remove(controller);
+		LayeredPainter.getInstance().remove(controller);
 	}
 
 	@Override
