@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -52,7 +53,7 @@ public class ManipulationTool extends Tool {
 	public void deselect() {
 		Manager.setSelected(null);
 
-		AbstractController control = window.getPainter().getSelectableControllerAt(cursor.getMouseLocation());
+		AbstractController control = LayeredPainter.getInstance().getSelectableControllerAt(cursor.getMouseLocation());
 		if (control != null) {
 			control.setHighlighted(false);
 		}
@@ -139,7 +140,7 @@ public class ManipulationTool extends Tool {
 			AbstractController control = null;
 			for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
 				if (selectableLayerIds[i] != null) {
-					control = window.getPainter().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
+					control = LayeredPainter.getInstance().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
 					if (control != null && control instanceof RoomController)
 						break;
 				}
@@ -173,7 +174,7 @@ public class ManipulationTool extends Tool {
 			// find the topmost selectable controller and notify it about mouseUp event
 			for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
 				if (selectableLayerIds[i] != null) {
-					controller = window.getPainter().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
+					controller = LayeredPainter.getInstance().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
 					if (controller != null && controller != Manager.getSelected()) {
 						controller.mouseUp(e);
 						break;
@@ -273,8 +274,8 @@ public class ManipulationTool extends Tool {
 		}
 
 		// faciliate mouseExit event for controllers
-		for (Layers layer : window.getPainter().getLayerMap().descendingKeySet()) {
-			for (AbstractController control : window.getPainter().getLayerMap().get(layer)) {
+		for (Layers layer : LayeredPainter.getInstance().getLayerMap().descendingKeySet()) {
+			for (AbstractController control : LayeredPainter.getInstance().getLayerMap().get(layer)) {
 				if (control != null && control.isVisible()) {
 					// send mouseExit event to controllers that are obscured by other controllers
 					// if:
@@ -297,7 +298,7 @@ public class ManipulationTool extends Tool {
 		AbstractController controller = null;
 		for (int i = selectableLayerIds.length - 1; i >= 0 && controller == null; i--) {
 			if (selectableLayerIds[i] != null)
-				controller = window.getPainter().getSelectableControllerAt(x, y, selectableLayerIds[i]);
+				controller = LayeredPainter.getInstance().getSelectableControllerAt(x, y, selectableLayerIds[i]);
 		}
 		return controller;
 	}

@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -145,7 +146,7 @@ public class DoorTool extends Tool {
 		if (!Manager.getCurrentShip().isDoorsVisible())
 			return false;
 
-		AbstractController control = window.getPainter().getSelectableControllerAt(cursor.getLocation());
+		AbstractController control = LayeredPainter.getInstance().getSelectableControllerAt(cursor.getLocation());
 		if (control != null && control instanceof RoomController) {
 			return control.getBounds().intersects(cursor.getBounds()) && !Utils.contains(control.getBounds(), cursor.getBounds());
 		} else

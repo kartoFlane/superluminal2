@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.core.Manager;
@@ -111,7 +112,7 @@ public class StationTool extends Tool {
 				if (Manager.modShift) {
 					// direction change
 					ShipContainer container = Manager.getCurrentShip();
-					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+					RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
 						Systems sys = container.getActiveSystem(roomC.getGameObject());
 						SystemController system = container.getSystemController(sys);
@@ -125,7 +126,7 @@ public class StationTool extends Tool {
 				} else {
 					// station placement
 					ShipContainer container = Manager.getCurrentShip();
-					RoomController roomC = (RoomController) window.getPainter().getControllerAt(e.x, e.y, Layers.ROOM);
+					RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
 						Systems sys = container.getActiveSystem(roomC.getGameObject());
 						SystemController system = container.getSystemController(sys);
@@ -169,7 +170,7 @@ public class StationTool extends Tool {
 
 	private void removeStation(int x, int y) {
 		ShipContainer container = Manager.getCurrentShip();
-		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
+		RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
 			Systems sys = container.getActiveSystem(roomC.getGameObject());
 			SystemController system = container.getSystemController(sys);
@@ -184,7 +185,7 @@ public class StationTool extends Tool {
 
 	private void changeDirection(int x, int y, Directions dir) {
 		ShipContainer container = Manager.getCurrentShip();
-		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
+		RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
 			Systems sys = container.getActiveSystem(roomC.getGameObject());
 			SystemController system = container.getSystemController(sys);
@@ -245,7 +246,7 @@ public class StationTool extends Tool {
 	public boolean canPlace(int x, int y) {
 		boolean result = true;
 		ShipContainer container = Manager.getCurrentShip();
-		RoomController roomC = (RoomController) window.getPainter().getControllerAt(x, y, Layers.ROOM);
+		RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
 			Systems id = container.getActiveSystem(roomC.getGameObject());
 			SystemController system = container.getSystemController(id);

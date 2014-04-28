@@ -2,7 +2,6 @@ package com.kartoflane.superluminal2.tools;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.GibToolComposite;

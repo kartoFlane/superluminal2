@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ToolItem;
 
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -47,7 +48,7 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 		cursor = CursorController.getInstance();
 
 		if (selectableLayerIds == null) {
-			Layers[] allLayerIds = window.getPainter().getSelectionOrder();
+			Layers[] allLayerIds = LayeredPainter.getInstance().getSelectionOrder();
 			Layers[] ignoredLayers = { Layers.CURSOR, Layers.GRID, Layers.OVERLAY, Layers.SYSTEM, Layers.STATION };
 			selectableLayerIds = new Layers[allLayerIds.length];
 

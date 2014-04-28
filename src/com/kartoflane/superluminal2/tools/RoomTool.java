@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.RoomObject;
@@ -245,7 +246,7 @@ public class RoomTool extends Tool {
 			return false;
 
 		boolean collided = false;
-		ArrayList<AbstractController> layer = window.getPainter().getLayerMap().get(Layers.ROOM);
+		ArrayList<AbstractController> layer = LayeredPainter.getInstance().getLayerMap().get(Layers.ROOM);
 		for (int i = 0; i < layer.size() && !collided; i++) {
 			AbstractController c = layer.get(i);
 			if (c.isVisible() && c.collides(createBounds.x + COLLISION_TOLERANCE, createBounds.y + COLLISION_TOLERANCE,
