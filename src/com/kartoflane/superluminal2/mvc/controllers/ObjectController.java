@@ -2,6 +2,8 @@ package com.kartoflane.superluminal2.mvc.controllers;
 
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.ftl.GameObject;
+import com.kartoflane.superluminal2.mvc.Model;
+import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 
 public abstract class ObjectController extends AbstractController implements Alias {
 
@@ -31,5 +33,20 @@ public abstract class ObjectController extends AbstractController implements Ali
 	@Override
 	public boolean isLocModifiable() {
 		return model.isLocModifiable();
+	}
+
+	@Override
+	protected ObjectModel getModel() {
+		return (ObjectModel) model;
+	}
+
+	@Override
+	public void setModel(Model model) {
+		if (model == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		if (model instanceof ObjectModel == false)
+			throw new IllegalArgumentException("Argument must be an ObjectModel.");
+		this.model = (ObjectModel) model;
+		getModel().getGameObject().setModel(getModel());
 	}
 }

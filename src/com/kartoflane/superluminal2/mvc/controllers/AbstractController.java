@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Boundable;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
@@ -66,6 +67,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		this.model = (BaseModel) model;
 	}
 
+	protected BaseModel getModel() {
+		return model;
+	}
+
 	@Override
 	public void setView(View view) {
 		if (view == null)
@@ -76,6 +81,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 		view.setController(this);
 		view.setModel(model);
+	}
+
+	protected BaseView getView() {
+		return view;
 	}
 
 	public void updateView() {
@@ -754,7 +763,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public static boolean collidesAs(Rectangle rect, AbstractController col) {
 		CollisionPredicate predicate = new CollisionPredicate(rect, col);
 		Layers layer = ((AbstractController) col).view.getLayerId();
-		return EditorWindow.getInstance().getPainter().getControllerMatching(predicate, layer) != null;
+		return LayeredPainter.getInstance().getControllerMatching(predicate, layer) != null;
 	}
 
 	public static class CollisionPredicate implements Predicate<AbstractController> {

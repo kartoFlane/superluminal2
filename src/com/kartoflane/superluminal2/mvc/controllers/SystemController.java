@@ -46,11 +46,7 @@ public class SystemController extends ObjectController implements Controller {
 		return controller;
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
-	private SystemView getView() {
+	protected SystemView getView() {
 		return (SystemView) view;
 	}
 
@@ -151,7 +147,7 @@ public class SystemController extends ObjectController implements Controller {
 
 	public void setGlowPath(Glows glowId, String glowPath) {
 		getGameObject().getGlow().setGlowPath(glowPath, glowId);
-		// glows are not represented in the editor, nothing else to do here
+		// Glows are not represented in the editor, nothing else to do here
 	}
 
 	public String getGlowPath(Glows glowId) {

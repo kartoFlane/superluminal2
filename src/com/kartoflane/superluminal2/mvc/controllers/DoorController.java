@@ -48,10 +48,6 @@ public class DoorController extends ObjectController {
 		return controller;
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
 	public DoorObject getGameObject() {
 		return (DoorObject) getModel().getGameObject();
 	}

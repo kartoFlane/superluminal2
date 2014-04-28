@@ -59,11 +59,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 		EditorWindow.getInstance().canvasRedraw(getView().getDirectionArrowBounds());
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
-	private MountView getView() {
+	protected MountView getView() {
 		return (MountView) view;
 	}
 

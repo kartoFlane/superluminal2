@@ -73,16 +73,12 @@ public class ShipController extends ObjectController {
 		return controller;
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
 	@Override
 	public ShipObject getGameObject() {
 		return (ShipObject) getModel().getGameObject();
 	}
 
-	private ShipView getView() {
+	protected ShipView getView() {
 		return (ShipView) view;
 	}
 

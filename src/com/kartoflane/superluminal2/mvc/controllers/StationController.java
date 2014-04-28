@@ -57,10 +57,6 @@ public class StationController extends ObjectController implements Controller {
 		return controller;
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
 	@Override
 	public void setView(View view) {
 		super.setView(view);

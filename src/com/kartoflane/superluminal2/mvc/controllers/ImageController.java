@@ -47,10 +47,6 @@ public class ImageController extends ObjectController {
 		updateView();
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
 	@Override
 	public ImageObject getGameObject() {
 		return (ImageObject) getModel().getGameObject();

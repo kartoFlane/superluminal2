@@ -25,10 +25,6 @@ public class GibController extends ObjectController {
 		return null;
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
 	@Override
 	public GameObject getGameObject() {
 		return (GibObject) getModel().getGameObject();

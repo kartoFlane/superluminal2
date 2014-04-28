@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
@@ -73,10 +74,6 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		return controller;
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
 	public RoomObject getGameObject() {
 		return (RoomObject) getModel().getGameObject();
 	}
@@ -87,7 +84,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		this.view.addToPainter(Layers.ROOM);
 	}
 
-	private RoomView getView() {
+	protected RoomView getView() {
 		return (RoomView) view;
 	}
 
@@ -274,7 +271,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 						canResize = false;
 
 					// calculate collision with other boxes on the same layer
-					ArrayList<AbstractController> layer = EditorWindow.getInstance().getPainter().getLayerMap().get(Layers.ROOM);
+					ArrayList<AbstractController> layer = LayeredPainter.getInstance().getLayerMap().get(Layers.ROOM);
 					for (int i = 0; i < layer.size() && canResize; i++) {
 						AbstractController c = layer.get(i);
 						if (c != this && c.isVisible() && c.collides(resizeBounds))
