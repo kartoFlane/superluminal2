@@ -10,6 +10,7 @@ import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class RoomObject extends GameObject implements Alias, Movable, Resizable, Comparable<RoomObject> {
@@ -31,6 +32,20 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	public RoomObject(int id) {
 		this();
 		this.id = id;
+	}
+
+	public void update() {
+		if (model == null)
+			throw new IllegalArgumentException("Model must not be null.");
+
+		ShipController shipC = Manager.getCurrentShip().getShipController();
+		ShipObject ship = shipC.getGameObject();
+		locX = ((model.getX() - shipC.getX()) / ShipContainer.CELL_SIZE) -
+				((model.getW() / ShipContainer.CELL_SIZE) / 2) - ship.getXOffset();
+		locY = ((model.getY() - shipC.getY()) / ShipContainer.CELL_SIZE) -
+				((model.getH() / ShipContainer.CELL_SIZE) / 2) - ship.getYOffset();
+		sizeW = model.getW() / ShipContainer.CELL_SIZE;
+		sizeH = model.getH() / ShipContainer.CELL_SIZE;
 	}
 
 	public void setId(int id) {

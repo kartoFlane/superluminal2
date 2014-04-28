@@ -10,9 +10,7 @@ import com.kartoflane.superluminal2.components.Directions;
  * @author kartoFlane
  * 
  */
-public class GlowObject extends GameObject {
-
-	private static final long serialVersionUID = -7938000186887328057L;
+public class GlowObject {
 
 	public enum Glows {
 		BLUE, GREEN, YELLOW

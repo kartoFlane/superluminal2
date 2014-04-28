@@ -16,6 +16,9 @@ public abstract class GameObject implements Deletable, Serializable {
 		this.model = model;
 	}
 
+	/** Pull positioning data from the model and interpret it to represent it in-game. */
+	public abstract void update();
+
 	@Override
 	public void delete() {
 	}

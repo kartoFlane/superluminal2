@@ -15,6 +15,10 @@ public class DroneObject extends GameObject implements Comparable<DroneObject> {
 		setBlueprintName(blueprint);
 	}
 
+	public void update() {
+		// Nothing to do here
+	}
+
 	public void setType(DroneTypes type) {
 		droneType = type;
 	}

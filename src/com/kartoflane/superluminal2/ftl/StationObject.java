@@ -22,6 +22,10 @@ public class StationObject extends GameObject {
 	public StationObject(SystemObject object) {
 	}
 
+	public void update() {
+		// Nothing to do here
+	}
+
 	/**
 	 * Id of the tile on which the station will be located.<br>
 	 * -2 = use default value<br>

@@ -24,6 +24,10 @@ public class GibObject extends GameObject implements Comparable<GibObject> {
 		setDeletable(true);
 	}
 
+	public void update() {
+		// TODO
+	}
+
 	public void setId(int id) {
 		this.id = id;
 	}

@@ -39,6 +39,10 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 		setBlueprintName(blueprintName);
 	}
 
+	public void update() {
+		// Nothing to do here
+	}
+
 	public void setAnimation(AnimationObject anim) {
 		if (anim == null)
 			throw new IllegalArgumentException(blueprintName + ": animation must not be null.");

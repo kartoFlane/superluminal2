@@ -6,6 +6,9 @@ import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class MountObject extends GameObject implements Alias, Movable, Comparable<MountObject> {
 
@@ -27,6 +30,13 @@ public class MountObject extends GameObject implements Alias, Movable, Comparabl
 	public MountObject() {
 		setDeletable(true);
 		setWeapon(Database.DEFAULT_WEAPON_OBJ);
+	}
+
+	public void update() {
+		ShipController shipC = Manager.getCurrentShip().getShipController();
+		ShipObject ship = shipC.getGameObject();
+		locX = model.getX() - shipC.getX() - ship.getXOffset() * ShipContainer.CELL_SIZE - ship.getHullOffset().x;
+		locY = model.getY() - shipC.getY() - ship.getYOffset() * ShipContainer.CELL_SIZE - ship.getHullOffset().y;
 	}
 
 	public void setId(int id) {

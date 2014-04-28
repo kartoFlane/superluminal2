@@ -6,6 +6,9 @@ import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class DoorObject extends GameObject implements Alias, Movable, Serializable {
 
@@ -30,6 +33,16 @@ public class DoorObject extends GameObject implements Alias, Movable, Serializab
 	public DoorObject(boolean horizontal) {
 		this();
 		setHorizontal(horizontal);
+	}
+
+	public void update() {
+		if (model == null)
+			throw new IllegalArgumentException("Model must not be null.");
+
+		ShipController shipC = Manager.getCurrentShip().getShipController();
+		ShipObject ship = shipC.getGameObject();
+		locX = (model.getX() - shipC.getX() + ShipContainer.CELL_SIZE / 2) / ShipContainer.CELL_SIZE - ship.getXOffset();
+		locY = (model.getY() - shipC.getY() + ShipContainer.CELL_SIZE / 2) / ShipContainer.CELL_SIZE - ship.getYOffset();
 	}
 
 	/**

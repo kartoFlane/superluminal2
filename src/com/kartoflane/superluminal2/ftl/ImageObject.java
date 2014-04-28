@@ -7,33 +7,13 @@ public class ImageObject extends GameObject implements Alias {
 	private static final long serialVersionUID = 5829085341187861553L;
 
 	private String imagePath = null;
-	private int locX = 0;
-	private int locY = 0;
-
 	private String alias = null;
 
 	public ImageObject() {
 	}
 
-	public void setLocation(int x, int y) {
-		locX = x;
-		locY = y;
-	}
-
-	public void setX(int x) {
-		locX = x;
-	}
-
-	public void setY(int y) {
-		locY = y;
-	}
-
-	public int getX() {
-		return locX;
-	}
-
-	public int getY() {
-		return locY;
+	public void update() {
+		// Nothing to do here -- can't interpret the data in any meaningful way at this level
 	}
 
 	public void setImagePath(String path) {

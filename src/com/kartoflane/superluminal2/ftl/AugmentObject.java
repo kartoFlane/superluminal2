@@ -12,6 +12,10 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 		this.blueprintName = blueprintName;
 	}
 
+	public void update() {
+		// Nothing to do here
+	}
+
 	public void setBlueprintName(String name) {
 		if (name == null)
 			throw new IllegalArgumentException("Blueprint name must not be null.");

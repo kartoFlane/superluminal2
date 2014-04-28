@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
@@ -26,7 +27,6 @@ import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.mvc.controllers.ImageController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
-import com.kartoflane.superluminal2.mvc.controllers.PropController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
@@ -52,7 +52,6 @@ public class ShipContainer implements Disposable {
 
 	private HashMap<GameObject, AbstractController> objectControllerMap;
 	private HashMap<Images, ImageController> imageControllerMap;
-	private HashMap<AbstractController, ArrayList<PropController>> propMap; // TODO
 	private HashMap<RoomObject, Systems> activeSystemMap;
 
 	private boolean anchorVisible = true;
@@ -74,7 +73,6 @@ public class ShipContainer implements Disposable {
 
 		objectControllerMap = new HashMap<GameObject, AbstractController>();
 		imageControllerMap = new HashMap<Images, ImageController>();
-		propMap = new HashMap<AbstractController, ArrayList<PropController>>();
 		activeSystemMap = new HashMap<RoomObject, Systems>();
 	}
 
@@ -147,6 +145,64 @@ public class ShipContainer implements Disposable {
 		createImageControllers();
 	}
 
+	public void updateGameObjects() {
+		// Update image offsets, as they cannot be updated in ImageObjects, since they lack the needed data
+		ShipObject ship = shipController.getGameObject();
+		ImageController imageC = null;
+
+		// Shield image is anchored at the center of the smallest rectangle that contains all rooms
+		imageC = getImageController(Images.SHIELD);
+		Point center = findShipOffset();
+		Point size = findShipSize();
+		center.x += size.x / 2;
+		center.y += size.y / 2;
+
+		Rectangle ellipse = new Rectangle(0, 0, 0, 0);
+		ellipse.x = imageC.getX() - center.x - shipController.getX();
+		ellipse.y = imageC.getY() - center.y - shipController.getY();
+		// Ellipse's width and height are half of the actual shield image's dimensions
+		ellipse.width = imageC.getW() / 2;
+		ellipse.height = imageC.getH() / 2;
+
+		ship.setEllipse(ellipse);
+		center = null;
+		size = null;
+
+		// Hull image is anchored at the ship origin
+		ImageController hull = imageC = getImageController(Images.HULL);
+		Point hullSize = imageC.getSize();
+		Point hullOffset = imageC.getLocation();
+		hullOffset.x += -imageC.getW() / 2 - shipController.getX() - ship.getXOffset() * CELL_SIZE;
+		hullOffset.y += -imageC.getH() / 2 - shipController.getY() - ship.getYOffset() * CELL_SIZE;
+
+		ship.setHullDimensions(hullOffset.x, hullOffset.y, hullSize.x, hullSize.y);
+		hullSize = null;
+		hullOffset = null;
+
+		// Floor is anchored at the top-left corner of the hull image
+		imageC = getImageController(Images.FLOOR);
+		Point floorOffset = imageC.getLocation();
+		floorOffset.x += -imageC.getW() / 2 - (hull.getX() - hull.getW() / 2);
+		floorOffset.y += -imageC.getH() / 2 - (hull.getY() - hull.getH() / 2);
+
+		ship.setFloorOffset(floorOffset);
+		floorOffset = null;
+
+		// Cloak is anchored at the top-left corner of the hull image
+		imageC = getImageController(Images.CLOAK);
+		Point cloakOffset = imageC.getLocation();
+		cloakOffset.x += -imageC.getW() / 2 - (hull.getX() - hull.getW() / 2);
+		cloakOffset.y += -imageC.getH() / 2 - (hull.getY() - hull.getH() / 2);
+
+		ship.setCloakOffset(cloakOffset);
+		cloakOffset = null;
+
+		// Update member objects of the ship
+		for (GameObject gameObject : objectControllerMap.keySet()) {
+			gameObject.update();
+		}
+	}
+
 	public boolean isSaved() {
 		return shipSaved;
 	}
@@ -195,7 +251,7 @@ public class ShipContainer implements Disposable {
 	/**
 	 * @return the ship's offset, in pixels.
 	 */
-	protected Point findShipOffset() {
+	public Point findShipOffset() {
 		int nx = -1, ny = -1;
 		for (RoomController room : roomControllers) {
 			int t = room.getX() - room.getW() / 2 - shipController.getX();
@@ -211,7 +267,7 @@ public class ShipContainer implements Disposable {
 	/**
 	 * @return the size of the ship, in pixels.
 	 */
-	protected Point findShipSize() {
+	public Point findShipSize() {
 		int mx = -1, my = -1;
 		Point offset = findShipOffset();
 		for (RoomController room : roomControllers) {
@@ -364,12 +420,7 @@ public class ShipContainer implements Disposable {
 	}
 
 	private int getNextRoomId() {
-		int id = 0;
-		for (RoomObject object : shipController.getGameObject().getRooms()) {
-			if (id == object.getId())
-				id++;
-		}
-		return id;
+		return shipController.getGameObject().getNextRoomId();
 	}
 
 	private int getNextMountId() {
@@ -503,7 +554,7 @@ public class ShipContainer implements Disposable {
 		ImageController cloak = ImageController.newInstance(hull, imgObject);
 		cloak.setImage(imgObject.getImagePath());
 
-		// Floor's offset is relative to hull's top-left corner
+		// Cloak's offset is relative to hull's top-left corner
 		offset = ship.getCloakOffset();
 		center = Utils.add(hull.getLocationCorner(), ship.getCloakOffset());
 		cloak.setLocationCorner(center.x, center.y);
