@@ -47,6 +47,9 @@ public class PropertyTool extends Tool {
 
 	@Override
 	public void mouseUp(MouseEvent e) {
+		// Returns focus to the main window when user clicks on the canvas, allowing to use hotkeys
+		if (!window.isFocusControl())
+			window.forceFocus();
 	}
 
 	@Override
