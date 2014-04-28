@@ -32,6 +32,24 @@ public class Database {
 		MISSILES, LASER, BEAM, BOMB, BURST
 	}
 
+	public enum PlayerShipBlueprints {
+		HARD, HARD_2, HARD_3,
+		MANTIS, MANTIS_2, MANTIS_3,
+		STEALTH, STEALTH_2, STEALTH_3,
+		CIRCLE, CIRCLE_2, CIRCLE_3,
+		FED, FED_2, FED_3,
+		JELLY, JELLY_2, JELLY_3,
+		ROCK, ROCK_2, ROCK_3,
+		ENERGY, ENERGY_2, ENERGY_3,
+		CRYSTAL, CRYSTAL_2,
+		ANAEROBIC, ANAEROBIC_2;
+
+		@Override
+		public String toString() {
+			return "PLAYER_SHIP_" + name();
+		}
+	}
+
 	public static final Logger log = LogManager.getLogger(Database.class);
 
 	public static final AnimationObject DEFAULT_ANIM_OBJ = new AnimationObject();
@@ -43,7 +61,6 @@ public class Database {
 	private FTLPack resource = null;
 
 	// Constant
-	private ArrayList<String> playerShipBlueprintNames = new ArrayList<String>();
 	private HashMap<String, String> shipFileMap = new HashMap<String, String>();
 
 	// Dynamically loaded
@@ -57,71 +74,41 @@ public class Database {
 	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
 
 	private Database() {
-		playerShipBlueprintNames.add("PLAYER_SHIP_HARD");
-		playerShipBlueprintNames.add("PLAYER_SHIP_HARD_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_HARD_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_MANTIS");
-		playerShipBlueprintNames.add("PLAYER_SHIP_MANTIS_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_MANTIS_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_STEALTH");
-		playerShipBlueprintNames.add("PLAYER_SHIP_STEALTH_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_STEALTH_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_CIRCLE");
-		playerShipBlueprintNames.add("PLAYER_SHIP_CIRCLE_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_CIRCLE_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_FED");
-		playerShipBlueprintNames.add("PLAYER_SHIP_FED_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_FED_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_JELLY");
-		playerShipBlueprintNames.add("PLAYER_SHIP_JELLY_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_JELLY_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ROCK");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ROCK_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ROCK_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ENERGY");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ENERGY_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ENERGY_3");
-		playerShipBlueprintNames.add("PLAYER_SHIP_CRYSTAL");
-		playerShipBlueprintNames.add("PLAYER_SHIP_CRYSTAL_2");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ANAEROBIC");
-		playerShipBlueprintNames.add("PLAYER_SHIP_ANAEROBIC_2");
-
 		String blueprints = "blueprints.xml";
 		String dlcBlueprints = "dlcBlueprints.xml";
 		String dlcOverwrite = "dlcBlueprintsOverwrite.xml";
 		String bosses = "bosses.xml";
 		// All pre-AE player ships are located in blueprints.xml
-		shipFileMap.put("PLAYER_SHIP_HARD", blueprints);
-		shipFileMap.put("PLAYER_SHIP_HARD_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_MANTIS", blueprints);
-		shipFileMap.put("PLAYER_SHIP_MANTIS_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_STEALTH", blueprints);
-		shipFileMap.put("PLAYER_SHIP_STEALTH_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_CIRCLE", blueprints);
-		shipFileMap.put("PLAYER_SHIP_CIRCLE_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_FED", blueprints);
-		shipFileMap.put("PLAYER_SHIP_FED_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_JELLY", blueprints);
-		shipFileMap.put("PLAYER_SHIP_JELLY_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_ROCK", blueprints);
-		shipFileMap.put("PLAYER_SHIP_ROCK_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_ENERGY", blueprints);
-		shipFileMap.put("PLAYER_SHIP_ENERGY_2", blueprints);
-		shipFileMap.put("PLAYER_SHIP_CRYSTAL", blueprints);
-		shipFileMap.put("PLAYER_SHIP_CRYSTAL_2", blueprints);
+		shipFileMap.put(PlayerShipBlueprints.HARD.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.HARD_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.MANTIS.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.MANTIS_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.STEALTH.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.STEALTH_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.CIRCLE.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.CIRCLE_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.FED.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.FED_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.JELLY.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.JELLY_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.ROCK.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.ROCK_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.ENERGY.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.ENERGY_2.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.CRYSTAL.toString(), blueprints);
+		shipFileMap.put(PlayerShipBlueprints.CRYSTAL_2.toString(), blueprints);
 		// Lanius' ships are in dlcBlueprints.xml
-		shipFileMap.put("PLAYER_SHIP_ANAEROBIC", dlcBlueprints);
-		shipFileMap.put("PLAYER_SHIP_ANAEROBIC_2", dlcBlueprints);
+		shipFileMap.put(PlayerShipBlueprints.ANAEROBIC.toString(), dlcBlueprints);
+		shipFileMap.put(PlayerShipBlueprints.ANAEROBIC_2.toString(), dlcBlueprints);
 		// Type C for all ships are located in dlcBlueprintsOverwrite.xml
-		shipFileMap.put("PLAYER_SHIP_HARD_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_MANTIS_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_STEALTH_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_CIRCLE_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_FED_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_JELLY_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_ROCK_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_ENERGY_3", dlcOverwrite);
-		shipFileMap.put("PLAYER_SHIP_CRYSTAL_3", dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.HARD_3.toString(), dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.MANTIS_3.toString(), dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.STEALTH_3.toString(), dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.CIRCLE_3.toString(), dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.FED_3.toString(), dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.JELLY_3.toString(), dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.ROCK_3.toString(), dlcOverwrite);
+		shipFileMap.put(PlayerShipBlueprints.ENERGY_3.toString(), dlcOverwrite);
 		// Boss ships are located in bosses.xml
 		shipFileMap.put("BOSS_1_EASY", bosses);
 		shipFileMap.put("BOSS_2_EASY", bosses);
@@ -164,7 +151,12 @@ public class Database {
 	}
 
 	public boolean isPlayerShip(String blueprintName) {
-		return playerShipBlueprintNames.contains(blueprintName);
+		try {
+			PlayerShipBlueprints.valueOf(blueprintName.replace("PLAYER_SHIP_", ""));
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	public String getAssociatedFile(String blueprint) {
@@ -172,10 +164,6 @@ public class Database {
 			return shipFileMap.get(blueprint);
 		else
 			return "autoBlueprints.xml";
-	}
-
-	public String[] getPlayerShipBlueprintNames() {
-		return playerShipBlueprintNames.toArray(new String[0]);
 	}
 
 	public void storeAnimation(AnimationObject anim) {
