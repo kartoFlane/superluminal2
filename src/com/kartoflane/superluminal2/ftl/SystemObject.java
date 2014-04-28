@@ -18,6 +18,7 @@ public class SystemObject extends GameObject {
 	private StationObject station;
 	private GlowObject glow;
 
+	private String interiorNamespace = null;
 	private String interiorPath = null;
 
 	public SystemObject(Systems systemId) {
@@ -63,7 +64,11 @@ public class SystemObject extends GameObject {
 		}
 
 		if (canContainInterior())
-			setInteriorPath(getDefaultInterior(systemId));
+			setInteriorNamespace(getDefaultInteriorNamespace(systemId));
+	}
+
+	public void update() {
+		// Nothing to do here
 	}
 
 	public Systems getSystemId() {
@@ -90,10 +95,31 @@ public class SystemObject extends GameObject {
 		this.glow = glow;
 	}
 
+	public void setInteriorNamespace(String namespace) {
+		interiorNamespace = namespace;
+		if (namespace == null)
+			interiorPath = null;
+		else
+			interiorPath = "rdat:img/ship/interior/" + namespace + ".png";
+	}
+
+	public String getInteriorNamespace() {
+		return interiorNamespace;
+	}
+
+	/**
+	 * Sets path to the interior image if it is not located in the game's archives.
+	 * 
+	 * @param path
+	 *            path to the interior image in the filesystem, or null to use dat archive location
+	 */
 	public void setInteriorPath(String path) {
 		interiorPath = path;
 	}
 
+	/**
+	 * @return Path to the interior image, or null if not set.
+	 */
 	public String getInteriorPath() {
 		return interiorPath;
 	}
@@ -159,7 +185,7 @@ public class SystemObject extends GameObject {
 		return systemId.getDefaultSlotDirection();
 	}
 
-	public static String getDefaultInterior(Systems systemId) {
-		return systemId.getDefaultInterior();
+	public static String getDefaultInteriorNamespace(Systems systemId) {
+		return systemId.getDefaultInteriorNamespace();
 	}
 }

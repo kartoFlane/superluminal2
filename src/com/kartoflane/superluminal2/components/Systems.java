@@ -78,36 +78,36 @@ public enum Systems {
 		}
 	}
 
-	public String getDefaultInterior() {
+	public String getDefaultInteriorNamespace() {
 		switch (this) {
 			case ARTILLERY:
-				return "rdat:img/ship/interior/room_artillery.png";
+				return "room_artillery";
 			case BATTERY:
-				return "rdat:img/ship/interior/room_battery.png";
+				return "room_battery";
 			case CLOAKING:
-				return "rdat:img/ship/interior/room_cloaking.png";
+				return "room_cloaking";
 			case DOORS:
-				return "rdat:img/ship/interior/room_doors.png";
+				return "room_doors";
 			case DRONES:
-				return "rdat:img/ship/interior/room_drones.png";
+				return "room_drones";
 			case ENGINES:
-				return "rdat:img/ship/interior/room_engines.png";
+				return "room_engines";
 			case HACKING:
-				return "rdat:img/ship/interior/room_hacking.png";
+				return "room_hacking";
 			case MEDBAY:
-				return "rdat:img/ship/interior/room_medbay.png";
+				return "room_medbay";
 			case MIND:
-				return "rdat:img/ship/interior/room_mind.png";
+				return "room_mind";
 			case OXYGEN:
-				return "rdat:img/ship/interior/room_oxygen.png";
+				return "room_oxygen";
 			case PILOT:
-				return "rdat:img/ship/interior/room_pilot.png";
+				return "room_pilot";
 			case SENSORS:
-				return "rdat:img/ship/interior/room_sensors.png";
+				return "room_sensors";
 			case SHIELDS:
-				return "rdat:img/ship/interior/room_shields.png";
+				return "room_shields";
 			case WEAPONS:
-				return "rdat:img/ship/interior/room_weapons.png";
+				return "room_weapons";
 			case CLONEBAY: // always uses the clonebay "station", can't have interior
 			case TELEPORTER: // always uses teleporter pads, can't have interior
 			case EMPTY: // can't have interior

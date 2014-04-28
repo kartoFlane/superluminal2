@@ -23,6 +23,7 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Images;
+import com.kartoflane.superluminal2.components.Races;
 import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -34,6 +35,7 @@ import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class ShipUtils {
 
@@ -218,12 +220,11 @@ public class ShipUtils {
 				// Optional
 				attr = sysEl.getAttributeValue("img");
 				if (attr != null) {
-					system.setInteriorPath("rdat:img/ship/interior/" + attr + ".png");
-					// TODO get glows by pruning room_ from attr?
-					// what happens with custom-named interior images?
+					system.setInteriorNamespace(attr);
+					// TODO what happens with custom-named interior images?
 				} else if (!isPlayer) {
 					// Enemy ships' systems don't use interior images
-					system.setInteriorPath(null);
+					system.setInteriorNamespace(null);
 				}
 
 				// Get the weapon used by this system
@@ -264,14 +265,14 @@ public class ShipUtils {
 
 		child = e.getChild("weaponSlots");
 		if (child == null) {
-			ship.setWeaponSlots(4); // default
+			ship.setWeaponSlots(4); // Default
 		} else {
 			ship.setWeaponSlots(Integer.valueOf(child.getValue()));
 		}
 
 		child = e.getChild("droneSlots");
 		if (child == null) {
-			ship.setDroneSlots(2); // default
+			ship.setDroneSlots(2); // Default
 		} else {
 			ship.setDroneSlots(Integer.valueOf(child.getValue()));
 		}
@@ -287,7 +288,7 @@ public class ShipUtils {
 				ship.setMissilesAmount(Integer.valueOf(attr));
 
 			attr = child.getAttributeValue("count");
-			int count = -1;
+			int count = -1; // Default - load all
 			if (attr != null)
 				count = Integer.valueOf(attr);
 
@@ -363,7 +364,47 @@ public class ShipUtils {
 			throw new IllegalArgumentException("<maxPower> tag is missing 'amount' attribute.");
 		ship.setPower(Integer.valueOf(attr));
 
-		// TODO crew
+		if (!ship.isPlayerShip()) {
+			child = e.getChild("minSector");
+			if (child == null)
+				ship.setMinSector(1);
+			else {
+				attr = child.getValue();
+				ship.setMinSector(Integer.valueOf(attr));
+			}
+
+			child = e.getChild("maxSector");
+			if (child == null)
+				ship.setMaxSector(8);
+			else {
+				attr = child.getValue();
+				ship.setMaxSector(Integer.valueOf(attr));
+			}
+		}
+
+		for (Element crew : e.getChildren("crewCount")) {
+			attr = crew.getAttributeValue("class");
+			if (attr == null)
+				throw new IllegalArgumentException("<crewCount> tag is missing 'class' attribute.");
+			Races race = null;
+			try {
+				race = Races.valueOf(attr.toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				throw new IllegalArgumentException("Race class not recognised: " + attr);
+			}
+
+			attr = crew.getAttributeValue("amount");
+			if (attr == null)
+				throw new IllegalArgumentException("<crewCount> tag is missing 'amount' attribute.");
+			ship.setCrewCount(race, Integer.valueOf(attr));
+
+			if (!ship.isPlayerShip()) {
+				attr = crew.getAttributeValue("max");
+				if (attr == null)
+					throw new IllegalArgumentException("<crewCount> tag is missing 'max' attribute.");
+				ship.setCrewMax(race, Integer.valueOf(attr));
+			}
+		}
 
 		for (Element aug : e.getChildren("aug")) {
 			attr = aug.getAttributeValue("name");
@@ -380,7 +421,12 @@ public class ShipUtils {
 		return ship;
 	}
 
-	public static void saveShipXML(File destination, ShipObject ship) throws IllegalArgumentException, IOException {
+	public static void saveShipXML(File destination, ShipContainer container) throws IllegalArgumentException, IOException {
+		if (container == null)
+			throw new IllegalArgumentException("ShipContainer must not be null.");
+
+		ShipObject ship = container.getShipController().getGameObject();
+
 		if (ship == null)
 			throw new IllegalArgumentException("Ship object must not be null.");
 		if (destination == null)
@@ -388,29 +434,38 @@ public class ShipUtils {
 		if (!destination.isDirectory())
 			throw new IllegalArgumentException("Not a directory: " + destination.getName());
 
+		container.updateGameObjects();
+		ship.coalesceRooms();
+		// TODO automatically link doors
+
 		Document doc = new Document();
 		Element root = new Element("wrapper");
 		Element e = null;
+		String attr = null;
 
 		// Prepare the document
 		Element shipBlueprint = new Element("shipBlueprint");
-		shipBlueprint.setAttribute("name", ship.getBlueprintName());
-		shipBlueprint.setAttribute("layout", ship.getLayout());
-		shipBlueprint.setAttribute("img", ship.getImageNamespace());
+		attr = ship.getBlueprintName();
+		shipBlueprint.setAttribute("name", attr);
+		attr = ship.getLayout();
+		shipBlueprint.setAttribute("layout", attr);
+		attr = ship.getImageNamespace();
+		shipBlueprint.setAttribute("img", attr);
 
 		e = new Element("class");
-		e.setText(ship.getShipClass());
+		attr = ship.getShipClass();
+		e.setText(attr == null ? "" : attr);
 		shipBlueprint.addContent(e);
 
 		e = new Element("name");
-		e.setText(ship.getShipName());
+		attr = ship.getShipName();
+		e.setText(attr == null ? "" : attr);
 		shipBlueprint.addContent(e);
 
 		e = new Element("desc");
-		e.setText(ship.getShipDescription());
+		attr = ship.getShipDescription();
+		e.setText(attr == null ? "" : attr);
 		shipBlueprint.addContent(e);
-
-		ship.coalesceRooms();
 
 		Element systemList = new Element("systemList");
 		for (Systems sys : Systems.getSystems()) {
@@ -420,16 +475,21 @@ public class ShipUtils {
 				Element sysEl = new Element(sys.toString().toLowerCase());
 
 				sysEl.setAttribute("power", "" + system.getLevelStart());
+
 				// Enemy ships' system have a 'max' attribute which determines the max level of the system
 				if (!ship.isPlayerShip())
 					sysEl.setAttribute("max", "" + system.getLevelMax());
+
 				sysEl.setAttribute("room", "" + system.getRoom().getId());
+
 				sysEl.setAttribute("start", "" + system.isAvailable());
-				if (system.canContainInterior() && ship.isPlayerShip())
-					sysEl.setAttribute("img", system.getInteriorPath()); // TODO namespace, not path
+
 				// Artillery has a special 'weapon' attribute to determine which weapon is used as artillery weapon
 				if (sys == Systems.ARTILLERY)
-					sysEl.setAttribute("weapon", ""); // TODO artillery weapon
+					sysEl.setAttribute("weapon", ""); // TODO artillery weapon, default to ARTILLERY_FED
+
+				if (system.canContainInterior() && ship.isPlayerShip() && system.getInteriorNamespace() != null)
+					sysEl.setAttribute("img", system.getInteriorNamespace());
 
 				StationObject station = system.getStation();
 
@@ -501,7 +561,34 @@ public class ShipUtils {
 		e.setAttribute("amount", "" + ship.getPower());
 		shipBlueprint.addContent(e);
 
-		// TODO crew
+		// Sector tags
+		// Enemy exclusive
+		if (!ship.isPlayerShip()) {
+			e = new Element("minSector");
+			e.setText("" + ship.getMinSector());
+			shipBlueprint.addContent(e);
+
+			e = new Element("maxSector");
+			e.setText("" + ship.getMaxSector());
+			shipBlueprint.addContent(e);
+		}
+
+		for (Races race : Races.values()) {
+			int amount = ship.getCrewCount(race);
+			int max = ship.getCrewMax(race);
+
+			e = new Element("crewCount");
+			e.setAttribute("amount", "" + amount);
+
+			if (!ship.isPlayerShip())
+				e.setAttribute("max", "" + max);
+
+			e.setAttribute("class", race.toString().toLowerCase());
+
+			// Don't print an empty tag
+			if (amount > 0 && (ship.isPlayerShip() || max > 0))
+				shipBlueprint.addContent(e);
+		}
 
 		for (AugmentObject aug : ship.getAugments()) {
 			e = new Element("aug");
@@ -517,21 +604,11 @@ public class ShipUtils {
 				Database.getInstance().getAssociatedFile(ship.getBlueprintName()) + ".append");
 		Utils.writeFileXML(doc, blueprints);
 
-		// TODO automatically link doors
 		File fileTXT = new File(destination.getAbsolutePath() + "/" + ship.getLayout() + ".txt");
 		saveLayoutTXT(ship, fileTXT);
 
 		File fileXML = new File(destination.getAbsolutePath() + "/" + ship.getLayout() + ".xml");
 		saveLayoutXML(ship, fileXML);
-	}
-
-	public static ShipObject loadShipSHPO(File f) {
-		// TODO
-		return null;
-	}
-
-	public static void saveShipSHPO(File f, ShipObject ship) {
-		// TODO
 	}
 
 	/**
@@ -616,6 +693,7 @@ public class ShipUtils {
 				}
 			}
 
+			// Link doors to rooms
 			for (DoorObject door : ship.getDoors()) {
 				door.setLeftRoom(ship.getRoomById(leftMap.get(door)));
 				door.setRightRoom(ship.getRoomById(rightMap.get(door)));
@@ -792,6 +870,7 @@ public class ShipUtils {
 			// Load additional offsets for other images
 			Point offset = new Point(0, 0);
 			Element offsets = root.getChild("offsets");
+
 			if (offsets != null) {
 				child = offsets.getChild("cloak");
 				if (child != null) {
@@ -997,13 +1076,13 @@ public class ShipUtils {
 		Element offsets = new Element("offsets");
 
 		e = new Element("floor");
-		e.setAttribute("x", "");
-		e.setAttribute("y", "");
+		e.setAttribute("x", "" + ship.getFloorOffset().x);
+		e.setAttribute("y", "" + ship.getFloorOffset().y);
 		offsets.addContent(e);
 
 		e = new Element("cloak");
-		e.setAttribute("x", "");
-		e.setAttribute("y", "");
+		e.setAttribute("x", "" + ship.getCloakOffset().x);
+		e.setAttribute("y", "" + ship.getCloakOffset().y);
 		offsets.addContent(e);
 
 		root.addContent(offsets);
