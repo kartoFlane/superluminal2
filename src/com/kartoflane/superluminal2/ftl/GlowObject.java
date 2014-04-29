@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ftl;
 import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.Directions;
+import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 /**
  * A class representing a glow namespace.
@@ -10,41 +11,55 @@ import com.kartoflane.superluminal2.components.Directions;
  * @author kartoFlane
  * 
  */
-public class GlowObject {
-
-	public enum Glows {
-		BLUE, GREEN, YELLOW
-	}
+public class GlowObject implements Comparable<GlowObject>, Identifiable {
 
 	private final String identifier;
 	private String imageNamespace = null;
-
-	private String glowPathBlue;
-	private String glowPathGreen;
-	private String glowPathYellow;
 
 	private int locX = 0;
 	private int locY = 0;
 	private Directions direction = Directions.NONE;
 
-	public GlowObject(String identifier) {
-		this.identifier = identifier;
+	public GlowObject() {
+		this("Default Glow");
 	}
 
+	public GlowObject(String identifier) {
+		if (identifier == null)
+			throw new IllegalArgumentException("Identifier must not be null.");
+		this.identifier = identifier;
+		setGlowImageNamespace(identifier);
+	}
+
+	@Override
 	public String getIdentifier() {
 		return identifier;
 	}
 
-	public void setImageNamespace(String namespace) {
+	public void setGlowImageNamespace(String namespace) {
+		if (namespace == null)
+			throw new IllegalArgumentException("Namespace must not be null.");
 		imageNamespace = namespace;
 	}
 
-	public String getImageNamespace() {
+	public String getGlowImageNamespace() {
 		return imageNamespace;
+	}
+
+	public String getGlowImagePath() {
+		return "img/ship/interior/" + imageNamespace + ".png";
 	}
 
 	public void setLocation(int x, int y) {
 		locX = x;
+		locY = y;
+	}
+
+	public void setX(int x) {
+		locX = x;
+	}
+
+	public void setY(int y) {
 		locY = y;
 	}
 
@@ -70,36 +85,8 @@ public class GlowObject {
 		return direction;
 	}
 
-	public void setGlowPath(String path, Glows id) {
-		switch (id) {
-			case BLUE:
-				glowPathBlue = path;
-				break;
-			case GREEN:
-				glowPathGreen = path;
-				break;
-			case YELLOW:
-				glowPathYellow = path;
-				break;
-			default:
-				throw new IllegalArgumentException();
-		}
-	}
-
-	public String getGlowPath(Glows id) {
-		switch (id) {
-			case BLUE:
-				return glowPathBlue;
-			case GREEN:
-				return glowPathGreen;
-			case YELLOW:
-				return glowPathYellow;
-			default:
-				throw new IllegalArgumentException();
-		}
-	}
-
-	public String[] getGlowsPaths() {
-		return new String[] { glowPathBlue, glowPathGreen, glowPathYellow };
+	@Override
+	public int compareTo(GlowObject o) {
+		return identifier.compareTo(o.identifier);
 	}
 }

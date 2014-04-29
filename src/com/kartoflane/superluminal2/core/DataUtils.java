@@ -12,6 +12,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
+import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.core.Database.DroneTypes;
 import com.kartoflane.superluminal2.core.Database.WeaponTypes;
@@ -19,6 +20,7 @@ import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneObject;
+import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class DataUtils {
@@ -303,5 +305,45 @@ public class DataUtils {
 		augment.setDescription(child.getValue());
 
 		return augment;
+	}
+
+	public static GlowObject loadGlow(Element e) {
+		if (e == null)
+			throw new IllegalArgumentException("Element must not be null.");
+
+		String attr = null;
+		Element child = null;
+
+		// Identifier of the glow set, has to match an existing interior image in order for the game to link them
+		attr = e.getAttributeValue("name");
+		if (attr == null)
+			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
+		GlowObject glow = new GlowObject(attr);
+
+		child = e.getChild("computerGlow");
+		if (child == null)
+			throw new IllegalArgumentException(glow.getIdentifier() + " is missing a <computerGlow> tag.");
+
+		// Optional attribute that allows to use a different image for the glow
+		attr = child.getAttributeValue("name");
+		if (attr != null)
+			glow.setGlowImageNamespace(attr);
+
+		attr = child.getAttributeValue("x");
+		if (attr == null)
+			throw new IllegalArgumentException(glow.getIdentifier() + "'s <computerGlow> is missing 'x' attribute.");
+		glow.setX(Integer.valueOf(attr));
+
+		attr = child.getAttributeValue("y");
+		if (attr == null)
+			throw new IllegalArgumentException(glow.getIdentifier() + "'s <computerGlow> is missing 'y' attribute.");
+		glow.setY(Integer.valueOf(attr));
+
+		attr = child.getAttributeValue("dir");
+		if (attr == null)
+			throw new IllegalArgumentException(glow.getIdentifier() + "'s <computerGlow> is missing 'dir' attribute.");
+		glow.setDirection(Directions.parseDir(attr));
+
+		return glow;
 	}
 }

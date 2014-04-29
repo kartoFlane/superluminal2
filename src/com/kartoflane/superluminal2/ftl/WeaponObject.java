@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Database.WeaponTypes;
 
@@ -13,7 +14,7 @@ import com.kartoflane.superluminal2.core.Database.WeaponTypes;
  * @author kartoFlane
  * 
  */
-public class WeaponObject extends GameObject implements Comparable<WeaponObject> {
+public class WeaponObject extends GameObject implements Comparable<WeaponObject>, Identifiable {
 
 	private static final long serialVersionUID = 7968532944693929010L;
 
@@ -29,7 +30,7 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 	 */
 	public WeaponObject() {
 		weaponType = null;
-		blueprintName = null;
+		blueprintName = "SL Dummy Weapon";
 		title = "No Weapon";
 		shortName = "No Weapon";
 		animation = Database.DEFAULT_ANIM_OBJ;
@@ -37,6 +38,11 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 
 	public WeaponObject(String blueprintName) {
 		setBlueprintName(blueprintName);
+	}
+
+	@Override
+	public String getIdentifier() {
+		return blueprintName;
 	}
 
 	public void update() {

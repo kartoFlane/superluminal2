@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.ftl;
 
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.core.Database;
 
 public class SystemObject extends GameObject {
 
@@ -65,6 +66,9 @@ public class SystemObject extends GameObject {
 
 		if (canContainInterior())
 			setInteriorNamespace(getDefaultInteriorNamespace(systemId));
+
+		if (canContainGlow())
+			glow = Database.DEFAULT_GLOW_OBJ;
 	}
 
 	public void update() {

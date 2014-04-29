@@ -2,9 +2,10 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.core.Utils;
 
-public class AnimationObject implements Comparable<AnimationObject> {
+public class AnimationObject implements Comparable<AnimationObject>, Identifiable {
 
 	private String animName;
 
@@ -27,6 +28,11 @@ public class AnimationObject implements Comparable<AnimationObject> {
 
 	public AnimationObject(String name) {
 		setAnimName(name);
+	}
+
+	@Override
+	public String getIdentifier() {
+		return animName;
 	}
 
 	public void setAnimName(String name) {

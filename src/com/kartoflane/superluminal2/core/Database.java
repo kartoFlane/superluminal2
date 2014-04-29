@@ -16,10 +16,12 @@ import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.ShipMetadata;
+import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneObject;
+import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class Database {
@@ -54,6 +56,7 @@ public class Database {
 
 	public static final AnimationObject DEFAULT_ANIM_OBJ = new AnimationObject();
 	public static final WeaponObject DEFAULT_WEAPON_OBJ = new WeaponObject();
+	public static final GlowObject DEFAULT_GLOW_OBJ = new GlowObject();
 
 	private static final Database instance = new Database();
 
@@ -69,6 +72,7 @@ public class Database {
 	private TreeSet<WeaponObject> weaponObjects = new TreeSet<WeaponObject>();
 	private TreeSet<DroneObject> droneObjects = new TreeSet<DroneObject>();
 	private TreeSet<AugmentObject> augmentObjects = new TreeSet<AugmentObject>();
+	private TreeSet<GlowObject> glowObjects = new TreeSet<GlowObject>();
 
 	/** Temporary map to hold anim sheets, since they need to be loaded before weaponAnims, which reference them */
 	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
@@ -230,12 +234,33 @@ public class Database {
 	}
 
 	public AugmentObject getAugment(String blueprint) {
-		AugmentObject[] augments = augmentObjects.toArray(new AugmentObject[0]);
+		AugmentObject[] augments = getAugments();
 		try {
 			return augments[binarySearch(augments, blueprint, 0, augments.length)];
 		} catch (IndexOutOfBoundsException e) {
 			return null;
 		}
+	}
+
+	public AugmentObject[] getAugments() {
+		return augmentObjects.toArray(new AugmentObject[0]);
+	}
+
+	public void storeGlow(GlowObject glow) {
+		glowObjects.add(glow);
+	}
+
+	public GlowObject getGlow(String id) {
+		GlowObject[] glows = getGlows();
+		try {
+			return glows[binarySearch(glows, id, 0, glows.length)];
+		} catch (IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	public GlowObject[] getGlows() {
+		return glowObjects.toArray(new GlowObject[0]);
 	}
 
 	public void storeShipMetadata(ShipMetadata metadata) {
@@ -318,59 +343,16 @@ public class Database {
 		return animSheetMap.get(anim);
 	}
 
-	private static int binarySearch(AnimationObject[] array, String animName, int min, int max) {
+	private static int binarySearch(Identifiable[] array, String identifier, int min, int max) {
 		if (min > max)
 			return -1;
 		int mid = (min + max) / 2;
-		int result = animName.compareTo(array[mid].getAnimName());
-		if (result > 0) {
-			return binarySearch(array, animName, mid + 1, max);
-		} else if (result < 0) {
-			return binarySearch(array, animName, min, mid - 1);
-		} else {
+		int result = identifier.compareTo(array[mid].getIdentifier());
+		if (result > 0)
+			return binarySearch(array, identifier, mid + 1, max);
+		else if (result < 0)
+			return binarySearch(array, identifier, min, mid - 1);
+		else
 			return mid;
-		}
-	}
-
-	private static int binarySearch(WeaponObject[] array, String blueprint, int min, int max) {
-		if (min > max)
-			return -1;
-		int mid = (min + max) / 2;
-		int result = blueprint.compareTo(array[mid].getBlueprintName());
-		if (result > 0) {
-			return binarySearch(array, blueprint, mid + 1, max);
-		} else if (result < 0) {
-			return binarySearch(array, blueprint, min, mid - 1);
-		} else {
-			return mid;
-		}
-	}
-
-	private static int binarySearch(DroneObject[] array, String blueprint, int min, int max) {
-		if (min > max)
-			return -1;
-		int mid = (min + max) / 2;
-		int result = blueprint.compareTo(array[mid].getBlueprintName());
-		if (result > 0) {
-			return binarySearch(array, blueprint, mid + 1, max);
-		} else if (result < 0) {
-			return binarySearch(array, blueprint, min, mid - 1);
-		} else {
-			return mid;
-		}
-	}
-
-	private static int binarySearch(AugmentObject[] array, String blueprint, int min, int max) {
-		if (min > max)
-			return -1;
-		int mid = (min + max) / 2;
-		int result = blueprint.compareTo(array[mid].getBlueprintName());
-		if (result > 0) {
-			return binarySearch(array, blueprint, mid + 1, max);
-		} else if (result < 0) {
-			return binarySearch(array, blueprint, min, mid - 1);
-		} else {
-			return mid;
-		}
 	}
 }

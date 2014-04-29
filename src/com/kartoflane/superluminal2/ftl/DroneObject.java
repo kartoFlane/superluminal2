@@ -1,8 +1,9 @@
 package com.kartoflane.superluminal2.ftl;
 
+import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.core.Database.DroneTypes;
 
-public class DroneObject extends GameObject implements Comparable<DroneObject> {
+public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable {
 
 	private static final long serialVersionUID = -4645066316142355841L;
 
@@ -13,6 +14,11 @@ public class DroneObject extends GameObject implements Comparable<DroneObject> {
 
 	public DroneObject(String blueprint) {
 		setBlueprintName(blueprint);
+	}
+
+	@Override
+	public String getIdentifier() {
+		return blueprintName;
 	}
 
 	public void update() {

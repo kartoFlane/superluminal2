@@ -43,17 +43,21 @@ public class Superluminal {
 
 	public static final String HOTKEYS_FILE = "hotkeys.xml";
 
-	public static Display display = null;
+	private static Display display = null;
 
 	/**
 	 * settings ideas:
 	 * - close ship loader after loading
 	 * - pin all elements after loading a ship?
-	 * -
+	 * - checkboxes to make floor/cloak/shield/mounts follow hull, something along these lines
 	 * -
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
+	 * - load glow sets from rooms.xml
+	 * - mount tool cursor offset (make border follow the image)
+	 * - ship offset modification
+	 * - keep interior images etc in Database --> allows for easy handling of mods (loading .ftl file that has custom images, can't add that to rdat, have to store in Database)
 	 * - automatic version check
 	 * - add blueprint name selection to general tab?
 	 * - rework door linking so that it doesn't have to be done through the DoorDataComposite (like SystemsMenu)
@@ -298,6 +302,20 @@ public class Superluminal {
 							log.warn("Could not load augment: " + ex.getMessage());
 						}
 					}
+
+					elements.clear();
+					elements = null;
+					elements = DataUtils.findTagsNamed(dr.text, "roomLayout");
+					for (Element e : elements) {
+						try {
+							db.storeGlow(DataUtils.loadGlow(e));
+						} catch (IllegalArgumentException ex) {
+							log.warn("Could not glow set: " + ex.getMessage());
+						}
+					}
+
+					elements.clear();
+					elements = null;
 				} catch (FileNotFoundException e) {
 					log.error("Could not find file: " + innerPath);
 				} catch (IOException e) {

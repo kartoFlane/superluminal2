@@ -10,6 +10,7 @@ public class ImageObject extends GameObject implements Alias {
 	private String alias = null;
 
 	public ImageObject() {
+		setDeletable(false);
 	}
 
 	public void update() {

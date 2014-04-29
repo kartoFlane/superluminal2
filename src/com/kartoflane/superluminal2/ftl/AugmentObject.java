@@ -1,6 +1,8 @@
 package com.kartoflane.superluminal2.ftl;
 
-public class AugmentObject extends GameObject implements Comparable<AugmentObject> {
+import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+
+public class AugmentObject extends GameObject implements Comparable<AugmentObject>, Identifiable {
 
 	private static final long serialVersionUID = 7946331800522010830L;
 
@@ -10,6 +12,10 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 
 	public AugmentObject(String blueprintName) {
 		this.blueprintName = blueprintName;
+	}
+
+	public String getIdentifier() {
+		return blueprintName;
 	}
 
 	public void update() {
