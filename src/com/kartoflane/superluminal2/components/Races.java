@@ -21,7 +21,7 @@ public enum Races {
 				return "Lanius";
 			default:
 				String s = name();
-				s = s.substring(0, 0) + s.substring(1).toLowerCase();
+				s = s.substring(0, 1) + s.substring(1).toLowerCase();
 				return s;
 		}
 	}
