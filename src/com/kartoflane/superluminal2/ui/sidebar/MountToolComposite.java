@@ -6,13 +6,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.tools.MountTool;
+import com.kartoflane.superluminal2.ui.DirectionCombo;
 
 public class MountToolComposite extends Composite {
 
@@ -59,58 +58,19 @@ public class MountToolComposite extends Composite {
 		Label lblDirection = new Label(this, SWT.NONE);
 		lblDirection.setText("Direction:");
 
-		final Combo directionCombo = new Combo(this, SWT.READ_ONLY);
-		GridData gd_directionCombo = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
-		gd_directionCombo.widthHint = 80;
-		directionCombo.setLayoutData(gd_directionCombo);
-		directionCombo.add("Up");
-		directionCombo.add("Left");
-		directionCombo.add("Right");
-		directionCombo.add("Down");
-		directionCombo.add("None");
-		directionCombo.select(directionToInt(tool.getDirection()));
+		final DirectionCombo cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, true);
+		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_cmbDirection.widthHint = 80;
+		cmbDirection.setLayoutData(gd_cmbDirection);
+		cmbDirection.select(DirectionCombo.toIndex(tool.getDirection()));
 
-		directionCombo.addSelectionListener(new SelectionAdapter() {
+		cmbDirection.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				tool.setDirection(intToDirection(directionCombo.getSelectionIndex()));
+				tool.setDirection(cmbDirection.getDirection());
 			}
 		});
 
 		pack();
-	}
-
-	private Directions intToDirection(int i) {
-		switch (i) {
-			case 0:
-				return Directions.UP;
-			case 1:
-				return Directions.LEFT;
-			case 2:
-				return Directions.RIGHT;
-			case 3:
-				return Directions.DOWN;
-			case 4:
-				return Directions.NONE;
-			default:
-				return null;
-		}
-	}
-
-	private int directionToInt(Directions dir) {
-		switch (dir) {
-			case UP:
-				return 0;
-			case LEFT:
-				return 1;
-			case RIGHT:
-				return 2;
-			case DOWN:
-				return 3;
-			case NONE:
-				return 4;
-			default:
-				return -1;
-		}
 	}
 }

@@ -116,7 +116,7 @@ public class EditorWindow {
 		gl_shell.marginWidth = 0;
 		shell.setLayout(gl_shell);
 
-		Monitor m = Superluminal.display.getPrimaryMonitor();
+		Monitor m = display.getPrimaryMonitor();
 		Rectangle displaySize = m.getClientArea();
 		displaySize.width = (displaySize.width / 5) * 4;
 		displaySize.height = (displaySize.height / 5) * 4;
@@ -128,6 +128,7 @@ public class EditorWindow {
 		new ShipLoaderDialog(shell);
 		new SettingsDialog(shell);
 		new SystemsMenu(shell);
+		new GlowSelectionDialog(shell);
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
@@ -848,8 +849,8 @@ public class EditorWindow {
 		mntmCloseShip.setEnabled(enable);
 
 		// Edit
-		mntmUndo.setEnabled(enable);
-		mntmRedo.setEnabled(enable);
+		mntmUndo.setEnabled(false); // TODO
+		mntmRedo.setEnabled(false); // TODO
 		mntmDelete.setEnabled(enable);
 
 		// View

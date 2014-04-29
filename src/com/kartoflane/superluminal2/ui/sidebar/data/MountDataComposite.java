@@ -13,12 +13,12 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Database.WeaponTypes;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
+import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
 public class MountDataComposite extends Composite implements DataComposite {
@@ -26,7 +26,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 	private Label label;
 	private Button btnRotated;
 	private Button btnMirrored;
-	private Combo directionCombo;
+	private DirectionCombo cmbDirection;
 	private Combo categoryCombo;
 	private Combo weaponCombo;
 
@@ -60,16 +60,11 @@ public class MountDataComposite extends Composite implements DataComposite {
 		Label lblDirection = new Label(this, SWT.NONE);
 		lblDirection.setText("Power-up Direction:");
 
-		directionCombo = new Combo(this, SWT.READ_ONLY);
-		GridData gd_directionCombo = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
-		gd_directionCombo.widthHint = 80;
-		directionCombo.setLayoutData(gd_directionCombo);
-		directionCombo.add("Up");
-		directionCombo.add("Left");
-		directionCombo.add("Right");
-		directionCombo.add("Down");
-		directionCombo.add("None");
-		directionCombo.select(0);
+		cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, true);
+		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_cmbDirection.widthHint = 80;
+		cmbDirection.setLayoutData(gd_cmbDirection);
+		cmbDirection.select(0);
 
 		Label lblWeapon = new Label(this, SWT.NONE);
 		lblWeapon.setText("Weapon:");
@@ -110,10 +105,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 			}
 		});
 
-		directionCombo.addSelectionListener(new SelectionAdapter() {
+		cmbDirection.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controller.setDirection(indexToDirection(directionCombo.getSelectionIndex()));
+				controller.setDirection(cmbDirection.getDirection());
 			}
 		});
 
@@ -155,7 +150,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnRotated.setSelection(controller.isRotated());
 		btnMirrored.setSelection(controller.isMirrored());
 
-		directionCombo.select(directionToIndex(controller.getDirection()));
+		cmbDirection.select(DirectionCombo.toIndex(controller.getDirection()));
 
 		WeaponObject weapon = controller.getWeapon();
 		WeaponTypes type = weapon.getType();
@@ -183,40 +178,6 @@ public class MountDataComposite extends Composite implements DataComposite {
 		weaponCombo.select(0);
 		for (WeaponObject weapon : weaponList) {
 			weaponCombo.add(String.format("%-30s [%s]", weapon.getTitle(), weapon.getBlueprintName()));
-		}
-	}
-
-	private int directionToIndex(Directions dir) {
-		switch (dir) {
-			case UP:
-				return 0;
-			case LEFT:
-				return 1;
-			case RIGHT:
-				return 2;
-			case DOWN:
-				return 3;
-			case NONE:
-				return 4;
-			default:
-				throw new IllegalArgumentException("Unknown direction: " + dir);
-		}
-	}
-
-	private Directions indexToDirection(int index) {
-		switch (index) {
-			case 0:
-				return Directions.UP;
-			case 1:
-				return Directions.LEFT;
-			case 2:
-				return Directions.RIGHT;
-			case 3:
-				return Directions.DOWN;
-			case 4:
-				return Directions.NONE;
-			default:
-				throw new IllegalArgumentException("Unknown index: " + index);
 		}
 	}
 

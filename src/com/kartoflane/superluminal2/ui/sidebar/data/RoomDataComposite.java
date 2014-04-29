@@ -11,7 +11,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -22,11 +21,14 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.GlowSelectionDialog;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
@@ -51,7 +53,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private ShipContainer container = null;
 	private Label label;
 	private Label lblGlow;
-	private Combo glowCombo;
+	private Button btnGlow;
 
 	public RoomDataComposite(Composite parent, RoomController control) {
 		super(parent, SWT.NONE);
@@ -173,15 +175,11 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		lblGlow.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblGlow.setText("Manning glow:");
 
-		glowCombo = new Combo(imagesComposite, SWT.READ_ONLY);
-		glowCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-
-		// TODO read and add glow sets
-
-		glowCombo.add("Define new glow set...");
-		glowCombo.add("Default glow set");
-		glowCombo.select(1);
-		// TODO define dialog popup to define new glow set
+		btnGlow = new Button(imagesComposite, SWT.NONE);
+		GridData gd_btnGlow = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1);
+		gd_btnGlow.widthHint = 80;
+		btnGlow.setLayoutData(gd_btnGlow);
+		btnGlow.setText("None");
 
 		btnSystem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -257,6 +255,18 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		};
 		btnInteriorClear.addSelectionListener(imageClearListener);
 
+		btnGlow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Systems sys = container.getActiveSystem(roomC.getGameObject());
+				SystemObject systemObject = container.getSystemController(sys).getGameObject();
+
+				GlowObject glowObject = GlowSelectionDialog.getInstance().open(systemObject.getGlow());
+				btnGlow.setText(glowObject == null ? "None" : glowObject.getIdentifier());
+				systemObject.setGlow(glowObject);
+			}
+		});
+
 		updateData();
 
 		pack();
@@ -285,7 +295,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnInteriorBrowse.setEnabled(system.canContainInterior());
 		btnInteriorClear.setEnabled(system.canContainInterior());
 		btnInteriorView.setEnabled(system.getInteriorPath() != null);
-		glowCombo.setEnabled(system.canContainGlow());
+		btnGlow.setEnabled(system.canContainGlow());
 
 		btnAvailable.setEnabled(system.getSystemId() != Systems.EMPTY);
 		scaleSysLevel.setEnabled(system.getSystemId() != Systems.EMPTY);
@@ -308,6 +318,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			String temp = system.getInteriorPath();
 			txtInterior.setText(temp == null ? "" : Utils.trimProtocol(temp));
 			txtInterior.selectAll();
+
+			GlowObject glowObject = system.getGameObject().getGlow();
+			btnGlow.setText(glowObject == null ? "None" : glowObject.getIdentifier());
 		} else {
 			// No system - reset to default
 			if (!playerShip) {
@@ -320,6 +333,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtSysLevel.setText("");
 
 			txtInterior.setText("");
+
+			btnGlow.setText("None");
 		}
 		OverviewWindow overview = OverviewWindow.getInstance();
 		if (overview != null && overview.isVisible())
