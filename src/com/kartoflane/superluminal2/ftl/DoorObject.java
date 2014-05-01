@@ -116,4 +116,14 @@ public class DoorObject extends GameObject implements Alias, Movable, Serializab
 	public RoomObject getRightRoom() {
 		return rightRoom;
 	}
+
+	/**
+	 * Makes sure that the door is not linked to a deleted room.
+	 */
+	public void verifyLinks() {
+		if (leftRoom != null && leftRoom.isDeleted())
+			setLeftRoom(null);
+		if (rightRoom != null && rightRoom.isDeleted())
+			setRightRoom(null);
+	}
 }

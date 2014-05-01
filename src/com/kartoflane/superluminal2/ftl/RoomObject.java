@@ -87,7 +87,7 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	}
 
 	/**
-	 * @return the distance from the ship anchor, in grid cells.
+	 * @return the distance from the ship anchor to the top-left corner, in grid cells.
 	 */
 	@Override
 	public Point getLocation() {
@@ -156,6 +156,9 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 		return w + h * w >= slotId && slotId >= 0;
 	}
 
+	/**
+	 * @return center of the tile at which the slot will be located in this room, in pixels
+	 */
 	public Point getSlotLocation(int slotId) {
 		Point size = getSize();
 		int w = size.x / ShipContainer.CELL_SIZE;

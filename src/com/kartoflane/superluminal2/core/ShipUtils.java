@@ -29,6 +29,7 @@ import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
+import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -47,6 +48,27 @@ public class ShipUtils {
 		ELLIPSE,
 		ROOM,
 		DOOR
+	}
+
+	public static ShipObject loadShipFTL() {
+		// TODO
+		return null;
+	}
+
+	public static void saveShipFTL(File saveFile, ShipContainer container) throws IllegalArgumentException, IOException {
+		if (container == null)
+			throw new IllegalArgumentException("ShipContainer must not be null.");
+
+		ShipObject ship = container.getShipController().getGameObject();
+
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (saveFile == null)
+			throw new IllegalArgumentException("Destination file must not be null.");
+		if (saveFile.isDirectory())
+			throw new IllegalArgumentException("Not a file: " + saveFile.getName());
+
+		// TODO zip library
 	}
 
 	/**
@@ -221,10 +243,22 @@ public class ShipUtils {
 				attr = sysEl.getAttributeValue("img");
 				if (attr != null) {
 					system.setInteriorNamespace(attr);
-					// TODO what happens with custom-named interior images?
 				} else if (!isPlayer) {
-					// Enemy ships' systems don't use interior images
+					// Enemy ships' systems don't use interior images or glows
 					system.setInteriorNamespace(null);
+				}
+
+				// When an interior image doesn't have a corresponding glow,
+				// No glow is used -- apparently there is no default to fall back to.
+				// The editor will try to create a glow, should no match be found
+				if (system.canContainGlow()) {
+					if (attr == null)
+						attr = sys.getDefaultInteriorNamespace();
+					attr = attr.replace("room_", "");
+					GlowObject glowObject = db.getGlow(attr);
+					if (glowObject != null) {
+						system.setGlowSet(glowObject.getGlowSet());
+					}
 				}
 
 				// Get the weapon used by this system
@@ -436,9 +470,10 @@ public class ShipUtils {
 
 		container.updateGameObjects();
 		ship.coalesceRooms();
-		// TODO automatically link doors
+		ship.linkDoors();
+		GlowObject[] newGlows = ship.createGlows();
 
-		Document doc = new Document();
+		Document blueprintsDoc = new Document();
 		Element root = new Element("wrapper");
 		Element e = null;
 		String attr = null;
@@ -446,26 +481,29 @@ public class ShipUtils {
 		// Prepare the document
 		Element shipBlueprint = new Element("shipBlueprint");
 		attr = ship.getBlueprintName();
-		shipBlueprint.setAttribute("name", attr);
+		shipBlueprint.setAttribute("name", attr == null ? "" : attr);
 		attr = ship.getLayout();
-		shipBlueprint.setAttribute("layout", attr);
+		shipBlueprint.setAttribute("layout", attr == null ? "" : attr);
 		attr = ship.getImageNamespace();
-		shipBlueprint.setAttribute("img", attr);
+		shipBlueprint.setAttribute("img", attr == null ? "" : attr);
 
 		e = new Element("class");
 		attr = ship.getShipClass();
 		e.setText(attr == null ? "" : attr);
-		shipBlueprint.addContent(e);
+		shipBlueprint.addContent(e); // Add <class> to <shipBlueprint>
 
-		e = new Element("name");
-		attr = ship.getShipName();
-		e.setText(attr == null ? "" : attr);
-		shipBlueprint.addContent(e);
+		// Name and description only affect player ships
+		if (ship.isPlayerShip()) {
+			e = new Element("name");
+			attr = ship.getShipName();
+			e.setText(attr == null ? "" : attr);
+			shipBlueprint.addContent(e); // Add <name> to <shipBlueprint>
 
-		e = new Element("desc");
-		attr = ship.getShipDescription();
-		e.setText(attr == null ? "" : attr);
-		shipBlueprint.addContent(e);
+			e = new Element("desc");
+			attr = ship.getShipDescription();
+			e.setText(attr == null ? "" : attr);
+			shipBlueprint.addContent(e); // Add <desc> to <shipBlueprint>
+		}
 
 		Element systemList = new Element("systemList");
 		for (Systems sys : Systems.getSystems()) {
@@ -500,28 +538,28 @@ public class ShipUtils {
 					if (sys != Systems.MEDBAY && sys != Systems.CLONEBAY) {
 						e = new Element("direction");
 						e.setText(station.getSlotDirection().toString());
-						slotEl.addContent(e);
+						slotEl.addContent(e); // Add <direction> to <slot>
 					}
 
 					e = new Element("number");
 					e.setText("" + station.getSlotId());
-					slotEl.addContent(e);
+					slotEl.addContent(e); // Add <number> to <slot>
 
-					sysEl.addContent(slotEl);
+					sysEl.addContent(slotEl); // Add <slot> to <system>
 				}
 
-				systemList.addContent(sysEl);
+				systemList.addContent(sysEl); // Add <system> to <systemLst>
 			}
 		}
-		shipBlueprint.addContent(systemList);
+		shipBlueprint.addContent(systemList); // Add <systemList> to <shipBlueprint>
 
 		e = new Element("weaponSlots");
 		e.setText("" + ship.getWeaponSlots());
-		shipBlueprint.addContent(e);
+		shipBlueprint.addContent(e); // Add <weaponSlots> to <shipBlueprint>
 
 		e = new Element("droneSlots");
 		e.setText("" + ship.getDroneSlots());
-		shipBlueprint.addContent(e);
+		shipBlueprint.addContent(e); // Add <droneSlots> to <shipBlueprint>
 
 		e = new Element("weaponList");
 		e.setAttribute("missiles", "" + ship.getMissilesAmount());
@@ -536,7 +574,7 @@ public class ShipUtils {
 		else {
 			// TODO load="" + count
 		}
-		shipBlueprint.addContent(e);
+		shipBlueprint.addContent(e); // Add <weaponList> to <shipBlueprint>
 
 		e = new Element("droneList");
 		e.setAttribute("drones", "" + ship.getDronePartsAmount());
@@ -551,64 +589,92 @@ public class ShipUtils {
 		else {
 			// TODO load="" + count
 		}
-		shipBlueprint.addContent(e);
+		shipBlueprint.addContent(e); // Add <droneList> to <shipBlueprint>
 
 		e = new Element("health");
 		e.setAttribute("amount", "" + ship.getHealth());
-		shipBlueprint.addContent(e);
+		shipBlueprint.addContent(e); // Add <health> to <shipBlueprint>
 
 		e = new Element("maxPower");
 		e.setAttribute("amount", "" + ship.getPower());
-		shipBlueprint.addContent(e);
+		shipBlueprint.addContent(e); // Add <maxPower> to <shipBlueprint>
 
 		// Sector tags
 		// Enemy exclusive
 		if (!ship.isPlayerShip()) {
 			e = new Element("minSector");
 			e.setText("" + ship.getMinSector());
-			shipBlueprint.addContent(e);
+			shipBlueprint.addContent(e); // Add <minSector> to <shipBlueprint>
 
 			e = new Element("maxSector");
 			e.setText("" + ship.getMaxSector());
-			shipBlueprint.addContent(e);
+			shipBlueprint.addContent(e); // Add <maxSector> to <shipBlueprint>
 		}
 
 		for (Races race : Races.values()) {
 			int amount = ship.getCrewCount(race);
 			int max = ship.getCrewMax(race);
 
+			// 'amount' is shared between player and enemy ships
 			e = new Element("crewCount");
 			e.setAttribute("amount", "" + amount);
 
+			// 'max' is exclusive to enemy ships
 			if (!ship.isPlayerShip())
 				e.setAttribute("max", "" + max);
 
-			e.setAttribute("class", race.toString().toLowerCase());
+			e.setAttribute("class", race.name().toLowerCase());
 
 			// Don't print an empty tag
 			if (amount > 0 && (ship.isPlayerShip() || max > 0))
-				shipBlueprint.addContent(e);
+				shipBlueprint.addContent(e); // Add <crewCount> to <shipBlueprint>
 		}
 
 		for (AugmentObject aug : ship.getAugments()) {
 			e = new Element("aug");
 			e.setAttribute("name", aug.getBlueprintName());
-			shipBlueprint.addContent(e);
+			shipBlueprint.addContent(e); // Add <aug> to <shipBlueprint>
 		}
 
-		root.addContent(shipBlueprint);
-		doc.setRootElement(root);
+		root.addContent(shipBlueprint); // Add <shipBlueprint> to <wrapper>
+		blueprintsDoc.setRootElement(root);
 
 		// Write the files
 		File blueprints = new File(destination.getAbsolutePath() + "/" +
 				Database.getInstance().getAssociatedFile(ship.getBlueprintName()) + ".append");
-		Utils.writeFileXML(doc, blueprints);
+		Utils.writeFileXML(blueprintsDoc, blueprints);
 
 		File fileTXT = new File(destination.getAbsolutePath() + "/" + ship.getLayout() + ".txt");
 		saveLayoutTXT(ship, fileTXT);
 
 		File fileXML = new File(destination.getAbsolutePath() + "/" + ship.getLayout() + ".xml");
 		saveLayoutXML(ship, fileXML);
+
+		// Create the rooms.xml.append file for glow locations
+		if (newGlows.length != 0) {
+			Document roomsDoc = new Document();
+			root = new Element("wrapper");
+
+			for (GlowObject glow : newGlows) {
+				Element glowEl = new Element("roomLayout");
+				glowEl.setAttribute("name", glow.getIdentifier());
+
+				e = new Element("computerGlow");
+				if (!glow.getGlowSet().getIdentifier().equals("glow"))
+					e.setAttribute("name", glow.getGlowSet().getIdentifier());
+				e.setAttribute("x", "" + glow.getX());
+				e.setAttribute("y", "" + glow.getY());
+				e.setAttribute("dir", "" + glow.getDirection().name());
+
+				glowEl.addContent(e);
+				root.addContent(glowEl);
+			}
+
+			roomsDoc.setRootElement(root);
+
+			File rooms = new File(destination.getAbsolutePath() + "/rooms.xml.append");
+			Utils.writeFileXML(roomsDoc, rooms);
+		}
 	}
 
 	/**

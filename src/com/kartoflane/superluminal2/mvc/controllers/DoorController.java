@@ -194,13 +194,7 @@ public class DoorController extends ObjectController {
 	/**
 	 * Makes sure that the door is not linked to a deleted room.
 	 */
-	public void verifyLinkedDoors() {
-		AbstractController ac = null;
-		ac = container.getController(getLeftRoom());
-		if (ac != null && ac.isDeleted())
-			setLeftRoom(null);
-		ac = container.getController(getRightRoom());
-		if (ac != null && ac.isDeleted())
-			setRightRoom(null);
+	public void verifyLinks() {
+		getGameObject().verifyLinks();
 	}
 }
