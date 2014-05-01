@@ -43,21 +43,18 @@ public class Superluminal {
 
 	public static final String HOTKEYS_FILE = "hotkeys.xml";
 
-	private static Display display = null;
-
 	/**
 	 * settings ideas:
 	 * - close ship loader after loading
 	 * - pin all elements after loading a ship?
 	 * - checkboxes to make floor/cloak/shield/mounts follow hull, something along these lines
-	 * -
+	 * - whether to load data from game's archives, or unpack them and use that
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - load glow sets from rooms.xml
-	 * - mount tool cursor offset (make border follow the image)
+	 * - rudimentary image viewer
 	 * - ship offset modification
-	 * - keep interior images etc in Database --> allows for easy handling of mods (loading .ftl file that has custom images, can't add that to rdat, have to store in Database)
+	 * - zip protocol
 	 * - automatic version check
 	 * - add blueprint name selection to general tab?
 	 * - rework door linking so that it doesn't have to be done through the DoorDataComposite (like SystemsMenu)
@@ -79,6 +76,7 @@ public class Superluminal {
 	 */
 
 	public static void main(String[] args) {
+		Display display = Display.getCurrent();
 		Display.setAppName(APP_NAME);
 		Display.setAppVersion(APP_VERSION.toString());
 
@@ -253,6 +251,7 @@ public class Superluminal {
 
 		// Animations need to be loaded before weapons, since they reference them
 		db.preloadAnims();
+		db.loadGlowSets();
 
 		for (String innerPath : data.list()) {
 			if (innerPath.endsWith(".xml")) {
@@ -310,7 +309,7 @@ public class Superluminal {
 						try {
 							db.storeGlow(DataUtils.loadGlow(e));
 						} catch (IllegalArgumentException ex) {
-							log.warn("Could not glow set: " + ex.getMessage());
+							log.warn("Could not load glow object: " + ex.getMessage());
 						}
 					}
 

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
 
@@ -17,11 +18,14 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.GlowSet;
+import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class Database {
@@ -56,6 +60,7 @@ public class Database {
 
 	public static final AnimationObject DEFAULT_ANIM_OBJ = new AnimationObject();
 	public static final WeaponObject DEFAULT_WEAPON_OBJ = new WeaponObject();
+	public static final GlowSet DEFAULT_GLOW_SET = new GlowSet();
 	public static final GlowObject DEFAULT_GLOW_OBJ = new GlowObject();
 
 	private static final Database instance = new Database();
@@ -73,6 +78,7 @@ public class Database {
 	private TreeSet<DroneObject> droneObjects = new TreeSet<DroneObject>();
 	private TreeSet<AugmentObject> augmentObjects = new TreeSet<AugmentObject>();
 	private TreeSet<GlowObject> glowObjects = new TreeSet<GlowObject>();
+	private TreeSet<GlowSet> glowSets = new TreeSet<GlowSet>();
 
 	/** Temporary map to hold anim sheets, since they need to be loaded before weaponAnims, which reference them */
 	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
@@ -263,6 +269,23 @@ public class Database {
 		return glowObjects.toArray(new GlowObject[0]);
 	}
 
+	public void storeGlowSet(GlowSet set) {
+		glowSets.add(set);
+	}
+
+	public GlowSet getGlowSet(String id) {
+		GlowSet[] glowSets = getGlowSets();
+		try {
+			return glowSets[binarySearch(glowSets, id, 0, glowSets.length)];
+		} catch (IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	public GlowSet[] getGlowSets() {
+		return glowSets.toArray(new GlowSet[0]);
+	}
+
 	public void storeShipMetadata(ShipMetadata metadata) {
 		ArrayList<ShipMetadata> dataList = shipMetadata.get(metadata.getBlueprintName());
 		if (dataList == null) {
@@ -354,5 +377,58 @@ public class Database {
 			return binarySearch(array, identifier, min, mid - 1);
 		else
 			return mid;
+	}
+
+	public void loadGlowSets() {
+		final Pattern glowPtrn = Pattern.compile("[0-9]\\.png");
+
+		Predicate<String> filter = new Predicate<String>() {
+			@Override
+			public boolean accept(String path) {
+				return path.contains("img/ship/interior/") &&
+						(glowPtrn.matcher(path).find() || path.endsWith("_glow.png"));
+			}
+		};
+
+		TreeSet<String> eligiblePaths = new TreeSet<String>();
+		for (String path : resource.list()) {
+			if (filter.accept(path))
+				eligiblePaths.add(path);
+		}
+
+		for (String s1 : eligiblePaths) {
+			if (s1.endsWith("_glow.png")) {
+				String namespace = s1.replaceAll("_glow.png", "");
+				namespace = namespace.replace("img/ship/interior/", "");
+				GlowSet set = new GlowSet(namespace);
+				set.setImage(Glows.CLOAK, "rdat:" + s1);
+				glowSets.add(set);
+			} else if (s1.endsWith("1.png")) {
+				String namespace = s1.replaceAll("[0-9]\\.png", "");
+				String s2 = find(eligiblePaths, namespace + "2.png");
+				String s3 = find(eligiblePaths, namespace + "3.png");
+
+				if (s1 != null && s2 != null && s3 != null) {
+					namespace = namespace.replace("img/ship/interior/", "");
+					GlowSet set = new GlowSet(namespace);
+					set.setImage(Glows.BLUE, "rdat:" + s1);
+					set.setImage(Glows.GREEN, "rdat:" + s2);
+					set.setImage(Glows.YELLOW, "rdat:" + s3);
+					glowSets.add(set);
+				}
+			}
+		}
+
+	}
+
+	private static String find(TreeSet<String> list, String name) {
+		for (String s : list) {
+			if (s.equals(name))
+				return s;
+			// Break if the current string is greater than the sought one
+			else if (s.compareTo(name) > 0)
+				break;
+		}
+		return null;
 	}
 }
