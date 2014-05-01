@@ -108,15 +108,10 @@ public class DataUtils {
 			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
 		ShipMetadata metadata = new ShipMetadata(e, attr);
 
-		attr = e.getAttributeValue("layout");
-		if (attr == null)
-			throw new IllegalArgumentException(metadata.getBlueprintName() + " is missing 'layout' attribute.");
-		metadata.setShipLayoutTXT(attr);
-
 		attr = e.getAttributeValue("img");
 		if (attr == null)
 			throw new IllegalArgumentException(metadata.getBlueprintName() + " is missing 'img' attribute.");
-		metadata.setShipLayoutXML(attr);
+		metadata.setShipImageNamespace(attr);
 
 		child = e.getChild("class");
 		if (child == null)
@@ -327,7 +322,7 @@ public class DataUtils {
 		// Optional attribute that allows to use a different image for the glow
 		attr = child.getAttributeValue("name");
 		if (attr != null)
-			glow.setGlowImageNamespace(attr);
+			glow.setGlowSet(Database.getInstance().getGlowSet(attr));
 
 		attr = child.getAttributeValue("x");
 		if (attr == null)

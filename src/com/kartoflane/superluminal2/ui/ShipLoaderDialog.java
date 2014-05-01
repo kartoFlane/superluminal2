@@ -8,15 +8,20 @@ import java.util.Iterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -34,12 +39,14 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.ShipUtils;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.mvc.views.Preview;
+import org.eclipse.swt.custom.SashForm;
 
 public class ShipLoaderDialog {
 	private static ShipLoaderDialog instance = null;
 	private static final Logger log = LogManager.getLogger(ShipLoaderDialog.class);
 
-	private static final int minTreeWidth = 400;
+	private static final int minTreeWidth = 405;
 	private static final int defaultBlueTabWidth = 200;
 	private static final int defaultClassTabWidth = 200;
 	private static final int defaultMetadataWidth = 250;
@@ -48,6 +55,7 @@ public class ShipLoaderDialog {
 	private HashMap<String, TreeItem> blueprintTreeMap = new HashMap<String, TreeItem>();
 
 	private boolean sortByBlueprint = true;
+	private Preview preview = null;
 
 	private Shell shell;
 	private Text txtBlueprint;
@@ -58,18 +66,21 @@ public class ShipLoaderDialog {
 	private TreeItem trtmEnemy;
 	private Tree tree;
 	private Button btnLoad;
+	private Canvas canvas;
 
 	public ShipLoaderDialog(Shell parent) {
 		instance = this;
+
+		preview = new Preview();
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
 		shell.setText(Superluminal.APP_NAME + " - Ship Loader");
 		shell.setLayout(new GridLayout(2, false));
 
-		tree = new Tree(shell, SWT.BORDER | SWT.FULL_SELECTION);
-		GridData gd_tree = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-		gd_tree.widthHint = minTreeWidth;
-		tree.setLayoutData(gd_tree);
+		SashForm sashForm = new SashForm(shell, SWT.SMOOTH);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
 
 		TreeColumn trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
@@ -90,11 +101,18 @@ public class ShipLoaderDialog {
 		trtmEnemy.setText(0, "Enemy Ships");
 		trtmEnemy.setText(1, "");
 
-		Composite metadataComposite = new Composite(shell, SWT.BORDER);
+		ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm, SWT.BORDER | SWT.V_SCROLL);
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.setExpandVertical(true);
+
+		Composite metadataComposite = new Composite(scrolledComposite, SWT.NONE);
 		metadataComposite.setLayout(new GridLayout(2, false));
-		GridData gd_metadataComposite = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
-		gd_metadataComposite.widthHint = defaultMetadataWidth;
-		metadataComposite.setLayoutData(gd_metadataComposite);
+
+		canvas = new Canvas(metadataComposite, SWT.NONE);
+		GridData gd_canvas = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+		gd_canvas.heightHint = 100;
+		canvas.setLayoutData(gd_canvas);
+		canvas.addPaintListener(preview);
 
 		Label lblBlueprint = new Label(metadataComposite, SWT.NONE);
 		lblBlueprint.setText("Blueprint:");
@@ -115,13 +133,17 @@ public class ShipLoaderDialog {
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 		Label lblDescription = new Label(metadataComposite, SWT.NONE);
-		lblDescription.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblDescription.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false, 2, 1));
 		lblDescription.setText("Description:");
 
 		txtDescription = new Text(metadataComposite, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		GridData gd_txtDescription = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
 		gd_txtDescription.heightHint = 100;
 		txtDescription.setLayoutData(gd_txtDescription);
+		scrolledComposite.setContent(metadataComposite);
+		scrolledComposite.setMinSize(metadataComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		sashForm.setWeights(new int[] { 1, 1 });
 
 		Composite buttonComposite = new Composite(shell, SWT.NONE);
 		GridLayout gl_buttonComposite = new GridLayout(2, false);
@@ -178,6 +200,9 @@ public class ShipLoaderDialog {
 						txtClass.setText("");
 						txtName.setText("");
 						txtDescription.setText("");
+
+						preview.setImage(null);
+						canvas.redraw();
 					} else {
 						btnLoad.setEnabled(true);
 						txtBlueprint.setText(metadata.getBlueprintName());
@@ -189,9 +214,16 @@ public class ShipLoaderDialog {
 							txtName.setText("N/A");
 							txtDescription.setText("N/A");
 						}
+
+						String path = metadata.getHullImagePath();
+						preview.setImage(path == null ? "rdat:img/nullResource.png" : path);
+						updatePreview();
+						canvas.redraw();
 					}
 				} else {
 					btnLoad.setEnabled(false);
+					preview.setImage(null);
+					canvas.redraw();
 				}
 			}
 		});
@@ -199,7 +231,7 @@ public class ShipLoaderDialog {
 		trclmnBlueprint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// sort by blueprint name
+				// Sort by blueprint name
 				if (!sortByBlueprint) {
 					sortByBlueprint = true;
 					loadShipList(Database.getInstance().getShipMetadata());
@@ -210,7 +242,7 @@ public class ShipLoaderDialog {
 		trclmnClass.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// sort by class name
+				// Sort by class name
 				if (sortByBlueprint) {
 					sortByBlueprint = false;
 					loadShipList(Database.getInstance().getShipMetadata());
@@ -233,7 +265,7 @@ public class ShipLoaderDialog {
 						StringBuilder buf = new StringBuilder();
 						buf.append(String.format("%s could not be loaded:", metadata.getBlueprintName()));
 						buf.append("\n");
-						buf.append(ex.getStackTrace()[0].toString());
+						buf.append(ex.getMessage());
 						buf.append("\n\nCheck log for details.");
 						Utils.showWarningDialog(shell, buf.toString());
 					}
@@ -266,6 +298,18 @@ public class ShipLoaderDialog {
 					else
 						selectedItem.setExpanded(!selectedItem.getExpanded());
 				}
+			}
+		});
+
+		canvas.addControlListener(new ControlListener() {
+			@Override
+			public void controlMoved(ControlEvent e) {
+			}
+
+			@Override
+			public void controlResized(ControlEvent e) {
+				updatePreview();
+				canvas.redraw();
 			}
 		});
 
@@ -314,12 +358,35 @@ public class ShipLoaderDialog {
 		}
 	}
 
+	private void updatePreview() {
+		Point iSize = preview.getImageSize();
+		Point cSize = canvas.getSize();
+
+		double ratio = (double) iSize.y / iSize.x;
+		int w = (int) (cSize.y / ratio);
+		int h = (int) (cSize.x * ratio);
+		preview.setSize(min(w, cSize.x, iSize.x), min(h, cSize.y, iSize.y));
+		preview.setLocation(cSize.x / 2, cSize.y / 2);
+	}
+
 	public void open() {
 		shell.open();
 	}
 
+	public boolean isVisible() {
+		return shell.isVisible();
+	}
+
 	public static ShipLoaderDialog getInstance() {
 		return instance;
+	}
+
+	public void dispose() {
+		shell.dispose();
+	}
+
+	private int min(int a, int b, int c) {
+		return Math.min(a, Math.min(b, c));
 	}
 
 	private class MetadataIterator implements Iterator<String> {
@@ -396,9 +463,5 @@ public class ShipLoaderDialog {
 				return result;
 			}
 		}
-	}
-
-	public void dispose() {
-		shell.dispose();
 	}
 }

@@ -1,8 +1,11 @@
 package com.kartoflane.superluminal2.components;
 
+import net.vhati.ftldat.FTLDat.FTLPack;
+
 import org.jdom2.Element;
 
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Utils;
 
 public class ShipMetadata {
 
@@ -12,8 +15,7 @@ public class ShipMetadata {
 	private String shipClass = "";
 	private String shipName = "";
 	private String description = "";
-	private String layoutTxt = null;
-	private String layoutXml = null;
+	private String imageNamespace = "";
 
 	public ShipMetadata(Element element, String blueprintName) {
 		isPlayer = Database.getInstance().isPlayerShip(blueprintName);
@@ -63,19 +65,26 @@ public class ShipMetadata {
 		return description;
 	}
 
-	public void setShipLayoutTXT(String layout) {
-		layoutTxt = layout;
+	public void setShipImageNamespace(String namespace) {
+		if (namespace == null)
+			throw new IllegalArgumentException("Image namespace must not be null.");
+		imageNamespace = namespace;
 	}
 
-	public String getShipLayoutTXT() {
-		return layoutTxt;
+	public String getShipImageNamespace() {
+		return imageNamespace;
 	}
 
-	public void setShipLayoutXML(String layout) {
-		layoutXml = layout;
+	public String getHullImagePath() {
+		return firstExisting(imageNamespace + "_base.png", Database.getInstance().getResourceDat());
 	}
 
-	public String getShipLayoutXML() {
-		return layoutXml;
+	private static String firstExisting(String suffix, FTLPack archive) {
+		String[] prefixes = { "rdat:img/ship/", "rdat:img/ships_glow/", "rdat:img/ships_noglow/" };
+		for (String prefix : prefixes) {
+			if (archive.contains(Utils.trimProtocol(prefix) + suffix))
+				return prefix + suffix;
+		}
+		return null;
 	}
 }
