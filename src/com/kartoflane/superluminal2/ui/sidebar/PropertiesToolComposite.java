@@ -231,7 +231,7 @@ public class PropertiesToolComposite extends Composite {
 				if (path == null)
 					return;
 
-				File file = new File(path); // TODO allow only if protocl is file:
+				File file = new File(path);
 				if (file.exists()) {
 					if (Desktop.isDesktopSupported()) {
 						Desktop desktop = Desktop.getDesktop();
@@ -360,6 +360,7 @@ public class PropertiesToolComposite extends Composite {
 
 		spHealth = new Spinner(generalComposite, SWT.BORDER);
 		spHealth.setTextLimit(3);
+		spHealth.setMinimum(0);
 		spHealth.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
 		Label lblReactor = new Label(generalComposite, SWT.NONE);
@@ -367,6 +368,7 @@ public class PropertiesToolComposite extends Composite {
 
 		spPower = new Spinner(generalComposite, SWT.BORDER);
 		spPower.setTextLimit(3);
+		spPower.setMinimum(0);
 		spPower.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
 		// Enemy ship-specific widgets
@@ -411,6 +413,7 @@ public class PropertiesToolComposite extends Composite {
 		lblMissiles.setText("Starting Missiles");
 
 		Spinner spMissiles = new Spinner(grpWeapons, SWT.BORDER);
+		spMissiles.setMinimum(0);
 		spMissiles.setMaximum(999);
 		spMissiles.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 
@@ -418,6 +421,7 @@ public class PropertiesToolComposite extends Composite {
 		lblWeaponSlots.setText("Slots");
 
 		Spinner spWeaponSlots = new Spinner(grpWeapons, SWT.BORDER);
+		spWeaponSlots.setMinimum(0);
 		spWeaponSlots.setMaximum(10);
 		spWeaponSlots.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 

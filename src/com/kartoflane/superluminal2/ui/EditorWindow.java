@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -129,6 +130,8 @@ public class EditorWindow {
 		new SettingsDialog(shell);
 		new SystemsMenu(shell);
 		new GlowSelectionDialog(shell);
+		new GlowSetDialog(GlowSelectionDialog.getInstance().getShell());
+		new ImageViewerDialog(shell);
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
@@ -532,10 +535,13 @@ public class EditorWindow {
 					return;
 				}
 
+				// TODO ask if user wants to pack into .ftl or not
+
 				File temp = saveDestination;
 				// Only prompt for save directory if the user hasn't chosen any yet
-				if (saveDestination == null)
-					temp = promptForDirectory("Save As...", "Please select the folder where you wish to save the ship.");
+				if (saveDestination == null) {
+					temp = promptForSaveFile();
+				}
 
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
@@ -558,7 +564,8 @@ public class EditorWindow {
 				ShipContainer container = Manager.getCurrentShip();
 
 				// Always prompt for save directory
-				File temp = promptForDirectory("Save As...", "Please select the folder where you wish to save the ship.");
+				// File temp = promptForSaveFile();
+				File temp = promptForDirectory("", "");
 
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
@@ -899,8 +906,11 @@ public class EditorWindow {
 	 */
 	public boolean isFocusControl() {
 		boolean result = !OverviewWindow.getInstance().isVisible() || !OverviewWindow.getInstance().isFocusControl();
+		result &= !ShipLoaderDialog.getInstance().isVisible() && !SettingsDialog.getInstance().isVisible();
+		result &= !GlowSelectionDialog.getInstance().isVisible();
 		result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isVisible();
 		result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isVisible();
+
 		Composite c = (Composite) getSidebarContent();
 		if (c != null && !c.isDisposed())
 			result &= !c.isFocusControl();
@@ -1027,6 +1037,24 @@ public class EditorWindow {
 		DirectoryDialog dialog = new DirectoryDialog(shell);
 		dialog.setText(title);
 		dialog.setMessage(message);
+
+		String path = dialog.open();
+		if (path == null) {
+			// User aborted selection
+			// Nothing to do here
+		} else {
+			result = new File(path);
+		}
+
+		return result;
+	}
+
+	private File promptForSaveFile() {
+		File result = null;
+		FileDialog dialog = new FileDialog(shell, SWT.SAVE);
+		dialog.setFilterExtensions(new String[] { "*.ftl" });
+		dialog.setText("Save Ship");
+		dialog.setOverwrite(true);
 
 		String path = dialog.open();
 		if (path == null) {

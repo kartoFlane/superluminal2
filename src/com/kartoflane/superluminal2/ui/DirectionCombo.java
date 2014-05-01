@@ -52,7 +52,7 @@ public class DirectionCombo extends Combo {
 		// Need to override this in order to allow subclassing
 	}
 
-	public void setDirection(Directions dir) {
+	public void select(Directions dir) {
 		if (dir == Directions.NONE && !full)
 			throw new IllegalArgumentException("DirectionCombo wasn't instantiated as full and doesn't have an item for Directions.NONE");
 		select(toIndex(dir));

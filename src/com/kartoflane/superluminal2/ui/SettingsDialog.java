@@ -112,6 +112,10 @@ public class SettingsDialog {
 		return instance;
 	}
 
+	public boolean isVisible() {
+		return shell.isVisible();
+	}
+
 	public void dispose() {
 		shell.dispose();
 	}

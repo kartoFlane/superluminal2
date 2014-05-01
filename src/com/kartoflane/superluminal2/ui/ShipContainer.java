@@ -130,6 +130,7 @@ public class ShipContainer implements Disposable {
 		for (Systems sys : Systems.values()) {
 			SystemObject system = ship.getSystem(sys);
 			SystemController systemC = SystemController.newInstance(this, system);
+
 			add(systemC);
 			if (sys.canContainStation())
 				add(StationController.newInstance(this, systemC, system.getStation()));
@@ -138,6 +139,7 @@ public class ShipContainer implements Disposable {
 		for (Systems sys : Systems.getSystems()) {
 			SystemObject system = ship.getSystem(sys);
 			RoomController room = (RoomController) getController(system.getRoom());
+
 			if (room != null)
 				assign(sys, room);
 		}

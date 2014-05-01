@@ -8,11 +8,11 @@ public enum Directions {
 	NONE;
 
 	/**
-	 * A non case-sensitive alternative to valueOf(String), that also
-	 * interprets NO as NONE.
+	 * A non-case-sensitive alternative to valueOf(String), that also
+	 * interprets NO as NONE and ignores trailing/leading whitespace.
 	 */
 	public static Directions parseDir(String value) {
-		value = value.toUpperCase();
+		value = value.toUpperCase().trim();
 		if (value.equals("NO"))
 			return NONE;
 		else
