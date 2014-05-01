@@ -5,7 +5,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.ftl.GlowObject.Glows;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -143,15 +142,6 @@ public class SystemController extends ObjectController implements Controller {
 
 	public String getInteriorPath() {
 		return getGameObject().getInteriorPath();
-	}
-
-	public void setGlowPath(Glows glowId, String glowPath) {
-		getGameObject().getGlow().setGlowPath(glowPath, glowId);
-		// Glows are not represented in the editor, nothing else to do here
-	}
-
-	public String getGlowPath(Glows glowId) {
-		return getGameObject().getGlow().getGlowPath(glowId);
 	}
 
 	public boolean canContainGlow() {

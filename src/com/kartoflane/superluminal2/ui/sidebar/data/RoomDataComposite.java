@@ -21,7 +21,7 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
-import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
@@ -34,6 +34,9 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
 
 public class RoomDataComposite extends Composite implements DataComposite {
+
+	private RoomController roomC = null;
+	private ShipContainer container = null;
 
 	private Button btnSystem;
 	private Label lblSysLevel;
@@ -48,9 +51,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private Button btnInteriorClear;
 	private Text txtInterior;
 	private Button btnInteriorView;
-
-	private RoomController roomC = null;
-	private ShipContainer container = null;
 	private Label label;
 	private Label lblGlow;
 	private Button btnGlow;
@@ -171,13 +171,14 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		txtInterior = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
 		txtInterior.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
+		// Glow widgets
 		lblGlow = new Label(imagesComposite, SWT.NONE);
 		lblGlow.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblGlow.setText("Manning glow:");
 
 		btnGlow = new Button(imagesComposite, SWT.NONE);
 		GridData gd_btnGlow = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1);
-		gd_btnGlow.widthHint = 80;
+		gd_btnGlow.widthHint = 120;
 		btnGlow.setLayoutData(gd_btnGlow);
 		btnGlow.setText("None");
 
@@ -260,10 +261,12 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			public void widgetSelected(SelectionEvent e) {
 				Systems sys = container.getActiveSystem(roomC.getGameObject());
 				SystemObject systemObject = container.getSystemController(sys).getGameObject();
+				GlowSet glowSet = GlowSelectionDialog.getInstance().open(systemObject);
 
-				GlowObject glowObject = GlowSelectionDialog.getInstance().open(systemObject.getGlow());
-				btnGlow.setText(glowObject == null ? "None" : glowObject.getIdentifier());
-				systemObject.setGlow(glowObject);
+				if (glowSet != null) {
+					btnGlow.setText(glowSet.getIdentifier());
+					systemObject.setGlowSet(glowSet);
+				}
 			}
 		});
 
@@ -295,7 +298,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnInteriorBrowse.setEnabled(system.canContainInterior());
 		btnInteriorClear.setEnabled(system.canContainInterior());
 		btnInteriorView.setEnabled(system.getInteriorPath() != null);
-		btnGlow.setEnabled(system.canContainGlow());
+
+		btnGlow.setEnabled(system.canContainGlow() && playerShip);
 
 		btnAvailable.setEnabled(system.getSystemId() != Systems.EMPTY);
 		scaleSysLevel.setEnabled(system.getSystemId() != Systems.EMPTY);
@@ -319,8 +323,13 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtInterior.setText(temp == null ? "" : Utils.trimProtocol(temp));
 			txtInterior.selectAll();
 
-			GlowObject glowObject = system.getGameObject().getGlow();
-			btnGlow.setText(glowObject == null ? "None" : glowObject.getIdentifier());
+			if (system.canContainGlow() && playerShip) {
+				btnGlow.setText(system.getGameObject().getGlowSet().getIdentifier());
+			} else {
+				btnGlow.setText("None");
+			}
+
+			EditorWindow.getInstance().forceFocus();
 		} else {
 			// No system - reset to default
 			if (!playerShip) {
@@ -333,7 +342,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtSysLevel.setText("");
 
 			txtInterior.setText("");
-
 			btnGlow.setText("None");
 		}
 		OverviewWindow overview = OverviewWindow.getInstance();

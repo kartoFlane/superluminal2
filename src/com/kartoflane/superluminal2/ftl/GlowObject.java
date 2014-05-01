@@ -4,6 +4,8 @@ import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 /**
  * A class representing a glow namespace.
@@ -14,12 +16,15 @@ import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 public class GlowObject implements Comparable<GlowObject>, Identifiable {
 
 	private final String identifier;
-	private String imageNamespace = null;
+	private GlowSet glowSet = null;
 
 	private int locX = 0;
 	private int locY = 0;
 	private Directions direction = Directions.NONE;
 
+	/**
+	 * Creates the default glow object.
+	 */
 	public GlowObject() {
 		this("Default Glow");
 	}
@@ -28,7 +33,7 @@ public class GlowObject implements Comparable<GlowObject>, Identifiable {
 		if (identifier == null)
 			throw new IllegalArgumentException("Identifier must not be null.");
 		this.identifier = identifier;
-		setGlowImageNamespace(identifier);
+		setGlowSet(Database.DEFAULT_GLOW_SET);
 	}
 
 	@Override
@@ -36,18 +41,14 @@ public class GlowObject implements Comparable<GlowObject>, Identifiable {
 		return identifier;
 	}
 
-	public void setGlowImageNamespace(String namespace) {
-		if (namespace == null)
-			throw new IllegalArgumentException("Namespace must not be null.");
-		imageNamespace = namespace;
+	public void setGlowSet(GlowSet set) {
+		if (set == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		glowSet = set;
 	}
 
-	public String getGlowImageNamespace() {
-		return imageNamespace;
-	}
-
-	public String getGlowImagePath() {
-		return "img/ship/interior/" + imageNamespace + ".png";
+	public GlowSet getGlowSet() {
+		return glowSet;
 	}
 
 	public void setLocation(int x, int y) {
@@ -83,6 +84,53 @@ public class GlowObject implements Comparable<GlowObject>, Identifiable {
 
 	public Directions getDirection() {
 		return direction;
+	}
+
+	/**
+	 * Sets the location and direction of the glow in accordance with the data
+	 * stored in the room and station supplied in argument.
+	 * 
+	 * @param room
+	 *            the room in which the station is placed
+	 * @param station
+	 *            the station to which the glow is assigned
+	 */
+	public void setData(RoomObject room, StationObject station) {
+		// TODO
+		Point glowLoc = room.getSlotLocation(station.getSlotId());
+		glowLoc.x -= ShipContainer.CELL_SIZE / 2;
+		glowLoc.y -= ShipContainer.CELL_SIZE / 2;
+		Point roomLoc = room.getLocation();
+		roomLoc.x = roomLoc.x * ShipContainer.CELL_SIZE;
+		roomLoc.y = roomLoc.y * ShipContainer.CELL_SIZE;
+
+		glowLoc.x -= roomLoc.x;
+		glowLoc.y -= roomLoc.y;
+
+		switch (station.getSlotDirection()) {
+			case UP:
+				glowLoc.x += 5;
+				glowLoc.y += 0;
+				break;
+			case RIGHT:
+				glowLoc.x += 18;
+				glowLoc.y += 7;
+				break;
+			case DOWN:
+				glowLoc.x += 5;
+				glowLoc.y += 18;
+				break;
+			case LEFT:
+				glowLoc.x += 0;
+				glowLoc.y += 9;
+				break;
+			default:
+				break;
+		}
+
+		setDirection(station.getSlotDirection());
+		setX(glowLoc.x);
+		setY(glowLoc.y);
 	}
 
 	@Override

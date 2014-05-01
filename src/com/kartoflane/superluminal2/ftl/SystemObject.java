@@ -17,7 +17,7 @@ public class SystemObject extends GameObject {
 
 	private RoomObject room;
 	private StationObject station;
-	private GlowObject glow;
+	private GlowSet glowSet;
 
 	private String interiorNamespace = null;
 	private String interiorPath = null;
@@ -67,8 +67,9 @@ public class SystemObject extends GameObject {
 		if (canContainInterior())
 			setInteriorNamespace(getDefaultInteriorNamespace(systemId));
 
-		if (canContainGlow())
-			glow = Database.DEFAULT_GLOW_OBJ;
+		if (canContainGlow()) {
+			setGlowSet(Database.DEFAULT_GLOW_SET);
+		}
 	}
 
 	public void update() {
@@ -91,12 +92,14 @@ public class SystemObject extends GameObject {
 		return station;
 	}
 
-	public GlowObject getGlow() {
-		return glow;
+	public void setGlowSet(GlowSet set) {
+		if (set == null)
+			throw new IllegalArgumentException("Glow set must not be null.");
+		glowSet = set;
 	}
 
-	public void setGlow(GlowObject glow) {
-		this.glow = glow;
+	public GlowSet getGlowSet() {
+		return glowSet;
 	}
 
 	public void setInteriorNamespace(String namespace) {
