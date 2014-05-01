@@ -11,6 +11,7 @@ public abstract class GameObject implements Deletable, Serializable {
 
 	protected ObjectModel model = null;
 	protected boolean deletable = true;
+	protected boolean deleted = false;
 
 	public void setModel(ObjectModel model) {
 		this.model = model;
@@ -21,10 +22,16 @@ public abstract class GameObject implements Deletable, Serializable {
 
 	@Override
 	public void delete() {
+		deleted = true;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
 	}
 
 	@Override
 	public void restore() {
+		deleted = false;
 	}
 
 	@Override

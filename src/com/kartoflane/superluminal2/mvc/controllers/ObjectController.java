@@ -49,4 +49,22 @@ public abstract class ObjectController extends AbstractController implements Ali
 		this.model = (ObjectModel) model;
 		getModel().getGameObject().setModel(getModel());
 	}
+
+	@Override
+	public void delete() {
+		getGameObject().delete();
+		setVisible(false);
+		view.removeFromPainter();
+	}
+
+	@Override
+	public void restore() {
+		getGameObject().restore();
+		setView(view);
+		setVisible(true);
+	}
+
+	public boolean isDeleted() {
+		return getGameObject().isDeleted();
+	}
 }
