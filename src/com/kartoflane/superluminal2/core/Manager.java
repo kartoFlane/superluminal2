@@ -3,10 +3,11 @@ package com.kartoflane.superluminal2.core;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
 
 import com.kartoflane.superluminal2.components.Hotkey;
-import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -34,6 +35,9 @@ public class Manager {
 	public static boolean sidebarOnRightSide = true;
 	public static boolean rememberGeometry = true;
 	public static boolean allowRoomOverlap = false;
+	public static boolean startMaximised = false;
+	public static boolean closeLoader = false;
+	public static Point windowSize = null;
 	public static String resourcePath = "";
 
 	// Runtime variables

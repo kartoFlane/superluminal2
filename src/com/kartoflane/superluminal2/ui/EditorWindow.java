@@ -38,10 +38,10 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
-import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.NotDeletableException;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
+import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
@@ -77,6 +77,7 @@ public class EditorWindow {
 
 	private File saveDestination = null;
 
+	// UI widgets' variables
 	private Shell shell;
 	private ScrolledComposite sideContainer;
 	private Canvas canvas;
@@ -131,6 +132,8 @@ public class EditorWindow {
 		new SystemsMenu(shell);
 		new GlowSelectionDialog(shell);
 		new GlowSetDialog(GlowSelectionDialog.getInstance().getShell());
+		new WeaponSelectionDialog(shell);
+		new DroneSelectionDialog(shell);
 		new ImageViewerDialog(shell);
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
@@ -262,6 +265,9 @@ public class EditorWindow {
 
 		Menu menuHelp = new Menu(mntmView);
 		mntmHelp.setMenu(menuHelp);
+
+		MenuItem mntmUpdate = new MenuItem(menuHelp, SWT.NONE);
+		mntmUpdate.setText("Check for Updates");
 
 		MenuItem mntmAbout = new MenuItem(menuHelp, SWT.NONE);
 		mntmAbout.setText("About");
@@ -508,6 +514,11 @@ public class EditorWindow {
 				}
 
 				editorContainer.setWeights(weights);
+
+				if (!shell.getMaximized()) {
+					Manager.windowSize.x = shell.getSize().x;
+					Manager.windowSize.y = shell.getSize().y;
+				}
 			}
 		});
 
@@ -731,16 +742,21 @@ public class EditorWindow {
 			}
 		});
 
-		sideContainer.setFocus();
-
-		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
+		mntmUpdate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Superluminal.checkForUpdates();
+			}
+		});
 
 		canvas.addMouseListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseMoveListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseTrackListener(MouseInputDispatcher.getInstance());
 
+		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
 		Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
+		sideContainer.setFocus();
 		enableTools(false);
 		enableOptions(false);
 		setVisibilityOptions(true);
@@ -751,6 +767,8 @@ public class EditorWindow {
 	}
 
 	public void open() {
+		shell.setSize(Manager.windowSize);
+		shell.setMaximized(Manager.startMaximised);
 		shell.open();
 	}
 
@@ -907,7 +925,8 @@ public class EditorWindow {
 	public boolean isFocusControl() {
 		boolean result = !OverviewWindow.getInstance().isVisible() || !OverviewWindow.getInstance().isFocusControl();
 		result &= !ShipLoaderDialog.getInstance().isVisible() && !SettingsDialog.getInstance().isVisible();
-		result &= !GlowSelectionDialog.getInstance().isVisible();
+		result &= !GlowSelectionDialog.getInstance().isVisible() && !WeaponSelectionDialog.getInstance().isVisible();
+		result &= !DroneSelectionDialog.getInstance().isVisible();
 		result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isVisible();
 		result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isVisible();
 

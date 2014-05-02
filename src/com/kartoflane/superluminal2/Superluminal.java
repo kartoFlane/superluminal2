@@ -23,7 +23,7 @@ import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Hotkey;
-import com.kartoflane.superluminal2.components.Hotkey.Hotkeys;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.core.DataUtils;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
@@ -52,6 +52,7 @@ public class Superluminal {
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
+	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * - rudimentary image viewer
 	 * - ship offset modification
 	 * - zip protocol
@@ -60,12 +61,9 @@ public class Superluminal {
 	 * - rework door linking so that it doesn't have to be done through the DoorDataComposite (like SystemsMenu)
 	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
 	 * - come up with a way to set which system is first when assigned to the same room?
-	 * - come up with another way of choosing weapons/drones -- combos are ugly ---> TREE -> like ship loader, but with categories instead of player/enemy
-	 * ---- also need a way to select weapon lists for enemy ships
 	 * - optimize anchor moving against its bounds with some rooms loaded -> stutters
 	 * - rework interior drawing -> currently drawn on room layer, so higher rooms obscur the image -> bad
 	 * - clear() in ShipObject -> wipe txt layout, + something else?
-	 * - figure out glow images
 	 * - add gibs
 	 * - add reordering to ship overview
 	 * - properties: armaments & crew tabs
@@ -88,10 +86,13 @@ public class Superluminal {
 		File configFile = new File("editor.cfg");
 
 		Properties config = new Properties();
+		SuperluminalConfig appConfig = new SuperluminalConfig(config, configFile);
 		// Setup defaults
 		config.setProperty(SuperluminalConfig.FTL_RESOURCE, "");
 		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "true");
-		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "true");
+		config.setProperty(SuperluminalConfig.START_MAX, "false");
+		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "false");
+		config.setProperty(SuperluminalConfig.GEOMETRY, "");
 
 		// Read the config file
 		InputStream in = null;
@@ -115,6 +116,7 @@ public class Superluminal {
 		// Read config values
 		Manager.sidebarOnRightSide = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SIDEBAR_SIDE));
 		Manager.rememberGeometry = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SAVE_GEOMETRY));
+		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();
 		File hotkeysFile = new File(HOTKEYS_FILE);
@@ -202,7 +204,7 @@ public class Superluminal {
 			}
 		}
 
-		// Open the main window's shell
+		// Open the main window's shell, making it visible
 		editorWindow.open();
 
 		log.info("Running...");
@@ -226,14 +228,13 @@ public class Superluminal {
 		saveHotkeys(hotkeysFile);
 
 		// Save config
-		SuperluminalConfig appConfig = new SuperluminalConfig(config, configFile);
 		try {
 			appConfig.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
 			appConfig.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "" + Manager.rememberGeometry);
+			appConfig.setProperty(SuperluminalConfig.START_MAX, "" + Manager.startMaximised);
 			appConfig.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
-			for (Hotkeys hotkey : Hotkeys.values()) {
-				appConfig.setProperty(hotkey.toString(), Manager.getHotkey(hotkey).toString());
-			}
+			if (Manager.rememberGeometry && !Manager.startMaximised)
+				appConfig.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 			appConfig.writeConfig();
 		} catch (IOException e) {
 			String errorMsg = String.format("Error writing config to \"%s\".", configFile.getPath());
@@ -245,6 +246,24 @@ public class Superluminal {
 		display.dispose();
 	}
 
+	public static void checkForUpdates() {
+		// TODO
+	}
+
+	/**
+	 * Parse the dat archives and load relevant data into the database.
+	 * 
+	 * <pre>
+	 * Loaded data:
+	 *   - weapon anim, animSheets (only temporarily), weapon sprites
+	 *   - ship blueprints
+	 *   - weapon blueprints
+	 *   - drone blueprints
+	 *   - augment blueprints
+	 *   - roomLayout tags (glow objects) from rooms.xml
+	 *   - glow images (glow sets) in img/ship/interior, eg. pilot_glow1-3.png, etc
+	 * </pre>
+	 */
 	private static void loadDatabase() {
 		Database db = Database.getInstance();
 		FTLPack data = db.getDataDat();
@@ -253,81 +272,130 @@ public class Superluminal {
 		db.preloadAnims();
 		db.loadGlowSets();
 
-		for (String innerPath : data.list()) {
-			if (innerPath.endsWith(".xml")) {
-				InputStream is = null;
-				try {
-					is = data.getInputStream(innerPath);
-					DecodeResult dr = Utils.decodeText(is, null);
+		InputStream is = null;
 
-					ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
-					for (Element e : elements) {
-						try {
-							db.storeShipMetadata(DataUtils.loadShipMetadata(e));
-						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load ship metadata: " + ex.getMessage());
-						}
-					}
+		String[] blueprintFiles = { "data/blueprints.xml", "data/autoBlueprints.xml",
+				"data/dlcBlueprints.xml", "data/dlcBlueprintsOverwrite.xml" };
+		for (String innerPath : blueprintFiles) {
+			try {
+				is = data.getInputStream(innerPath);
+				DecodeResult dr = Utils.decodeText(is, null);
 
-					elements.clear();
-					elements = null;
-					elements = DataUtils.findTagsNamed(dr.text, "weaponBlueprint");
-					for (Element e : elements) {
-						try {
-							db.storeWeapon(DataUtils.loadWeapon(e));
-						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load weapon: " + ex.getMessage());
-						}
-					}
-
-					elements.clear();
-					elements = null;
-					elements = DataUtils.findTagsNamed(dr.text, "droneBlueprint");
-					for (Element e : elements) {
-						try {
-							db.storeDrone(DataUtils.loadDrone(e));
-						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load drone: " + ex.getMessage());
-						}
-					}
-
-					elements.clear();
-					elements = null;
-					elements = DataUtils.findTagsNamed(dr.text, "augBlueprint");
-					for (Element e : elements) {
-						try {
-							db.storeAugment(DataUtils.loadAugment(e));
-						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load augment: " + ex.getMessage());
-						}
-					}
-
-					elements.clear();
-					elements = null;
-					elements = DataUtils.findTagsNamed(dr.text, "roomLayout");
-					for (Element e : elements) {
-						try {
-							db.storeGlow(DataUtils.loadGlow(e));
-						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load glow object: " + ex.getMessage());
-						}
-					}
-
-					elements.clear();
-					elements = null;
-				} catch (FileNotFoundException e) {
-					log.error("Could not find file: " + innerPath);
-				} catch (IOException e) {
-					log.error("An error has occured while loading file " + innerPath + ":", e);
-				} catch (JDOMParseException e) {
-					log.error("An error has occured while parsing file " + innerPath + ":", e);
-				} finally {
+				ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
+				for (Element e : elements) {
 					try {
-						if (is != null)
-							is.close();
-					} catch (IOException e) {
+						db.store(DataUtils.loadShipMetadata(e));
+					} catch (IllegalArgumentException ex) {
+						log.warn("Could not load ship metadata: " + ex.getMessage());
 					}
 				}
+
+				elements.clear();
+				elements = null;
+				elements = DataUtils.findTagsNamed(dr.text, "weaponBlueprint");
+				for (Element e : elements) {
+					try {
+						db.store(DataUtils.loadWeapon(e));
+					} catch (IllegalArgumentException ex) {
+						log.warn("Could not load weapon: " + ex.getMessage());
+					}
+				}
+
+				elements.clear();
+				elements = null;
+				elements = DataUtils.findTagsNamed(dr.text, "droneBlueprint");
+				for (Element e : elements) {
+					try {
+						db.store(DataUtils.loadDrone(e));
+					} catch (IllegalArgumentException ex) {
+						log.warn("Could not load drone: " + ex.getMessage());
+					}
+				}
+
+				elements.clear();
+				elements = null;
+				elements = DataUtils.findTagsNamed(dr.text, "augBlueprint");
+				for (Element e : elements) {
+					try {
+						db.store(DataUtils.loadAugment(e));
+					} catch (IllegalArgumentException ex) {
+						log.warn("Could not load augment: " + ex.getMessage());
+					}
+				}
+			} catch (FileNotFoundException e) {
+				log.error(String.format("Could not find file: '%s'", innerPath));
+			} catch (IOException e) {
+				log.error("An error has occured while loading file '" + innerPath + "':", e);
+			} catch (JDOMParseException e) {
+				log.error("An error has occured while parsing file '" + innerPath + "':", e);
+			} finally {
+				try {
+					if (is != null)
+						is.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
+		// Lists reference their contents directly, so they have to be loaded in a separate loop
+		for (String innerPath : blueprintFiles) {
+			try {
+				is = data.getInputStream(innerPath);
+				DecodeResult dr = Utils.decodeText(is, null);
+
+				ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "blueprintList");
+				for (Element e : elements) {
+					try {
+						db.store(DataUtils.loadList(e));
+					} catch (IllegalArgumentException ex) {
+						log.warn("Could not load blueprint list: " + ex.getMessage());
+					}
+				}
+
+				elements.clear();
+				elements = null;
+			} catch (FileNotFoundException e) {
+				log.error(String.format("Could not find file: '%s'", innerPath));
+			} catch (IOException e) {
+				log.error("An error has occured while loading file '" + innerPath + "':", e);
+			} catch (JDOMParseException e) {
+				log.error("An error has occured while parsing file '" + innerPath + "':", e);
+			} finally {
+				try {
+					if (is != null)
+						is.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
+		// Scan rooms xml alone
+		try {
+			is = data.getInputStream("data/rooms.xml");
+			DecodeResult dr = Utils.decodeText(is, null);
+
+			ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "roomLayout");
+			for (Element e : elements) {
+				try {
+					db.store(DataUtils.loadGlow(e));
+				} catch (IllegalArgumentException ex) {
+					log.warn("Could not load glow object: " + ex.getMessage());
+				}
+			}
+
+			elements.clear();
+			elements = null;
+		} catch (FileNotFoundException e) {
+			log.error(String.format("Could not find file: '%s'", "data/rooms.xml"));
+		} catch (IOException e) {
+			log.error("An error has occured while loading file 'data/rooms.xml':", e);
+		} catch (JDOMParseException e) {
+			log.error("An error has occured while parsing file 'data/rooms.xml':", e);
+		} finally {
+			try {
+				if (is != null)
+					is.close();
+			} catch (IOException e) {
 			}
 		}
 
@@ -337,12 +405,14 @@ public class Superluminal {
 		ShipLoaderDialog.getInstance().loadShipList(Database.getInstance().getShipMetadata());
 	}
 
+	/** Create a Hotkey object for each hotkey, and store them in the hotkey map. */
 	private static void initHotkeys() {
 		for (Hotkeys keyId : Hotkeys.values())
 			Manager.HOTKEY_MAP.put(keyId, new Hotkey(keyId));
 		loadDefaultHotkeys();
 	}
 
+	/** Loads the default hotkey values, which are later overridden by config or the user. */
 	private static void loadDefaultHotkeys() {
 		Hotkey hotkey = null;
 
@@ -400,6 +470,12 @@ public class Superluminal {
 		Manager.getHotkey(Hotkeys.SHOW_SHIELD).setKey('8');
 	}
 
+	/**
+	 * Loads hotkey configuration from the given file.
+	 * 
+	 * @param f
+	 *            File from which hotkey config will be read.
+	 */
 	private static void loadHotkeys(File f) {
 		try {
 			Document keyDoc = Utils.readFileXML(f);
@@ -465,6 +541,12 @@ public class Superluminal {
 		}
 	}
 
+	/**
+	 * Saves the current hotkey configuration in the given file.
+	 * 
+	 * @param f
+	 *            File in which hotkey config will be saved.
+	 */
 	private static void saveHotkeys(File f) {
 		Document keyDoc = new Document();
 
