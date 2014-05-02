@@ -17,51 +17,33 @@ import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.ShipMetadata;
-import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+import com.kartoflane.superluminal2.components.enums.DroneTypes;
+import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
+import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.BlueprintList;
+import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
+import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class Database {
-
-	public enum DroneTypes {
-		COMBAT, SHIP_REPAIR, BOARDER, BATTLE, REPAIR, DEFENSE, SHIELD, HACKING
-	}
-
-	public enum WeaponTypes {
-		MISSILES, LASER, BEAM, BOMB, BURST
-	}
-
-	public enum PlayerShipBlueprints {
-		HARD, HARD_2, HARD_3,
-		MANTIS, MANTIS_2, MANTIS_3,
-		STEALTH, STEALTH_2, STEALTH_3,
-		CIRCLE, CIRCLE_2, CIRCLE_3,
-		FED, FED_2, FED_3,
-		JELLY, JELLY_2, JELLY_3,
-		ROCK, ROCK_2, ROCK_3,
-		ENERGY, ENERGY_2, ENERGY_3,
-		CRYSTAL, CRYSTAL_2,
-		ANAEROBIC, ANAEROBIC_2;
-
-		@Override
-		public String toString() {
-			return "PLAYER_SHIP_" + name();
-		}
-	}
 
 	public static final Logger log = LogManager.getLogger(Database.class);
 
 	public static final AnimationObject DEFAULT_ANIM_OBJ = new AnimationObject();
 	public static final WeaponObject DEFAULT_WEAPON_OBJ = new WeaponObject();
+	public static final DroneObject DEFAULT_DRONE_OBJ = new DroneObject();
 	public static final GlowSet DEFAULT_GLOW_SET = new GlowSet();
 	public static final GlowObject DEFAULT_GLOW_OBJ = new GlowObject();
+	public static final WeaponList DEFAULT_WEAPON_LIST = new WeaponList();
+	public static final DroneList DEFAULT_DRONE_LIST = new DroneList();
 
 	private static final Database instance = new Database();
 
@@ -79,6 +61,8 @@ public class Database {
 	private TreeSet<AugmentObject> augmentObjects = new TreeSet<AugmentObject>();
 	private TreeSet<GlowObject> glowObjects = new TreeSet<GlowObject>();
 	private TreeSet<GlowSet> glowSets = new TreeSet<GlowSet>();
+	private TreeSet<WeaponList> weaponLists = new TreeSet<WeaponList>();
+	private TreeSet<DroneList> droneLists = new TreeSet<DroneList>();
 
 	/** Temporary map to hold anim sheets, since they need to be loaded before weaponAnims, which reference them */
 	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
@@ -176,27 +160,63 @@ public class Database {
 			return "autoBlueprints.xml";
 	}
 
-	public void storeAnimation(AnimationObject anim) {
+	public void store(BlueprintList<?> list) {
+		if (list instanceof WeaponList) {
+			weaponLists.add((WeaponList) list);
+		} else if (list instanceof DroneList) {
+			droneLists.add((DroneList) list);
+		} else {
+			// Not interested in any other lists
+		}
+	}
+
+	public WeaponList[] getWeaponLists() {
+		return weaponLists.toArray(new WeaponList[0]);
+	}
+
+	public DroneList[] getDroneLists() {
+		return droneLists.toArray(new DroneList[0]);
+	}
+
+	public WeaponList getWeaponList(String name) {
+		WeaponList[] lists = getWeaponLists();
+		try {
+			return lists[Utils.binarySearch(lists, name, 0, lists.length)];
+		} catch (IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	public DroneList getDroneList(String name) {
+		DroneList[] lists = getDroneLists();
+		try {
+			return lists[Utils.binarySearch(lists, name, 0, lists.length)];
+		} catch (IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	public void store(AnimationObject anim) {
 		animationObjects.add(anim);
 	}
 
 	public AnimationObject getAnimation(String animName) {
 		AnimationObject[] anims = animationObjects.toArray(new AnimationObject[0]);
 		try {
-			return anims[binarySearch(anims, animName, 0, anims.length)];
+			return anims[Utils.binarySearch(anims, animName, 0, anims.length)];
 		} catch (IndexOutOfBoundsException e) {
 			return null;
 		}
 	}
 
-	public void storeWeapon(WeaponObject weapon) {
+	public void store(WeaponObject weapon) {
 		weaponObjects.add(weapon);
 	}
 
 	public WeaponObject getWeapon(String blueprint) {
 		WeaponObject[] weapons = weaponObjects.toArray(new WeaponObject[0]);
 		try {
-			return weapons[binarySearch(weapons, blueprint, 0, weapons.length)];
+			return weapons[Utils.binarySearch(weapons, blueprint, 0, weapons.length)];
 		} catch (IndexOutOfBoundsException e) {
 			return null;
 		}
@@ -212,14 +232,14 @@ public class Database {
 		return typeWeapons;
 	}
 
-	public void storeDrone(DroneObject drone) {
+	public void store(DroneObject drone) {
 		droneObjects.add(drone);
 	}
 
 	public DroneObject getDrone(String blueprint) {
 		DroneObject[] drones = droneObjects.toArray(new DroneObject[0]);
 		try {
-			return drones[binarySearch(drones, blueprint, 0, drones.length)];
+			return drones[Utils.binarySearch(drones, blueprint, 0, drones.length)];
 		} catch (IndexOutOfBoundsException e) {
 			return null;
 		}
@@ -235,14 +255,14 @@ public class Database {
 		return typeDrones;
 	}
 
-	public void storeAugment(AugmentObject augment) {
+	public void store(AugmentObject augment) {
 		augmentObjects.add(augment);
 	}
 
 	public AugmentObject getAugment(String blueprint) {
 		AugmentObject[] augments = getAugments();
 		try {
-			return augments[binarySearch(augments, blueprint, 0, augments.length)];
+			return augments[Utils.binarySearch(augments, blueprint, 0, augments.length)];
 		} catch (IndexOutOfBoundsException e) {
 			return null;
 		}
@@ -252,14 +272,14 @@ public class Database {
 		return augmentObjects.toArray(new AugmentObject[0]);
 	}
 
-	public void storeGlow(GlowObject glow) {
+	public void store(GlowObject glow) {
 		glowObjects.add(glow);
 	}
 
 	public GlowObject getGlow(String id) {
 		GlowObject[] glows = getGlows();
 		try {
-			return glows[binarySearch(glows, id, 0, glows.length)];
+			return glows[Utils.binarySearch(glows, id, 0, glows.length)];
 		} catch (IndexOutOfBoundsException e) {
 			return null;
 		}
@@ -269,14 +289,14 @@ public class Database {
 		return glowObjects.toArray(new GlowObject[0]);
 	}
 
-	public void storeGlowSet(GlowSet set) {
+	public void store(GlowSet set) {
 		glowSets.add(set);
 	}
 
 	public GlowSet getGlowSet(String id) {
 		GlowSet[] glowSets = getGlowSets();
 		try {
-			return glowSets[binarySearch(glowSets, id, 0, glowSets.length)];
+			return glowSets[Utils.binarySearch(glowSets, id, 0, glowSets.length)];
 		} catch (IndexOutOfBoundsException e) {
 			return null;
 		}
@@ -286,7 +306,7 @@ public class Database {
 		return glowSets.toArray(new GlowSet[0]);
 	}
 
-	public void storeShipMetadata(ShipMetadata metadata) {
+	public void store(ShipMetadata metadata) {
 		ArrayList<ShipMetadata> dataList = shipMetadata.get(metadata.getBlueprintName());
 		if (dataList == null) {
 			dataList = new ArrayList<ShipMetadata>();
@@ -336,7 +356,7 @@ public class Database {
 				// Load and store weaponAnims
 				for (Element e : root.getChildren("weaponAnim")) {
 					try {
-						storeAnimation(DataUtils.loadAnim(e));
+						store(DataUtils.loadAnim(e));
 					} catch (IllegalArgumentException ex) {
 						log.warn("Could not load animation: " + ex.getMessage());
 					}
@@ -364,19 +384,6 @@ public class Database {
 
 	public Element getAnimSheetElement(String anim) {
 		return animSheetMap.get(anim);
-	}
-
-	private static int binarySearch(Identifiable[] array, String identifier, int min, int max) {
-		if (min > max)
-			return -1;
-		int mid = (min + max) / 2;
-		int result = identifier.compareTo(array[mid].getIdentifier());
-		if (result > 0)
-			return binarySearch(array, identifier, mid + 1, max);
-		else if (result < 0)
-			return binarySearch(array, identifier, min, mid - 1);
-		else
-			return mid;
 	}
 
 	public void loadGlowSets() {

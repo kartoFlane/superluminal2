@@ -39,6 +39,7 @@ import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 public class Utils {
 	public static final Logger log = LogManager.getLogger(Utils.class);
@@ -69,6 +70,10 @@ public class Utils {
 
 	public static Point copy(Point p) {
 		return new Point(p.x, p.y);
+	}
+
+	public static int min(int a, int b, int c) {
+		return Math.min(a, Math.min(b, c));
 	}
 
 	/**
@@ -115,6 +120,19 @@ public class Utils {
 
 	public static boolean contains(Rectangle rect, Rectangle other) {
 		return rect.contains(other.x, other.y) && rect.contains(other.x + other.width, other.y + other.height);
+	}
+
+	public static int binarySearch(Identifiable[] array, String identifier, int min, int max) {
+		if (min > max)
+			return -1;
+		int mid = (min + max) / 2;
+		int result = identifier.compareTo(array[mid].getIdentifier());
+		if (result > 0)
+			return binarySearch(array, identifier, mid + 1, max);
+		else if (result < 0)
+			return binarySearch(array, identifier, min, mid - 1);
+		else
+			return mid;
 	}
 
 	/**
@@ -204,7 +222,9 @@ public class Utils {
 	}
 
 	public static String trimProtocol(String input) {
-		if (input.startsWith("rdat:") || input.startsWith("file:"))
+		if (input.startsWith("zip:"))
+			return input.substring(4);
+		else if (input.startsWith("rdat:") || input.startsWith("file:"))
 			return input.substring(5);
 		else if (input.startsWith("cpath:"))
 			return input.substring(6);
@@ -213,7 +233,9 @@ public class Utils {
 	}
 
 	public static String getProtocol(String input) {
-		if (input.startsWith("rdat:") || input.startsWith("file:"))
+		if (input.startsWith("zip:"))
+			return input.substring(0, 4);
+		else if (input.startsWith("rdat:") || input.startsWith("file:"))
 			return input.substring(0, 5);
 		else if (input.startsWith("cpath:"))
 			return input.substring(0, 6);

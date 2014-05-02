@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,15 +13,20 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.ShipMetadata;
-import com.kartoflane.superluminal2.core.Database.DroneTypes;
-import com.kartoflane.superluminal2.core.Database.WeaponTypes;
+import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.enums.DroneTypes;
+import com.kartoflane.superluminal2.components.enums.WeaponStats;
+import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.BlueprintList;
+import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
+import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class DataUtils {
@@ -155,12 +161,12 @@ public class DataUtils {
 		attr = child.getAttributeValue("x");
 		if (attr == null)
 			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'x' attribute.");
-		int x = Integer.valueOf(attr);
+		int x = Integer.parseInt(attr);
 
 		attr = child.getAttributeValue("y");
 		if (attr == null)
 			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'y' attribute.");
-		int y = Integer.valueOf(attr);
+		int y = Integer.parseInt(attr);
 
 		anim.setMountOffset(x, y);
 
@@ -177,12 +183,12 @@ public class DataUtils {
 		attr = sheet.getAttributeValue("w");
 		if (attr == null)
 			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'w' attribute.");
-		x = Integer.valueOf(attr);
+		x = Integer.parseInt(attr);
 
 		attr = sheet.getAttributeValue("h");
 		if (attr == null)
 			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'h' attribute.");
-		y = Integer.valueOf(attr);
+		y = Integer.parseInt(attr);
 
 		anim.setSheetSize(x, y);
 
@@ -190,12 +196,12 @@ public class DataUtils {
 		attr = sheet.getAttributeValue("fw");
 		if (attr == null)
 			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'fw' attribute.");
-		x = Integer.valueOf(attr);
+		x = Integer.parseInt(attr);
 
 		attr = sheet.getAttributeValue("fh");
 		if (attr == null)
 			throw new IllegalArgumentException(anim.getAnimName() + " is missing 'fh' attribute.");
-		y = Integer.valueOf(attr);
+		y = Integer.parseInt(attr);
 
 		anim.setFrameSize(x, y);
 
@@ -203,6 +209,75 @@ public class DataUtils {
 		anim.setSheetPath("rdat:img/" + sheet.getValue());
 
 		return anim;
+	}
+
+	/**
+	 * 
+	 * @param e
+	 *            element to be parsed
+	 * @return blueprint list the element represents, or null if the list was not
+	 *         holding weapons or drones
+	 */
+	public static BlueprintList<? extends GameObject> loadList(Element e) {
+		if (e == null)
+			throw new IllegalArgumentException("Element must not be null.");
+
+		String attr = e.getAttributeValue("name");
+		if (attr == null)
+			throw new IllegalArgumentException(e.getName() + " is missing 'name' attribute.");
+
+		List<Element> children = e.getChildren("name");
+		if (children.size() == 0) {
+			throw new IllegalArgumentException(attr + ": list is empty.");
+		} else {
+			// Need to figure out the type of the list...
+			// Checking the type of the first child seems like the most reasonable option
+			String name = children.get(0).getValue();
+
+			if (Database.getInstance().getWeapon(name) != null) {
+				return loadWeaponList(attr, children);
+			} else if (Database.getInstance().getDrone(name) != null) {
+				return loadDroneList(attr, children);
+			} else {
+				// Not interested in any other blueprintLists
+			}
+		}
+
+		return null;
+	}
+
+	private static WeaponList loadWeaponList(String name, List<Element> children) {
+		if (name == null)
+			throw new IllegalArgumentException("Name must not be null.");
+		if (children == null)
+			throw new IllegalArgumentException("Children list must not be null.");
+
+		Database db = Database.getInstance();
+		WeaponList list = new WeaponList(name);
+		for (Element child : children) {
+			WeaponObject weapon = db.getWeapon(child.getValue());
+			if (weapon != null)
+				list.add(weapon);
+		}
+
+		return list;
+	}
+
+	private static DroneList loadDroneList(String name, List<Element> children) {
+		if (name == null)
+			throw new IllegalArgumentException("Name must not be null.");
+		if (children == null)
+			throw new IllegalArgumentException("Children list must not be null.");
+
+		Database db = Database.getInstance();
+		DroneList list = new DroneList(name);
+		for (Element child : children) {
+			DroneObject drone = db.getDrone(child.getValue());
+			if (drone != null)
+				list.add(drone);
+		}
+
+		return list;
 	}
 
 	public static WeaponObject loadWeapon(Element e) {
@@ -229,9 +304,15 @@ public class DataUtils {
 
 		child = e.getChild("short");
 		if (child == null)
-			weapon.setShortName("N/A");
+			weapon.setShortName("Missing short name");
 		else
 			weapon.setShortName(child.getValue());
+
+		child = e.getChild("desc");
+		if (child == null)
+			weapon.setDescription("Missing description.");
+		else
+			weapon.setDescription(child.getValue());
 
 		child = e.getChild("weaponArt");
 		if (child == null)
@@ -241,6 +322,17 @@ public class DataUtils {
 		} catch (IllegalArgumentException ex) {
 			// Catch an re-throw the error to provide more information
 			throw new IllegalArgumentException(weapon.getBlueprintName() + ": could not find animation '" + child.getValue() + "'.", ex);
+		}
+
+		for (WeaponStats stat : WeaponStats.values()) {
+			try {
+				child = e.getChild(stat.getTagName());
+				if (child != null)
+					weapon.setStat(stat, Float.parseFloat(child.getValue()));
+			} catch (NumberFormatException ex) {
+				// Catch an re-throw the error to provide more information
+				throw new IllegalArgumentException(weapon.getBlueprintName() + ": <" + stat.getTagName() + "> tag's value could not be parsed: " + child.getValue());
+			}
 		}
 
 		return weapon;
@@ -270,9 +362,15 @@ public class DataUtils {
 
 		child = e.getChild("short");
 		if (child == null)
-			drone.setShortName("N/A");
+			drone.setShortName("Missing short name");
 		else
 			drone.setShortName(child.getValue());
+
+		child = e.getChild("desc");
+		if (child == null)
+			drone.setDescription("Missing description.");
+		else
+			drone.setDescription(child.getValue());
 
 		return drone;
 	}
@@ -327,12 +425,12 @@ public class DataUtils {
 		attr = child.getAttributeValue("x");
 		if (attr == null)
 			throw new IllegalArgumentException(glow.getIdentifier() + "'s <computerGlow> is missing 'x' attribute.");
-		glow.setX(Integer.valueOf(attr));
+		glow.setX(Integer.parseInt(attr));
 
 		attr = child.getAttributeValue("y");
 		if (attr == null)
 			throw new IllegalArgumentException(glow.getIdentifier() + "'s <computerGlow> is missing 'y' attribute.");
-		glow.setY(Integer.valueOf(attr));
+		glow.setY(Integer.parseInt(attr));
 
 		attr = child.getAttributeValue("dir");
 		if (attr == null)
