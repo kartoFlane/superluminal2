@@ -9,5 +9,10 @@ public interface Pinnable {
 	 */
 	public void setPinned(boolean pin);
 
+	/**
+	 * False by default.
+	 * 
+	 * @return true if the object is currently pinned, false otherwise.
+	 */
 	public boolean isPinned();
 }

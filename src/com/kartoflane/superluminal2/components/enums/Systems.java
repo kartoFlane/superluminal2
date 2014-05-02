@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.components;
+package com.kartoflane.superluminal2.components.enums;
 
 public enum Systems {
 	EMPTY,
