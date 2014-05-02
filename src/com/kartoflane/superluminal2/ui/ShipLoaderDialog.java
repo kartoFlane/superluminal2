@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Iterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -31,6 +33,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.ShipMetadata;
@@ -40,15 +43,14 @@ import com.kartoflane.superluminal2.core.ShipUtils;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
-import org.eclipse.swt.custom.SashForm;
 
 public class ShipLoaderDialog {
 	private static ShipLoaderDialog instance = null;
 	private static final Logger log = LogManager.getLogger(ShipLoaderDialog.class);
 
-	private static final int minTreeWidth = 405;
 	private static final int defaultBlueTabWidth = 200;
-	private static final int defaultClassTabWidth = 200;
+	private static final int defaultClassTabWidth = 150;
+	private static final int minTreeWidth = defaultBlueTabWidth + defaultClassTabWidth + 5;
 	private static final int defaultMetadataWidth = 250;
 
 	private HashMap<ShipMetadata, TreeItem> dataTreeMap = new HashMap<ShipMetadata, TreeItem>();
@@ -143,7 +145,7 @@ public class ShipLoaderDialog {
 		scrolledComposite.setContent(metadataComposite);
 		scrolledComposite.setMinSize(metadataComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-		sashForm.setWeights(new int[] { 1, 1 });
+		sashForm.setWeights(new int[] { minTreeWidth, defaultMetadataWidth });
 
 		Composite buttonComposite = new Composite(shell, SWT.NONE);
 		GridLayout gl_buttonComposite = new GridLayout(2, false);
@@ -164,7 +166,6 @@ public class ShipLoaderDialog {
 		gd_btnCancel.widthHint = 80;
 		btnCancel.setLayoutData(gd_btnCancel);
 		btnCancel.setText("Cancel");
-		shell.setMinimumSize(minTreeWidth + defaultMetadataWidth, 300);
 
 		tree.addMouseListener(new MouseListener() {
 			@Override
@@ -260,14 +261,12 @@ public class ShipLoaderDialog {
 						ShipObject object = ShipUtils.loadShipXML(metadata.getElement());
 
 						Manager.loadShip(object);
-					} catch (Exception ex) {
-						log.warn("An error has occured while loading " + metadata.getBlueprintName() + ":", ex);
-						StringBuilder buf = new StringBuilder();
-						buf.append(String.format("%s could not be loaded:", metadata.getBlueprintName()));
-						buf.append("\n");
-						buf.append(ex.getMessage());
-						buf.append("\n\nCheck log for details.");
-						Utils.showWarningDialog(shell, buf.toString());
+					} catch (IllegalArgumentException ex) {
+						handleException(metadata, ex);
+					} catch (JDOMParseException ex) {
+						handleException(metadata, ex);
+					} catch (IOException ex) {
+						handleException(metadata, ex);
 					}
 				}
 			}
@@ -313,7 +312,9 @@ public class ShipLoaderDialog {
 			}
 		});
 
+		shell.setMinimumSize(minTreeWidth + defaultMetadataWidth, 300);
 		shell.pack();
+		shell.setSize(shell.getSize().x + 5, shell.getSize().y);
 	}
 
 	public void loadShipList(HashMap<String, ArrayList<ShipMetadata>> metadataMap) {
@@ -358,6 +359,16 @@ public class ShipLoaderDialog {
 		}
 	}
 
+	private void handleException(ShipMetadata metadata, Exception ex) {
+		log.warn("An error has occured while loading " + metadata.getBlueprintName() + ": ", ex);
+		StringBuilder buf = new StringBuilder();
+		buf.append(String.format("%s could not be loaded:", metadata.getBlueprintName()));
+		buf.append("\n\n");
+		buf.append(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+		buf.append("\n\nCheck log for details.");
+		Utils.showWarningDialog(shell, buf.toString());
+	}
+
 	private void updatePreview() {
 		Point iSize = preview.getImageSize();
 		Point cSize = canvas.getSize();
@@ -365,7 +376,7 @@ public class ShipLoaderDialog {
 		double ratio = (double) iSize.y / iSize.x;
 		int w = (int) (cSize.y / ratio);
 		int h = (int) (cSize.x * ratio);
-		preview.setSize(min(w, cSize.x, iSize.x), min(h, cSize.y, iSize.y));
+		preview.setSize(Utils.min(w, cSize.x, iSize.x), Utils.min(h, cSize.y, iSize.y));
 		preview.setLocation(cSize.x / 2, cSize.y / 2);
 	}
 
@@ -383,10 +394,6 @@ public class ShipLoaderDialog {
 
 	public void dispose() {
 		shell.dispose();
-	}
-
-	private int min(int a, int b, int c) {
-		return Math.min(a, Math.min(b, c));
 	}
 
 	private class MetadataIterator implements Iterator<String> {
