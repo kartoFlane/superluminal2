@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;

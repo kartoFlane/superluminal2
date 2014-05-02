@@ -52,7 +52,7 @@ public class SettingsDialog {
 		TabItem tbtmKeybinds = new TabItem(tabFolder, SWT.NONE);
 		tbtmKeybinds.setText("Keybinds");
 
-		ScrolledComposite scKeybinds = new ScrolledComposite(tabFolder, SWT.BORDER | SWT.V_SCROLL);
+		ScrolledComposite scKeybinds = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
 		scKeybinds.setAlwaysShowScrollBars(true);
 		tbtmKeybinds.setControl(scKeybinds);
 		scKeybinds.setExpandHorizontal(true);

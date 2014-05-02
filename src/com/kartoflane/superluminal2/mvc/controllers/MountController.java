@@ -4,8 +4,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
-import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
@@ -78,8 +78,11 @@ public class MountController extends ObjectController implements Comparable<Moun
 		if (weapon == null)
 			throw new NullPointerException("Must not be null. For default, use DEFAULT_WEAPON_OBJ");
 
+		setVisible(false);
 		setSize(weapon.getFrameSize());
 		getGameObject().setWeapon(weapon);
+		updateView();
+		setVisible(true);
 	}
 
 	public WeaponObject getWeapon() {

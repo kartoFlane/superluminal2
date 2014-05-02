@@ -6,7 +6,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
 
-import com.kartoflane.superluminal2.components.Directions;
+import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;

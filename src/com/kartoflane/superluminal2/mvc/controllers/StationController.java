@@ -2,9 +2,9 @@ package com.kartoflane.superluminal2.mvc.controllers;
 
 import org.eclipse.swt.graphics.Point;
 
-import com.kartoflane.superluminal2.components.Directions;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.View;

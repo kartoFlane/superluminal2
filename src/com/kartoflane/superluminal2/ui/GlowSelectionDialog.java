@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
@@ -32,6 +32,7 @@ import com.kartoflane.superluminal2.mvc.views.Preview;
 public class GlowSelectionDialog {
 	private static GlowSelectionDialog instance = null;
 
+	private GlowSet result = null;
 	private int response = SWT.NO;
 	private Preview preview = null;
 	private SystemObject selectedSystem = null;
@@ -114,12 +115,13 @@ public class GlowSelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				if (tree.getSelectionCount() != 0) {
 					TreeItem selectedItem = tree.getSelection()[0];
-					GlowSet glowSet = (GlowSet) selectedItem.getData();
-					btnConfirm.setEnabled(glowSet != null);
-					updateData(glowSet);
+					result = (GlowSet) selectedItem.getData();
+					btnConfirm.setEnabled(result != null);
+					updateData();
 				} else {
 					btnConfirm.setEnabled(false);
-					updateData(null);
+					result = null;
+					updateData();
 				}
 			}
 		});
@@ -145,9 +147,10 @@ public class GlowSelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				GlowSet newGlow = GlowSetDialog.getInstance().open();
 				if (newGlow != null) {
-					Database.getInstance().storeGlowSet(newGlow);
+					Database.getInstance().store(newGlow);
 					TreeItem currentItem = updateTree(selectedSystem);
-					updateData(selectedSystem.getGlowSet());
+					result = selectedSystem.getGlowSet();
+					updateData();
 					if (currentItem != null)
 						tree.setSelection(currentItem);
 				}
@@ -191,7 +194,9 @@ public class GlowSelectionDialog {
 
 		shell.open();
 
-		updateData(system.getGlowSet());
+		result = system.getGlowSet();
+		updateData();
+
 		if (currentItem != null)
 			tree.setSelection(currentItem);
 
@@ -241,13 +246,13 @@ public class GlowSelectionDialog {
 		return currentItem;
 	}
 
-	private void updateData(GlowSet glow) {
+	private void updateData() {
 		String path = null;
 
-		if (glow != null) {
-			path = glow.getImage(Glows.CLOAK);
+		if (result != null) {
+			path = result.getImage(Glows.CLOAK);
 			if (path == null)
-				path = glow.getImage(Glows.BLUE);
+				path = result.getImage(Glows.BLUE);
 		}
 
 		preview.setImage(path);

@@ -2,8 +2,8 @@ package com.kartoflane.superluminal2.mvc.controllers;
 
 import org.eclipse.swt.graphics.Rectangle;
 
-import com.kartoflane.superluminal2.components.Directions;
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;

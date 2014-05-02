@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
 
@@ -356,6 +357,8 @@ public class GlowSetDialog {
 
 		String text = txtName.getText();
 		result &= text != null && !text.trim().equals("");
+		for (GlowSet set : Database.getInstance().getGlowSets())
+			result &= !set.getIdentifier().equalsIgnoreCase(text);
 
 		text = txtBlue.getText();
 		result &= text != null && !text.trim().equals("");

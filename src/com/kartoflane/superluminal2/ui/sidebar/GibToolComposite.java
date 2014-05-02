@@ -27,5 +27,9 @@ public class GibToolComposite extends Composite {
 		dataContainer.setLayout(gl_dataContainer);
 		dataContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
+		Label lblNYI = new Label(dataContainer, SWT.NONE);
+		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
+		lblNYI.setText("(not yet implemented)");
+
 	}
 }

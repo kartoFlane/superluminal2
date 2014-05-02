@@ -3,7 +3,7 @@ package com.kartoflane.superluminal2.ui;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
-import com.kartoflane.superluminal2.components.Directions;
+import com.kartoflane.superluminal2.components.enums.Directions;
 
 /**
  * A Combo widget with some predefined items, plus convenience methods.<br>
