@@ -20,6 +20,7 @@ public class Preview implements PaintListener {
 	private Image image = null;
 	private String imagePath = null;
 
+	private boolean overrideSource = false;
 	private boolean drawBackground = false;
 	private Color backgroundColor = null;
 
@@ -27,6 +28,7 @@ public class Preview implements PaintListener {
 	private int y = 0;
 	private int w = 0;
 	private int h = 0;
+	private Point sourceSize = new Point(0, 0);
 	private Rectangle cachedBounds = new Rectangle(0, 0, 0, 0);
 
 	public Preview() {
@@ -86,6 +88,19 @@ public class Preview implements PaintListener {
 		return new Point(cachedBounds.width, cachedBounds.height);
 	}
 
+	public void setSourceSize(int w, int h) {
+		sourceSize.x = w;
+		sourceSize.y = h;
+	}
+
+	public void setOverrideSourceSize(boolean override) {
+		overrideSource = override;
+	}
+
+	public boolean isOverrideSourceSize() {
+		return overrideSource;
+	}
+
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (drawBackground && backgroundColor != null) {
@@ -94,8 +109,17 @@ public class Preview implements PaintListener {
 			e.gc.fillRectangle(x - w / 2, y - h / 2, w, h);
 			e.gc.setBackground(prevColor);
 		}
-		if (image != null)
-			e.gc.drawImage(image, 0, 0, cachedBounds.width, cachedBounds.height, x - w / 2, y - h / 2, w, h);
+		if (image != null) {
+			int sw = cachedBounds.width;
+			int sh = cachedBounds.height;
+
+			if (overrideSource) {
+				sw = Math.min(sw, sourceSize.x);
+				sh = Math.min(sh, sourceSize.y);
+			}
+
+			e.gc.drawImage(image, 0, 0, sw, sh, x - w / 2, y - h / 2, w, h);
+		}
 	}
 
 	public void dispose() {
