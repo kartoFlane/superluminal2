@@ -21,12 +21,13 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.superluminal2.components.Directions;
-import com.kartoflane.superluminal2.components.Images;
-import com.kartoflane.superluminal2.components.Races;
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.Races;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
+import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
@@ -35,6 +36,7 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
+import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
@@ -326,25 +328,32 @@ public class ShipUtils {
 			if (attr != null)
 				count = Integer.valueOf(attr);
 
-			int loaded = 0;
-			MountObject[] mounts = ship.getMounts();
-			for (Element weapon : child.getChildren("weapon")) {
-				if (count != -1 && loaded >= count)
-					break;
+			if (isPlayer) {
+				int loaded = 0;
+				for (Element weapon : child.getChildren("weapon")) {
+					if (count != -1 && loaded >= count)
+						break;
 
-				// Artillery always uses fifth weapon mount TODO what if no artillery system?
-				MountObject mount = mounts[loaded >= 4 ? loaded + 1 : loaded];
-				attr = weapon.getAttributeValue("name");
-				if (attr == null)
-					throw new IllegalArgumentException("A weapon in <weaponList> is missing 'name' attribute.");
+					attr = weapon.getAttributeValue("name");
+					if (attr == null)
+						throw new IllegalArgumentException("A weapon in <weaponList> is missing 'name' attribute.");
 
-				WeaponObject weaponObject = db.getWeapon(attr);
-				if (weaponObject == null)
-					throw new IllegalArgumentException("WeaponBlueprint not found: " + attr);
+					WeaponObject weaponObject = db.getWeapon(attr);
+					if (weaponObject == null)
+						throw new IllegalArgumentException("WeaponBlueprint not found: " + attr);
 
-				mount.setWeapon(weaponObject);
+					ship.changeWeapon(Database.DEFAULT_WEAPON_OBJ, weaponObject);
 
-				loaded++;
+					loaded++;
+				}
+			} else {
+				attr = child.getAttributeValue("load");
+				if (attr != null) {
+					WeaponList list = db.getWeaponList(attr);
+					if (list == null)
+						throw new IllegalArgumentException("BlueprintList could not be found: " + attr);
+					ship.setWeaponList(list);
+				}
 			}
 		}
 
@@ -363,22 +372,32 @@ public class ShipUtils {
 			if (attr != null)
 				count = Integer.valueOf(attr);
 
-			int loaded = 0;
-			for (Element drone : child.getChildren("drone")) {
-				if (count != -1 && loaded >= count)
-					break;
+			if (ship.isPlayerShip()) {
+				int loaded = 0;
+				for (Element drone : child.getChildren("drone")) {
+					if (count != -1 && loaded >= count)
+						break;
 
-				attr = drone.getAttributeValue("name");
-				if (attr == null)
-					throw new IllegalArgumentException("A drone in <droneList> is missing 'name' attribute.");
+					attr = drone.getAttributeValue("name");
+					if (attr == null)
+						throw new IllegalArgumentException("A drone in <droneList> is missing 'name' attribute.");
 
-				DroneObject droneObject = db.getDrone(attr);
-				if (droneObject == null)
-					throw new IllegalArgumentException("DroneBlueprint not found: " + attr);
+					DroneObject droneObject = db.getDrone(attr);
+					if (droneObject == null)
+						throw new IllegalArgumentException("DroneBlueprint not found: " + attr);
 
-				ship.add(droneObject);
+					ship.changeDrone(Database.DEFAULT_DRONE_OBJ, droneObject);
 
-				loaded++;
+					loaded++;
+				}
+			} else {
+				attr = child.getAttributeValue("load");
+				if (attr != null) {
+					DroneList list = db.getDroneList(attr);
+					if (list == null)
+						throw new IllegalArgumentException("BlueprintList could not be found: " + attr);
+					ship.setDroneList(list);
+				}
 			}
 		}
 
