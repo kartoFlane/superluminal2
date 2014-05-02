@@ -8,7 +8,7 @@
       </PatternLayout>
     </Console>
     <File name="LogFile" fileName="editor-log.txt" append="false">
-      <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+      <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY" />
       <PatternLayout>
         <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%throwable%n</pattern>
       </PatternLayout>
