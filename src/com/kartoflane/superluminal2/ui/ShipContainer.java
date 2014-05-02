@@ -8,10 +8,11 @@ import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
-import com.kartoflane.superluminal2.components.Images;
 import com.kartoflane.superluminal2.components.NotDeletableException;
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
+import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
@@ -21,6 +22,7 @@ import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
+import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
@@ -358,6 +360,7 @@ public class ShipContainer implements Disposable {
 				mount.setId(getNextMountId());
 			mountControllers.add(mount);
 			shipController.getGameObject().add(mount.getGameObject());
+			updateMounts();
 		} else if (controller instanceof GibController) {
 			GibController gib = (GibController) controller;
 			gibControllers.add(gib);
@@ -386,6 +389,7 @@ public class ShipContainer implements Disposable {
 			MountController mount = (MountController) controller;
 			mountControllers.remove(mount);
 			shipController.getGameObject().remove(mount.getGameObject());
+			updateMounts();
 		} else if (controller instanceof GibController) {
 			GibController gib = (GibController) controller;
 			gibControllers.remove(gib);
@@ -431,6 +435,29 @@ public class ShipContainer implements Disposable {
 
 	public void coalesceRooms() {
 		shipController.getGameObject().coalesceRooms();
+	}
+
+	public void changeWeapon(int index, WeaponObject neu) {
+		shipController.getGameObject().changeWeapon(index, neu);
+		updateMounts();
+	}
+
+	public void changeWeapon(WeaponObject old, WeaponObject neu) {
+		shipController.getGameObject().changeWeapon(old, neu);
+		updateMounts();
+	}
+
+	public void updateMounts() {
+		int i = 0;
+		WeaponObject[] weapons = shipController.getGameObject().getWeapons();
+		for (MountController mount : mountControllers) {
+			mount.setId(i);
+			if (i < weapons.length)
+				mount.setWeapon(weapons[i]);
+			else
+				mount.setWeapon(Database.DEFAULT_WEAPON_OBJ);
+			i++;
+		}
 	}
 
 	public void delete(AbstractController controller) {

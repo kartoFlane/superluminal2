@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ui.sidebar;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -26,13 +27,20 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
-import com.kartoflane.superluminal2.components.Images;
+import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.ftl.DroneList;
+import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.ftl.WeaponList;
+import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.ui.DroneSelectionDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
 
 public class PropertiesToolComposite extends Composite {
 
@@ -66,7 +74,7 @@ public class PropertiesToolComposite extends Composite {
 	private Spinner spHealth;
 	private Spinner spPower;
 	private TabItem tbtmCrew;
-	private Composite crewComposite;
+	private Composite compCrew;
 	private Tree crewTree;
 	private TreeItem trtmCrewSlot1;
 	private TreeItem trtmCrewSlot2;
@@ -80,12 +88,24 @@ public class PropertiesToolComposite extends Composite {
 	private Spinner spMinSec;
 	private Spinner spMaxSec;
 	private TabFolder tabFolder;
+	private ArrayList<Button> btnWeapons = new ArrayList<Button>();
+	private ArrayList<Button> btnDrones = new ArrayList<Button>();
+	private Spinner spMissiles;
+	private Spinner spWeaponSlots;
+	private Button btnWeaponList;
+	private Button btnDroneList;
+	private Group grpWeapons;
+	private Composite compArm;
+	private Group grpDrones;
+	private Spinner spDrones;
+	private Spinner spDroneSlots;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(1, false));
 
 		container = Manager.getCurrentShip();
+		final ShipObject ship = container.getShipController().getGameObject();
 		final boolean[] created = { false };
 
 		Label lblPropertiesTool = new Label(this, SWT.NONE);
@@ -110,107 +130,112 @@ public class PropertiesToolComposite extends Composite {
 		 * XXX: Images tab
 		 * =========================================================================
 		 */
+
 		TabItem tbtmImages = new TabItem(tabFolder, SWT.NONE);
 		tbtmImages.setText("Images");
 
-		Composite imagesComposite = new Composite(tabFolder, SWT.NONE);
-		tbtmImages.setControl(imagesComposite);
-		imagesComposite.setLayout(new GridLayout(4, false));
+		Composite compImages = new Composite(tabFolder, SWT.NONE);
+		tbtmImages.setControl(compImages);
+		compImages.setLayout(new GridLayout(4, false));
 
 		// Hull widgets
-		Label lblHull = new Label(imagesComposite, SWT.NONE);
+		Label lblHull = new Label(compImages, SWT.NONE);
 		lblHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		lblHull.setText("Hull");
 
-		btnHullView = new Button(imagesComposite, SWT.NONE);
+		btnHullView = new Button(compImages, SWT.NONE);
 		btnHullView.setEnabled(false);
 		btnHullView.setText("View");
 
-		btnHullBrowse = new Button(imagesComposite, SWT.NONE);
+		btnHullBrowse = new Button(compImages, SWT.NONE);
 		btnHullBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnHullBrowse.setText("Browse");
 
-		btnHullClear = new Button(imagesComposite, SWT.NONE);
+		btnHullClear = new Button(compImages, SWT.NONE);
 		btnHullClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnHullClear.setText("Clear");
 
-		txtHull = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
+		txtHull = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
 		txtHull.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
-		// Floor widgets
-		Label lblFloor = new Label(imagesComposite, SWT.NONE);
-		lblFloor.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		lblFloor.setText("Floor");
+		if (ship.isPlayerShip()) {
+			// Floor widgets
+			Label lblFloor = new Label(compImages, SWT.NONE);
+			lblFloor.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			lblFloor.setText("Floor");
 
-		btnFloorView = new Button(imagesComposite, SWT.NONE);
-		btnFloorView.setEnabled(false);
-		btnFloorView.setText("View");
+			btnFloorView = new Button(compImages, SWT.NONE);
+			btnFloorView.setEnabled(false);
+			btnFloorView.setText("View");
 
-		btnFloorBrowse = new Button(imagesComposite, SWT.NONE);
-		btnFloorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnFloorBrowse.setText("Browse");
+			btnFloorBrowse = new Button(compImages, SWT.NONE);
+			btnFloorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			btnFloorBrowse.setText("Browse");
 
-		btnFloorClear = new Button(imagesComposite, SWT.NONE);
-		btnFloorClear.setText("Clear");
+			btnFloorClear = new Button(compImages, SWT.NONE);
+			btnFloorClear.setText("Clear");
 
-		txtFloor = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
-		txtFloor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+			txtFloor = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
+			txtFloor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		}
 
 		// Cloak widgets
-		Label lblCloak = new Label(imagesComposite, SWT.NONE);
+		Label lblCloak = new Label(compImages, SWT.NONE);
 		lblCloak.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		lblCloak.setText("Cloak");
 
-		btnCloakView = new Button(imagesComposite, SWT.NONE);
+		btnCloakView = new Button(compImages, SWT.NONE);
 		btnCloakView.setEnabled(false);
 		btnCloakView.setText("View");
 
-		btnCloakBrowse = new Button(imagesComposite, SWT.NONE);
+		btnCloakBrowse = new Button(compImages, SWT.NONE);
 		btnCloakBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnCloakBrowse.setText("Browse");
 
-		btnCloakClear = new Button(imagesComposite, SWT.NONE);
+		btnCloakClear = new Button(compImages, SWT.NONE);
 		btnCloakClear.setText("Clear");
 
-		txtCloak = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
+		txtCloak = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
 		txtCloak.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
-		// Shield widgets
-		Label lblShield = new Label(imagesComposite, SWT.NONE);
-		lblShield.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		lblShield.setText("Shield");
+		if (ship.isPlayerShip()) {
+			// Shield widgets
+			Label lblShield = new Label(compImages, SWT.NONE);
+			lblShield.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			lblShield.setText("Shield");
 
-		btnShieldView = new Button(imagesComposite, SWT.NONE);
-		btnShieldView.setEnabled(false);
-		btnShieldView.setText("View");
+			btnShieldView = new Button(compImages, SWT.NONE);
+			btnShieldView.setEnabled(false);
+			btnShieldView.setText("View");
 
-		btnShieldBrowse = new Button(imagesComposite, SWT.NONE);
-		btnShieldBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnShieldBrowse.setText("Browse");
+			btnShieldBrowse = new Button(compImages, SWT.NONE);
+			btnShieldBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			btnShieldBrowse.setText("Browse");
 
-		btnShieldClear = new Button(imagesComposite, SWT.NONE);
-		btnShieldClear.setText("Clear");
+			btnShieldClear = new Button(compImages, SWT.NONE);
+			btnShieldClear.setText("Clear");
 
-		txtShield = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
-		txtShield.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+			txtShield = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
+			txtShield.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
-		// Thumbnail widgets
-		Label lblMini = new Label(imagesComposite, SWT.NONE);
-		lblMini.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		lblMini.setText("Thumbnail");
+			// Thumbnail widgets
+			Label lblMini = new Label(compImages, SWT.NONE);
+			lblMini.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			lblMini.setText("Thumbnail");
 
-		btnMiniView = new Button(imagesComposite, SWT.NONE);
-		btnMiniView.setEnabled(false);
-		btnMiniView.setText("View");
+			btnMiniView = new Button(compImages, SWT.NONE);
+			btnMiniView.setEnabled(false);
+			btnMiniView.setText("View");
 
-		btnMiniBrowse = new Button(imagesComposite, SWT.NONE);
-		btnMiniBrowse.setText("Browse");
+			btnMiniBrowse = new Button(compImages, SWT.NONE);
+			btnMiniBrowse.setText("Browse");
 
-		btnMiniClear = new Button(imagesComposite, SWT.NONE);
-		btnMiniClear.setText("Clear");
+			btnMiniClear = new Button(compImages, SWT.NONE);
+			btnMiniClear.setText("Clear");
 
-		txtMini = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
-		txtMini.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+			txtMini = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
+			txtMini.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		}
 
 		SelectionAdapter imageViewListener = new SelectionAdapter() {
 			@Override
@@ -248,10 +273,12 @@ public class PropertiesToolComposite extends Composite {
 		};
 
 		btnHullView.addSelectionListener(imageViewListener);
-		btnFloorView.addSelectionListener(imageViewListener);
 		btnCloakView.addSelectionListener(imageViewListener);
-		btnShieldView.addSelectionListener(imageViewListener);
-		btnMiniView.addSelectionListener(imageViewListener);
+		if (ship.isPlayerShip()) {
+			btnFloorView.addSelectionListener(imageViewListener);
+			btnShieldView.addSelectionListener(imageViewListener);
+			btnMiniView.addSelectionListener(imageViewListener);
+		}
 
 		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 			@Override
@@ -281,10 +308,12 @@ public class PropertiesToolComposite extends Composite {
 		};
 
 		btnHullBrowse.addSelectionListener(imageBrowseListener);
-		btnFloorBrowse.addSelectionListener(imageBrowseListener);
 		btnCloakBrowse.addSelectionListener(imageBrowseListener);
-		btnShieldBrowse.addSelectionListener(imageBrowseListener);
-		btnMiniBrowse.addSelectionListener(imageBrowseListener);
+		if (ship.isPlayerShip()) {
+			btnFloorBrowse.addSelectionListener(imageBrowseListener);
+			btnShieldBrowse.addSelectionListener(imageBrowseListener);
+			btnMiniBrowse.addSelectionListener(imageBrowseListener);
+		}
 
 		SelectionAdapter imageClearListener = new SelectionAdapter() {
 			@Override
@@ -307,10 +336,12 @@ public class PropertiesToolComposite extends Composite {
 		};
 
 		btnHullClear.addSelectionListener(imageClearListener);
-		btnFloorClear.addSelectionListener(imageClearListener);
 		btnCloakClear.addSelectionListener(imageClearListener);
-		btnShieldClear.addSelectionListener(imageClearListener);
-		btnMiniClear.addSelectionListener(imageClearListener);
+		if (ship.isPlayerShip()) {
+			btnFloorClear.addSelectionListener(imageClearListener);
+			btnShieldClear.addSelectionListener(imageClearListener);
+			btnMiniClear.addSelectionListener(imageClearListener);
+		}
 
 		/*
 		 * =========================================================================
@@ -321,71 +352,78 @@ public class PropertiesToolComposite extends Composite {
 		TabItem tbtmGeneral = new TabItem(tabFolder, SWT.NONE);
 		tbtmGeneral.setText("General");
 
-		Composite generalComposite = new Composite(tabFolder, SWT.NONE);
-		tbtmGeneral.setControl(generalComposite);
-		generalComposite.setLayout(new GridLayout(2, false));
+		Composite compGeneral = new Composite(tabFolder, SWT.NONE);
+		tbtmGeneral.setControl(compGeneral);
+		compGeneral.setLayout(new GridLayout(2, false));
 
-		Label lblName = new Label(generalComposite, SWT.NONE);
-		lblName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		lblName.setText("Name:");
+		if (ship.isPlayerShip()) {
+			Label lblName = new Label(compGeneral, SWT.NONE);
+			lblName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+			lblName.setText("Name:");
 
-		txtName = new Text(generalComposite, SWT.BORDER);
-		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			txtName = new Text(compGeneral, SWT.BORDER);
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-		Label lblClass = new Label(generalComposite, SWT.NONE);
+			// TODO listener to apply changes
+		}
+
+		Label lblClass = new Label(compGeneral, SWT.NONE);
 		lblClass.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		lblClass.setText("Class:");
 
-		txtClass = new Text(generalComposite, SWT.BORDER);
+		txtClass = new Text(compGeneral, SWT.BORDER);
 		txtClass.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-		lblDesc = new Label(generalComposite, SWT.NONE);
-		lblDesc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		lblDesc.setText("Description: (0/255)");
+		if (ship.isPlayerShip()) {
+			lblDesc = new Label(compGeneral, SWT.NONE);
+			lblDesc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			lblDesc.setText("Description: (0/255)");
 
-		txtDesc = new Text(generalComposite, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		GridData gd_txtDesc = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-		gd_txtDesc.heightHint = 80;
-		txtDesc.setLayoutData(gd_txtDesc);
+			txtDesc = new Text(compGeneral, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+			GridData gd_txtDesc = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+			gd_txtDesc.heightHint = 80;
+			txtDesc.setLayoutData(gd_txtDesc);
 
-		txtDesc.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
-			}
-		});
+			txtDesc.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
+				}
+			});
 
-		Label lblHealth = new Label(generalComposite, SWT.NONE);
+			// TODO listener to apply changes
+		}
+
+		Label lblHealth = new Label(compGeneral, SWT.NONE);
 		lblHealth.setText("Hull Health:");
 
-		spHealth = new Spinner(generalComposite, SWT.BORDER);
+		spHealth = new Spinner(compGeneral, SWT.BORDER);
 		spHealth.setTextLimit(3);
 		spHealth.setMinimum(0);
 		spHealth.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
-		Label lblReactor = new Label(generalComposite, SWT.NONE);
+		Label lblReactor = new Label(compGeneral, SWT.NONE);
 		lblReactor.setText("Reactor Power:");
 
-		spPower = new Spinner(generalComposite, SWT.BORDER);
+		spPower = new Spinner(compGeneral, SWT.BORDER);
 		spPower.setTextLimit(3);
 		spPower.setMinimum(0);
 		spPower.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
-		// Enemy ship-specific widgets
-		if (!container.getShipController().isPlayerShip()) {
-			Label lblMinSector = new Label(generalComposite, SWT.NONE);
+		if (!ship.isPlayerShip()) {
+			Label lblMinSector = new Label(compGeneral, SWT.NONE);
 			lblMinSector.setText("Min Sector:");
 
-			spMinSec = new Spinner(generalComposite, SWT.BORDER);
+			spMinSec = new Spinner(compGeneral, SWT.BORDER);
 			spMinSec.setTextLimit(1);
 			spMinSec.setMaximum(8);
 			spMinSec.setMinimum(1);
 			spMinSec.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
-			Label lblMaxSector = new Label(generalComposite, SWT.NONE);
+			Label lblMaxSector = new Label(compGeneral, SWT.NONE);
 			lblMaxSector.setText("Max Sector:");
 
-			spMaxSec = new Spinner(generalComposite, SWT.BORDER);
+			spMaxSec = new Spinner(compGeneral, SWT.BORDER);
 			spMaxSec.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			spMaxSec.setTextLimit(1);
 			spMaxSec.setMaximum(8);
@@ -397,14 +435,15 @@ public class PropertiesToolComposite extends Composite {
 		 * XXX: Armaments tab
 		 * =========================================================================
 		 */
+
 		TabItem tbtmArmaments = new TabItem(tabFolder, 0);
 		tbtmArmaments.setText("Armaments");
 
-		Composite armComposite = new Composite(tabFolder, SWT.NONE);
-		tbtmArmaments.setControl(armComposite);
-		armComposite.setLayout(new GridLayout(1, false));
+		compArm = new Composite(tabFolder, SWT.NONE);
+		tbtmArmaments.setControl(compArm);
+		compArm.setLayout(new GridLayout(1, false));
 
-		Group grpWeapons = new Group(armComposite, SWT.NONE);
+		grpWeapons = new Group(compArm, SWT.NONE);
 		grpWeapons.setLayout(new GridLayout(2, false));
 		grpWeapons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		grpWeapons.setText("Weapons");
@@ -412,32 +451,117 @@ public class PropertiesToolComposite extends Composite {
 		Label lblMissiles = new Label(grpWeapons, SWT.NONE);
 		lblMissiles.setText("Starting Missiles");
 
-		Spinner spMissiles = new Spinner(grpWeapons, SWT.BORDER);
-		spMissiles.setMinimum(0);
+		spMissiles = new Spinner(grpWeapons, SWT.BORDER);
 		spMissiles.setMaximum(999);
 		spMissiles.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 
 		Label lblWeaponSlots = new Label(grpWeapons, SWT.NONE);
 		lblWeaponSlots.setText("Slots");
 
-		Spinner spWeaponSlots = new Spinner(grpWeapons, SWT.BORDER);
-		spWeaponSlots.setMinimum(0);
-		spWeaponSlots.setMaximum(10);
+		spWeaponSlots = new Spinner(grpWeapons, SWT.BORDER);
+		spWeaponSlots.setMaximum(4);
 		spWeaponSlots.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		spWeaponSlots.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (ship.isPlayerShip()) {
+					int slots = spWeaponSlots.getSelection();
+					ship.setWeaponSlots(slots);
+					clearWeaponSlots();
+					createWeaponSlots(slots);
+					updateData();
+					container.updateMounts();
+				}
+			}
+		});
+
+		if (ship.isPlayerShip()) {
+			createWeaponSlots(ship.getWeaponSlots());
+		} else {
+			btnWeaponList = new Button(grpWeapons, SWT.NONE);
+			btnWeaponList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			btnWeaponList.setText("<weapon list>");
+
+			btnWeaponList.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					WeaponList current = ship.getWeaponList();
+					WeaponList neu = WeaponSelectionDialog.getInstance().open(current);
+
+					if (neu != null) {
+						ship.setWeaponList(neu);
+						updateData();
+					}
+				}
+			});
+		}
+
+		grpDrones = new Group(compArm, SWT.NONE);
+		grpDrones.setLayout(new GridLayout(2, false));
+		grpDrones.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		grpDrones.setText("Drones");
+
+		Label lblDrones = new Label(grpDrones, SWT.NONE);
+		lblDrones.setText("Starting Drone Parts");
+
+		spDrones = new Spinner(grpDrones, SWT.BORDER);
+		spDrones.setMaximum(999);
+		spDrones.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+
+		Label lblDroneSlots = new Label(grpDrones, SWT.NONE);
+		lblDroneSlots.setText("Slots");
+
+		spDroneSlots = new Spinner(grpDrones, SWT.BORDER);
+		spDroneSlots.setMaximum(4);
+		spDroneSlots.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		spDroneSlots.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (ship.isPlayerShip()) {
+					int slots = spDroneSlots.getSelection();
+					ship.setDroneSlots(slots);
+					clearDroneSlots();
+					createDroneSlots(slots);
+					updateData();
+				}
+			}
+		});
+
+		if (ship.isPlayerShip()) {
+			createDroneSlots(ship.getDroneSlots());
+		} else {
+			btnDroneList = new Button(grpDrones, SWT.NONE);
+			btnDroneList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			btnDroneList.setText("<drone list>");
+
+			btnDroneList.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					DroneList current = ship.getDroneList();
+					DroneList neu = DroneSelectionDialog.getInstance().open(current);
+
+					if (neu != null) {
+						ship.setDroneList(neu);
+						updateData();
+					}
+				}
+			});
+		}
 
 		/*
 		 * =========================================================================
 		 * XXX: Crew tab
 		 * =========================================================================
 		 */
+
 		tbtmCrew = new TabItem(tabFolder, SWT.NONE);
 		tbtmCrew.setText("Crew");
 
-		crewComposite = new Composite(tabFolder, SWT.NONE);
-		tbtmCrew.setControl(crewComposite);
-		crewComposite.setLayout(new GridLayout(1, false));
+		compCrew = new Composite(tabFolder, SWT.NONE);
+		tbtmCrew.setControl(compCrew);
+		compCrew.setLayout(new GridLayout(1, false));
 
-		crewTree = new Tree(crewComposite, SWT.BORDER);
+		crewTree = new Tree(compCrew, SWT.BORDER);
 		crewTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
 		trtmCrewSlot1 = new TreeItem(crewTree, SWT.NONE);
@@ -504,6 +628,8 @@ public class PropertiesToolComposite extends Composite {
 		ShipController controller = container.getShipController();
 		ShipObject ship = controller.getGameObject();
 
+		// Images tab
+
 		// Update image path text fields and scroll them to the end to show the file's name
 		String content = container.getImage(Images.HULL);
 
@@ -511,51 +637,179 @@ public class PropertiesToolComposite extends Composite {
 		txtHull.selectAll();
 		btnHullView.setEnabled(content != null);
 
-		content = container.getImage(Images.FLOOR);
-		txtFloor.setText(content == null ? "" : Utils.trimProtocol(content));
-		txtFloor.selectAll();
-		btnFloorView.setEnabled(ship.isPlayerShip() && content != null);
-		btnFloorBrowse.setEnabled(ship.isPlayerShip());
-		btnFloorClear.setEnabled(ship.isPlayerShip());
-
 		content = container.getImage(Images.CLOAK);
 		txtCloak.setText(content == null ? "" : Utils.trimProtocol(content));
 		txtCloak.selectAll();
 		btnCloakView.setEnabled(content != null);
 
-		content = container.getImage(Images.SHIELD);
-		txtShield.setText(content == null ? "" : Utils.trimProtocol(content));
-		txtShield.selectAll();
-		btnShieldView.setEnabled(ship.isPlayerShip() && content != null);
-		btnShieldBrowse.setEnabled(ship.isPlayerShip());
-		btnShieldClear.setEnabled(ship.isPlayerShip());
+		if (ship.isPlayerShip()) {
+			content = container.getImage(Images.FLOOR);
+			txtFloor.setText(content == null ? "" : Utils.trimProtocol(content));
+			txtFloor.selectAll();
+			btnFloorView.setEnabled(content != null);
 
-		content = container.getImage(Images.THUMBNAIL);
-		txtMini.setText(content == null || !ship.isPlayerShip() ? "" : Utils.trimProtocol(content));
-		txtMini.selectAll();
-		btnMiniView.setEnabled(ship.isPlayerShip() && content != null);
-		btnMiniBrowse.setEnabled(ship.isPlayerShip());
-		btnMiniClear.setEnabled(ship.isPlayerShip());
+			content = container.getImage(Images.SHIELD);
+			txtShield.setText(content == null ? "" : Utils.trimProtocol(content));
+			txtShield.selectAll();
+			btnShieldView.setEnabled(content != null);
 
-		content = ship.getShipName();
-		txtName.setText(ship.isPlayerShip() && content != null ? content : "");
-		txtName.setEnabled(ship.isPlayerShip());
+			content = container.getImage(Images.THUMBNAIL);
+			txtMini.setText(content == null || !ship.isPlayerShip() ? "" : Utils.trimProtocol(content));
+			txtMini.selectAll();
+			btnMiniView.setEnabled(content != null);
+		}
+
+		// General tab
 
 		content = ship.getShipClass();
 		txtClass.setText(content == null ? "" : content);
 
-		content = ship.getShipDescription();
-		txtDesc.setText(ship.isPlayerShip() && content != null ? content : "");
-		txtDesc.setEnabled(ship.isPlayerShip());
-		lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
-
 		spHealth.setSelection(ship.getHealth());
 		spPower.setSelection(ship.getPower());
+
+		if (ship.isPlayerShip()) {
+			content = ship.getShipName();
+			txtName.setText(ship.isPlayerShip() && content != null ? content : "");
+
+			content = ship.getShipDescription();
+			txtDesc.setText(ship.isPlayerShip() && content != null ? content : "");
+			lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
+		} else {
+			spMinSec.setSelection(ship.getMinSector());
+			spMaxSec.setSelection(ship.getMaxSector());
+			spMinSec.setEnabled(!ship.isPlayerShip());
+			spMaxSec.setEnabled(!ship.isPlayerShip());
+		}
+
+		// Armaments tab
+
+		spMissiles.setSelection(ship.getMissilesAmount());
+		spWeaponSlots.setSelection(ship.getWeaponSlots());
+		spDrones.setSelection(ship.getDronePartsAmount());
+		spDroneSlots.setSelection(ship.getDroneSlots());
+
+		if (ship.isPlayerShip()) {
+			int count = 0;
+			for (WeaponObject weapon : ship.getWeapons()) {
+				if (count < ship.getWeaponSlots()) {
+					btnWeapons.get(count).setText(weapon.toString());
+					count++;
+				}
+			}
+
+			count = 0;
+			for (DroneObject drone : ship.getDrones()) {
+				if (count < ship.getDroneSlots()) {
+					btnDrones.get(count).setText(drone.toString());
+					count++;
+				}
+			}
+		} else {
+			WeaponList wList = ship.getWeaponList();
+			btnWeaponList.setText(wList.getBlueprintName());
+
+			DroneList dList = ship.getDroneList();
+			btnDroneList.setText(dList.getBlueprintName());
+		}
+	}
+
+	private void clearWeaponSlots() {
+		for (Button b : btnWeapons)
+			b.dispose();
+		btnWeapons.clear();
+		compArm.layout();
+	}
+
+	private void clearDroneSlots() {
+		for (Button b : btnDrones)
+			b.dispose();
+		btnDrones.clear();
+		compArm.layout();
+	}
+
+	private void createWeaponSlots(int n) {
+		SelectionAdapter listener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int i = btnWeapons.indexOf(e.getSource());
+
+				if (i != -1) {
+					ShipObject ship = container.getShipController().getGameObject();
+					WeaponObject current = ship.getWeapons()[i];
+
+					WeaponObject neu = WeaponSelectionDialog.getInstance().open(current);
+
+					if (neu != null) {
+						// If the weapon is the default dummy, then replace the first occurence of
+						// the dummy weapon, so that there are no gaps
+						if (current == Database.DEFAULT_WEAPON_OBJ)
+							container.changeWeapon(current, neu);
+						else
+							container.changeWeapon(i, neu);
+						updateData();
+					}
+				}
+			}
+		};
+
+		for (int i = 0; i < n; i++) {
+			Button b = new Button(grpWeapons, SWT.NONE);
+			b.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			b.setText("<weapon slot>");
+			b.addSelectionListener(listener);
+			btnWeapons.add(b);
+		}
+
+		compArm.layout();
+	}
+
+	private void createDroneSlots(int n) {
+		SelectionAdapter listener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int i = btnDrones.indexOf(e.getSource());
+
+				if (i != -1) {
+					ShipObject ship = container.getShipController().getGameObject();
+					DroneObject current = ship.getDrones()[i];
+
+					DroneObject neu = DroneSelectionDialog.getInstance().open(current);
+
+					if (neu != null) {
+						// If the drone is the default dummy, then replace the first occurence of
+						// the dummy drone, so that there are no gaps
+						if (current == Database.DEFAULT_DRONE_OBJ)
+							ship.changeDrone(current, neu);
+						else
+							ship.changeDrone(i, neu);
+						updateData();
+					}
+				}
+			}
+		};
+
+		for (int i = 0; i < n; i++) {
+			Button b = new Button(grpDrones, SWT.NONE);
+			b.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			b.setText("<drone slot>");
+			b.addSelectionListener(listener);
+			btnDrones.add(b);
+		}
+
+		compArm.layout();
 	}
 
 	@Override
 	public boolean isFocusControl() {
-		return txtName.isFocusControl() || txtClass.isFocusControl() || txtDesc.isFocusControl() ||
-				spHealth.isFocusControl() || spPower.isFocusControl();
+		boolean result = false;
+		result |= txtClass.isFocusControl() || spHealth.isFocusControl() || spPower.isFocusControl() ||
+				spMissiles.isFocusControl() || spWeaponSlots.isFocusControl() ||
+				spDrones.isFocusControl() || spDroneSlots.isFocusControl();
+		if (container.getShipController().isPlayerShip()) {
+			result |= txtName.isFocusControl() || txtDesc.isFocusControl();
+		} else {
+			result |= spMinSec.isFocusControl() || spMaxSec.isFocusControl();
+		}
+		return result;
 	}
 }

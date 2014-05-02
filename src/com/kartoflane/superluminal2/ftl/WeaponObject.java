@@ -1,10 +1,13 @@
 package com.kartoflane.superluminal2.ftl;
 
+import java.util.HashMap;
+
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.components.enums.WeaponStats;
+import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.Database.WeaponTypes;
 
 /**
  * A class representing a weapon. Since it serves only as a data vessel
@@ -18,10 +21,13 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 
 	private static final long serialVersionUID = 7968532944693929010L;
 
+	private final String blueprintName;
 	private WeaponTypes weaponType;
-	private String blueprintName;
-	private String title;
-	private String shortName;
+	private String title = "";
+	private String shortName = "";
+	private String description = "";
+
+	private HashMap<WeaponStats, Float> statMap = null;
 
 	private AnimationObject animation;
 
@@ -30,14 +36,14 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 	 */
 	public WeaponObject() {
 		weaponType = null;
-		blueprintName = "SL Dummy Weapon";
-		title = "No Weapon";
-		shortName = "No Weapon";
+		blueprintName = "Default Weapon";
+		title = "<No Weapon>";
+		shortName = "<No Weapon>";
 		animation = Database.DEFAULT_ANIM_OBJ;
 	}
 
-	public WeaponObject(String blueprintName) {
-		setBlueprintName(blueprintName);
+	public WeaponObject(String blueprint) {
+		blueprintName = blueprint;
 	}
 
 	@Override
@@ -61,12 +67,6 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 
 	public WeaponTypes getType() {
 		return weaponType;
-	}
-
-	public void setBlueprintName(String name) {
-		if (name == null)
-			throw new IllegalArgumentException("Name must not be null.");
-		blueprintName = name;
 	}
 
 	public String getBlueprintName() {
@@ -93,6 +93,32 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 		return shortName;
 	}
 
+	public void setDescription(String desc) {
+		if (desc == null)
+			throw new IllegalArgumentException(blueprintName + ": description must not be null.");
+		description = desc;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setStat(WeaponStats stat, float value) {
+		if (stat == null)
+			throw new IllegalArgumentException("Stat type must not be null.");
+		if (statMap == null)
+			initStatMap();
+		statMap.put(stat, value);
+	}
+
+	public float getStat(WeaponStats stat) {
+		if (stat == null)
+			throw new IllegalArgumentException("Stat type must not be null.");
+		if (statMap == null)
+			initStatMap();
+		return statMap.get(stat);
+	}
+
 	public String getAnimName() {
 		return animation.getAnimName();
 	}
@@ -111,6 +137,17 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 
 	public String getSheetPath() {
 		return animation.getSheetPath();
+	}
+
+	private void initStatMap() {
+		statMap = new HashMap<WeaponStats, Float>();
+		for (WeaponStats stat : WeaponStats.values())
+			statMap.put(stat, 0f);
+	}
+
+	@Override
+	public String toString() {
+		return shortName;
 	}
 
 	@Override

@@ -8,12 +8,12 @@ import java.util.TreeSet;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
-import com.kartoflane.superluminal2.components.Directions;
-import com.kartoflane.superluminal2.components.Images;
-import com.kartoflane.superluminal2.components.Races;
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
+import com.kartoflane.superluminal2.components.enums.Races;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.Database.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
@@ -35,12 +35,17 @@ public class ShipObject extends GameObject {
 	private HashSet<DoorObject> doors;
 	private TreeSet<MountObject> mounts;
 	private HashSet<GibObject> gibs;
-	private ArrayList<DroneObject> drones;
+
 	private ArrayList<AugmentObject> augments;
 	private HashMap<Systems, SystemObject> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
 	private HashMap<Races, Integer> crewCountMap;
 	private HashMap<Races, Integer> crewMaxMap;
+
+	private ArrayList<WeaponObject> weapons;
+	private ArrayList<DroneObject> drones;
+	private WeaponList weaponList = Database.DEFAULT_WEAPON_LIST;
+	private DroneList droneList = Database.DEFAULT_DRONE_LIST;
 
 	private int xOffset = 0;
 	private int yOffset = 0;
@@ -70,12 +75,19 @@ public class ShipObject extends GameObject {
 		doors = new HashSet<DoorObject>();
 		mounts = new TreeSet<MountObject>();
 		gibs = new HashSet<GibObject>();
-		drones = new ArrayList<DroneObject>();
 		systemMap = new HashMap<Systems, SystemObject>();
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
 		crewCountMap = new HashMap<Races, Integer>();
 		crewMaxMap = new HashMap<Races, Integer>();
+
+		weapons = new ArrayList<WeaponObject>();
+		drones = new ArrayList<DroneObject>();
+
+		for (int i = 0; i <= 4; i++) {
+			weapons.add(Database.DEFAULT_WEAPON_OBJ);
+			drones.add(Database.DEFAULT_DRONE_OBJ);
+		}
 
 		for (Systems system : Systems.values())
 			systemMap.put(system, new SystemObject(system));
@@ -459,6 +471,13 @@ public class ShipObject extends GameObject {
 		if (slots < 0)
 			throw new IllegalArgumentException("Number of slots must be non-negative.");
 		weaponSlots = slots;
+		if (weapons.size() > slots) {
+			for (int i = slots; i < weapons.size(); i++)
+				weapons.remove(i);
+		} else if (weapons.size() < slots) {
+			for (int i = weapons.size(); i <= slots; i++)
+				weapons.add(Database.DEFAULT_WEAPON_OBJ);
+		}
 	}
 
 	/**
@@ -466,6 +485,73 @@ public class ShipObject extends GameObject {
 	 */
 	public int getWeaponSlots() {
 		return weaponSlots;
+	}
+
+	/**
+	 * Sets the weapon list that the ship will use as its loadout.<br>
+	 * Enemy ships only.
+	 */
+	public void setWeaponList(WeaponList list) {
+		if (isPlayer)
+			throw new IllegalStateException("Not an enemy ship.");
+		if (list == null)
+			throw new IllegalArgumentException("List must not be null.");
+		weaponList = list;
+	}
+
+	/**
+	 * @return the weapon list that the ship uses as its loadout
+	 */
+	public WeaponList getWeaponList() {
+		return weaponList;
+	}
+
+	public WeaponObject[] getWeapons() {
+		return weapons.toArray(new WeaponObject[0]);
+	}
+
+	/**
+	 * Puts the new weapon at the specified index in the weapon list.
+	 */
+	public void changeWeapon(int index, WeaponObject neu) {
+		if (index < 0 || index > weaponSlots)
+			throw new IllegalArgumentException("Index is out of bounds: " + index);
+		if (neu == null)
+			throw new IllegalArgumentException("New weapon must not be null.");
+		weapons.set(index, neu);
+		coalesceWeapons();
+	}
+
+	/**
+	 * Removes the first occurence of the old weapon, and puts the new weapon in its place.
+	 * 
+	 * @return index at which the new weapon was placed
+	 */
+	public int changeWeapon(WeaponObject old, WeaponObject neu) {
+		if (old == null)
+			throw new IllegalArgumentException("Old weapon must not be null.");
+		if (neu == null)
+			throw new IllegalArgumentException("New weapon must not be null.");
+
+		int i = weapons.indexOf(old);
+		if (i == -1)
+			throw new IllegalArgumentException("Old weapon not found.");
+		weapons.set(i, neu);
+		return i;
+	}
+
+	/**
+	 * Coalesces the weapons, moving all dummy weapons to the end of the list, so that
+	 * there are no gaps between 'real' weapons.
+	 */
+	private void coalesceWeapons() {
+		for (int i = 0; i < weapons.size(); i++) {
+			WeaponObject weapon = weapons.get(i);
+			if (weapon == Database.DEFAULT_WEAPON_OBJ) {
+				weapons.remove(weapon);
+				weapons.add(weapon);
+			}
+		}
 	}
 
 	/**
@@ -483,6 +569,73 @@ public class ShipObject extends GameObject {
 	 */
 	public int getDroneSlots() {
 		return droneSlots;
+	}
+
+	/**
+	 * Sets the drone list that the ship will use as its loadout.<br>
+	 * Enemy ships only.
+	 */
+	public void setDroneList(DroneList list) {
+		if (isPlayer)
+			throw new IllegalStateException("Not an enemy ship.");
+		if (list == null)
+			throw new IllegalArgumentException("List must not be null.");
+		droneList = list;
+	}
+
+	/**
+	 * @return the drone list that the ship uses as its loadout
+	 */
+	public DroneList getDroneList() {
+		return droneList;
+	}
+
+	public DroneObject[] getDrones() {
+		return drones.toArray(new DroneObject[0]);
+	}
+
+	/**
+	 * Puts the new drone at the specified index in the drone list.
+	 */
+	public void changeDrone(int index, DroneObject neu) {
+		if (index < 0 || index > weaponSlots)
+			throw new IllegalArgumentException("Index is out of bounds: " + index);
+		if (neu == null)
+			throw new IllegalArgumentException("New drone must not be null.");
+		drones.set(index, neu);
+		coalesceDrones();
+	}
+
+	/**
+	 * Removes the first occurence of the old drone, and puts the new drone in its place.
+	 * 
+	 * @return index at which the new drone was placed
+	 */
+	public int changeDrone(DroneObject old, DroneObject neu) {
+		if (old == null)
+			throw new IllegalArgumentException("Old drone must not be null.");
+		if (neu == null)
+			throw new IllegalArgumentException("New drone must not be null.");
+
+		int i = drones.indexOf(old);
+		if (i == -1)
+			throw new IllegalArgumentException("Old drone not found.");
+		drones.set(i, neu);
+		return i;
+	}
+
+	/**
+	 * Coalesces drones, moving all dummy drones to the end of the list, so that
+	 * there are no gaps between 'real' drones.
+	 */
+	private void coalesceDrones() {
+		for (int i = 0; i < drones.size(); i++) {
+			DroneObject drone = drones.get(i);
+			if (drone == Database.DEFAULT_DRONE_OBJ) {
+				drones.remove(drone);
+				drones.add(drone);
+			}
+		}
 	}
 
 	public void setMissilesAmount(int amount) {
@@ -687,12 +840,10 @@ public class ShipObject extends GameObject {
 			rooms.add((RoomObject) object);
 		else if (object instanceof DoorObject)
 			doors.add((DoorObject) object);
-		else if (object instanceof MountObject) {
+		else if (object instanceof MountObject)
 			mounts.add((MountObject) object);
-		} else if (object instanceof GibObject)
+		else if (object instanceof GibObject)
 			gibs.add((GibObject) object);
-		else if (object instanceof DroneObject)
-			drones.add((DroneObject) object);
 		else if (object instanceof AugmentObject)
 			augments.add((AugmentObject) object);
 		else
@@ -717,8 +868,6 @@ public class ShipObject extends GameObject {
 			mounts.remove(object);
 		else if (object instanceof GibObject)
 			gibs.remove(object);
-		else if (object instanceof DroneObject)
-			drones.remove(object);
 		else if (object instanceof AugmentObject)
 			augments.remove(object);
 		else
@@ -738,6 +887,9 @@ public class ShipObject extends GameObject {
 		}
 	}
 
+	/**
+	 * Automatically links doors to adjacent rooms.
+	 */
 	public void linkDoors() {
 		for (DoorObject door : doors) {
 			door.verifyLinks();

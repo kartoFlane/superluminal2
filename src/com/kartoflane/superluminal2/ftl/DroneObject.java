@@ -1,19 +1,32 @@
 package com.kartoflane.superluminal2.ftl;
 
+import java.util.HashMap;
+
+import com.kartoflane.superluminal2.components.enums.DroneStats;
+import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
-import com.kartoflane.superluminal2.core.Database.DroneTypes;
 
 public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable {
 
 	private static final long serialVersionUID = -4645066316142355841L;
 
+	private final String blueprintName;
 	private DroneTypes droneType;
-	private String blueprintName;
-	private String title;
-	private String shortName;
+	private String title = "";
+	private String shortName = "";
+	private String description = "";
+
+	private HashMap<DroneStats, Float> statMap = null;
+
+	public DroneObject() {
+		droneType = null;
+		blueprintName = "Default Drone";
+		title = "<No Drone>";
+		shortName = "<No Drone>";
+	}
 
 	public DroneObject(String blueprint) {
-		setBlueprintName(blueprint);
+		blueprintName = blueprint;
 	}
 
 	@Override
@@ -31,12 +44,6 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 
 	public DroneTypes getType() {
 		return droneType;
-	}
-
-	public void setBlueprintName(String name) {
-		if (name == null)
-			throw new IllegalArgumentException("Name must not be null.");
-		blueprintName = name;
 	}
 
 	public String getBlueprintName() {
@@ -60,6 +67,43 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 	}
 
 	public String getShortName() {
+		return shortName;
+	}
+
+	public void setDescription(String desc) {
+		if (desc == null)
+			throw new IllegalArgumentException(blueprintName + ": description must not be null.");
+		description = desc;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setStat(DroneStats stat, float value) {
+		if (stat == null)
+			throw new IllegalArgumentException("Stat type must not be null.");
+		if (statMap == null)
+			initStatMap();
+		statMap.put(stat, value);
+	}
+
+	public float getStat(DroneStats stat) {
+		if (stat == null)
+			throw new IllegalArgumentException("Stat type must not be null.");
+		if (statMap == null)
+			initStatMap();
+		return statMap.get(stat);
+	}
+
+	private void initStatMap() {
+		statMap = new HashMap<DroneStats, Float>();
+		for (DroneStats stat : DroneStats.values())
+			statMap.put(stat, 0f);
+	}
+
+	@Override
+	public String toString() {
 		return shortName;
 	}
 

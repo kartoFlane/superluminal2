@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
-import com.kartoflane.superluminal2.components.Systems;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.GlowSet;
@@ -322,14 +322,13 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			String temp = system.getInteriorPath();
 			txtInterior.setText(temp == null ? "" : Utils.trimProtocol(temp));
 			txtInterior.selectAll();
+			txtInterior.clearSelection();
 
 			if (system.canContainGlow() && playerShip) {
 				btnGlow.setText(system.getGameObject().getGlowSet().getIdentifier());
 			} else {
 				btnGlow.setText("None");
 			}
-
-			EditorWindow.getInstance().forceFocus();
 		} else {
 			// No system - reset to default
 			if (!playerShip) {
