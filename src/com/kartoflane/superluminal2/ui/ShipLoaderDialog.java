@@ -36,11 +36,11 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
-import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.ShipUtils;
 import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
 
@@ -217,7 +217,7 @@ public class ShipLoaderDialog {
 						}
 
 						String path = metadata.getHullImagePath();
-						preview.setImage(path == null ? "rdat:img/nullResource.png" : path);
+						preview.setImage(path == null ? "dat:img/nullResource.png" : path);
 						updatePreview();
 						canvas.redraw();
 					}
@@ -359,6 +359,11 @@ public class ShipLoaderDialog {
 		}
 	}
 
+	public void loadShipList() {
+		Database db = Database.getInstance();
+		loadShipList(db.getShipMetadata());
+	}
+
 	private void handleException(ShipMetadata metadata, Exception ex) {
 		log.warn("An error has occured while loading " + metadata.getBlueprintName() + ": ", ex);
 		StringBuilder buf = new StringBuilder();
@@ -381,6 +386,7 @@ public class ShipLoaderDialog {
 	}
 
 	public void open() {
+		loadShipList();
 		shell.open();
 	}
 

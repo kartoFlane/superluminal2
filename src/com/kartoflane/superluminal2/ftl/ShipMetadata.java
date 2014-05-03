@@ -1,6 +1,4 @@
-package com.kartoflane.superluminal2.components;
-
-import net.vhati.ftldat.FTLDat.FTLPack;
+package com.kartoflane.superluminal2.ftl;
 
 import org.jdom2.Element;
 
@@ -76,13 +74,13 @@ public class ShipMetadata {
 	}
 
 	public String getHullImagePath() {
-		return firstExisting(imageNamespace + "_base.png", Database.getInstance().getResourceDat());
+		return firstExisting(imageNamespace + "_base.png", Database.getInstance());
 	}
 
-	private static String firstExisting(String suffix, FTLPack archive) {
-		String[] prefixes = { "rdat:img/ship/", "rdat:img/ships_glow/", "rdat:img/ships_noglow/" };
+	private static String firstExisting(String suffix, Database db) {
+		String[] prefixes = { "dat:img/ship/", "dat:img/ships_glow/", "dat:img/ships_noglow/" };
 		for (String prefix : prefixes) {
-			if (archive.contains(Utils.trimProtocol(prefix) + suffix))
+			if (db.contains(Utils.trimProtocol(prefix) + suffix))
 				return prefix + suffix;
 		}
 		return null;
