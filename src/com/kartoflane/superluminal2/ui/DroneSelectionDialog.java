@@ -394,8 +394,9 @@ public class DroneSelectionDialog {
 			for (DroneStats stat : DroneStats.values()) {
 				float value = result.getStat(stat);
 				if (value != 0) {
+					if (buf.length() != 0)
+						buf.append("\n");
 					buf.append(stat.toString() + ": " + value);
-					buf.append("\n");
 				}
 			}
 			txtStats.setText(buf.toString());

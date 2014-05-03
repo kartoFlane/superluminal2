@@ -44,6 +44,8 @@ import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 public class Utils {
 	public static final Logger log = LogManager.getLogger(Utils.class);
 
+	private static final Pattern PROTOCOL_PTRN = Pattern.compile("^[^:]+:");
+
 	public static int distance(Point p1, Point p2) {
 		return (int) Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
 	}
@@ -179,6 +181,16 @@ public class Utils {
 		return parseXML(contents);
 	}
 
+	public static InputStream cloneStream(InputStream is) throws IOException {
+		int read = 0;
+		byte[] bytes = new byte[1024 * 1024];
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		while ((read = is.read(bytes)) != -1)
+			baos.write(bytes, 0, read);
+		byte[] ba = baos.toByteArray();
+		return new ByteArrayInputStream(ba);
+	}
+
 	public static Document parseXML(String contents) throws JDOMParseException {
 		if (contents == null)
 			throw new IllegalArgumentException("Parsed string must not be null.");
@@ -222,23 +234,17 @@ public class Utils {
 	}
 
 	public static String trimProtocol(String input) {
-		if (input.startsWith("zip:"))
-			return input.substring(4);
-		else if (input.startsWith("rdat:") || input.startsWith("file:"))
-			return input.substring(5);
-		else if (input.startsWith("cpath:"))
-			return input.substring(6);
+		Matcher m = PROTOCOL_PTRN.matcher(input);
+		if (m.find())
+			return input.replace(m.group(), "");
 		else
 			return input;
 	}
 
 	public static String getProtocol(String input) {
-		if (input.startsWith("zip:"))
-			return input.substring(0, 4);
-		else if (input.startsWith("rdat:") || input.startsWith("file:"))
-			return input.substring(0, 5);
-		else if (input.startsWith("cpath:"))
-			return input.substring(0, 6);
+		Matcher m = PROTOCOL_PTRN.matcher(input);
+		if (m.find())
+			return m.group();
 		else
 			return "";
 	}
