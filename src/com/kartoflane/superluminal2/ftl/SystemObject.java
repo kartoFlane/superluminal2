@@ -107,7 +107,7 @@ public class SystemObject extends GameObject {
 		if (namespace == null)
 			interiorPath = null;
 		else
-			interiorPath = "rdat:img/ship/interior/" + namespace + ".png";
+			interiorPath = "dat:img/ship/interior/" + namespace + ".png";
 	}
 
 	public String getInteriorNamespace() {
