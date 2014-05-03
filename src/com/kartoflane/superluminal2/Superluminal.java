@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Properties;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
@@ -24,14 +23,11 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
-import com.kartoflane.superluminal2.core.DataUtils;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.core.Utils;
-import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ui.EditorWindow;
-import com.kartoflane.superluminal2.ui.ShipLoaderDialog;
 
 public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
@@ -55,7 +51,6 @@ public class Superluminal {
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * - rudimentary image viewer
 	 * - ship offset modification
-	 * - zip protocol
 	 * - automatic version check
 	 * - add blueprint name selection to general tab?
 	 * - rework door linking so that it doesn't have to be done through the DoorDataComposite (like SystemsMenu)
@@ -186,12 +181,10 @@ public class Superluminal {
 				FTLPack data = new FTLPack(dataFile, "r");
 				FTLPack resource = new FTLPack(resourceFile, "r");
 
-				Database db = Database.getInstance();
-				db.setDataDat(data);
-				db.setResourceDat(resource);
+				Database db = new Database(data, resource);
 
 				log.trace("Loading database...");
-				loadDatabase();
+				db.getCore().load();
 			} catch (IOException e) {
 				log.error("An error occured while loading dat archives:", e);
 
@@ -248,161 +241,6 @@ public class Superluminal {
 
 	public static void checkForUpdates() {
 		// TODO
-	}
-
-	/**
-	 * Parse the dat archives and load relevant data into the database.
-	 * 
-	 * <pre>
-	 * Loaded data:
-	 *   - weapon anim, animSheets (only temporarily), weapon sprites
-	 *   - ship blueprints
-	 *   - weapon blueprints
-	 *   - drone blueprints
-	 *   - augment blueprints
-	 *   - roomLayout tags (glow objects) from rooms.xml
-	 *   - glow images (glow sets) in img/ship/interior, eg. pilot_glow1-3.png, etc
-	 * </pre>
-	 */
-	private static void loadDatabase() {
-		Database db = Database.getInstance();
-		FTLPack data = db.getDataDat();
-
-		// Animations need to be loaded before weapons, since they reference them
-		db.preloadAnims();
-		db.loadGlowSets();
-
-		InputStream is = null;
-
-		String[] blueprintFiles = { "data/blueprints.xml", "data/autoBlueprints.xml",
-				"data/dlcBlueprints.xml", "data/dlcBlueprintsOverwrite.xml" };
-		for (String innerPath : blueprintFiles) {
-			try {
-				is = data.getInputStream(innerPath);
-				DecodeResult dr = Utils.decodeText(is, null);
-
-				ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
-				for (Element e : elements) {
-					try {
-						db.store(DataUtils.loadShipMetadata(e));
-					} catch (IllegalArgumentException ex) {
-						log.warn("Could not load ship metadata: " + ex.getMessage());
-					}
-				}
-
-				elements.clear();
-				elements = null;
-				elements = DataUtils.findTagsNamed(dr.text, "weaponBlueprint");
-				for (Element e : elements) {
-					try {
-						db.store(DataUtils.loadWeapon(e));
-					} catch (IllegalArgumentException ex) {
-						log.warn("Could not load weapon: " + ex.getMessage());
-					}
-				}
-
-				elements.clear();
-				elements = null;
-				elements = DataUtils.findTagsNamed(dr.text, "droneBlueprint");
-				for (Element e : elements) {
-					try {
-						db.store(DataUtils.loadDrone(e));
-					} catch (IllegalArgumentException ex) {
-						log.warn("Could not load drone: " + ex.getMessage());
-					}
-				}
-
-				elements.clear();
-				elements = null;
-				elements = DataUtils.findTagsNamed(dr.text, "augBlueprint");
-				for (Element e : elements) {
-					try {
-						db.store(DataUtils.loadAugment(e));
-					} catch (IllegalArgumentException ex) {
-						log.warn("Could not load augment: " + ex.getMessage());
-					}
-				}
-			} catch (FileNotFoundException e) {
-				log.error(String.format("Could not find file: '%s'", innerPath));
-			} catch (IOException e) {
-				log.error("An error has occured while loading file '" + innerPath + "':", e);
-			} catch (JDOMParseException e) {
-				log.error("An error has occured while parsing file '" + innerPath + "':", e);
-			} finally {
-				try {
-					if (is != null)
-						is.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-
-		// Lists reference their contents directly, so they have to be loaded in a separate loop
-		for (String innerPath : blueprintFiles) {
-			try {
-				is = data.getInputStream(innerPath);
-				DecodeResult dr = Utils.decodeText(is, null);
-
-				ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "blueprintList");
-				for (Element e : elements) {
-					try {
-						db.store(DataUtils.loadList(e));
-					} catch (IllegalArgumentException ex) {
-						log.warn("Could not load blueprint list: " + ex.getMessage());
-					}
-				}
-
-				elements.clear();
-				elements = null;
-			} catch (FileNotFoundException e) {
-				log.error(String.format("Could not find file: '%s'", innerPath));
-			} catch (IOException e) {
-				log.error("An error has occured while loading file '" + innerPath + "':", e);
-			} catch (JDOMParseException e) {
-				log.error("An error has occured while parsing file '" + innerPath + "':", e);
-			} finally {
-				try {
-					if (is != null)
-						is.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-
-		// Scan rooms xml alone
-		try {
-			is = data.getInputStream("data/rooms.xml");
-			DecodeResult dr = Utils.decodeText(is, null);
-
-			ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "roomLayout");
-			for (Element e : elements) {
-				try {
-					db.store(DataUtils.loadGlow(e));
-				} catch (IllegalArgumentException ex) {
-					log.warn("Could not load glow object: " + ex.getMessage());
-				}
-			}
-
-			elements.clear();
-			elements = null;
-		} catch (FileNotFoundException e) {
-			log.error(String.format("Could not find file: '%s'", "data/rooms.xml"));
-		} catch (IOException e) {
-			log.error("An error has occured while loading file 'data/rooms.xml':", e);
-		} catch (JDOMParseException e) {
-			log.error("An error has occured while parsing file 'data/rooms.xml':", e);
-		} finally {
-			try {
-				if (is != null)
-					is.close();
-			} catch (IOException e) {
-			}
-		}
-
-		// Clear anim sheets, as they're no longer needed
-		db.clearAnimSheets();
-
-		ShipLoaderDialog.getInstance().loadShipList(Database.getInstance().getShipMetadata());
 	}
 
 	/** Create a Hotkey object for each hotkey, and store them in the hotkey map. */

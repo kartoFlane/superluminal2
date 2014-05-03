@@ -13,8 +13,8 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
@@ -26,6 +26,7 @@ import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
@@ -140,7 +141,7 @@ public class DataUtils {
 		return metadata;
 	}
 
-	public static AnimationObject loadAnim(Element e) {
+	public static AnimationObject loadAnim(DatabaseEntry de, Element e) {
 		if (e == null)
 			throw new IllegalArgumentException("Element must not be null.");
 
@@ -175,7 +176,7 @@ public class DataUtils {
 		if (child == null)
 			throw new IllegalArgumentException(anim.getAnimName() + " is missing <sheet> tag");
 
-		Element sheet = Database.getInstance().getAnimSheetElement(child.getValue());
+		Element sheet = de.getAnimSheetElement(child.getValue());
 		if (sheet == null)
 			throw new IllegalArgumentException(anim.getAnimName() + "'s animSheet could not be found: " + child.getValue());
 
@@ -206,7 +207,7 @@ public class DataUtils {
 		anim.setFrameSize(x, y);
 
 		// Load the anim sheet image path
-		anim.setSheetPath("rdat:img/" + sheet.getValue());
+		anim.setSheetPath("dat:img/" + sheet.getValue());
 
 		return anim;
 	}
@@ -371,6 +372,17 @@ public class DataUtils {
 			drone.setDescription("Missing description.");
 		else
 			drone.setDescription(child.getValue());
+
+		for (DroneStats stat : DroneStats.values()) {
+			try {
+				child = e.getChild(stat.getTagName());
+				if (child != null)
+					drone.setStat(stat, Float.parseFloat(child.getValue()));
+			} catch (NumberFormatException ex) {
+				// Catch an re-throw the error to provide more information
+				throw new IllegalArgumentException(drone.getBlueprintName() + ": <" + stat.getTagName() + "> tag's value could not be parsed: " + child.getValue());
+			}
+		}
 
 		return drone;
 	}

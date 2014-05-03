@@ -11,8 +11,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Scanner;
-
-import net.vhati.ftldat.FTLDat.FTLPack;
+import java.util.zip.ZipException;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -52,7 +51,13 @@ public class ShipUtils {
 		DOOR
 	}
 
-	public static ShipObject loadShipFTL() {
+	public void loadFTL(File f) {
+
+	}
+
+	public static ShipObject loadShipFTL(File f)
+			throws ZipException, IOException {
+		// ZipFile zf = new ZipFile(f);
 		// TODO
 		return null;
 	}
@@ -70,7 +75,7 @@ public class ShipUtils {
 		if (saveFile.isDirectory())
 			throw new IllegalArgumentException("Not a file: " + saveFile.getName());
 
-		// TODO zip library
+		// TODO
 	}
 
 	/**
@@ -89,8 +94,6 @@ public class ShipUtils {
 			throw new IllegalArgumentException("Element must not be null.");
 
 		Database db = Database.getInstance();
-		FTLPack data = Database.getInstance().getDataDat();
-		FTLPack resource = Database.getInstance().getResourceDat();
 
 		String attr = null;
 		Element child = null;
@@ -112,10 +115,10 @@ public class ShipUtils {
 			throw new IllegalArgumentException("Missing 'layout' attribute.");
 		ship.setLayout(attr);
 
-		if (!data.contains(ship.getLayoutTXT()))
+		if (!db.contains(ship.getLayoutTXT()))
 			throw new FileNotFoundException("TXT layout file could not be found in game's archives: " + ship.getLayoutTXT());
 
-		InputStream is = data.getInputStream(ship.getLayoutTXT());
+		InputStream is = db.getInputStream(ship.getLayoutTXT());
 		loadLayoutTXT(ship, is, ship.getLayoutTXT());
 
 		// Load ship's images
@@ -126,16 +129,16 @@ public class ShipUtils {
 
 		String namespace = attr;
 		// Ship images can be located in either ship/, ships_glow/ or ships_noglow/
-		String[] prefixes = { "rdat:img/ship/", "rdat:img/ships_glow/", "rdat:img/ships_noglow/" };
+		String[] prefixes = { "dat:img/ship/", "dat:img/ships_glow/", "dat:img/ships_noglow/" };
 
 		// Load the hull image
-		ship.setImage(Images.HULL, firstExisting(prefixes, namespace + "_base.png", resource));
+		ship.setImage(Images.HULL, firstExisting(prefixes, namespace + "_base.png", db));
 
 		// Load the cloak image, check for override
 		child = e.getChild("cloakImage");
 		if (child != null)
 			namespace = child.getValue();
-		ship.setImage(Images.CLOAK, firstExisting(prefixes, namespace + "_cloak.png", resource));
+		ship.setImage(Images.CLOAK, firstExisting(prefixes, namespace + "_cloak.png", db));
 		namespace = attr;
 
 		// Floor and shield images are exclusive to player ships.
@@ -146,25 +149,25 @@ public class ShipUtils {
 			child = e.getChild("floorImage");
 			if (child != null)
 				namespace = child.getValue();
-			ship.setImage(Images.FLOOR, firstExisting(prefixes, namespace + "_floor.png", resource));
+			ship.setImage(Images.FLOOR, firstExisting(prefixes, namespace + "_floor.png", db));
 			namespace = attr;
 
 			// Load the shield image, check for override
 			child = e.getChild("shieldImage");
 			if (child != null)
 				namespace = child.getValue();
-			ship.setImage(Images.SHIELD, firstExisting(prefixes, namespace + "_shields1.png", resource));
+			ship.setImage(Images.SHIELD, firstExisting(prefixes, namespace + "_shields1.png", db));
 			namespace = attr;
 
 			// Load the thumbnail/miniship image path (not represented in the editor)
-			ship.setImage(Images.THUMBNAIL, "rdat:img/customizeUI/miniship_" + namespace + ".png");
+			ship.setImage(Images.THUMBNAIL, "dat:img/customizeUI/miniship_" + namespace + ".png");
 		}
 
 		// Load the XML layout of the ship (images' offsets, gibs, weapon mounts)
-		if (!data.contains(ship.getLayoutXML()))
+		if (!db.contains(ship.getLayoutXML()))
 			throw new FileNotFoundException("XML layout file could not be found in game's archives: " + ship.getLayoutXML());
 
-		is = data.getInputStream(ship.getLayoutXML());
+		is = db.getInputStream(ship.getLayoutXML());
 		loadLayoutXML(ship, is, ship.getLayoutXML());
 
 		// Get the class of the ship
@@ -564,13 +567,13 @@ public class ShipUtils {
 					e.setText("" + station.getSlotId());
 					slotEl.addContent(e); // Add <number> to <slot>
 
-					sysEl.addContent(slotEl); // Add <slot> to <system>
+					sysEl.addContent(slotEl);
 				}
 
-				systemList.addContent(sysEl); // Add <system> to <systemLst>
+				systemList.addContent(sysEl);
 			}
 		}
-		shipBlueprint.addContent(systemList); // Add <systemList> to <shipBlueprint>
+		shipBlueprint.addContent(systemList);
 
 		e = new Element("weaponSlots");
 		e.setText("" + ship.getWeaponSlots());
@@ -580,35 +583,53 @@ public class ShipUtils {
 		e.setText("" + ship.getDroneSlots());
 		shipBlueprint.addContent(e); // Add <droneSlots> to <shipBlueprint>
 
-		e = new Element("weaponList");
-		e.setAttribute("missiles", "" + ship.getMissilesAmount());
+		Element weaponList = new Element("weaponList");
+		weaponList.setAttribute("missiles", "" + ship.getMissilesAmount());
+		weaponList.setAttribute("count", "" + ship.getWeaponSlots());
 
 		// Player ships' weapons have to be declared explicitly, ie. listed by name
 		// Only the first 'count' weapons are loaded in-game
 		if (ship.isPlayerShip()) {
-			e.setAttribute("count", "4"); // TODO weapon count
+			for (WeaponObject weapon : ship.getWeapons()) {
+				if (weapon == Database.DEFAULT_WEAPON_OBJ)
+					continue;
+				e = new Element("weapon");
+				e.setAttribute("name", weapon.getBlueprintName());
+				weaponList.addContent(e);
+			}
 		}
 		// Enemy ships' weapons are randomly drafted from a list of weapons
 		// 'count' determines how many weapons are drafted
 		else {
-			// TODO load="" + count
+			WeaponList list = ship.getWeaponList();
+			if (list != Database.DEFAULT_WEAPON_LIST)
+				weaponList.setAttribute("load", list.getBlueprintName());
 		}
-		shipBlueprint.addContent(e); // Add <weaponList> to <shipBlueprint>
+		shipBlueprint.addContent(weaponList);
 
-		e = new Element("droneList");
-		e.setAttribute("drones", "" + ship.getDronePartsAmount());
+		Element droneList = new Element("droneList");
+		droneList.setAttribute("drones", "" + ship.getDronePartsAmount());
+		droneList.setAttribute("count", "" + ship.getDroneSlots());
 
 		// Player ships' drones have to be declared explicitly, ie. listed by name
 		// Only the first 'count' drones are loaded in-game
 		if (ship.isPlayerShip()) {
-			e.setAttribute("count", "4"); // TODO drone count
+			for (DroneObject drone : ship.getDrones()) {
+				if (drone == Database.DEFAULT_DRONE_OBJ)
+					continue;
+				e = new Element("drone");
+				e.setAttribute("name", drone.getBlueprintName());
+				droneList.addContent(e);
+			}
 		}
 		// Enemy ships' drones are randomly drafted from a list of drones
 		// 'count' determines how many drones are drafted
 		else {
-			// TODO load="" + count
+			DroneList list = ship.getDroneList();
+			if (list != Database.DEFAULT_DRONE_LIST)
+				droneList.setAttribute("load", list.getBlueprintName());
 		}
-		shipBlueprint.addContent(e); // Add <droneList> to <shipBlueprint>
+		shipBlueprint.addContent(droneList);
 
 		e = new Element("health");
 		e.setAttribute("amount", "" + ship.getHealth());
@@ -655,7 +676,7 @@ public class ShipUtils {
 			shipBlueprint.addContent(e); // Add <aug> to <shipBlueprint>
 		}
 
-		root.addContent(shipBlueprint); // Add <shipBlueprint> to <wrapper>
+		root.addContent(shipBlueprint);
 		blueprintsDoc.setRootElement(root);
 
 		// Write the files
@@ -1226,9 +1247,9 @@ public class ShipUtils {
 		Utils.writeFileXML(doc, f);
 	}
 
-	private static String firstExisting(String[] prefixes, String suffix, FTLPack archive) {
+	private static String firstExisting(String[] prefixes, String suffix, Database db) {
 		for (String prefix : prefixes) {
-			if (archive.contains(Utils.trimProtocol(prefix) + suffix))
+			if (db.contains(Utils.trimProtocol(prefix) + suffix))
 				return prefix + suffix;
 		}
 		return null;

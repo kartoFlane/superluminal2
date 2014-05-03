@@ -147,7 +147,7 @@ public class GlowSelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				GlowSet newGlow = GlowSetDialog.getInstance().open();
 				if (newGlow != null) {
-					Database.getInstance().store(newGlow);
+					Database.getInstance().getCore().store(newGlow);
 					TreeItem currentItem = updateTree(selectedSystem);
 					result = selectedSystem.getGlowSet();
 					updateData();

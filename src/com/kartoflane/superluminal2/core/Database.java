@@ -5,31 +5,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.superluminal2.components.ShipMetadata;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
-import com.kartoflane.superluminal2.components.interfaces.Predicate;
-import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
-import com.kartoflane.superluminal2.ftl.BlueprintList;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
-import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
+import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
@@ -45,29 +36,24 @@ public class Database {
 	public static final WeaponList DEFAULT_WEAPON_LIST = new WeaponList();
 	public static final DroneList DEFAULT_DRONE_LIST = new DroneList();
 
-	private static final Database instance = new Database();
-
-	private FTLPack data = null;
-	private FTLPack resource = null;
+	private static Database instance;
 
 	// Constant
 	private HashMap<String, String> shipFileMap = new HashMap<String, String>();
 
 	// Dynamically loaded
-	private HashMap<String, ArrayList<ShipMetadata>> shipMetadata = new HashMap<String, ArrayList<ShipMetadata>>();
-	private TreeSet<AnimationObject> animationObjects = new TreeSet<AnimationObject>();
-	private TreeSet<WeaponObject> weaponObjects = new TreeSet<WeaponObject>();
-	private TreeSet<DroneObject> droneObjects = new TreeSet<DroneObject>();
-	private TreeSet<AugmentObject> augmentObjects = new TreeSet<AugmentObject>();
-	private TreeSet<GlowObject> glowObjects = new TreeSet<GlowObject>();
-	private TreeSet<GlowSet> glowSets = new TreeSet<GlowSet>();
-	private TreeSet<WeaponList> weaponLists = new TreeSet<WeaponList>();
-	private TreeSet<DroneList> droneLists = new TreeSet<DroneList>();
-
-	/** Temporary map to hold anim sheets, since they need to be loaded before weaponAnims, which reference them */
-	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
+	private ArrayList<DatabaseEntry> dataEntries = new ArrayList<DatabaseEntry>();
 
 	private Database() {
+	}
+
+	public Database(FTLPack data, FTLPack resource) throws FileNotFoundException, IOException {
+		this();
+		instance = this;
+
+		DatabaseEntry core = new DatabaseEntry(data, resource);
+		dataEntries.add(core);
+
 		String blueprints = "blueprints.xml";
 		String dlcBlueprints = "dlcBlueprints.xml";
 		String dlcOverwrite = "dlcBlueprintsOverwrite.xml";
@@ -128,20 +114,26 @@ public class Database {
 		return instance;
 	}
 
-	public void setDataDat(FTLPack dat) {
-		data = dat;
+	public DatabaseEntry getCore() {
+		return dataEntries.get(0);
 	}
 
-	public FTLPack getDataDat() {
-		return data;
+	public DatabaseEntry[] getDatabaseEntries() {
+		return dataEntries.toArray(new DatabaseEntry[0]);
 	}
 
-	public void setResourceDat(FTLPack dat) {
-		resource = dat;
+	public void addEntry(DatabaseEntry de) {
+		dataEntries.add(de);
+		de.load();
 	}
 
-	public FTLPack getResourceDat() {
-		return resource;
+	public void removeEntry(DatabaseEntry de) {
+		try {
+			dataEntries.remove(de);
+			de.close();
+		} catch (IOException e) {
+			log.error(String.format("An error has occured while closing database entry '%s': ", de.getName()), e);
+		}
 	}
 
 	public boolean isPlayerShip(String blueprintName) {
@@ -160,282 +152,188 @@ public class Database {
 			return "autoBlueprints.xml";
 	}
 
-	public void store(BlueprintList<?> list) {
-		if (list instanceof WeaponList) {
-			weaponLists.add((WeaponList) list);
-		} else if (list instanceof DroneList) {
-			droneLists.add((DroneList) list);
-		} else {
-			// Not interested in any other lists
+	public AnimationObject getAnimation(String animName) {
+		AnimationObject result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getAnimation(animName);
 		}
+		return result;
 	}
 
-	public WeaponList[] getWeaponLists() {
-		return weaponLists.toArray(new WeaponList[0]);
-	}
-
-	public DroneList[] getDroneLists() {
-		return droneLists.toArray(new DroneList[0]);
-	}
-
-	public WeaponList getWeaponList(String name) {
-		WeaponList[] lists = getWeaponLists();
-		try {
-			return lists[Utils.binarySearch(lists, name, 0, lists.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
+	public AugmentObject getAugment(String blueprintName) {
+		AugmentObject result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getAugment(blueprintName);
 		}
+		return result;
+	}
+
+	public ArrayList<AugmentObject> getAugments() {
+		ArrayList<AugmentObject> result = new ArrayList<AugmentObject>();
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (AugmentObject o : de.getAugments())
+				if (!result.contains(o))
+					result.add(o);
+		}
+		return result;
+	}
+
+	public ArrayList<DroneList> getDroneLists() {
+		ArrayList<DroneList> result = new ArrayList<DroneList>();
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (DroneList o : de.getDroneLists())
+				if (!result.contains(o))
+					result.add(o);
+		}
+		return result;
 	}
 
 	public DroneList getDroneList(String name) {
-		DroneList[] lists = getDroneLists();
-		try {
-			return lists[Utils.binarySearch(lists, name, 0, lists.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
+		DroneList result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getDroneList(name);
 		}
-	}
+		return result;
 
-	public void store(AnimationObject anim) {
-		animationObjects.add(anim);
-	}
-
-	public AnimationObject getAnimation(String animName) {
-		AnimationObject[] anims = animationObjects.toArray(new AnimationObject[0]);
-		try {
-			return anims[Utils.binarySearch(anims, animName, 0, anims.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
-	}
-
-	public void store(WeaponObject weapon) {
-		weaponObjects.add(weapon);
-	}
-
-	public WeaponObject getWeapon(String blueprint) {
-		WeaponObject[] weapons = weaponObjects.toArray(new WeaponObject[0]);
-		try {
-			return weapons[Utils.binarySearch(weapons, blueprint, 0, weapons.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
-	}
-
-	public ArrayList<WeaponObject> getWeaponsByType(WeaponTypes type) {
-		ArrayList<WeaponObject> typeWeapons = new ArrayList<WeaponObject>();
-		for (WeaponObject weapon : weaponObjects) {
-			if (weapon.getType() == type)
-				typeWeapons.add(weapon);
-		}
-
-		return typeWeapons;
-	}
-
-	public void store(DroneObject drone) {
-		droneObjects.add(drone);
 	}
 
 	public DroneObject getDrone(String blueprint) {
-		DroneObject[] drones = droneObjects.toArray(new DroneObject[0]);
-		try {
-			return drones[Utils.binarySearch(drones, blueprint, 0, drones.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
+		DroneObject result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getDrone(blueprint);
 		}
+		return result;
 	}
 
 	public ArrayList<DroneObject> getDronesByType(DroneTypes type) {
-		ArrayList<DroneObject> typeDrones = new ArrayList<DroneObject>();
-		for (DroneObject drone : droneObjects) {
-			if (drone.getType() == type)
-				typeDrones.add(drone);
+		ArrayList<DroneObject> result = new ArrayList<DroneObject>();
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (DroneObject o : de.getDronesByType(type))
+				if (!result.contains(o))
+					result.add(o);
 		}
-
-		return typeDrones;
-	}
-
-	public void store(AugmentObject augment) {
-		augmentObjects.add(augment);
-	}
-
-	public AugmentObject getAugment(String blueprint) {
-		AugmentObject[] augments = getAugments();
-		try {
-			return augments[Utils.binarySearch(augments, blueprint, 0, augments.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
-	}
-
-	public AugmentObject[] getAugments() {
-		return augmentObjects.toArray(new AugmentObject[0]);
-	}
-
-	public void store(GlowObject glow) {
-		glowObjects.add(glow);
+		return result;
 	}
 
 	public GlowObject getGlow(String id) {
-		GlowObject[] glows = getGlows();
-		try {
-			return glows[Utils.binarySearch(glows, id, 0, glows.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
+		GlowObject result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getGlow(id);
 		}
+		return result;
 	}
 
-	public GlowObject[] getGlows() {
-		return glowObjects.toArray(new GlowObject[0]);
-	}
-
-	public void store(GlowSet set) {
-		glowSets.add(set);
+	public ArrayList<GlowObject> getGlows() {
+		ArrayList<GlowObject> result = new ArrayList<GlowObject>();
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (GlowObject o : de.getGlows())
+				if (!result.contains(o))
+					result.add(o);
+		}
+		return result;
 	}
 
 	public GlowSet getGlowSet(String id) {
-		GlowSet[] glowSets = getGlowSets();
-		try {
-			return glowSets[Utils.binarySearch(glowSets, id, 0, glowSets.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
+		GlowSet result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getGlowSet(id);
 		}
+		return result;
 	}
 
-	public GlowSet[] getGlowSets() {
-		return glowSets.toArray(new GlowSet[0]);
-	}
-
-	public void store(ShipMetadata metadata) {
-		ArrayList<ShipMetadata> dataList = shipMetadata.get(metadata.getBlueprintName());
-		if (dataList == null) {
-			dataList = new ArrayList<ShipMetadata>();
-			shipMetadata.put(metadata.getBlueprintName(), dataList);
+	public ArrayList<GlowSet> getGlowSets() {
+		ArrayList<GlowSet> result = new ArrayList<GlowSet>();
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (GlowSet o : de.getGlowSets())
+				if (!result.contains(o))
+					result.add(o);
 		}
-
-		dataList.add(metadata);
+		return result;
 	}
 
 	public HashMap<String, ArrayList<ShipMetadata>> getShipMetadata() {
-		HashMap<String, ArrayList<ShipMetadata>> copiedMap = new HashMap<String, ArrayList<ShipMetadata>>();
-		copiedMap.putAll(shipMetadata);
-		return copiedMap;
-	}
-
-	public void clearShipMetadata() {
-		shipMetadata.clear();
-	}
-
-	public ShipMetadata[] listShipMetadata() {
-		return shipMetadata.values().toArray(new ShipMetadata[0]);
-	}
-
-	public void preloadAnims() {
-		String[] animPaths = new String[] { "data/animations.xml", "data/dlcAnimations.xml" };
-
-		for (String innerPath : animPaths) {
-			InputStream is = null;
-			try {
-				is = data.getInputStream(innerPath);
-				DecodeResult dr = Utils.decodeText(is, null);
-
-				Document doc = null;
-				doc = Utils.parseXML(dr.text);
-				Element root = doc.getRootElement();
-
-				// Preload anim sheets
-				for (Element e : root.getChildren("animSheet")) {
-					String name = e.getAttributeValue("name");
-					// If older entries are allowed to be overwritten by newer ones, bomb weapons
-					// load the bomb projectile images instead of weapon images, since their sheets
-					// share the same name
-					if (name != null && !animSheetMap.containsKey(name))
-						animSheetMap.put(name, e);
-				}
-
-				// Load and store weaponAnims
-				for (Element e : root.getChildren("weaponAnim")) {
-					try {
-						store(DataUtils.loadAnim(e));
-					} catch (IllegalArgumentException ex) {
-						log.warn("Could not load animation: " + ex.getMessage());
-					}
-				}
-			} catch (FileNotFoundException e) {
-				log.error("Could not find file: " + innerPath);
-			} catch (IOException e) {
-				log.error("An error has occured while loading file " + innerPath + ":", e);
-			} catch (JDOMParseException e) {
-				log.error("An error has occured while parsing file " + innerPath + ":", e);
-			} finally {
-				try {
-					if (is != null)
-						is.close();
-				} catch (IOException e) {
-				}
+		HashMap<String, ArrayList<ShipMetadata>> map = new HashMap<String, ArrayList<ShipMetadata>>();
+		for (DatabaseEntry de : dataEntries) {
+			for (ShipMetadata metadata : de.getShipMetadata()) {
+				ArrayList<ShipMetadata> list = map.get(metadata.getBlueprintName());
+				if (list == null)
+					list = new ArrayList<ShipMetadata>();
+				list.add(metadata);
+				map.put(metadata.getBlueprintName(), list);
 			}
 		}
+		return map;
 	}
 
-	public void clearAnimSheets() {
-		animSheetMap.clear();
-		animSheetMap = null;
-	}
-
-	public Element getAnimSheetElement(String anim) {
-		return animSheetMap.get(anim);
-	}
-
-	public void loadGlowSets() {
-		final Pattern glowPtrn = Pattern.compile("[0-9]\\.png");
-
-		Predicate<String> filter = new Predicate<String>() {
-			@Override
-			public boolean accept(String path) {
-				return path.contains("img/ship/interior/") &&
-						(glowPtrn.matcher(path).find() || path.endsWith("_glow.png"));
-			}
-		};
-
-		TreeSet<String> eligiblePaths = new TreeSet<String>();
-		for (String path : resource.list()) {
-			if (filter.accept(path))
-				eligiblePaths.add(path);
+	public ArrayList<WeaponList> getWeaponLists() {
+		ArrayList<WeaponList> result = new ArrayList<WeaponList>();
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (WeaponList o : de.getWeaponLists())
+				if (!result.contains(o))
+					result.add(o);
 		}
-
-		for (String s1 : eligiblePaths) {
-			if (s1.endsWith("_glow.png")) {
-				String namespace = s1.replaceAll("_glow.png", "");
-				namespace = namespace.replace("img/ship/interior/", "");
-				GlowSet set = new GlowSet(namespace);
-				set.setImage(Glows.CLOAK, "rdat:" + s1);
-				glowSets.add(set);
-			} else if (s1.endsWith("1.png")) {
-				String namespace = s1.replaceAll("[0-9]\\.png", "");
-				String s2 = find(eligiblePaths, namespace + "2.png");
-				String s3 = find(eligiblePaths, namespace + "3.png");
-
-				if (s1 != null && s2 != null && s3 != null) {
-					namespace = namespace.replace("img/ship/interior/", "");
-					GlowSet set = new GlowSet(namespace);
-					set.setImage(Glows.BLUE, "rdat:" + s1);
-					set.setImage(Glows.GREEN, "rdat:" + s2);
-					set.setImage(Glows.YELLOW, "rdat:" + s3);
-					glowSets.add(set);
-				}
-			}
-		}
-
+		return result;
 	}
 
-	private static String find(TreeSet<String> list, String name) {
-		for (String s : list) {
-			if (s.equals(name))
-				return s;
-			// Break if the current string is greater than the sought one
-			else if (s.compareTo(name) > 0)
-				break;
+	public WeaponList getWeaponList(String name) {
+		WeaponList result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getWeaponList(name);
 		}
-		return null;
+		return result;
+	}
+
+	public WeaponObject getWeapon(String blueprint) {
+		WeaponObject result = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && result == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.getWeapon(blueprint);
+		}
+		return result;
+	}
+
+	public ArrayList<WeaponObject> getWeaponsByType(WeaponTypes type) {
+		ArrayList<WeaponObject> result = new ArrayList<WeaponObject>();
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (WeaponObject o : de.getWeaponsByType(type))
+				if (!result.contains(o))
+					result.add(o);
+		}
+		return result;
+	}
+
+	public boolean contains(String innerPath) {
+		boolean result = false;
+		for (int i = dataEntries.size() - 1; i >= 0 && !result; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			result = de.contains(innerPath);
+		}
+		return result;
+	}
+
+	public InputStream getInputStream(String innerPath) throws FileNotFoundException, IOException {
+		InputStream is = null;
+		for (int i = dataEntries.size() - 1; i >= 0 && is == null; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			if (de.contains(innerPath))
+				is = de.getInputStream(innerPath);
+		}
+		if (is == null)
+			throw new FileNotFoundException(String.format("Inner path '%s' was not found in the database.", innerPath));
+		return is;
 	}
 }

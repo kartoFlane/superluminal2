@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.ui;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
 import com.kartoflane.superluminal2.core.ShipUtils;
@@ -161,6 +164,9 @@ public class EditorWindow {
 
 		mntmLoadShip = new MenuItem(menuFile, SWT.NONE);
 		mntmLoadShip.setText("Load Ship\t" + Manager.getHotkey(Hotkeys.LOAD_SHIP));
+
+		MenuItem mntmLoadMod = new MenuItem(menuFile, SWT.NONE);
+		mntmLoadMod.setText("Load Mod");
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
@@ -533,6 +539,22 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ShipLoaderDialog.getInstance().open();
+			}
+		});
+
+		mntmLoadMod.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				File temp = promptForLoadFile();
+				if (temp != null) {
+					try {
+						Database db = Database.getInstance();
+						DatabaseEntry de = new DatabaseEntry(temp);
+						db.addEntry(de);
+					} catch (IOException ex) {
+						log.warn(String.format("An error has occured while loading mod file '%s': ", temp.getName(), ex));
+					}
+				}
 			}
 		});
 
@@ -1074,6 +1096,23 @@ public class EditorWindow {
 		dialog.setFilterExtensions(new String[] { "*.ftl" });
 		dialog.setText("Save Ship");
 		dialog.setOverwrite(true);
+
+		String path = dialog.open();
+		if (path == null) {
+			// User aborted selection
+			// Nothing to do here
+		} else {
+			result = new File(path);
+		}
+
+		return result;
+	}
+
+	private File promptForLoadFile() {
+		File result = null;
+		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
+		dialog.setFilterExtensions(new String[] { "*.ftl" });
+		dialog.setText("Load Mod");
 
 		String path = dialog.open();
 		if (path == null) {
