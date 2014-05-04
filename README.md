@@ -5,9 +5,9 @@ Superluminal2 is a ship editor for the game FTL: Faster Than Light, and the expa
 
 It is a complete rewrite of, and successor to, the original editor ([Superluminal](https://github.com/kartoFlane/Superluminal)).
 
-The project is still a work in progress and is not functional yet.
+The project is still a work in progress and is not fully functional yet.
 
-
+<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/screenshot1.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/screenshot1.png" width="145px" height="auto" /></a>
 
 Requirements
 ------------
@@ -15,13 +15,3 @@ Requirements
     * http://www.java.com/en/download/
 * FTL: AE (1.5.10, Windows/OSX/Linux, Steam/GOG/Standalone).
     * http://www.ftlgame.com/
-
-
-Libraries
----------
-* SWT GUI library (4.2.2)
-    * http://www.eclipse.org/swt/
-* log4j2 logging library (beta9)
-    * http://logging.apache.org/log4j/2.x/
-* jDOM2 XML library (2.0.5)
-    * http://www.jdom.org/

@@ -1,0 +1,8 @@
+<versions>
+	<latest id="2.0.0 beta" />
+	<changelog>
+		<version id="2.0.0 beta">
+			<change>Beta release</change>
+		</version>
+	</changelog>
+</versions>

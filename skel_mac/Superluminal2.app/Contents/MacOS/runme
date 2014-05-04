@@ -1,0 +1,16 @@
+#!/bin/sh
+# You can run this script directly, but only from a directory
+# outside the bundle.
+
+# Chop off a few dirs from the full path used to run the executable.
+# Not necessarily an absolute path, but good enough to navigate.
+contentdir="${0%/*/*}";
+maindir="${contentdir%/*/*}";
+resdir="${contentdir}/Resources";
+
+classpath="${resdir}/superluminal2.jar";
+
+cd "${maindir}";
+
+# Run the java app, relaying any args passed to this script.
+java -classpath "${classpath}" -XstartOnFirstThread -Xdock:icon="${resdir}/appIcon.icns" com.kartoflane.superluminal2.Superluminal "$@";
