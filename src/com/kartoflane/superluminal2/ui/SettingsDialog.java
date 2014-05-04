@@ -48,6 +48,10 @@ public class SettingsDialog {
 
 		Label separator1 = new Label(cBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		
+		Label lblNYI = new Label(cBehaviour, SWT.NONE);
+		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
+		lblNYI.setText("(not implemented yet)");
 
 		TabItem tbtmKeybinds = new TabItem(tabFolder, SWT.NONE);
 		tbtmKeybinds.setText("Keybinds");

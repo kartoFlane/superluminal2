@@ -207,7 +207,7 @@ public class DataUtils {
 		anim.setFrameSize(x, y);
 
 		// Load the anim sheet image path
-		anim.setSheetPath("dat:img/" + sheet.getValue());
+		anim.setSheetPath("db:img/" + sheet.getValue());
 
 		return anim;
 	}

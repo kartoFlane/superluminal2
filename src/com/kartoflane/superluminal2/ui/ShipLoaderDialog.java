@@ -217,7 +217,7 @@ public class ShipLoaderDialog {
 						}
 
 						String path = metadata.getHullImagePath();
-						preview.setImage(path == null ? "dat:img/nullResource.png" : path);
+						preview.setImage(path == null ? "db:img/nullResource.png" : path);
 						updatePreview();
 						canvas.redraw();
 					}

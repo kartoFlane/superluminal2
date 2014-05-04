@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
@@ -57,7 +58,17 @@ public class DatabaseEntry {
 	/** Temporary map to hold anim sheets, since they need to be loaded before weaponAnims, which reference them */
 	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
 
-	public DatabaseEntry(File f) throws IOException {
+	/**
+	 * Creates a DatabaseEntry representing an installed mod.
+	 * 
+	 * @param f
+	 *            the .ftl or .zip file from which the data will be read
+	 * @throws ZipException
+	 *             when the file is not a zip archive
+	 * @throws IOException
+	 *             when an IO error occurs
+	 */
+	public DatabaseEntry(File f) throws ZipException, IOException {
 		log = LogManager.getLogger(DatabaseEntry.class);
 		file = f;
 		archive = new ZipFile(f);
@@ -65,7 +76,15 @@ public class DatabaseEntry {
 		resource = null;
 	}
 
-	public DatabaseEntry(FTLPack data, FTLPack resource) throws FileNotFoundException, IOException {
+	/**
+	 * Creates the default DatabaseEntry, which serves as the core of the database.
+	 * 
+	 * @param data
+	 *            the data.dat archive
+	 * @param resource
+	 *            the resource.dat archive
+	 */
+	public DatabaseEntry(FTLPack data, FTLPack resource) {
 		log = LogManager.getLogger(Database.class);
 		file = new File("DatabaseCore");
 		archive = null;
@@ -73,10 +92,16 @@ public class DatabaseEntry {
 		this.resource = resource;
 	}
 
+	/**
+	 * @return the name of the database entry
+	 */
 	public String getName() {
 		return file == null ? "" : file.getName();
 	}
 
+	/**
+	 * @return true if the entry contains the innerPath, false otherwise
+	 */
 	public boolean contains(String innerPath) {
 		if (innerPath == null)
 			throw new IllegalArgumentException("Inner path must not be null.");
@@ -91,7 +116,17 @@ public class DatabaseEntry {
 			return archive.getEntry(innerPath) != null;
 	}
 
-	public InputStream getInputStream(String innerPath) throws IOException {
+	/**
+	 * @param innerPath
+	 *            the inner path of the sought file
+	 * @return the stream
+	 * 
+	 * @throws FileNotFoundException
+	 *             when the inner path was not found in the entry
+	 * @throws IOException
+	 *             when an IO error occurs
+	 */
+	public InputStream getInputStream(String innerPath) throws FileNotFoundException, IOException {
 		if (innerPath == null)
 			throw new IllegalArgumentException("Inner path must not be null.");
 
@@ -109,6 +144,9 @@ public class DatabaseEntry {
 		}
 	}
 
+	/**
+	 * @return a list of all inner paths
+	 */
 	public ArrayList<String> list() {
 		ArrayList<String> result = new ArrayList<String>();
 		if (archive == null) {
@@ -125,6 +163,9 @@ public class DatabaseEntry {
 		return result;
 	}
 
+	/**
+	 * Closes this entry and releases any system resources associated with the stream.
+	 */
 	public void close() throws IOException {
 		if (archive == null) {
 			data.close();
@@ -600,7 +641,7 @@ public class DatabaseEntry {
 				String namespace = s1.replaceAll("_glow.png", "");
 				namespace = namespace.replace("img/ship/interior/", "");
 				GlowSet set = new GlowSet(namespace);
-				set.setImage(Glows.CLOAK, "dat:" + s1);
+				set.setImage(Glows.CLOAK, "db:" + s1);
 				glowSets.add(set);
 			} else if (s1.endsWith("1.png")) {
 				String namespace = s1.replaceAll("[0-9]\\.png", "");
@@ -610,9 +651,9 @@ public class DatabaseEntry {
 				if (s1 != null && s2 != null && s3 != null) {
 					namespace = namespace.replace("img/ship/interior/", "");
 					GlowSet set = new GlowSet(namespace);
-					set.setImage(Glows.BLUE, "dat:" + s1);
-					set.setImage(Glows.GREEN, "dat:" + s2);
-					set.setImage(Glows.YELLOW, "dat:" + s3);
+					set.setImage(Glows.BLUE, "db:" + s1);
+					set.setImage(Glows.GREEN, "db:" + s2);
+					set.setImage(Glows.YELLOW, "db:" + s3);
 					glowSets.add(set);
 				}
 			}

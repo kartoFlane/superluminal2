@@ -6,19 +6,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A version string (eg, 10.4.2_17 or 2.7.5rc1 ).
- * 
- * It is composed of three parts:
- * - A series of period-separated positive ints.
+ * A version string (eg, 10.4.2_17 or 2.7.5rc1 ).<br>
+ * <br>
+ * It is composed of three parts:<br>
+ * - A series of period-separated positive ints.<br>
  * 
  * - The numbers may be immediately followed by a short
- * suffix string.
+ * suffix string.<br>
  * 
  * - Finally, a string comment, separated from the rest
- * by a space.
- * 
- * The (numbers + suffix) or comment may appear alone.
- * 
+ * by a space.<br>
+ * <br>
+ * The (numbers + suffix) or comment may appear alone.<br>
+ * <br>
  * For details, see the string constructor and compareTo().
  */
 public class ComparableVersion implements Comparable<ComparableVersion> {
@@ -43,13 +43,15 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 	/**
 	 * Constructs an AppVersion by parsing a string.
 	 * 
-	 * The suffix can be:
-	 * - A divider string followed by a number.
-	 * - Optional Hyphen/underscore, then a|b|r|rc, then 0-9+.
-	 * - Hyphen/underscore, then 0-9+.
-	 * Or the suffix can be a single letter without a number.
-	 * 
+	 * The suffix can be:<br>
+	 * - A divider string followed by a number.<br>
+	 * - Optional Hyphen/underscore, then a|b|r|rc, then 0-9+.<br>
+	 * - Hyphen/underscore, then 0-9+.<br>
+	 * Or the suffix can be a single letter without a number.<br>
+	 * <br>
 	 * Examples:
+	 * 
+	 * <pre>
 	 * 1
 	 * 1 Blah
 	 * 1.2 Blah
@@ -62,6 +64,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 	 * 1.2.3z Blah
 	 * 1.2.3D
 	 * Alpha
+	 * </pre>
 	 * 
 	 * @throws IllegalArgumentException
 	 *             if the string is unsuitable
@@ -238,14 +241,14 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
 	}
 
 	/**
-	 * Compares this object with the specified object for order.
-	 * 
+	 * Compares this object with the specified object for order.<br>
+	 * <br>
 	 * - The ints are compared arithmetically. In case of ties,
-	 * the version with the most numbers wins.
+	 * the version with the most numbers wins.<br>
 	 * - If both versions' suffixes have a number, and the same
 	 * characters appear before that number, then the suffix number
-	 * is compared arithmetically.
-	 * - Then the entire suffix is compared alphabetically.
+	 * is compared arithmetically.<br>
+	 * - Then the entire suffix is compared alphabetically.<br>
 	 * - Then the comment is compared alphabetically.
 	 */
 	@Override

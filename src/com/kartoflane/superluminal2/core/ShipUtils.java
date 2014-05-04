@@ -129,7 +129,7 @@ public class ShipUtils {
 
 		String namespace = attr;
 		// Ship images can be located in either ship/, ships_glow/ or ships_noglow/
-		String[] prefixes = { "dat:img/ship/", "dat:img/ships_glow/", "dat:img/ships_noglow/" };
+		String[] prefixes = { "db:img/ship/", "db:img/ships_glow/", "db:img/ships_noglow/" };
 
 		// Load the hull image
 		ship.setImage(Images.HULL, firstExisting(prefixes, namespace + "_base.png", db));
@@ -160,7 +160,7 @@ public class ShipUtils {
 			namespace = attr;
 
 			// Load the thumbnail/miniship image path (not represented in the editor)
-			ship.setImage(Images.THUMBNAIL, "dat:img/customizeUI/miniship_" + namespace + ".png");
+			ship.setImage(Images.THUMBNAIL, "db:img/customizeUI/miniship_" + namespace + ".png");
 		}
 
 		// Load the XML layout of the ship (images' offsets, gibs, weapon mounts)

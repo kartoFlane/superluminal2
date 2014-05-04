@@ -97,7 +97,7 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 
 		spNudge = new Spinner(boundsContainer, SWT.BORDER);
 		spNudge.setMinimum(1);
-		spNudge.setToolTipText("This determines how much the selected object\nwill be moved when you press the arrows.");
+		spNudge.setToolTipText("This determines how much the selected object\nwill move when you press the arrows.");
 
 		btnRight = new Button(boundsContainer, SWT.NONE);
 		btnRight.setImage(Cache.checkOutImage(this, "cpath:/assets/right.png"));

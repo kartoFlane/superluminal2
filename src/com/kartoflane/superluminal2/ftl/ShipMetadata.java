@@ -78,7 +78,7 @@ public class ShipMetadata {
 	}
 
 	private static String firstExisting(String suffix, Database db) {
-		String[] prefixes = { "dat:img/ship/", "dat:img/ships_glow/", "dat:img/ships_noglow/" };
+		String[] prefixes = { "db:img/ship/", "db:img/ships_glow/", "db:img/ships_noglow/" };
 		for (String prefix : prefixes) {
 			if (db.contains(Utils.trimProtocol(prefix) + suffix))
 				return prefix + suffix;

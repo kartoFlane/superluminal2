@@ -16,9 +16,9 @@ public class GlowSet implements Comparable<GlowSet>, Identifiable {
 
 	public GlowSet() {
 		this.namespace = "glow";
-		setImage(Glows.BLUE, "dat:img/ship/interior/glow1.png");
-		setImage(Glows.GREEN, "dat:img/ship/interior/glow2.png");
-		setImage(Glows.YELLOW, "dat:img/ship/interior/glow3.png");
+		setImage(Glows.BLUE, "db:img/ship/interior/glow1.png");
+		setImage(Glows.GREEN, "db:img/ship/interior/glow2.png");
+		setImage(Glows.YELLOW, "db:img/ship/interior/glow3.png");
 	}
 
 	public GlowSet(String namespace) {

@@ -59,9 +59,9 @@ public class Cache {
 	 *              eg. an absolute or relative path
 	 * cpath:   - for use when the resource is located inside the jar
 	 *              eg. cpath:/assets/image.png
-	 * dat:    - for use when the resource is located inside a dat archive
-	 *              eg. dat:img/ship/kestral_base.png</tt>
-	 * zip:     - for use when the resource is located inside a zip archive
+	 * db:    - for use when the resource is loaded in the database
+	 *              eg. db:img/ship/kestral_base.png</tt>
+	 * zip:     - for use when the resource is located inside an unloaded zip archive
 	 *              eg. zip:/path/to/file.zip/inner/path/image.png
 	 * </pre>
 	 * 
@@ -103,8 +103,8 @@ public class Cache {
 					protocol = Utils.getProtocol(path);
 
 					// Employ "protocols" to spare the Cache from having to guess where the file is located
-					if (protocol.equals("dat:")) {
-						// Refers to file in dat archive
+					if (protocol.equals("db:")) {
+						// Refers to file in database
 						is = Database.getInstance().getInputStream(loadPath);
 					} else if (protocol.equals("cpath:")) {
 						// Refers to file in classpath

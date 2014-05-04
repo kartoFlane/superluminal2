@@ -165,9 +165,6 @@ public class EditorWindow {
 		mntmLoadShip = new MenuItem(menuFile, SWT.NONE);
 		mntmLoadShip.setText("Load Ship\t" + Manager.getHotkey(Hotkeys.LOAD_SHIP));
 
-		MenuItem mntmLoadMod = new MenuItem(menuFile, SWT.NONE);
-		mntmLoadMod.setText("Load Mod");
-
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmSaveShip = new MenuItem(menuFile, SWT.NONE);
@@ -175,6 +172,11 @@ public class EditorWindow {
 
 		mntmSaveShipAs = new MenuItem(menuFile, SWT.NONE);
 		mntmSaveShipAs.setText("Save Ship As...");
+
+		new MenuItem(menuFile, SWT.SEPARATOR);
+
+		MenuItem mntmLoadMod = new MenuItem(menuFile, SWT.NONE);
+		mntmLoadMod.setText("Load Mod");
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
@@ -542,22 +544,6 @@ public class EditorWindow {
 			}
 		});
 
-		mntmLoadMod.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				File temp = promptForLoadFile();
-				if (temp != null) {
-					try {
-						Database db = Database.getInstance();
-						DatabaseEntry de = new DatabaseEntry(temp);
-						db.addEntry(de);
-					} catch (IOException ex) {
-						log.warn(String.format("An error has occured while loading mod file '%s': ", temp.getName(), ex));
-					}
-				}
-			}
-		});
-
 		mntmSaveShip.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -610,6 +596,22 @@ public class EditorWindow {
 					} catch (Exception ex) {
 						log.error("An error occured while saving the ship: ", ex);
 						Utils.showWarningDialog(shell, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+					}
+				}
+			}
+		});
+
+		mntmLoadMod.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				File temp = promptForLoadFile();
+				if (temp != null) {
+					try {
+						Database db = Database.getInstance();
+						DatabaseEntry de = new DatabaseEntry(temp);
+						db.addEntry(de);
+					} catch (IOException ex) {
+						log.warn(String.format("An error has occured while loading mod file '%s': ", temp.getName(), ex));
 					}
 				}
 			}
