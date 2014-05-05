@@ -21,28 +21,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.vhati.modmanager.core.FTLUtilities;
 import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
 import net.vhati.modmanager.core.SloppyXMLParser;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 public class Utils {
-	public static final Logger log = LogManager.getLogger(Utils.class);
 
 	private static final Pattern PROTOCOL_PTRN = Pattern.compile("^[^:]+:");
 
@@ -247,94 +237,6 @@ public class Utils {
 			return m.group();
 		else
 			return "";
-	}
-
-	public static void showErrorDialog(Shell parentShell, String message) {
-		boolean dispose = false;
-
-		if (parentShell == null) {
-			parentShell = new Shell(Display.getCurrent());
-			dispose = true;
-		}
-
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_ERROR | SWT.OK);
-
-		box.setText(String.format("%s - Error", Superluminal.APP_NAME));
-		box.setMessage(message);
-
-		box.open();
-
-		if (dispose)
-			parentShell.dispose();
-	}
-
-	public static void showWarningDialog(Shell parentShell, String message) {
-		boolean dispose = false;
-
-		if (parentShell == null) {
-			parentShell = new Shell(Display.getCurrent());
-			dispose = true;
-		}
-
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_WARNING | SWT.OK);
-
-		box.setText(String.format("%s - Warning", Superluminal.APP_NAME));
-		box.setMessage(message);
-
-		box.open();
-
-		if (dispose)
-			parentShell.dispose();
-	}
-
-	/**
-	 * Modally prompts the user for the FTL resources dir.
-	 * 
-	 * @param parentShell
-	 *            parent for the SWT dialog
-	 * 
-	 * @author Vhati - original method wth Swing dialogs
-	 * @author kartoFlane - modified to work with SWT dialogs
-	 */
-	public static File promptForDatsDir(Shell parentShell) {
-		File result = null;
-
-		String message = "";
-		message += "You will now be prompted to locate FTL manually.\n";
-		message += "Select '(FTL dir)/resources/data.dat'.\n";
-		message += "Or 'FTL.app', if you're on OSX.";
-
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
-		box.setText("Find FTL");
-		box.setMessage(message);
-
-		FileDialog fd = new FileDialog(parentShell, SWT.OPEN);
-		fd.setText("Find data.dat or FTL.app");
-		fd.setFilterExtensions(new String[] { "*.dat", "*.app" });
-		fd.setFilterNames(new String[] { "FTL Data File - (FTL dir)/resources/data.dat", "FTL Application Bundle" });
-
-		String filePath = fd.open();
-
-		if (filePath == null) {
-			// User aborted selection
-			// Nothing to do here
-		} else {
-			File f = new File(filePath);
-			if (f.getName().equals("data.dat")) {
-				result = f.getParentFile();
-			} else if (f.getName().endsWith(".app")) {
-				File contentsPath = new File(f, "Contents");
-				if (contentsPath.exists() && contentsPath.isDirectory() && new File(contentsPath, "Resources").exists())
-					result = new File(contentsPath, "Resources");
-				// TODO test whether this works on OSX
-			}
-		}
-
-		if (result != null && FTLUtilities.isDatsDirValid(result)) {
-			return result;
-		}
-
-		return null;
 	}
 
 	/**
