@@ -123,9 +123,11 @@ public class Preview implements PaintListener {
 	}
 
 	public void dispose() {
-		Cache.checkInColor(this, backgroundColor.getRGB());
+		if (backgroundColor != null)
+			Cache.checkInColor(this, backgroundColor.getRGB());
 		backgroundColor = null;
-		Cache.checkInImage(this, imagePath);
+		if (imagePath != null)
+			Cache.checkInImage(this, imagePath);
 		image = null;
 	}
 }

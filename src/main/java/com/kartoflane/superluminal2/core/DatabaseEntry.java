@@ -39,7 +39,7 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class DatabaseEntry {
 
-	private final Logger log;
+	private static final Logger log = LogManager.getLogger(DatabaseEntry.class);
 
 	private final File file;
 	private final ZipFile archive;
@@ -59,7 +59,8 @@ public class DatabaseEntry {
 	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
 
 	/**
-	 * Creates a DatabaseEntry representing an installed mod.
+	 * Creates a DatabaseEntry representing an installed mod.<br>
+	 * The entry then has to be loaded using {@link #load()}
 	 * 
 	 * @param f
 	 *            the .ftl or .zip file from which the data will be read
@@ -69,7 +70,6 @@ public class DatabaseEntry {
 	 *             when an IO error occurs
 	 */
 	public DatabaseEntry(File f) throws ZipException, IOException {
-		log = LogManager.getLogger(DatabaseEntry.class);
 		file = f;
 		archive = new ZipFile(f);
 		data = null;
@@ -85,7 +85,6 @@ public class DatabaseEntry {
 	 *            the resource.dat archive
 	 */
 	public DatabaseEntry(FTLPack data, FTLPack resource) {
-		log = LogManager.getLogger(Database.class);
 		file = new File("DatabaseCore");
 		archive = null;
 		this.data = data;
@@ -397,7 +396,8 @@ public class DatabaseEntry {
 	}
 
 	/**
-	 * Loads the contents of the database entry.
+	 * Loads the contents of the database entry.<br>
+	 * This method should not be called directly. Use {@link Database#addEntry(DatabaseEntry)} instead.
 	 * 
 	 * <pre>
 	 * Loaded data:
@@ -433,7 +433,7 @@ public class DatabaseEntry {
 						try {
 							store(DataUtils.loadShipMetadata(e));
 						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load ship metadata: " + ex.getMessage());
+							log.warn(getName() + ": could not load ship metadata: " + ex.getMessage());
 						}
 					}
 
@@ -444,7 +444,7 @@ public class DatabaseEntry {
 						try {
 							store(DataUtils.loadWeapon(e));
 						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load weapon: " + ex.getMessage());
+							log.warn(getName() + ": could not load weapon: " + ex.getMessage());
 						}
 					}
 
@@ -455,7 +455,7 @@ public class DatabaseEntry {
 						try {
 							store(DataUtils.loadDrone(e));
 						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load drone: " + ex.getMessage());
+							log.warn(getName() + ": could not load drone: " + ex.getMessage());
 						}
 					}
 
@@ -466,15 +466,16 @@ public class DatabaseEntry {
 						try {
 							store(DataUtils.loadAugment(e));
 						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load augment: " + ex.getMessage());
+							log.warn(getName() + ": could not load augment: " + ex.getMessage());
 						}
 					}
 				} catch (FileNotFoundException e) {
+					// Spammy and not very useful.
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				} catch (IOException e) {
-					log.error("An error has occured while loading file '" + innerPath + "':", e);
+					log.error(getName() + ": an error has occured while loading file '" + innerPath + "':", e);
 				} catch (JDOMParseException e) {
-					log.error("An error has occured while parsing file '" + innerPath + "':", e);
+					log.error(getName() + ": an error has occured while parsing file '" + innerPath + "':", e);
 				} finally {
 					try {
 						if (is != null)
@@ -497,18 +498,19 @@ public class DatabaseEntry {
 						try {
 							store(DataUtils.loadList(e));
 						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load blueprint list: " + ex.getMessage());
+							log.warn(getName() + ": could not load blueprint list: " + ex.getMessage());
 						}
 					}
 
 					elements.clear();
 					elements = null;
 				} catch (FileNotFoundException e) {
+					// Spammy and not very useful.
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				} catch (IOException e) {
-					log.error("An error has occured while loading file '" + innerPath + "':", e);
+					log.error(getName() + ": an error has occured while loading file '" + innerPath + "':", e);
 				} catch (JDOMParseException e) {
-					log.error("An error has occured while parsing file '" + innerPath + "':", e);
+					log.error(getName() + ": an error has occured while parsing file '" + innerPath + "':", e);
 				} finally {
 					try {
 						if (is != null)
@@ -530,7 +532,7 @@ public class DatabaseEntry {
 					try {
 						store(DataUtils.loadGlow(e));
 					} catch (IllegalArgumentException ex) {
-						log.warn("Could not load glow object: " + ex.getMessage());
+						log.warn(getName() + ": could not load glow object: " + ex.getMessage());
 					}
 				}
 
@@ -539,9 +541,9 @@ public class DatabaseEntry {
 			} catch (FileNotFoundException e) {
 				// log.trace(String.format("Inner path '%s' could not be found.", "data/rooms" + ext));
 			} catch (IOException e) {
-				log.error("An error has occured while loading file 'data/rooms.xml':", e);
+				log.error(getName() + ": an error has occured while loading file 'data/rooms.xml':", e);
 			} catch (JDOMParseException e) {
-				log.error("An error has occured while parsing file 'data/rooms.xml':", e);
+				log.error(getName() + ": an error has occured while parsing file 'data/rooms.xml':", e);
 			} finally {
 				try {
 					if (is != null)
@@ -553,6 +555,8 @@ public class DatabaseEntry {
 
 		// Clear anim sheets, as they're no longer needed
 		clearAnimSheets();
+
+		log.trace(getName() + " was loaded successfully.");
 	}
 
 	private void preloadAnims() {
@@ -585,15 +589,15 @@ public class DatabaseEntry {
 						try {
 							store(DataUtils.loadAnim(this, e));
 						} catch (IllegalArgumentException ex) {
-							log.warn("Could not load animation: " + ex.getMessage());
+							log.warn(getName() + ": could not load animation: " + ex.getMessage());
 						}
 					}
 				} catch (FileNotFoundException e) {
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				} catch (IOException e) {
-					log.error("An error has occured while loading file " + innerPath + ":", e);
+					log.error(getName() + ": an error has occured while loading file " + innerPath + ":", e);
 				} catch (JDOMParseException e) {
-					log.error("An error has occured while parsing file " + innerPath + ":", e);
+					log.error(getName() + ": an error has occured while parsing file " + innerPath + ":", e);
 				} finally {
 					try {
 						if (is != null)
@@ -669,5 +673,20 @@ public class DatabaseEntry {
 				break;
 		}
 		return null;
+	}
+
+	@Override
+	public int hashCode() {
+		return file.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof DatabaseEntry) {
+			DatabaseEntry other = (DatabaseEntry) o;
+			return file.equals(other.file);
+		} else {
+			return super.equals(o);
+		}
 	}
 }
