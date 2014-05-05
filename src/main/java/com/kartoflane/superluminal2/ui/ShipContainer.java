@@ -466,6 +466,7 @@ public class ShipContainer implements Disposable {
 
 		controller.delete();
 		remove(controller);
+		updateBoundingArea();
 	}
 
 	public void restore(AbstractController controller) {
