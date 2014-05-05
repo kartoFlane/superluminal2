@@ -1,11 +1,14 @@
 package com.kartoflane.superluminal2;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
@@ -19,6 +22,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Hotkey;
@@ -26,6 +30,8 @@ import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
+import com.kartoflane.superluminal2.core.UIUtils;
+import com.kartoflane.superluminal2.core.UIUtils.LoadTask;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
@@ -33,28 +39,25 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 alpha");
-	public static final String APP_UPDATE_URL = "https://raw.github.com/kartoFlane/superluminal2/master/ ... skel_common/backup/auto_update.xml"; // TODO
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta");
+	public static final String APP_UPDATE_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skel_common/auto_update.xml";
 	public static final String APP_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
-	private Display d;
-
 	public static final String HOTKEYS_FILE = "hotkeys.xml";
 
 	/**
 	 * settings ideas:
-	 * - close ship loader after loading
-	 * - pin all elements after loading a ship?
 	 * - checkboxes to make floor/cloak/shield/mounts follow hull, something along these lines
 	 * - whether to load data from game's archives, or unpack them and use that
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - figure out Maven and restructurize Github repo
+	 * - weapons not overriding earlier entries properly?
+	 * - image saving during export
+	 * - all tree columns > add selection listener so that get shrunk/grown when moving (like in the error checker)
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * - rudimentary image viewer
 	 * - ship offset modification
-	 * - automatic version check
 	 * - add blueprint name selection to general tab?
 	 * - rework door linking so that it doesn't have to be done through the DoorDataComposite (like SystemsMenu)
 	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
@@ -77,14 +80,11 @@ public class Superluminal {
 		log.debug(String.format("%s, %s, %s", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("os.arch")));
 		log.debug(String.format("SWT v%s", SWT.getVersion()));
 
-		Display display = null;
-		try {
-			display = Display.getCurrent();
-			Display.setAppName(APP_NAME);
-			Display.setAppVersion(APP_VERSION.toString());
-		} catch (Exception e) {
-			log.error("", e);
-		}
+		log.trace("Retrieving display... If the log cuts off after this entry, then wrong version of the editor has been downloaded.");
+		Display display = Display.getCurrent();
+		Display.setAppName(APP_NAME);
+		Display.setAppVersion(APP_VERSION.toString());
+		log.trace("Display retrieved successfully!");
 
 		File configFile = new File("editor.cfg");
 
@@ -95,6 +95,7 @@ public class Superluminal {
 		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "true");
 		config.setProperty(SuperluminalConfig.START_MAX, "false");
 		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "false");
+		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "true");
 		config.setProperty(SuperluminalConfig.GEOMETRY, "");
 
 		// Read the config file
@@ -107,7 +108,7 @@ public class Superluminal {
 			}
 		} catch (IOException e) {
 			log.error("Error loading config.", e);
-			Utils.showErrorDialog(null, "Error loading config from " + configFile.getPath());
+			UIUtils.showErrorDialog(null, null, "Error loading config from " + configFile.getPath());
 		} finally {
 			try {
 				if (in != null)
@@ -119,6 +120,8 @@ public class Superluminal {
 		// Read config values
 		Manager.sidebarOnRightSide = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SIDEBAR_SIDE));
 		Manager.rememberGeometry = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SAVE_GEOMETRY));
+		Manager.checkUpdates = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CHECK_UPDATES));
+		Manager.startMaximised = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.START_MAX));
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();
@@ -148,7 +151,7 @@ public class Superluminal {
 			editorWindow = new EditorWindow(display);
 		} catch (Exception e) {
 			log.error("Exception occured while creating EditorWindow: ", e);
-			Utils.showErrorDialog(null, "An error has occured while creating the editor's GUI: " + e.getMessage());
+			UIUtils.showErrorDialog(null, null, "An error has occured while creating the editor's GUI: " + e.getMessage());
 			System.exit(1);
 		}
 
@@ -166,7 +169,7 @@ public class Superluminal {
 
 			if (datsDir == null) {
 				log.debug("FTL dats path was not located automatically. Prompting user for location.");
-				datsDir = Utils.promptForDatsDir(editorWindow.getShell());
+				datsDir = UIUtils.promptForDatsDir(editorWindow.getShell());
 			}
 
 			if (datsDir != null) {
@@ -178,7 +181,7 @@ public class Superluminal {
 
 		// Exit program if dats were not found, or load them if they were
 		if (datsDir == null) {
-			Utils.showErrorDialog(editorWindow.getShell(), "FTL resources were not found.\nThe editor will now exit.");
+			UIUtils.showErrorDialog(editorWindow.getShell(), null, "FTL resources were not found.\nThe editor will now exit.");
 			log.debug("No FTL dats path found, exiting.");
 			System.exit(1);
 		} else {
@@ -189,10 +192,15 @@ public class Superluminal {
 				FTLPack data = new FTLPack(dataFile, "r");
 				FTLPack resource = new FTLPack(resourceFile, "r");
 
-				Database db = new Database(data, resource);
+				final Database db = new Database(data, resource);
 
 				log.trace("Loading database...");
-				db.getCore().load();
+
+				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new LoadTask() {
+					public void execute() {
+						db.getCore().load();
+					}
+				});
 			} catch (IOException e) {
 				log.error("An error occured while loading dat archives:", e);
 
@@ -200,13 +208,17 @@ public class Superluminal {
 				buf.append("An error has occured while loading the game's resources.\n\n");
 				buf.append("Please check editor-log.txt in the editor's directory, and post it\n");
 				buf.append("in the editor's thread on the FTL forums.");
-				Utils.showErrorDialog(editorWindow.getShell(), buf.toString());
+				UIUtils.showErrorDialog(editorWindow.getShell(), null, buf.toString());
 				System.exit(1);
 			}
 		}
 
 		// Open the main window's shell, making it visible
 		editorWindow.open();
+
+		if (Manager.checkUpdates) {
+			checkForUpdates(true); // Automatic update check
+		}
 
 		log.info("Running...");
 
@@ -221,7 +233,7 @@ public class Superluminal {
 			buf.append(APP_NAME + " has encountered a problem and needs to close.\n\n");
 			buf.append("Please check editor-log.txt in the editor's directory, and post it\n");
 			buf.append("in the editor's thread on the FTL forums.");
-			Utils.showErrorDialog(editorWindow.getShell(), buf.toString());
+			UIUtils.showErrorDialog(editorWindow.getShell(), null, buf.toString());
 		}
 
 		log.info("Exiting...");
@@ -234,21 +246,89 @@ public class Superluminal {
 			appConfig.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "" + Manager.rememberGeometry);
 			appConfig.setProperty(SuperluminalConfig.START_MAX, "" + Manager.startMaximised);
 			appConfig.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
+			appConfig.setProperty(SuperluminalConfig.CHECK_UPDATES, "" + Manager.checkUpdates);
 			if (Manager.rememberGeometry && !Manager.startMaximised)
 				appConfig.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 			appConfig.writeConfig();
 		} catch (IOException e) {
 			String errorMsg = String.format("Error writing config to \"%s\".", configFile.getPath());
 			log.error(errorMsg, e);
-			Utils.showErrorDialog(editorWindow.getShell(), errorMsg);
+			UIUtils.showErrorDialog(editorWindow.getShell(), null, errorMsg);
 		}
 
 		editorWindow.dispose();
 		display.dispose();
 	}
 
-	public static void checkForUpdates() {
-		// TODO
+	public static void checkForUpdates(boolean automatic) {
+		log.info("Checking for updates...");
+
+		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
+		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new LoadTask() {
+			public void execute() {
+				InputStream is = null;
+				try {
+					URL url = new URL(APP_UPDATE_URL);
+					is = url.openStream();
+
+					Document updateDoc = Utils.readStreamXML(is, "auto-update");
+					Element root = updateDoc.getRootElement();
+					Element latest = root.getChild("latest");
+					String id = latest.getAttributeValue("id");
+
+					remoteVersion[0] = new ComparableVersion(id);
+				} catch (UnknownHostException e) {
+					log.warn("Update check failed -- connection to the repository could not be estabilished.");
+				} catch (JDOMException e) {
+					log.warn("Udpate check failed -- an error has occured while parsing update file.", e);
+				} catch (Exception e) {
+					log.warn("An error occured while checking updates.", e);
+				} finally {
+					try {
+						if (is != null)
+							is.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+		});
+
+		if (remoteVersion[0] == null) {
+			// Version check failed, already logged by previous catches
+		} else if (APP_VERSION.compareTo(remoteVersion[0]) < 0) {
+			try {
+				log.info("Update is available, user version: " + APP_VERSION);
+
+				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(), SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+				box.setText(APP_NAME + " - Update Available");
+				StringBuilder buf = new StringBuilder();
+				buf.append("A new version of the editor is available: v.");
+				buf.append(remoteVersion[0].toString());
+				buf.append("\nWould you like to download it now?");
+				box.setMessage(buf.toString());
+
+				if (box.open() == SWT.YES) {
+					URL url = new URL(APP_URL);
+
+					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+						try {
+							desktop.browse(url.toURI());
+						} catch (Exception e) {
+							log.error("An error has occured while opening web browser.", e);
+						}
+					}
+				}
+			} catch (IOException e) {
+				log.warn("An error has occured while displaying update result.", e);
+			}
+		} else {
+			log.info("Program is up to date.");
+			if (!automatic) {
+				// The user manually initiated the version check, so probably expects some kind of response in either case.
+				UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, "Program is up to date.");
+			}
+		}
 	}
 
 	/** Create a Hotkey object for each hotkey, and store them in the hotkey map. */
@@ -302,6 +382,14 @@ public class Superluminal {
 
 		hotkey = Manager.getHotkey(Hotkeys.CLOSE_SHIP);
 		hotkey.setKey('w');
+		hotkey.setCtrl(true);
+
+		hotkey = Manager.getHotkey(Hotkeys.MANAGE_MOD);
+		hotkey.setKey('m');
+		hotkey.setCtrl(true);
+
+		hotkey = Manager.getHotkey(Hotkeys.SETTINGS);
+		hotkey.setKey('o');
 		hotkey.setCtrl(true);
 
 		// View hotkeys

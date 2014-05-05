@@ -20,6 +20,7 @@ public class SuperluminalConfig {
 	public static final String START_MAX = "startMaximized";
 	public static final String CLOSE_LOADER = "closeLoaderAfterLoading";
 	public static final String GEOMETRY = "geometry";
+	public static final String CHECK_UPDATES = "checkUpdatesOnStartup";
 
 	public SuperluminalConfig(Properties config, File configFile) {
 		this.config = config;
@@ -86,6 +87,7 @@ public class SuperluminalConfig {
 			configComments += " " + START_MAX + " - If true, the application's window will be maximised on startup (overrides geometry).\n";
 			configComments += " " + SIDEBAR_SIDE + " - If true, the sidebar will appear on the right side of the editor's main display.\n";
 			configComments += " " + CLOSE_LOADER + " - If true, ship loader window will automatically close after a ship is loaded.\n";
+			configComments += " " + CHECK_UPDATES + " - If true, the program will automatically check for updates each time it is started.\n";
 			configComments += "\n";
 			configComments += " " + GEOMETRY + " - Last saved size of the main window.\n";
 			configComments += "\n";
