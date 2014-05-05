@@ -30,7 +30,9 @@ public enum WeaponStats {
 	/** Double damage on systemless rooms */
 	HULL_BUST,
 	/** Triggers Crystals' special ability on hit rooms */
-	LOCKDOWN;
+	LOCKDOWN,
+	/** For BURST type weapons, determines the area of effect of the weapon */
+	RADIUS;
 
 	public String getTagName() {
 		switch (this) {

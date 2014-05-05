@@ -19,6 +19,8 @@ public enum Hotkeys {
 	LOAD_SHIP,
 	SAVE_SHIP,
 	CLOSE_SHIP,
+	MANAGE_MOD,
+	SETTINGS,
 	UNDO,
 	REDO,
 
