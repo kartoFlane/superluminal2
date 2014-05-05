@@ -26,7 +26,7 @@ public class CreationTool extends Tool {
 
 	@Override
 	public void select() {
-		disposeSidebarContent();
+		window.disposeSidebarContent();
 
 		CreationToolComposite createC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(createC);

@@ -205,7 +205,7 @@ public class DroneSelectionDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				response = SWT.NO;
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
@@ -213,7 +213,7 @@ public class DroneSelectionDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				response = SWT.YES;
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
@@ -256,7 +256,7 @@ public class DroneSelectionDialog {
 		updateData();
 
 		Display display = Display.getCurrent();
-		while (shell.isVisible()) {
+		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
@@ -411,8 +411,12 @@ public class DroneSelectionDialog {
 		return instance;
 	}
 
-	public boolean isVisible() {
-		return shell.isVisible();
+	public void dispose() {
+		shell.dispose();
+	}
+
+	public boolean isActive() {
+		return !shell.isDisposed() && shell.isVisible();
 	}
 
 	private class DroneIterator implements Iterator<DroneObject> {

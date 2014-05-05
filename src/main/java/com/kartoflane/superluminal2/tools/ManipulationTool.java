@@ -34,12 +34,12 @@ public class ManipulationTool extends Tool {
 
 	@Override
 	public void select() {
-		disposeSidebarContent();
+		window.disposeSidebarContent();
 
 		ManipulationToolComposite pointerC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(pointerC);
 
-		OverviewWindow.getInstance().update();
+		OverviewWindow.staticUpdate();
 
 		Manager.setSelected(null);
 
@@ -146,6 +146,7 @@ public class ManipulationTool extends Tool {
 				}
 			}
 
+			// TODO rework
 			ManipulationToolComposite mtc = (ManipulationToolComposite) window.getSidebarContent();
 			DoorDataComposite ddc = (DoorDataComposite) mtc.getDataComposite();
 			RoomController roomController = control instanceof RoomController ? (RoomController) control : null;

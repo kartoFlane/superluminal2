@@ -33,7 +33,6 @@ public class GlowSelectionDialog {
 	private static GlowSelectionDialog instance = null;
 
 	private GlowSet result = null;
-	private int response = SWT.NO;
 	private Preview preview = null;
 	private SystemObject selectedSystem = null;
 
@@ -129,23 +128,22 @@ public class GlowSelectionDialog {
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				response = SWT.NO;
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
 		btnConfirm.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				response = SWT.YES;
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				GlowSet newGlow = GlowSetDialog.getInstance().open();
+				GlowSetDialog dialog = new GlowSetDialog(shell);
+				GlowSet newGlow = dialog.open();
 				if (newGlow != null) {
 					Database.getInstance().getCore().store(newGlow);
 					TreeItem currentItem = updateTree(selectedSystem);
@@ -189,7 +187,6 @@ public class GlowSelectionDialog {
 
 	public GlowSet open(SystemObject system) {
 		selectedSystem = system;
-		response = SWT.NO;
 		TreeItem currentItem = updateTree(system);
 
 		shell.open();
@@ -201,29 +198,21 @@ public class GlowSelectionDialog {
 			tree.setSelection(currentItem);
 
 		Display display = Display.getCurrent();
-		while (shell.isVisible()) {
+		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
 
-		if (response == SWT.YES) {
-			TreeItem selectedItem = tree.getSelection()[0];
-			if (selectedItem == null) {
-				throw new IllegalStateException("No TreeItem was selected.");
-			} else {
-				return (GlowSet) selectedItem.getData();
-			}
-		} else {
-			return null;
-		}
+		return result;
 	}
 
-	public Shell getShell() {
-		return shell;
+	public void dispose() {
+		preview.dispose();
+		shell.dispose();
 	}
 
-	public boolean isVisible() {
-		return shell.isVisible();
+	public boolean isActive() {
+		return !shell.isDisposed() && shell.isVisible();
 	}
 
 	private TreeItem updateTree(SystemObject system) {

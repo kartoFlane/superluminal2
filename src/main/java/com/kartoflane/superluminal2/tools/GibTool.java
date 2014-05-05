@@ -14,7 +14,7 @@ public class GibTool extends Tool {
 
 	@Override
 	public void select() {
-		disposeSidebarContent();
+		window.disposeSidebarContent();
 
 		GibToolComposite gibC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(gibC);

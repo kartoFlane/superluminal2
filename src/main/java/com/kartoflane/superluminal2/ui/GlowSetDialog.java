@@ -88,6 +88,7 @@ public class GlowSetDialog {
 
 		txtName = new Text(shell, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		txtName.setText("");
 
 		lblBlue = new Label(shell, SWT.NONE);
 		lblBlue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -108,6 +109,7 @@ public class GlowSetDialog {
 		txtBlue = new Text(shell, SWT.BORDER);
 		txtBlue.setEditable(false);
 		txtBlue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		txtBlue.setText("");
 
 		Label lblGreen = new Label(shell, SWT.NONE);
 		lblGreen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -127,6 +129,7 @@ public class GlowSetDialog {
 		txtGreen = new Text(shell, SWT.BORDER);
 		txtGreen.setEditable(false);
 		txtGreen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		txtGreen.setText("");
 
 		Label lblYellow = new Label(shell, SWT.NONE);
 		lblYellow.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -146,6 +149,7 @@ public class GlowSetDialog {
 		txtYellow = new Text(shell, SWT.BORDER);
 		txtYellow.setEditable(false);
 		txtYellow.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		txtYellow.setText("");
 
 		Composite compButtons = new Composite(shell, SWT.NONE);
 		GridLayout gl_compButtons = new GridLayout(2, false);
@@ -159,6 +163,7 @@ public class GlowSetDialog {
 		gd_btnConfirm.widthHint = 80;
 		btnConfirm.setLayoutData(gd_btnConfirm);
 		btnConfirm.setText("Confirm");
+		btnConfirm.setEnabled(false);
 
 		btnCancel = new Button(compButtons, SWT.NONE);
 		GridData gd_btnCancel = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
@@ -185,7 +190,7 @@ public class GlowSetDialog {
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
@@ -200,7 +205,7 @@ public class GlowSetDialog {
 					result.setImage(Glows.GREEN, txtGreen.getText());
 					result.setImage(Glows.YELLOW, txtYellow.getText());
 				}
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
@@ -301,6 +306,7 @@ public class GlowSetDialog {
 		btnClearGreen.addSelectionListener(imageClearListener);
 		btnClearYellow.addSelectionListener(imageClearListener);
 
+		updateWidgets();
 		shell.pack();
 		shell.setMinimumSize(shell.getSize());
 		shell.setSize(300, 300);
@@ -310,21 +316,17 @@ public class GlowSetDialog {
 		return instance;
 	}
 
+	public void dispose() {
+		shell.dispose();
+	}
+
 	public GlowSet open() {
 		result = null;
-
-		txtName.setText("");
-		txtBlue.setText("");
-		txtGreen.setText("");
-		txtYellow.setText("");
-		btnConfirm.setEnabled(false);
-
-		updateWidgets();
 
 		shell.open();
 
 		Display display = Display.getCurrent();
-		while (shell.isVisible()) {
+		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
@@ -370,9 +372,5 @@ public class GlowSetDialog {
 		}
 
 		btnConfirm.setEnabled(result);
-	}
-
-	public boolean isVisible() {
-		return shell.isVisible();
 	}
 }

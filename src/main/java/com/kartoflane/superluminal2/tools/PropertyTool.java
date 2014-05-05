@@ -14,7 +14,7 @@ public class PropertyTool extends Tool {
 
 	@Override
 	public void select() {
-		disposeSidebarContent();
+		window.disposeSidebarContent();
 
 		PropertiesToolComposite createC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(createC);

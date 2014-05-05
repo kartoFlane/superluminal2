@@ -261,7 +261,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			public void widgetSelected(SelectionEvent e) {
 				Systems sys = container.getActiveSystem(roomC.getGameObject());
 				SystemObject systemObject = container.getSystemController(sys).getGameObject();
-				GlowSet glowSet = GlowSelectionDialog.getInstance().open(systemObject);
+
+				GlowSelectionDialog dialog = new GlowSelectionDialog(EditorWindow.getInstance().getShell());
+				GlowSet glowSet = dialog.open(systemObject);
 
 				if (glowSet != null) {
 					btnGlow.setText(glowSet.getIdentifier());
@@ -343,9 +345,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtInterior.setText("");
 			btnGlow.setText("None");
 		}
-		OverviewWindow overview = OverviewWindow.getInstance();
-		if (overview != null && overview.isVisible())
-			overview.update(roomC);
+		OverviewWindow.staticUpdate(roomC);
 	}
 
 	@Override

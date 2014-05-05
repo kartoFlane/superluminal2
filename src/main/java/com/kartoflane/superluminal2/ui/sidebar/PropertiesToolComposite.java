@@ -486,7 +486,8 @@ public class PropertiesToolComposite extends Composite {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					WeaponList current = ship.getWeaponList();
-					WeaponList neu = WeaponSelectionDialog.getInstance().open(current);
+					WeaponSelectionDialog dialog = new WeaponSelectionDialog(EditorWindow.getInstance().getShell());
+					WeaponList neu = dialog.open(current);
 
 					if (neu != null) {
 						ship.setWeaponList(neu);
@@ -538,7 +539,8 @@ public class PropertiesToolComposite extends Composite {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					DroneList current = ship.getDroneList();
-					DroneList neu = DroneSelectionDialog.getInstance().open(current);
+					DroneSelectionDialog dialog = new DroneSelectionDialog(EditorWindow.getInstance().getShell());
+					DroneList neu = dialog.open(current);
 
 					if (neu != null) {
 						ship.setDroneList(neu);
@@ -737,7 +739,8 @@ public class PropertiesToolComposite extends Composite {
 					ShipObject ship = container.getShipController().getGameObject();
 					WeaponObject current = ship.getWeapons()[i];
 
-					WeaponObject neu = WeaponSelectionDialog.getInstance().open(current);
+					WeaponSelectionDialog dialog = new WeaponSelectionDialog(EditorWindow.getInstance().getShell());
+					WeaponObject neu = dialog.open(current);
 
 					if (neu != null) {
 						// If the weapon is the default dummy, then replace the first occurence of
@@ -773,7 +776,8 @@ public class PropertiesToolComposite extends Composite {
 					ShipObject ship = container.getShipController().getGameObject();
 					DroneObject current = ship.getDrones()[i];
 
-					DroneObject neu = DroneSelectionDialog.getInstance().open(current);
+					DroneSelectionDialog dialog = new DroneSelectionDialog(EditorWindow.getInstance().getShell());
+					DroneObject neu = dialog.open(current);
 
 					if (neu != null) {
 						// If the drone is the default dummy, then replace the first occurence of

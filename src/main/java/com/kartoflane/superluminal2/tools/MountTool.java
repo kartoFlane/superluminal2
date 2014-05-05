@@ -125,7 +125,7 @@ public class MountTool extends Tool {
 
 			window.canvasRedraw(oldBounds);
 			mount.redraw();
-			OverviewWindow.getInstance().update();
+			OverviewWindow.staticUpdate();
 		}
 		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {

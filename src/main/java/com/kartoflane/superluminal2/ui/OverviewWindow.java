@@ -55,9 +55,6 @@ public class OverviewWindow {
 		instance = this;
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE);
-		shell.setSize(250, 350);
-		Point pLoc = parent.getLocation();
-		shell.setLocation(pLoc.x + parent.getSize().x - shell.getSize().x, pLoc.y + 50);
 		shell.setText(String.format("%s - Ship Overview", Superluminal.APP_NAME));
 		shell.setLayout(new GridLayout(1, false));
 
@@ -101,7 +98,7 @@ public class OverviewWindow {
 		shell.addListener(SWT.Close, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				close();
+				dispose();
 				event.doit = false;
 			}
 		});
@@ -209,6 +206,12 @@ public class OverviewWindow {
 		};
 		mntmRemoveAlias.addSelectionListener(removeAliasListener);
 		tltmRemove.addSelectionListener(removeAliasListener);
+
+		shell.setSize(300, 600);
+		Point size = shell.getSize();
+		Point pSize = parent.getSize();
+		Point pLoc = parent.getLocation();
+		shell.setLocation(pLoc.x + pSize.x - size.x, pLoc.y + 50);
 	}
 
 	public void open() {
@@ -216,10 +219,6 @@ public class OverviewWindow {
 		update();
 
 		shell.setMinimized(false);
-	}
-
-	public void close() {
-		shell.setVisible(false);
 	}
 
 	public void update() {
@@ -290,6 +289,24 @@ public class OverviewWindow {
 		}
 	}
 
+	/**
+	 * Updates the overview window if it exists, or does nothing if it does not.
+	 */
+	public static void staticUpdate() {
+		if (instance != null && !instance.shell.isDisposed()) {
+			instance.update();
+		}
+	}
+
+	/**
+	 * Updates the overview window if it exists, or does nothing if it does not.
+	 */
+	public static void staticUpdate(AbstractController controller) {
+		if (instance != null && !instance.shell.isDisposed()) {
+			instance.update(controller);
+		}
+	}
+
 	public static OverviewWindow getInstance() {
 		return instance;
 	}
@@ -304,16 +321,8 @@ public class OverviewWindow {
 		return tree.isEnabled();
 	}
 
-	public boolean isVisible() {
-		return shell.isVisible();
-	}
-
-	public boolean isDisposed() {
-		return shell.isDisposed();
-	}
-
-	public boolean isFocusControl() {
-		return tree.isFocusControl();
+	public boolean isActive() {
+		return !shell.isDisposed() && tree.isFocusControl();
 	}
 
 	private TreeItem createItem(AbstractController controller) {

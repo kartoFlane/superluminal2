@@ -138,7 +138,7 @@ public class RoomTool extends Tool {
 					container.updateBoundingArea();
 
 					window.canvasRedraw(createBounds);
-					OverviewWindow.getInstance().update(roomController);
+					OverviewWindow.staticUpdate(roomController);
 				} else {
 					// if collided with a room, just redraw the area (cursor isn't visible)
 					window.canvasRedraw(createBounds);

@@ -250,7 +250,7 @@ public class SystemsMenu {
 
 				dataComposite.updateData();
 				controller.redraw();
-				OverviewWindow.getInstance().update(controller);
+				OverviewWindow.staticUpdate(controller);
 			}
 		};
 

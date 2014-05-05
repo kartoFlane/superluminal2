@@ -72,7 +72,7 @@ public class AliasDialog {
 			public void widgetSelected(SelectionEvent e) {
 				alias.setAlias(aliasText.getText());
 				shell.setVisible(false);
-				OverviewWindow.getInstance().update((AbstractController) alias);
+				OverviewWindow.staticUpdate((AbstractController) alias);
 			}
 		});
 
@@ -116,7 +116,7 @@ public class AliasDialog {
 		return instance;
 	}
 
-	public boolean isVisible() {
+	public boolean isActive() {
 		return !shell.isDisposed() && shell.isVisible();
 	}
 

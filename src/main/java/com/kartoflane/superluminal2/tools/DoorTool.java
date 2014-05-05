@@ -89,7 +89,7 @@ public class DoorTool extends Tool {
 			doorController.redraw();
 
 			container.updateBoundingArea();
-			OverviewWindow.getInstance().update(doorController);
+			OverviewWindow.staticUpdate(doorController);
 		}
 		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {

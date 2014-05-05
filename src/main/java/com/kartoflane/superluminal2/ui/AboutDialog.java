@@ -130,7 +130,7 @@ public class AboutDialog {
 		return SWT.OK;
 	}
 
-	public boolean isVisible() {
+	public boolean isActive() {
 		return !shell.isDisposed() && shell.isVisible();
 	}
 

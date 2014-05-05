@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -39,14 +40,16 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.ShipUtils;
+import com.kartoflane.superluminal2.core.UIUtils;
 import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
 
 public class ShipLoaderDialog {
-	private static ShipLoaderDialog instance = null;
 	private static final Logger log = LogManager.getLogger(ShipLoaderDialog.class);
+
+	private static ShipLoaderDialog instance = null;
 
 	private static final int defaultBlueTabWidth = 200;
 	private static final int defaultClassTabWidth = 150;
@@ -57,8 +60,8 @@ public class ShipLoaderDialog {
 	private HashMap<String, TreeItem> blueprintTreeMap = new HashMap<String, TreeItem>();
 
 	private boolean sortByBlueprint = true;
-	private Preview preview = null;
 
+	private Preview preview = null;
 	private Shell shell;
 	private Text txtBlueprint;
 	private Text txtClass;
@@ -69,6 +72,9 @@ public class ShipLoaderDialog {
 	private Tree tree;
 	private Button btnLoad;
 	private Canvas canvas;
+	private Button btnCancel;
+	private TreeColumn trclmnBlueprint;
+	private TreeColumn trclmnClass;
 
 	public ShipLoaderDialog(Shell parent) {
 		instance = this;
@@ -85,15 +91,17 @@ public class ShipLoaderDialog {
 		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
 
-		TreeColumn trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
+		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
 		trclmnBlueprint.setMoveable(true);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
 		trclmnBlueprint.setText("Blueprint Name");
+		trclmnBlueprint.setToolTipText("Click to sort by blueprint name.");
 
-		TreeColumn trclmnClass = new TreeColumn(tree, SWT.RIGHT);
+		trclmnClass = new TreeColumn(tree, SWT.RIGHT);
 		trclmnClass.setMoveable(true);
 		trclmnClass.setWidth(defaultClassTabWidth);
 		trclmnClass.setText("Ship Class");
+		trclmnClass.setToolTipText("Click to sort by class name.");
 
 		trtmPlayer = new TreeItem(tree, SWT.NONE);
 		trtmPlayer.setText(0, "Player Ships");
@@ -161,11 +169,11 @@ public class ShipLoaderDialog {
 		btnLoad.setText("Load");
 		btnLoad.setEnabled(false);
 
-		Button btnCancel = new Button(buttonComposite, SWT.NONE);
+		btnCancel = new Button(buttonComposite, SWT.NONE);
 		GridData gd_btnCancel = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_btnCancel.widthHint = 80;
 		btnCancel.setLayoutData(gd_btnCancel);
-		btnCancel.setText("Cancel");
+		btnCancel.setText("Close");
 
 		tree.addMouseListener(new MouseListener() {
 			@Override
@@ -261,6 +269,9 @@ public class ShipLoaderDialog {
 						ShipObject object = ShipUtils.loadShipXML(metadata.getElement());
 
 						Manager.loadShip(object);
+
+						if (Manager.closeLoader)
+							shell.setVisible(false);
 					} catch (IllegalArgumentException ex) {
 						handleException(metadata, ex);
 					} catch (JDOMParseException ex) {
@@ -275,14 +286,14 @@ public class ShipLoaderDialog {
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
 		shell.addListener(SWT.Close, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				shell.setVisible(false);
+				btnCancel.notifyListeners(SWT.Selection, null);
 				e.doit = false;
 			}
 		});
@@ -312,9 +323,25 @@ public class ShipLoaderDialog {
 			}
 		});
 
+		ControlAdapter resizer = new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				final int BORDER_OFFSET = 5;
+				trclmnClass.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
+			}
+		};
+		tree.addControlListener(resizer);
+		trclmnBlueprint.addControlListener(resizer);
+
 		shell.setMinimumSize(minTreeWidth + defaultMetadataWidth, 300);
 		shell.pack();
-		shell.setSize(shell.getSize().x + 5, shell.getSize().y);
+		Point size = shell.getSize();
+		shell.setSize(size.x + 5, size.y);
+		Point parSize = parent.getSize();
+		Point parLoc = parent.getLocation();
+		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+
+		loadShipList();
 	}
 
 	public void loadShipList(HashMap<String, ArrayList<ShipMetadata>> metadataMap) {
@@ -371,7 +398,7 @@ public class ShipLoaderDialog {
 		buf.append("\n\n");
 		buf.append(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		buf.append("\n\nCheck log for details.");
-		Utils.showWarningDialog(shell, buf.toString());
+		UIUtils.showWarningDialog(shell, null, buf.toString());
 	}
 
 	private void updatePreview() {
@@ -386,12 +413,11 @@ public class ShipLoaderDialog {
 	}
 
 	public void open() {
-		loadShipList();
 		shell.open();
 	}
 
-	public boolean isVisible() {
-		return shell.isVisible();
+	public boolean isActive() {
+		return !shell.isDisposed() && shell.isVisible();
 	}
 
 	public static ShipLoaderDialog getInstance() {
@@ -399,6 +425,9 @@ public class ShipLoaderDialog {
 	}
 
 	public void dispose() {
+		dataTreeMap.clear();
+		blueprintTreeMap.clear();
+		preview.dispose();
 		shell.dispose();
 	}
 

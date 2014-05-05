@@ -5,7 +5,6 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.components.LayeredPainter;
@@ -99,12 +98,6 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 
 	/** Creates a new instance of the composite that represents the tool. */
 	protected abstract Composite createToolComposite(Composite parent);
-
-	protected void disposeSidebarContent() {
-		Control c = (Control) window.getSidebarContent();
-		if (c != null)
-			c.dispose();
-	}
 
 	public void mouseMove(MouseEvent e) {
 		cursor.mouseMove(e);

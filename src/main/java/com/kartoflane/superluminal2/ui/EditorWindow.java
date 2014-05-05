@@ -1,7 +1,6 @@
 package com.kartoflane.superluminal2.ui;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -25,10 +24,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -44,12 +41,10 @@ import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
 import com.kartoflane.superluminal2.core.ShipUtils;
-import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.core.UIUtils;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.tools.CreationTool;
@@ -110,6 +105,8 @@ public class EditorWindow {
 	private MenuItem mntmSaveShip;
 	private MenuItem mntmSaveShipAs;
 	private MenuItem mntmCloseShip;
+	private SashForm editorContainer;
+	private MenuItem mntmModMan;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -129,15 +126,7 @@ public class EditorWindow {
 		// Instantiate quasi-singletons
 		new MouseInputDispatcher();
 		CursorController.newInstance();
-		new OverviewWindow(shell);
-		new ShipLoaderDialog(shell);
-		new SettingsDialog(shell);
 		new SystemsMenu(shell);
-		new GlowSelectionDialog(shell);
-		new GlowSetDialog(GlowSelectionDialog.getInstance().getShell());
-		new WeaponSelectionDialog(shell);
-		new DroneSelectionDialog(shell);
-		new ImageViewerDialog(shell);
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
@@ -175,8 +164,8 @@ public class EditorWindow {
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
-		MenuItem mntmLoadMod = new MenuItem(menuFile, SWT.NONE);
-		mntmLoadMod.setText("Load Mod");
+		mntmModMan = new MenuItem(menuFile, SWT.NONE);
+		mntmModMan.setText("Mod Management\t" + Manager.getHotkey(Hotkeys.MANAGE_MOD));
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
@@ -204,7 +193,7 @@ public class EditorWindow {
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
 		mntmSettings = new MenuItem(menuEdit, SWT.NONE);
-		mntmSettings.setText("Settings");
+		mntmSettings.setText("Settings\t" + Manager.getHotkey(Hotkeys.SETTINGS));
 
 		// View menu
 		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
@@ -212,12 +201,6 @@ public class EditorWindow {
 
 		Menu menuView = new Menu(mntmView);
 		mntmView.setMenu(menuView);
-
-		final MenuItem mntmSidebar = new MenuItem(menuView, SWT.CHECK);
-		mntmSidebar.setSelection(Manager.sidebarOnRightSide);
-		mntmSidebar.setText("Sidebar on Right Side");
-
-		new MenuItem(menuView, SWT.SEPARATOR);
 
 		mntmGrid = new MenuItem(menuView, SWT.CHECK);
 		mntmGrid.setText("Show Grid\t" + Manager.getHotkey(Hotkeys.TOGGLE_GRID));
@@ -345,7 +328,8 @@ public class EditorWindow {
 		tltmManager.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				OverviewWindow.getInstance().open();
+				OverviewWindow window = new OverviewWindow(shell);
+				window.open();
 			}
 		});
 
@@ -355,7 +339,7 @@ public class EditorWindow {
 		infoContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
 
 		// Editor container - canvas, sidebar
-		final SashForm editorContainer = new SashForm(mainContainer, SWT.SMOOTH);
+		editorContainer = new SashForm(mainContainer, SWT.SMOOTH);
 		editorContainer.setLayout(new FormLayout());
 		editorContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
@@ -540,7 +524,8 @@ public class EditorWindow {
 		mntmLoadShip.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ShipLoaderDialog.getInstance().open();
+				ShipLoaderDialog dialog = new ShipLoaderDialog(shell);
+				dialog.open();
 			}
 		});
 
@@ -559,7 +544,7 @@ public class EditorWindow {
 				File temp = saveDestination;
 				// Only prompt for save directory if the user hasn't chosen any yet
 				if (saveDestination == null) {
-					temp = promptForSaveFile();
+					temp = UIUtils.promptForSaveFile(shell);
 				}
 
 				if (temp != null) { // User could've aborted selection, which returns null.
@@ -571,7 +556,7 @@ public class EditorWindow {
 						log.trace("Ship saved successfully.");
 					} catch (Exception ex) {
 						log.error("An error occured while saving the ship: ", ex);
-						Utils.showWarningDialog(shell, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+						UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
 					}
 				}
 			}
@@ -584,7 +569,7 @@ public class EditorWindow {
 
 				// Always prompt for save directory
 				// File temp = promptForSaveFile();
-				File temp = promptForDirectory("", "");
+				File temp = UIUtils.promptForDirectory(shell, "", "");
 
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
@@ -595,25 +580,17 @@ public class EditorWindow {
 						log.trace("Ship saved successfully.");
 					} catch (Exception ex) {
 						log.error("An error occured while saving the ship: ", ex);
-						Utils.showWarningDialog(shell, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+						UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
 					}
 				}
 			}
 		});
 
-		mntmLoadMod.addSelectionListener(new SelectionAdapter() {
+		mntmModMan.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				File temp = promptForLoadFile();
-				if (temp != null) {
-					try {
-						Database db = Database.getInstance();
-						DatabaseEntry de = new DatabaseEntry(temp);
-						db.addEntry(de);
-					} catch (IOException ex) {
-						log.warn(String.format("An error has occured while loading mod file '%s': ", temp.getName(), ex));
-					}
-				}
+				ModManagementDialog dialog = new ModManagementDialog(shell);
+				dialog.open();
 			}
 		});
 
@@ -660,26 +637,8 @@ public class EditorWindow {
 		mntmSettings.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SettingsDialog.getInstance().open();
-			}
-		});
-
-		mntmSidebar.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Manager.sidebarOnRightSide = mntmSidebar.getSelection();
-
-				sideContainer.setParent(shell);
-				canvas.setParent(shell);
-				if (Manager.sidebarOnRightSide) {
-					canvas.setParent(editorContainer);
-					sideContainer.setParent(editorContainer);
-				} else {
-					sideContainer.setParent(editorContainer);
-					canvas.setParent(editorContainer);
-				}
-
-				editorContainer.layout();
+				SettingsDialog dialog = new SettingsDialog(shell);
+				dialog.open();
 			}
 		});
 
@@ -753,7 +712,7 @@ public class EditorWindow {
 				buf.append(Superluminal.APP_NAME + " - a ship editor for FTL: Faster Than Light");
 				buf.append("\nVersion " + Superluminal.APP_VERSION);
 				buf.append("\n\nCreated by " + Superluminal.APP_AUTHOR);
-				buf.append("\n ");
+				buf.append("\n");
 
 				AboutDialog aboutDialog = new AboutDialog(shell);
 				aboutDialog.setMessage(buf.toString());
@@ -769,7 +728,7 @@ public class EditorWindow {
 		mntmUpdate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Superluminal.checkForUpdates();
+				Superluminal.checkForUpdates(false); // Manually checking for updates
 			}
 		});
 
@@ -779,6 +738,9 @@ public class EditorWindow {
 
 		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
 		Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
+
+		shell.setSize(Manager.windowSize);
+		shell.setMaximized(Manager.startMaximised);
 
 		sideContainer.setFocus();
 		enableTools(false);
@@ -791,8 +753,6 @@ public class EditorWindow {
 	}
 
 	public void open() {
-		shell.setSize(Manager.windowSize);
-		shell.setMaximized(Manager.startMaximised);
 		shell.open();
 	}
 
@@ -818,7 +778,12 @@ public class EditorWindow {
 		}
 	}
 
-	/** @return the Composite currently held by the sidebar. */
+	/**
+	 * Do not use this method to dispose the content of the sidebar.
+	 * To do this, use {@link #disposeSidebarContent()}.
+	 * 
+	 * @return the Composite currently held by the sidebar.
+	 */
 	public Composite getSidebarContent() {
 		Control c = sideContainer.getContent();
 		if (c instanceof Composite)
@@ -827,6 +792,17 @@ public class EditorWindow {
 			throw new IllegalStateException("Content of the sidebar is not a Composite: " + c.getClass().getSimpleName());
 		else
 			return null;
+	}
+
+	/**
+	 * Disposes the content of the sidebar, and sets the content to null.<br>
+	 * Prevents the editor from crashing when trying to change the sidebar positioning after closing a ship.
+	 */
+	public void disposeSidebarContent() {
+		Control c = sideContainer.getContent();
+		if (c != null)
+			c.dispose();
+		sideContainer.setContent(null);
 	}
 
 	/** @return the sidebar ScrolledComposite itself. */
@@ -911,6 +887,9 @@ public class EditorWindow {
 		mntmShowHull.setEnabled(enable);
 		mntmShowFloor.setEnabled(enable);
 		mntmShowShield.setEnabled(enable);
+
+		// Disable mod management, only available when a ship is not loaded
+		mntmModMan.setEnabled(!enable);
 	}
 
 	public boolean optionsEnabled() {
@@ -947,12 +926,16 @@ public class EditorWindow {
 	 * @return true if the editor window controls the focus and should execute hotkey actions.
 	 */
 	public boolean isFocusControl() {
-		boolean result = !OverviewWindow.getInstance().isVisible() || !OverviewWindow.getInstance().isFocusControl();
-		result &= !ShipLoaderDialog.getInstance().isVisible() && !SettingsDialog.getInstance().isVisible();
-		result &= !GlowSelectionDialog.getInstance().isVisible() && !WeaponSelectionDialog.getInstance().isVisible();
-		result &= !DroneSelectionDialog.getInstance().isVisible();
-		result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isVisible();
-		result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isVisible();
+		boolean result =
+				OverviewWindow.getInstance() == null || !OverviewWindow.getInstance().isActive();
+		result &= ShipLoaderDialog.getInstance() == null || !ShipLoaderDialog.getInstance().isActive();
+		result &= SettingsDialog.getInstance() == null || !SettingsDialog.getInstance().isActive();
+		result &= GlowSelectionDialog.getInstance() == null || !GlowSelectionDialog.getInstance().isActive();
+		result &= WeaponSelectionDialog.getInstance() == null || !WeaponSelectionDialog.getInstance().isActive();
+		result &= DroneSelectionDialog.getInstance() == null || !DroneSelectionDialog.getInstance().isActive();
+		result &= ModManagementDialog.getInstance() == null || !ModManagementDialog.getInstance().isActive();
+		result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isActive();
+		result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isActive();
 
 		Composite c = (Composite) getSidebarContent();
 		if (c != null && !c.isDisposed())
@@ -968,162 +951,112 @@ public class EditorWindow {
 	public void dispose() {
 		Cache.checkInColor(this, canvasRGB);
 		Grid.getInstance().dispose();
-		OverviewWindow.getInstance().dispose();
-		ShipLoaderDialog.getInstance().dispose();
-		SettingsDialog.getInstance().dispose();
 		Cache.dispose();
 		shell.dispose();
+	}
+
+	/**
+	 * Refreshes the sidebar's layout.
+	 */
+	public void layoutSidebar() {
+		sideContainer.setParent(shell);
+		canvas.setParent(shell);
+		if (Manager.sidebarOnRightSide) {
+			canvas.setParent(editorContainer);
+			sideContainer.setParent(editorContainer);
+		} else {
+			sideContainer.setParent(editorContainer);
+			canvas.setParent(editorContainer);
+		}
+
+		editorContainer.layout();
 	}
 
 	private void handleHotkeys(Event e) {
 		// ====== Menu hotkeys
 		// File
-		if (Manager.getHotkey(Hotkeys.NEW_SHIP).passes(e.keyCode)) {
-			if (mntmNewShip.isEnabled())
-				mntmNewShip.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.LOAD_SHIP).passes(e.keyCode)) {
-			if (mntmLoadShip.isEnabled())
-				mntmLoadShip.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SAVE_SHIP).passes(e.keyCode)) {
-			if (mntmSaveShip.isEnabled())
-				mntmSaveShip.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.CLOSE_SHIP).passes(e.keyCode)) {
-			if (mntmCloseShip.isEnabled())
-				mntmCloseShip.notifyListeners(SWT.Selection, null);
+		if (Manager.getHotkey(Hotkeys.NEW_SHIP).passes(e.keyCode) && mntmNewShip.isEnabled()) {
+			mntmNewShip.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.LOAD_SHIP).passes(e.keyCode) && mntmLoadShip.isEnabled()) {
+			mntmLoadShip.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SAVE_SHIP).passes(e.keyCode) && mntmSaveShip.isEnabled()) {
+			mntmSaveShip.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.MANAGE_MOD).passes(e.keyCode) && mntmModMan.isEnabled()) {
+			mntmModMan.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.CLOSE_SHIP).passes(e.keyCode) && mntmCloseShip.isEnabled()) {
+			mntmCloseShip.notifyListeners(SWT.Selection, null);
 		}
 
 		// Edit
-		else if (Manager.getHotkey(Hotkeys.UNDO).passes(e.keyCode)) {
-			if (mntmUndo.isEnabled())
-				mntmUndo.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.REDO).passes(e.keyCode)) {
-			if (mntmRedo.isEnabled())
-				mntmRedo.notifyListeners(SWT.Selection, null);
+		else if (Manager.getHotkey(Hotkeys.UNDO).passes(e.keyCode) && mntmUndo.isEnabled()) {
+			mntmUndo.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.REDO).passes(e.keyCode) && mntmRedo.isEnabled()) {
+			mntmRedo.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SETTINGS).passes(e.keyCode) && mntmSettings.isEnabled()) {
+			mntmSettings.notifyListeners(SWT.Selection, null);
 		}
 
 		// View
-		else if (Manager.getHotkey(Hotkeys.TOGGLE_GRID).passes(e.keyCode)) {
-			if (mntmGrid.isEnabled()) {
-				mntmGrid.setSelection(!mntmGrid.getSelection());
-				mntmGrid.notifyListeners(SWT.Selection, null);
-			}
-		} else if (optionsEnabled()) {
-			if (Manager.getHotkey(Hotkeys.SHOW_ANCHOR).passes(e.keyCode)) {
-				mntmShowAnchor.setSelection(!mntmShowAnchor.getSelection());
-				mntmShowAnchor.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.SHOW_MOUNTS).passes(e.keyCode)) {
-				mntmShowMounts.setSelection(!mntmShowMounts.getSelection());
-				mntmShowMounts.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.SHOW_ROOMS).passes(e.keyCode)) {
-				mntmShowRooms.setSelection(!mntmShowRooms.getSelection());
-				mntmShowRooms.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.SHOW_DOORS).passes(e.keyCode)) {
-				mntmShowDoors.setSelection(!mntmShowDoors.getSelection());
-				mntmShowDoors.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.SHOW_STATIONS).passes(e.keyCode)) {
-				mntmShowStations.setSelection(!mntmShowStations.getSelection());
-				mntmShowStations.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.SHOW_HULL).passes(e.keyCode)) {
-				mntmShowHull.setSelection(!mntmShowHull.getSelection());
-				mntmShowHull.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.SHOW_FLOOR).passes(e.keyCode)) {
-				mntmShowFloor.setSelection(!mntmShowFloor.getSelection());
-				mntmShowFloor.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.SHOW_SHIELD).passes(e.keyCode)) {
-				mntmShowShield.setSelection(!mntmShowShield.getSelection());
-				mntmShowShield.notifyListeners(SWT.Selection, null);
-			}
+		else if (Manager.getHotkey(Hotkeys.TOGGLE_GRID).passes(e.keyCode) && mntmGrid.isEnabled()) {
+			mntmGrid.setSelection(!mntmGrid.getSelection());
+			mntmGrid.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_ANCHOR).passes(e.keyCode) && mntmShowAnchor.isEnabled()) {
+			mntmShowAnchor.setSelection(!mntmShowAnchor.getSelection());
+			mntmShowAnchor.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_MOUNTS).passes(e.keyCode) && mntmShowMounts.isEnabled()) {
+			mntmShowMounts.setSelection(!mntmShowMounts.getSelection());
+			mntmShowMounts.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_ROOMS).passes(e.keyCode) && mntmShowRooms.isEnabled()) {
+			mntmShowRooms.setSelection(!mntmShowRooms.getSelection());
+			mntmShowRooms.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_DOORS).passes(e.keyCode) && mntmShowDoors.isEnabled()) {
+			mntmShowDoors.setSelection(!mntmShowDoors.getSelection());
+			mntmShowDoors.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_STATIONS).passes(e.keyCode) && mntmShowStations.isEnabled()) {
+			mntmShowStations.setSelection(!mntmShowStations.getSelection());
+			mntmShowStations.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_HULL).passes(e.keyCode) && mntmShowHull.isEnabled()) {
+			mntmShowHull.setSelection(!mntmShowHull.getSelection());
+			mntmShowHull.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_FLOOR).passes(e.keyCode) && mntmShowFloor.isEnabled()) {
+			mntmShowFloor.setSelection(!mntmShowFloor.getSelection());
+			mntmShowFloor.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_SHIELD).passes(e.keyCode) && mntmShowShield.isEnabled()) {
+			mntmShowShield.setSelection(!mntmShowShield.getSelection());
+			mntmShowShield.notifyListeners(SWT.Selection, null);
 		}
 
 		// ====== Tool hotkeys
-		if (toolsEnabled()) {
-			if (Manager.getHotkey(Hotkeys.POINTER_TOOL).passes(e.keyCode)) {
-				Manager.selectTool(Tools.POINTER);
-				e.doit = false;
-			} else if (Manager.getHotkey(Hotkeys.CREATE_TOOL).passes(e.keyCode)) {
-				Manager.selectTool(Tools.CREATOR);
-				e.doit = false;
-			} else if (Manager.getHotkey(Hotkeys.GIB_TOOL).passes(e.keyCode)) {
-				Manager.selectTool(Tools.GIB);
-				e.doit = false;
-			} else if (Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).passes(e.keyCode)) {
-				Manager.selectTool(Tools.CONFIG);
-				e.doit = false;
-			} else if (Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).passes(e.keyCode)) {
-				OverviewWindow.getInstance().open();
-			} else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode)) {
-				if (Manager.getSelectedToolId() != Tools.CREATOR)
-					Manager.selectTool(Tools.CREATOR);
-				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-				ctool.selectSubtool(Tools.ROOM);
-			} else if (Manager.getHotkey(Hotkeys.DOOR_TOOL).passes(e.keyCode)) {
-				if (Manager.getSelectedToolId() != Tools.CREATOR)
-					Manager.selectTool(Tools.CREATOR);
-				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-				ctool.selectSubtool(Tools.DOOR);
-			} else if (Manager.getHotkey(Hotkeys.MOUNT_TOOL).passes(e.keyCode)) {
-				if (Manager.getSelectedToolId() != Tools.CREATOR)
-					Manager.selectTool(Tools.CREATOR);
-				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-				ctool.selectSubtool(Tools.WEAPON);
-			} else if (Manager.getHotkey(Hotkeys.STATION_TOOL).passes(e.keyCode)) {
-				if (Manager.getSelectedToolId() != Tools.CREATOR)
-					Manager.selectTool(Tools.CREATOR);
-				CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-				ctool.selectSubtool(Tools.STATION);
-			}
+		else if (Manager.getHotkey(Hotkeys.POINTER_TOOL).passes(e.keyCode) && tltmPointer.isEnabled()) {
+			tltmPointer.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.CREATE_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
+			tltmCreation.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.GIB_TOOL).passes(e.keyCode) && tltmGib.isEnabled()) {
+			tltmGib.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).passes(e.keyCode) && tltmProperties.isEnabled()) {
+			tltmProperties.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).passes(e.keyCode) && tltmManager.isEnabled()) {
+			tltmManager.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
+			if (!tltmCreation.getSelection())
+				tltmCreation.notifyListeners(SWT.Selection, null);
+			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+			ctool.selectSubtool(Tools.ROOM);
+		} else if (Manager.getHotkey(Hotkeys.DOOR_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
+			if (!tltmCreation.getSelection())
+				tltmCreation.notifyListeners(SWT.Selection, null);
+			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+			ctool.selectSubtool(Tools.DOOR);
+		} else if (Manager.getHotkey(Hotkeys.MOUNT_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
+			if (!tltmCreation.getSelection())
+				tltmCreation.notifyListeners(SWT.Selection, null);
+			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+			ctool.selectSubtool(Tools.WEAPON);
+		} else if (Manager.getHotkey(Hotkeys.STATION_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
+			if (!tltmCreation.getSelection())
+				tltmCreation.notifyListeners(SWT.Selection, null);
+			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+			ctool.selectSubtool(Tools.STATION);
 		}
-	}
-
-	private File promptForDirectory(String title, String message) {
-		File result = null;
-		DirectoryDialog dialog = new DirectoryDialog(shell);
-		dialog.setText(title);
-		dialog.setMessage(message);
-
-		String path = dialog.open();
-		if (path == null) {
-			// User aborted selection
-			// Nothing to do here
-		} else {
-			result = new File(path);
-		}
-
-		return result;
-	}
-
-	private File promptForSaveFile() {
-		File result = null;
-		FileDialog dialog = new FileDialog(shell, SWT.SAVE);
-		dialog.setFilterExtensions(new String[] { "*.ftl" });
-		dialog.setText("Save Ship");
-		dialog.setOverwrite(true);
-
-		String path = dialog.open();
-		if (path == null) {
-			// User aborted selection
-			// Nothing to do here
-		} else {
-			result = new File(path);
-		}
-
-		return result;
-	}
-
-	private File promptForLoadFile() {
-		File result = null;
-		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
-		dialog.setFilterExtensions(new String[] { "*.ftl" });
-		dialog.setText("Load Mod");
-
-		String path = dialog.open();
-		if (path == null) {
-			// User aborted selection
-			// Nothing to do here
-		} else {
-			result = new File(path);
-		}
-
-		return result;
 	}
 }

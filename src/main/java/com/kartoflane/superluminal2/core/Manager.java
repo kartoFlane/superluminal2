@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Control;
 
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
@@ -34,9 +33,9 @@ public class Manager {
 	// Config variables
 	public static boolean sidebarOnRightSide = true;
 	public static boolean rememberGeometry = true;
-	public static boolean allowRoomOverlap = false;
 	public static boolean startMaximised = false;
 	public static boolean closeLoader = false;
+	public static boolean checkUpdates = true;
 	public static Point windowSize = null;
 	public static String resourcePath = "";
 
@@ -46,6 +45,7 @@ public class Manager {
 	public static boolean modShift = false;
 	public static boolean modAlt = false;
 	public static boolean modCtrl = false;
+	public static boolean allowRoomOverlap = false;
 
 	private static AbstractController selectedController;
 	private static ShipContainer currentShip = null;
@@ -90,8 +90,7 @@ public class Manager {
 		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
 		selectTool(Tools.POINTER);
-		if (OverviewWindow.getInstance().isVisible())
-			OverviewWindow.getInstance().update();
+		OverviewWindow.staticUpdate();
 	}
 
 	public static void loadShip(ShipObject ship) {
@@ -113,8 +112,7 @@ public class Manager {
 		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
 		selectTool(Tools.POINTER);
-		if (OverviewWindow.getInstance().isVisible())
-			OverviewWindow.getInstance().update();
+		OverviewWindow.staticUpdate();
 	}
 
 	public static void closeShip() {
@@ -140,8 +138,7 @@ public class Manager {
 		EditorWindow.getInstance().enableOptions(false);
 		EditorWindow.getInstance().canvasRedraw();
 		selectTool(null);
-		if (OverviewWindow.getInstance().isVisible())
-			OverviewWindow.getInstance().update();
+		OverviewWindow.staticUpdate();
 	}
 
 	/** Returns the currently loaded ship. */
@@ -168,9 +165,7 @@ public class Manager {
 		} else {
 			MouseInputDispatcher.getInstance().setCurrentTool(null);
 			EditorWindow.getInstance().selectTool(null);
-			Control c = (Control) EditorWindow.getInstance().getSidebarContent();
-			if (c != null && !c.isDisposed())
-				c.dispose();
+			EditorWindow.getInstance().disposeSidebarContent();
 		}
 	}
 
