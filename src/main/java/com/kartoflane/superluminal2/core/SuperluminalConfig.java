@@ -25,6 +25,15 @@ public class SuperluminalConfig {
 	public SuperluminalConfig(Properties config, File configFile) {
 		this.config = config;
 		this.configFile = configFile;
+
+		// Setup defaults
+		config.setProperty(SuperluminalConfig.FTL_RESOURCE, "");
+		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "true");
+		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "false");
+		config.setProperty(SuperluminalConfig.START_MAX, "false");
+		config.setProperty(SuperluminalConfig.CLOSE_LOADER, "false");
+		config.setProperty(SuperluminalConfig.GEOMETRY, "");
+		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "true");
 	}
 
 	/**
