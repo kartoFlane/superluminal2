@@ -1,4 +1,5 @@
 target/
+z_notes.txt
 
 *.class
 *.tmp
