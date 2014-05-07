@@ -111,4 +111,13 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 	public int compareTo(DroneObject o) {
 		return blueprintName.compareTo(o.blueprintName);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof DroneObject) {
+			DroneObject other = (DroneObject) o;
+			return blueprintName.equals(other.blueprintName);
+		} else
+			return false;
+	}
 }

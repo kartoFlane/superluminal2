@@ -6,7 +6,7 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 
 	private static final long serialVersionUID = 7946331800522010830L;
 
-	private String blueprintName;
+	private final String blueprintName;
 	private String title;
 	private String description;
 
@@ -20,12 +20,6 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 
 	public void update() {
 		// Nothing to do here
-	}
-
-	public void setBlueprintName(String name) {
-		if (name == null)
-			throw new IllegalArgumentException("Blueprint name must not be null.");
-		blueprintName = name;
 	}
 
 	public String getBlueprintName() {
@@ -55,5 +49,14 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 	@Override
 	public int compareTo(AugmentObject o) {
 		return blueprintName.compareTo(o.getBlueprintName());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof AugmentObject) {
+			AugmentObject other = (AugmentObject) o;
+			return blueprintName.equals(other.blueprintName);
+		} else
+			return false;
 	}
 }

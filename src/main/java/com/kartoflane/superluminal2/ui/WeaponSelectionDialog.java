@@ -8,6 +8,7 @@ import java.util.Iterator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -37,6 +38,7 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
@@ -66,6 +68,8 @@ public class WeaponSelectionDialog {
 	private Button btnConfirm;
 	private Tree tree;
 	private Canvas canvas;
+	private TreeColumn trclmnBlueprint;
+	private TreeColumn trclmnName;
 
 	public WeaponSelectionDialog(Shell parent) {
 		instance = this;
@@ -82,11 +86,11 @@ public class WeaponSelectionDialog {
 		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
 
-		TreeColumn trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
+		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
 		trclmnBlueprint.setText("Blueprint");
 
-		TreeColumn trclmnName = new TreeColumn(tree, SWT.RIGHT);
+		trclmnName = new TreeColumn(tree, SWT.RIGHT);
 		trclmnName.setWidth(defaultNameTabWidth);
 		trclmnName.setText("Name");
 
@@ -269,9 +273,23 @@ public class WeaponSelectionDialog {
 			}
 		});
 
+		ControlAdapter resizer = new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				final int BORDER_OFFSET = 5;
+				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
+			}
+		};
+		tree.addControlListener(resizer);
+		trclmnBlueprint.addControlListener(resizer);
+
 		shell.setMinimumSize(minTreeWidth + defaultDataWidth, 300);
 		shell.pack();
-		shell.setSize(shell.getSize().x + 5, shell.getSize().y);
+		Point size = shell.getSize();
+		shell.setSize(size.x + 5, size.y);
+		Point parSize = parent.getSize();
+		Point parLoc = parent.getLocation();
+		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 	}
 
 	private void open() {
@@ -409,8 +427,9 @@ public class WeaponSelectionDialog {
 		String path = null;
 
 		if (result != null) {
-			path = result.getSheetPath();
-			Point frameSize = result.getFrameSize();
+			AnimationObject anim = result.getAnimation();
+			path = anim.getSheetPath();
+			Point frameSize = anim.getFrameSize();
 			preview.setSourceSize(frameSize.x, frameSize.y);
 			preview.setOverrideSourceSize(true);
 			preview.setImage(path);

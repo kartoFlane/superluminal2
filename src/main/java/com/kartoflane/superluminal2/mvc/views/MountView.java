@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.Transform;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -115,9 +116,10 @@ public class MountView extends BaseView {
 
 	@Override
 	public void updateView() {
-		setImage(getController().getWeapon().getSheetPath());
-		weaponOffset = getGameObject().getWeapon().getMountOffset();
-		frameSize = getGameObject().getWeapon().getFrameSize();
+		AnimationObject anim = getController().getWeapon().getAnimation();
+		setImage(anim.getSheetPath());
+		weaponOffset = anim.getMountOffset();
+		frameSize = anim.getFrameSize();
 
 		if (controller.isSelected()) {
 			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);

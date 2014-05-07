@@ -28,4 +28,13 @@ public abstract class BlueprintList<T> extends ArrayList<T> implements Identifia
 	public int compareTo(BlueprintList<?> o) {
 		return blueprintName.compareTo(o.blueprintName);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof BlueprintList) {
+			BlueprintList<?> other = (BlueprintList<?>) o;
+			return blueprintName.equals(other.blueprintName);
+		} else
+			return false;
+	}
 }

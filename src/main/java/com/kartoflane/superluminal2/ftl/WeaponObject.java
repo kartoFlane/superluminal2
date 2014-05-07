@@ -2,8 +2,6 @@ package com.kartoflane.superluminal2.ftl;
 
 import java.util.HashMap;
 
-import org.eclipse.swt.graphics.Point;
-
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
@@ -26,10 +24,10 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 	private String title = "";
 	private String shortName = "";
 	private String description = "";
+	private String animName = "";
 
+	private AnimationObject cachedAnimation = null;
 	private HashMap<WeaponStats, Float> statMap = null;
-
-	private AnimationObject animation;
 
 	/**
 	 * Creates a default weapon object.
@@ -39,7 +37,8 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 		blueprintName = "Default Weapon";
 		title = "<No Weapon>";
 		shortName = "<No Weapon>";
-		animation = Database.DEFAULT_ANIM_OBJ;
+		animName = "Default Animation";
+		cachedAnimation = Database.DEFAULT_ANIM_OBJ;
 	}
 
 	public WeaponObject(String blueprint) {
@@ -55,10 +54,26 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 		// Nothing to do here
 	}
 
-	public void setAnimation(AnimationObject anim) {
-		if (anim == null)
+	public void setAnimName(String animName) {
+		if (animName == null)
 			throw new IllegalArgumentException(blueprintName + ": animation must not be null.");
-		animation = anim;
+		this.animName = animName;
+		cacheAnimation();
+	}
+
+	public String getAnimName() {
+		return animName;
+	}
+
+	public void cacheAnimation() {
+		AnimationObject anim = Database.getInstance().getAnimation(animName);
+		if (anim == null)
+			throw new IllegalArgumentException("AnimationObject not found for anim name " + animName);
+		cachedAnimation = anim;
+	}
+
+	public AnimationObject getAnimation() {
+		return cachedAnimation;
 	}
 
 	public void setType(WeaponTypes type) {
@@ -119,26 +134,6 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 		return statMap.get(stat);
 	}
 
-	public String getAnimName() {
-		return animation.getAnimName();
-	}
-
-	public Point getSheetSize() {
-		return animation.getSheetSize();
-	}
-
-	public Point getFrameSize() {
-		return animation.getFrameSize();
-	}
-
-	public Point getMountOffset() {
-		return animation.getMountOffset();
-	}
-
-	public String getSheetPath() {
-		return animation.getSheetPath();
-	}
-
 	private void initStatMap() {
 		statMap = new HashMap<WeaponStats, Float>();
 		for (WeaponStats stat : WeaponStats.values())
@@ -153,5 +148,14 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 	@Override
 	public int compareTo(WeaponObject o) {
 		return blueprintName.compareTo(o.blueprintName);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof WeaponObject) {
+			WeaponObject other = (WeaponObject) o;
+			return blueprintName.equals(other.blueprintName);
+		} else
+			return false;
 	}
 }

@@ -3,11 +3,11 @@ package com.kartoflane.superluminal2.ftl;
 import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
-import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class AnimationObject implements Comparable<AnimationObject>, Identifiable {
 
-	private String animName;
+	private final String animName;
 
 	private String sheetPath;
 	private Point sheetSize = new Point(0, 0);
@@ -27,18 +27,12 @@ public class AnimationObject implements Comparable<AnimationObject>, Identifiabl
 	}
 
 	public AnimationObject(String name) {
-		setAnimName(name);
+		animName = name;
 	}
 
 	@Override
 	public String getIdentifier() {
 		return animName;
-	}
-
-	public void setAnimName(String name) {
-		if (name == null)
-			throw new IllegalArgumentException("Name must not be null.");
-		animName = name;
 	}
 
 	public String getAnimName() {
@@ -97,5 +91,14 @@ public class AnimationObject implements Comparable<AnimationObject>, Identifiabl
 	@Override
 	public int compareTo(AnimationObject o) {
 		return animName.compareTo(o.animName);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof AnimationObject) {
+			AnimationObject other = (AnimationObject) o;
+			return animName.equals(other.animName);
+		} else
+			return false;
 	}
 }

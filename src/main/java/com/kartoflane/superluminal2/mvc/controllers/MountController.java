@@ -6,7 +6,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.enums.Directions;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
@@ -16,6 +15,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.MountDataComposite;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class MountController extends ObjectController implements Comparable<MountController> {
 	public static final int DEFAULT_WIDTH = 16;
@@ -79,7 +79,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 			throw new NullPointerException("Must not be null. For default, use DEFAULT_WEAPON_OBJ");
 
 		setVisible(false);
-		setSize(weapon.getFrameSize());
+		setSize(weapon.getAnimation().getFrameSize());
 		getGameObject().setWeapon(weapon);
 		updateView();
 		setVisible(true);
@@ -140,7 +140,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 	@Override
 	public Rectangle getBounds() {
 		Rectangle b = model.getBounds();
-		Point offset = getGameObject().getWeapon().getMountOffset();
+		Point offset = getGameObject().getWeapon().getAnimation().getMountOffset();
 
 		int s = isMirrored() ? -1 : 1;
 
