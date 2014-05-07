@@ -11,6 +11,7 @@ import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -61,7 +62,8 @@ public class ShipController extends ObjectController {
 		super.deselect();
 
 		for (Collidable c : collidables)
-			c.setCollidable(true);
+			c.setCollidable(true && (c instanceof RoomController == false ||
+					(c instanceof RoomController == true && !Manager.allowRoomOverlap)));
 		collidables.clear();
 	}
 

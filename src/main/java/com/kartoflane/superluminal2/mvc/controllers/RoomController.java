@@ -12,7 +12,6 @@ import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -25,6 +24,7 @@ import com.kartoflane.superluminal2.ui.SystemsMenu;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.RoomDataComposite;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class RoomController extends ObjectController implements Comparable<RoomController> {
 
@@ -54,7 +54,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		setSelectable(true);
 		setLocModifiable(true);
 		setBounded(true);
-		setCollidable(true);
+		setCollidable(!Manager.allowRoomOverlap);
 		setTolerance(COLLISION_TOLERANCE);
 		setParent(container.getShipController());
 	}
@@ -106,7 +106,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 
 			setSnapMode(getSnapMode(w, h));
 
-			setCollidable(w != 0 && h != 0);
+			setCollidable(w != 0 && h != 0 && !Manager.allowRoomOverlap);
 			updateBoundingArea();
 			return true;
 		} else
