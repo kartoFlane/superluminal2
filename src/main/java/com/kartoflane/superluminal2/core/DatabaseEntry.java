@@ -24,7 +24,6 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
-import com.kartoflane.superluminal2.core.Utils.DecodeResult;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.BlueprintList;
@@ -36,6 +35,9 @@ import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.utils.DataUtils;
+import com.kartoflane.superluminal2.utils.IOUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class DatabaseEntry {
 
@@ -426,7 +428,7 @@ public class DatabaseEntry {
 			for (String innerPath : blueprintFiles) {
 				try {
 					is = getInputStream(innerPath + ext);
-					DecodeResult dr = Utils.decodeText(is, null);
+					IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
 
 					ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
 					for (Element e : elements) {
@@ -491,7 +493,7 @@ public class DatabaseEntry {
 			for (String innerPath : blueprintFiles) {
 				try {
 					is = getInputStream(innerPath + ext);
-					DecodeResult dr = Utils.decodeText(is, null);
+					IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
 
 					ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "blueprintList");
 					for (Element e : elements) {
@@ -525,7 +527,7 @@ public class DatabaseEntry {
 		for (String ext : extensions) {
 			try {
 				is = getInputStream("data/rooms" + ext);
-				DecodeResult dr = Utils.decodeText(is, null);
+				IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
 
 				ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "roomLayout");
 				for (Element e : elements) {
@@ -568,10 +570,10 @@ public class DatabaseEntry {
 				InputStream is = null;
 				try {
 					is = getInputStream(innerPath + ext);
-					DecodeResult dr = Utils.decodeText(is, null);
+					IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
 
 					Document doc = null;
-					doc = Utils.parseXML(dr.text);
+					doc = IOUtils.parseXML(dr.text);
 					Element root = doc.getRootElement();
 
 					// Preload anim sheets
@@ -688,5 +690,10 @@ public class DatabaseEntry {
 		} else {
 			return super.equals(o);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

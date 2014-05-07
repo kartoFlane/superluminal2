@@ -1,0 +1,558 @@
+package com.kartoflane.superluminal2.utils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
+import org.eclipse.swt.graphics.Rectangle;
+import org.jdom2.Comment;
+import org.jdom2.Document;
+import org.jdom2.Element;
+
+import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.LayoutObjects;
+import com.kartoflane.superluminal2.components.enums.Races;
+import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.DoorObject;
+import com.kartoflane.superluminal2.ftl.DroneList;
+import com.kartoflane.superluminal2.ftl.DroneObject;
+import com.kartoflane.superluminal2.ftl.GibObject;
+import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.GlowSet;
+import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
+import com.kartoflane.superluminal2.ftl.ImageObject;
+import com.kartoflane.superluminal2.ftl.MountObject;
+import com.kartoflane.superluminal2.ftl.RoomObject;
+import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.ftl.StationObject;
+import com.kartoflane.superluminal2.ftl.SystemObject;
+import com.kartoflane.superluminal2.ftl.WeaponList;
+import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.ui.ShipContainer;
+
+public class ShipSaveUtils {
+
+	public static void saveShipFTL(File saveFile, ShipContainer container) throws IllegalArgumentException, IOException {
+		if (container == null)
+			throw new IllegalArgumentException("ShipContainer must not be null.");
+
+		ShipObject ship = container.getShipController().getGameObject();
+
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (saveFile == null)
+			throw new IllegalArgumentException("Destination file must not be null.");
+		if (saveFile.isDirectory())
+			throw new IllegalArgumentException("Not a file: " + saveFile.getName());
+
+		// TODO
+	}
+
+	public static void saveShipXML(File destination, ShipContainer container) throws IllegalArgumentException, IOException {
+		if (container == null)
+			throw new IllegalArgumentException("ShipContainer must not be null.");
+
+		ShipObject ship = container.getShipController().getGameObject();
+
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (destination == null)
+			throw new IllegalArgumentException("Destination file must not be null.");
+		if (!destination.isDirectory())
+			throw new IllegalArgumentException("Not a directory: " + destination.getName());
+
+		container.updateGameObjects();
+		ship.coalesceRooms();
+		ship.linkDoors();
+		GlowObject[] newGlows = ship.createGlows();
+
+		// Write the files
+		File blueprints = new File(destination.getAbsolutePath() + "/data/" +
+				Database.getInstance().getAssociatedFile(ship.getBlueprintName()) + ".append");
+		IOUtils.writeFileXML(generateBlueprintXML(ship), blueprints);
+
+		File fileTXT = new File(destination.getAbsolutePath() + "/data/" + ship.getLayout() + ".txt");
+		saveLayoutTXT(ship, fileTXT);
+
+		File fileXML = new File(destination.getAbsolutePath() + "/data/" + ship.getLayout() + ".xml");
+		saveLayoutXML(ship, fileXML);
+
+		// Create the rooms.xml.append file for glow locations
+		if (newGlows.length != 0) {
+			File rooms = new File(destination.getAbsolutePath() + "/data/rooms.xml.append");
+			IOUtils.writeFileXML(generateRoomsXML(newGlows), rooms);
+		}
+
+		// Copy images
+		for (Images img : Images.values()) {
+			ImageObject object = ship.getImage(img);
+			String path = object.getImagePath();
+
+			if (path != null) {
+				InputStream is = Manager.getInputStream(path);
+				File fileImage = new File(destination.getAbsolutePath() + "/" + img.getDatRelativePath(ship) +
+						img.getPrefix() + ship.getImageNamespace() + img.getSuffix() + ".png");
+
+				fileImage.getParentFile().mkdirs();
+				OutputStream out = new FileOutputStream(fileImage);
+				IOUtils.write(is, out);
+				is.close();
+				out.close();
+			}
+		}
+
+		for (Systems sys : Systems.getSystems()) {
+			SystemObject object = ship.getSystem(sys);
+			String path = object.getInteriorPath();
+
+			if (path != null) {
+				InputStream is = Manager.getInputStream(path);
+				File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" + object.getInteriorNamespace() + ".png");
+
+				fileImage.getParentFile().mkdirs();
+				OutputStream out = new FileOutputStream(fileImage);
+				IOUtils.write(is, out);
+				is.close();
+				out.close();
+			}
+		}
+
+		for (GlowObject object : newGlows) {
+			GlowSet set = object.getGlowSet();
+			String path = set.getImage(Glows.CLOAK);
+
+			if (path != null) {
+				InputStream is = Manager.getInputStream(path);
+				SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
+				if (cloaking.getInteriorNamespace() != null) {
+					File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" +
+							cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png");
+
+					fileImage.getParentFile().mkdirs();
+					OutputStream out = new FileOutputStream(fileImage);
+					IOUtils.write(is, out);
+					is.close();
+					out.close();
+				}
+			} else {
+				for (Glows glowId : Glows.getGlows()) {
+					path = set.getImage(glowId);
+
+					if (path != null) {
+						InputStream is = Manager.getInputStream(path);
+						File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" +
+								set.getIdentifier() + glowId.getSuffix() + ".png");
+
+						fileImage.getParentFile().mkdirs();
+						OutputStream out = new FileOutputStream(fileImage);
+						IOUtils.write(is, out);
+						is.close();
+						out.close();
+					}
+				}
+			}
+		}
+	}
+
+	public static void saveLayoutTXT(ShipObject ship, File f) throws FileNotFoundException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (f == null)
+			throw new IllegalArgumentException("File must not be null.");
+
+		FileWriter writer = null;
+
+		try {
+			writer = new FileWriter(f);
+			writer.write(generateLayoutTXT(ship));
+		} finally {
+			if (writer != null)
+				writer.close();
+		}
+	}
+
+	public static void saveLayoutXML(ShipObject ship, File f) throws IllegalArgumentException, IOException {
+		if (ship == null)
+			throw new IllegalArgumentException("Ship object must not be null.");
+		if (f == null)
+			throw new IllegalArgumentException("File must not be null.");
+
+		IOUtils.writeFileXML(generateLayoutXML(ship), f);
+	}
+
+	public static Document generateBlueprintXML(ShipObject ship) {
+		Document doc = new Document();
+		Element root = new Element("wrapper");
+		Element e = null;
+		String attr = null;
+
+		// Prepare the document
+		Element shipBlueprint = new Element("shipBlueprint");
+		attr = ship.getBlueprintName();
+		shipBlueprint.setAttribute("name", attr == null ? "" : attr);
+		attr = ship.getLayout();
+		shipBlueprint.setAttribute("layout", attr == null ? "" : attr);
+		attr = ship.getImageNamespace();
+		shipBlueprint.setAttribute("img", attr == null ? "" : attr);
+
+		e = new Element("class");
+		attr = ship.getShipClass();
+		e.setText(attr == null ? "" : attr);
+		shipBlueprint.addContent(e); // Add <class> to <shipBlueprint>
+
+		// Name and description only affect player ships
+		if (ship.isPlayerShip()) {
+			e = new Element("name");
+			attr = ship.getShipName();
+			e.setText(attr == null ? "" : attr);
+			shipBlueprint.addContent(e); // Add <name> to <shipBlueprint>
+
+			e = new Element("desc");
+			attr = ship.getShipDescription();
+			e.setText(attr == null ? "" : attr);
+			shipBlueprint.addContent(e); // Add <desc> to <shipBlueprint>
+		}
+
+		Element systemList = new Element("systemList");
+		for (Systems sys : Systems.getSystems()) {
+			SystemObject system = ship.getSystem(sys);
+
+			if (system.isAssigned()) {
+				Element sysEl = new Element(sys.toString().toLowerCase());
+
+				sysEl.setAttribute("power", "" + system.getLevelStart());
+
+				// Enemy ships' system have a 'max' attribute which determines the max level of the system
+				if (!ship.isPlayerShip())
+					sysEl.setAttribute("max", "" + system.getLevelMax());
+
+				sysEl.setAttribute("room", "" + system.getRoom().getId());
+
+				sysEl.setAttribute("start", "" + system.isAvailable());
+
+				// Artillery has a special 'weapon' attribute to determine which weapon is used as artillery weapon
+				if (sys == Systems.ARTILLERY)
+					sysEl.setAttribute("weapon", "ARTILLERY_FED"); // TODO artillery weapon, for now default to ARTILLERY_FED
+
+				if (system.canContainInterior() && ship.isPlayerShip() && system.getInteriorNamespace() != null)
+					sysEl.setAttribute("img", system.getInteriorNamespace());
+
+				StationObject station = system.getStation();
+
+				if (sys.canContainStation() && station.getSlotId() != -2) {
+					Element slotEl = new Element("slot");
+
+					// Medbay and Clonebay slots don't have a direction - they're always NONE
+					if (sys != Systems.MEDBAY && sys != Systems.CLONEBAY) {
+						e = new Element("direction");
+						e.setText(station.getSlotDirection().toString());
+						slotEl.addContent(e); // Add <direction> to <slot>
+					}
+
+					e = new Element("number");
+					e.setText("" + station.getSlotId());
+					slotEl.addContent(e); // Add <number> to <slot>
+
+					sysEl.addContent(slotEl);
+				}
+
+				systemList.addContent(sysEl);
+			}
+		}
+		shipBlueprint.addContent(systemList);
+
+		e = new Element("weaponSlots");
+		e.setText("" + ship.getWeaponSlots());
+		shipBlueprint.addContent(e); // Add <weaponSlots> to <shipBlueprint>
+
+		e = new Element("droneSlots");
+		e.setText("" + ship.getDroneSlots());
+		shipBlueprint.addContent(e); // Add <droneSlots> to <shipBlueprint>
+
+		Element weaponList = new Element("weaponList");
+		weaponList.setAttribute("missiles", "" + ship.getMissilesAmount());
+		weaponList.setAttribute("count", "" + ship.getWeaponSlots());
+
+		// Player ships' weapons have to be declared explicitly, ie. listed by name
+		// Only the first 'count' weapons are loaded in-game
+		if (ship.isPlayerShip()) {
+			for (WeaponObject weapon : ship.getWeapons()) {
+				if (weapon == Database.DEFAULT_WEAPON_OBJ)
+					continue;
+				e = new Element("weapon");
+				e.setAttribute("name", weapon.getBlueprintName());
+				weaponList.addContent(e);
+			}
+		}
+		// Enemy ships' weapons are randomly drafted from a list of weapons
+		// 'count' determines how many weapons are drafted
+		else {
+			WeaponList list = ship.getWeaponList();
+			if (list != Database.DEFAULT_WEAPON_LIST)
+				weaponList.setAttribute("load", list.getBlueprintName());
+		}
+		shipBlueprint.addContent(weaponList);
+
+		Element droneList = new Element("droneList");
+		droneList.setAttribute("drones", "" + ship.getDronePartsAmount());
+		droneList.setAttribute("count", "" + ship.getDroneSlots());
+
+		// Player ships' drones have to be declared explicitly, ie. listed by name
+		// Only the first 'count' drones are loaded in-game
+		if (ship.isPlayerShip()) {
+			for (DroneObject drone : ship.getDrones()) {
+				if (drone == Database.DEFAULT_DRONE_OBJ)
+					continue;
+				e = new Element("drone");
+				e.setAttribute("name", drone.getBlueprintName());
+				droneList.addContent(e);
+			}
+		}
+		// Enemy ships' drones are randomly drafted from a list of drones
+		// 'count' determines how many drones are drafted
+		else {
+			DroneList list = ship.getDroneList();
+			if (list != Database.DEFAULT_DRONE_LIST)
+				droneList.setAttribute("load", list.getBlueprintName());
+		}
+		shipBlueprint.addContent(droneList);
+
+		e = new Element("health");
+		e.setAttribute("amount", "" + ship.getHealth());
+		shipBlueprint.addContent(e); // Add <health> to <shipBlueprint>
+
+		e = new Element("maxPower");
+		e.setAttribute("amount", "" + ship.getPower());
+		shipBlueprint.addContent(e); // Add <maxPower> to <shipBlueprint>
+
+		// Sector tags
+		// Enemy exclusive
+		if (!ship.isPlayerShip()) {
+			e = new Element("minSector");
+			e.setText("" + ship.getMinSector());
+			shipBlueprint.addContent(e); // Add <minSector> to <shipBlueprint>
+
+			e = new Element("maxSector");
+			e.setText("" + ship.getMaxSector());
+			shipBlueprint.addContent(e); // Add <maxSector> to <shipBlueprint>
+		}
+
+		for (Races race : Races.values()) {
+			int amount = ship.getCrewCount(race);
+			int max = ship.getCrewMax(race);
+
+			// 'amount' is shared between player and enemy ships
+			e = new Element("crewCount");
+			e.setAttribute("amount", "" + amount);
+
+			// 'max' is exclusive to enemy ships
+			if (!ship.isPlayerShip())
+				e.setAttribute("max", "" + max);
+
+			e.setAttribute("class", race.name().toLowerCase());
+
+			// Don't print an empty tag
+			if (amount > 0 && (ship.isPlayerShip() || max > 0))
+				shipBlueprint.addContent(e); // Add <crewCount> to <shipBlueprint>
+		}
+
+		for (AugmentObject aug : ship.getAugments()) {
+			e = new Element("aug");
+			e.setAttribute("name", aug.getBlueprintName());
+			shipBlueprint.addContent(e); // Add <aug> to <shipBlueprint>
+		}
+
+		root.addContent(shipBlueprint);
+		doc.setRootElement(root);
+
+		return doc;
+	}
+
+	public static String generateLayoutTXT(ShipObject ship) {
+		StringBuilder buf = new StringBuilder();
+
+		buf.append(LayoutObjects.X_OFFSET);
+		buf.append("\r\n");
+		buf.append("" + ship.getXOffset());
+		buf.append("\r\n");
+
+		buf.append(LayoutObjects.Y_OFFSET);
+		buf.append("\r\n");
+		buf.append("" + ship.getYOffset());
+		buf.append("\r\n");
+
+		buf.append(LayoutObjects.HORIZONTAL);
+		buf.append("\r\n");
+		buf.append("" + ship.getHorizontal());
+		buf.append("\r\n");
+
+		buf.append(LayoutObjects.VERTICAL);
+		buf.append("\r\n");
+		buf.append("" + ship.getVertical());
+		buf.append("\r\n");
+
+		buf.append(LayoutObjects.ELLIPSE);
+		buf.append("\r\n");
+		Rectangle ellipse = ship.getEllipse();
+		buf.append("" + ellipse.width);
+		buf.append("\r\n");
+		buf.append("" + ellipse.height);
+		buf.append("\r\n");
+		buf.append("" + ellipse.x);
+		buf.append("\r\n");
+		buf.append("" + ellipse.y);
+		buf.append("\r\n");
+
+		for (RoomObject room : ship.getRooms()) {
+			buf.append(LayoutObjects.ROOM);
+			buf.append("\r\n");
+			buf.append("" + room.getId());
+			buf.append("\r\n");
+			buf.append("" + room.getX());
+			buf.append("\r\n");
+			buf.append("" + room.getY());
+			buf.append("\r\n");
+			buf.append("" + room.getW());
+			buf.append("\r\n");
+			buf.append("" + room.getH());
+			buf.append("\r\n");
+		}
+
+		RoomObject linked = null;
+		for (DoorObject door : ship.getDoors()) {
+			buf.append(LayoutObjects.DOOR);
+			buf.append("\r\n");
+			buf.append("" + door.getX());
+			buf.append("\r\n");
+			buf.append("" + door.getY());
+			buf.append("\r\n");
+			linked = door.getLeftRoom();
+			buf.append(linked == null ? "-1" : linked.getId());
+			buf.append("\r\n");
+			linked = door.getRightRoom();
+			buf.append(linked == null ? "-1" : linked.getId());
+			buf.append("\r\n");
+			buf.append("" + (door.isHorizontal() ? "0" : "1"));
+			buf.append("\r\n");
+		}
+
+		return buf.toString();
+	}
+
+	public static Document generateLayoutXML(ShipObject ship) {
+		Document doc = new Document();
+		Element root = new Element("wrapper");
+		Element e = null;
+
+		Comment c = new Comment("Copyright (c) 2012 by Subset Games. All rights reserved.");
+		root.addContent(c);
+
+		e = new Element("img");
+		Rectangle hullDimensions = ship.getHullDimensions();
+		e.setAttribute("x", "" + hullDimensions.x);
+		e.setAttribute("y", "" + hullDimensions.y);
+		e.setAttribute("w", "" + hullDimensions.width);
+		e.setAttribute("h", "" + hullDimensions.height);
+		root.addContent(e);
+
+		Element offsets = new Element("offsets");
+
+		e = new Element("floor");
+		e.setAttribute("x", "" + ship.getFloorOffset().x);
+		e.setAttribute("y", "" + ship.getFloorOffset().y);
+		offsets.addContent(e);
+
+		e = new Element("cloak");
+		e.setAttribute("x", "" + ship.getCloakOffset().x);
+		e.setAttribute("y", "" + ship.getCloakOffset().y);
+		offsets.addContent(e);
+
+		root.addContent(offsets);
+
+		Element weaponMounts = new Element("weaponMounts");
+
+		MountObject[] mounts = ship.getMounts();
+		for (int i = 0; i < mounts.length; i++) {
+			e = new Element("mount");
+			e.setAttribute("x", "" + mounts[i].getX());
+			e.setAttribute("y", "" + mounts[i].getY());
+			e.setAttribute("rotate", "" + mounts[i].isRotated());
+			e.setAttribute("mirror", "" + mounts[i].isMirrored());
+			e.setAttribute("gib", "" + mounts[i].getGib().getId());
+			e.setAttribute("slide", "" + mounts[i].getDirection().toString());
+			weaponMounts.addContent(e);
+		}
+		root.addContent(weaponMounts);
+
+		Element explosion = new Element("explosion");
+
+		DecimalFormat decimal = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.ENGLISH));
+		GibObject[] gibs = ship.getGibs();
+		for (int i = 0; i < gibs.length; i++) {
+			Element gib = new Element("gib" + (i + 1));
+
+			e = new Element("velocity");
+			e.setAttribute("min", "" + decimal.format(gibs[i].getVelocityMin()));
+			e.setAttribute("max", "" + decimal.format(gibs[i].getVelocityMax()));
+			gib.addContent(e);
+
+			e = new Element("angular");
+			e.setAttribute("min", "" + decimal.format(gibs[i].getAngularMin()));
+			e.setAttribute("max", "" + decimal.format(gibs[i].getAngularMax()));
+			gib.addContent(e);
+
+			e = new Element("direction");
+			e.setAttribute("min", "" + gibs[i].getDirectionMin());
+			e.setAttribute("max", "" + gibs[i].getDirectionMax());
+			gib.addContent(e);
+
+			e = new Element("x");
+			e.setText("" + gibs[i].getX());
+			gib.addContent(e);
+
+			e = new Element("y");
+			e.setText("" + gibs[i].getY());
+			gib.addContent(e);
+
+			explosion.addContent(gib);
+		}
+
+		root.addContent(explosion);
+		doc.setRootElement(root);
+
+		return doc;
+	}
+
+	public static Document generateRoomsXML(GlowObject[] newGlows) {
+		Document doc = new Document();
+		Element root = new Element("wrapper");
+
+		for (GlowObject glow : newGlows) {
+			Element glowEl = new Element("roomLayout");
+			glowEl.setAttribute("name", glow.getIdentifier());
+
+			Element e = new Element("computerGlow");
+			if (!glow.getGlowSet().getIdentifier().equals("glow"))
+				e.setAttribute("name", glow.getGlowSet().getIdentifier());
+			e.setAttribute("x", "" + glow.getX());
+			e.setAttribute("y", "" + glow.getY());
+			e.setAttribute("dir", "" + glow.getDirection().name());
+
+			glowEl.addContent(e);
+			root.addContent(glowEl);
+		}
+
+		doc.setRootElement(root);
+		return doc;
+	}
+}

@@ -13,13 +13,13 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Redrawable;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public abstract class BaseView implements View, Disposable, Redrawable {
 

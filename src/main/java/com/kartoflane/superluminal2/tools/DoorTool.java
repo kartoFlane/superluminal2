@@ -9,7 +9,6 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
@@ -18,6 +17,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.DoorToolComposite;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class DoorTool extends Tool {
 

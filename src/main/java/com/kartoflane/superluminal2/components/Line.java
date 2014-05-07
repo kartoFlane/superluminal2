@@ -5,7 +5,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
-import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class Line implements PaintListener {
 	private Point start = null;

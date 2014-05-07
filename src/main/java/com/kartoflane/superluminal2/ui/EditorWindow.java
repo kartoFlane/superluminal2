@@ -43,8 +43,6 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
-import com.kartoflane.superluminal2.core.ShipUtils;
-import com.kartoflane.superluminal2.core.UIUtils;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.tools.CreationTool;
@@ -57,6 +55,8 @@ import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
+import com.kartoflane.superluminal2.utils.ShipSaveUtils;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class EditorWindow {
 	private static final Logger log = LogManager.getLogger(EditorWindow.class);
@@ -552,7 +552,7 @@ public class EditorWindow {
 					log.trace("Saving ship to " + saveDestination.getAbsolutePath());
 
 					try {
-						ShipUtils.saveShipXML(saveDestination, container);
+						ShipSaveUtils.saveShipXML(saveDestination, container);
 						log.trace("Ship saved successfully.");
 					} catch (Exception ex) {
 						log.error("An error occured while saving the ship: ", ex);
@@ -576,7 +576,7 @@ public class EditorWindow {
 					log.trace("Saving ship to " + saveDestination.getAbsolutePath());
 
 					try {
-						ShipUtils.saveShipXML(saveDestination, container);
+						ShipSaveUtils.saveShipXML(saveDestination, container);
 						log.trace("Ship saved successfully.");
 					} catch (Exception ex) {
 						log.error("An error occured while saving the ship: ", ex);
@@ -728,7 +728,7 @@ public class EditorWindow {
 		mntmUpdate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Superluminal.checkForUpdates(false); // Manually checking for updates
+				Superluminal.checkForUpdates(true); // Manually checking for updates
 			}
 		});
 
@@ -741,6 +741,7 @@ public class EditorWindow {
 
 		shell.setSize(Manager.windowSize);
 		shell.setMaximized(Manager.startMaximised);
+		shell.setMinimized(false);
 
 		sideContainer.setFocus();
 		enableTools(false);

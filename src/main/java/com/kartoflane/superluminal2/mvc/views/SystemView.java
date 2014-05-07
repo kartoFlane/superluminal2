@@ -5,8 +5,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class SystemView extends BaseView {
 

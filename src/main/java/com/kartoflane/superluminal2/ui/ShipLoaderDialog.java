@@ -39,12 +39,12 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.ShipUtils;
-import com.kartoflane.superluminal2.core.UIUtils;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
+import com.kartoflane.superluminal2.utils.ShipLoadUtils;
+import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class ShipLoaderDialog {
 	private static final Logger log = LogManager.getLogger(ShipLoaderDialog.class);
@@ -92,13 +92,11 @@ public class ShipLoaderDialog {
 		tree.setHeaderVisible(true);
 
 		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
-		trclmnBlueprint.setMoveable(true);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
 		trclmnBlueprint.setText("Blueprint Name");
 		trclmnBlueprint.setToolTipText("Click to sort by blueprint name.");
 
 		trclmnClass = new TreeColumn(tree, SWT.RIGHT);
-		trclmnClass.setMoveable(true);
 		trclmnClass.setWidth(defaultClassTabWidth);
 		trclmnClass.setText("Ship Class");
 		trclmnClass.setToolTipText("Click to sort by class name.");
@@ -266,7 +264,7 @@ public class ShipLoaderDialog {
 					TreeItem selectedItem = tree.getSelection()[0];
 					ShipMetadata metadata = (ShipMetadata) selectedItem.getData();
 					try {
-						ShipObject object = ShipUtils.loadShipXML(metadata.getElement());
+						ShipObject object = ShipLoadUtils.loadShipXML(metadata.getElement());
 
 						Manager.loadShip(object);
 

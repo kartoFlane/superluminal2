@@ -9,11 +9,11 @@ import com.kartoflane.superluminal2.components.Triangle;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class RoomView extends BaseView {
 

@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.core;
+package com.kartoflane.superluminal2.utils;
 
 import java.io.File;
 
@@ -159,11 +159,11 @@ public class UIUtils {
 		return result;
 	}
 
-	public static File promptForLoadFile(Shell parentShell) {
+	public static File promptForLoadFile(Shell parentShell, String title, String[] extensions) {
 		File result = null;
 		FileDialog dialog = new FileDialog(parentShell, SWT.OPEN);
-		dialog.setFilterExtensions(new String[] { "*.ftl" });
-		dialog.setText("Load Mod");
+		dialog.setFilterExtensions(extensions);
+		dialog.setText(title);
 
 		String path = dialog.open();
 		if (path == null) {

@@ -3,7 +3,7 @@ package com.kartoflane.superluminal2.ftl;
 import org.jdom2.Element;
 
 import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.Utils;
+import com.kartoflane.superluminal2.utils.IOUtils;
 
 public class ShipMetadata {
 
@@ -80,7 +80,7 @@ public class ShipMetadata {
 	private static String firstExisting(String suffix, Database db) {
 		String[] prefixes = { "db:img/ship/", "db:img/ships_glow/", "db:img/ships_noglow/" };
 		for (String prefix : prefixes) {
-			if (db.contains(Utils.trimProtocol(prefix) + suffix))
+			if (db.contains(IOUtils.trimProtocol(prefix) + suffix))
 				return prefix + suffix;
 		}
 		return null;

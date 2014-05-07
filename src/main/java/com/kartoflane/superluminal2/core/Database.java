@@ -52,6 +52,7 @@ public class Database {
 		instance = this;
 
 		DatabaseEntry core = new DatabaseEntry(data, resource);
+		core.store(DEFAULT_ANIM_OBJ);
 		dataEntries.add(core);
 
 		String blueprints = "blueprints.xml";
@@ -133,6 +134,14 @@ public class Database {
 			de.close();
 		} catch (IOException e) {
 			log.error(String.format("An error has occured while closing database entry '%s': ", de.getName()), e);
+		}
+	}
+
+	public void cacheAnimations() {
+		for (WeaponTypes type : WeaponTypes.values()) {
+			for (WeaponObject object : getWeaponsByType(type)) {
+				object.cacheAnimation();
+			}
 		}
 	}
 

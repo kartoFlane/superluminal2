@@ -14,9 +14,9 @@ import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class ShipObject extends GameObject {
 
@@ -109,6 +109,7 @@ public class ShipObject extends GameObject {
 	}
 
 	public void update() {
+		// Nothing to do here
 	}
 
 	public boolean isPlayerShip() {

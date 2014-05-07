@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -32,6 +31,7 @@ import com.kartoflane.superluminal2.ui.GlowSelectionDialog;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
+import com.kartoflane.superluminal2.utils.IOUtils;
 
 public class RoomDataComposite extends Composite implements DataComposite {
 
@@ -322,7 +322,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleSysLevel.notifyListeners(SWT.Selection, null);
 
 			String temp = system.getInteriorPath();
-			txtInterior.setText(temp == null ? "" : Utils.trimProtocol(temp));
+			txtInterior.setText(temp == null ? "" : IOUtils.trimProtocol(temp));
 			txtInterior.selectAll();
 			txtInterior.clearSelection();
 

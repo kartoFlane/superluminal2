@@ -30,10 +30,10 @@ import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
-import com.kartoflane.superluminal2.core.UIUtils;
-import com.kartoflane.superluminal2.core.UIUtils.LoadTask;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.utils.IOUtils;
+import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 
 public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
@@ -43,7 +43,9 @@ public class Superluminal {
 	public static final String APP_UPDATE_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skel_common/auto_update.xml";
 	public static final String APP_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
+
 	public static final String HOTKEYS_FILE = "hotkeys.xml";
+	public static final String CONFIG_FILE = "editor.cfg";
 
 	/**
 	 * settings ideas:
@@ -52,19 +54,17 @@ public class Superluminal {
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - weapons not overriding earlier entries properly?
-	 * - image saving during export
-	 * - all tree columns > add selection listener so that get shrunk/grown when moving (like in the error checker)
+	 * - add augments to armaments tab
+	 * - remember room overlap in config?
+	 * - changing interior image from 2x2 to 2x1 (for example) leaves unredrawn canvas area
+	 * - dragging reorder to ship overview
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * - rudimentary image viewer
 	 * - ship offset modification
 	 * - add blueprint name selection to general tab?
-	 * - rework door linking so that it doesn't have to be done through the DoorDataComposite (like SystemsMenu)
 	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
 	 * - come up with a way to set which system is first when assigned to the same room?
-	 * - optimize anchor moving against its bounds with some rooms loaded -> stutters
 	 * - rework interior drawing -> currently drawn on room layer, so higher rooms obscur the image -> bad
-	 * - clear() in ShipObject -> wipe txt layout, + something else?
 	 * - add gibs
 	 * - add reordering to ship overview
 	 * - properties: crew tab
@@ -86,33 +86,26 @@ public class Superluminal {
 		Display.setAppVersion(APP_VERSION.toString());
 		log.trace("Display retrieved successfully!");
 
-		File configFile = new File("editor.cfg");
+		File configFile = new File(CONFIG_FILE);
 
 		Properties config = new Properties();
 		SuperluminalConfig appConfig = new SuperluminalConfig(config, configFile);
-		// Setup defaults
-		config.setProperty(SuperluminalConfig.FTL_RESOURCE, "");
-		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "true");
-		config.setProperty(SuperluminalConfig.START_MAX, "false");
-		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "false");
-		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "true");
-		config.setProperty(SuperluminalConfig.GEOMETRY, "");
 
 		// Read the config file
-		InputStream in = null;
+		InputStreamReader reader = null;
 		try {
 			if (configFile.exists()) {
 				log.trace("Loading properties from config file...");
-				in = new FileInputStream(configFile);
-				config.load(new InputStreamReader(in, "UTF-8"));
+				reader = new InputStreamReader(new FileInputStream(configFile), "UTF-8");
+				config.load(reader);
 			}
 		} catch (IOException e) {
 			log.error("Error loading config.", e);
 			UIUtils.showErrorDialog(null, null, "Error loading config from " + configFile.getPath());
 		} finally {
 			try {
-				if (in != null)
-					in.close();
+				if (reader != null)
+					reader.close();
 			} catch (IOException e) {
 			}
 		}
@@ -122,6 +115,7 @@ public class Superluminal {
 		Manager.rememberGeometry = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SAVE_GEOMETRY));
 		Manager.checkUpdates = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CHECK_UPDATES));
 		Manager.startMaximised = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.START_MAX));
+		Manager.closeLoader = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CLOSE_LOADER));
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();
@@ -199,6 +193,7 @@ public class Superluminal {
 				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new LoadTask() {
 					public void execute() {
 						db.getCore().load();
+						db.cacheAnimations();
 					}
 				});
 			} catch (IOException e) {
@@ -217,7 +212,7 @@ public class Superluminal {
 		editorWindow.open();
 
 		if (Manager.checkUpdates) {
-			checkForUpdates(true); // Automatic update check
+			checkForUpdates(false); // Automatic update check
 		}
 
 		log.info("Running...");
@@ -247,6 +242,7 @@ public class Superluminal {
 			appConfig.setProperty(SuperluminalConfig.START_MAX, "" + Manager.startMaximised);
 			appConfig.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
 			appConfig.setProperty(SuperluminalConfig.CHECK_UPDATES, "" + Manager.checkUpdates);
+			appConfig.setProperty(SuperluminalConfig.CLOSE_LOADER, "" + Manager.closeLoader);
 			if (Manager.rememberGeometry && !Manager.startMaximised)
 				appConfig.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 			appConfig.writeConfig();
@@ -260,7 +256,12 @@ public class Superluminal {
 		display.dispose();
 	}
 
-	public static void checkForUpdates(boolean automatic) {
+	/**
+	 * 
+	 * @param manual
+	 *            if true, an information dialog will pop up even if the program is up to date
+	 */
+	public static void checkForUpdates(boolean manual) {
 		log.info("Checking for updates...");
 
 		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
@@ -271,7 +272,7 @@ public class Superluminal {
 					URL url = new URL(APP_UPDATE_URL);
 					is = url.openStream();
 
-					Document updateDoc = Utils.readStreamXML(is, "auto-update");
+					Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
 					Element root = updateDoc.getRootElement();
 					Element latest = root.getChild("latest");
 					String id = latest.getAttributeValue("id");
@@ -297,13 +298,13 @@ public class Superluminal {
 			// Version check failed, already logged by previous catches
 		} else if (APP_VERSION.compareTo(remoteVersion[0]) < 0) {
 			try {
-				log.info("Update is available, user version: " + APP_VERSION);
+				log.info("Update is available, user version: " + APP_VERSION + ", remote version: " + remoteVersion[0]);
 
 				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(), SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
 				box.setText(APP_NAME + " - Update Available");
 				StringBuilder buf = new StringBuilder();
 				buf.append("A new version of the editor is available: v.");
-				buf.append(remoteVersion[0].toString());
+				buf.append(remoteVersion[0]);
 				buf.append("\nWould you like to download it now?");
 				box.setMessage(buf.toString());
 
@@ -324,9 +325,9 @@ public class Superluminal {
 			}
 		} else {
 			log.info("Program is up to date.");
-			if (!automatic) {
+			if (manual) {
 				// The user manually initiated the version check, so probably expects some kind of response in either case.
-				UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, "Program is up to date.");
+				UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, APP_NAME + " is up to date.");
 			}
 		}
 	}
@@ -412,7 +413,7 @@ public class Superluminal {
 	 */
 	private static void loadHotkeys(File f) {
 		try {
-			Document keyDoc = Utils.readFileXML(f);
+			Document keyDoc = IOUtils.readFileXML(f);
 
 			Element root = keyDoc.getRootElement();
 			for (Element bind : root.getChildren("bind")) {
@@ -503,7 +504,7 @@ public class Superluminal {
 		keyDoc.setRootElement(wrapper);
 
 		try {
-			Utils.writeFileXML(keyDoc, f);
+			IOUtils.writeFileXML(keyDoc, f);
 		} catch (IOException e) {
 			log.warn("An error occured while saving hotkeys file: ", e);
 		}
