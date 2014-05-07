@@ -2,16 +2,26 @@ package com.kartoflane.superluminal2.ui;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -25,11 +35,14 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
-import com.kartoflane.superluminal2.core.UIUtils;
-import com.kartoflane.superluminal2.core.UIUtils.LoadTask;
+import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 
 public class ModManagementDialog {
 	private static final Logger log = LogManager.getLogger(ModManagementDialog.class);
+
+	private TreeItem dragItem = null;
+	private DatabaseEntry dragData = null;
 
 	private static ModManagementDialog instance = null;
 	private Shell shell;
@@ -40,11 +53,13 @@ public class ModManagementDialog {
 	private Color disabledColor = null;
 	private Button btnConfirm;
 	private Button btnCancel;
+	private DragSource dragSource;
+	private DropTarget dropTarget;
 
 	public ModManagementDialog(Shell parent) {
 		instance = this;
 
-		final HashSet<DatabaseEntry> entries = new HashSet<DatabaseEntry>();
+		final ArrayList<DatabaseEntry> entries = new ArrayList<DatabaseEntry>();
 		final Database db = Database.getInstance();
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -64,6 +79,15 @@ public class ModManagementDialog {
 		trtmCore.setBackground(disabledColor);
 		trtmCore.setData(db.getCore());
 		entries.add(db.getCore());
+
+		// Need to specify a transfer type, even if it's not used, because
+		// otherwise it's not even possible to initiate drag and drop...
+		Transfer[] types = new Transfer[] { TextTransfer.getInstance() };
+		dragSource = new DragSource(tree, DND.DROP_MOVE);
+		dragSource.setTransfer(types);
+
+		dropTarget = new DropTarget(tree, DND.DROP_MOVE);
+		dropTarget.setTransfer(types);
 
 		btnLoad = new Button(shell, SWT.NONE);
 		GridData gd_btnLoad = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -97,6 +121,89 @@ public class ModManagementDialog {
 			entries.add(de);
 		}
 
+		dragSource.addDragListener(new DragSourceListener() {
+			@Override
+			public void dragStart(DragSourceEvent e) {
+				TreeItem[] selection = tree.getSelection();
+				if (selection.length > 0 && selection[0].getItemCount() == 0) {
+					e.doit = true;
+					dragItem = selection[0];
+				} else {
+					e.doit = false;
+				}
+			}
+
+			@Override
+			public void dragSetData(DragSourceEvent e) {
+				e.data = "whatever"; // This need not be an empty string, otherwise the drag mechanism freaks out...
+				dragData = (DatabaseEntry) dragItem.getData();
+			}
+
+			@Override
+			public void dragFinished(DragSourceEvent e) {
+				if (dragItem != null && dragItem.getData() == null)
+					dragItem.dispose();
+				dragItem = null;
+			}
+		});
+
+		dropTarget.addDropListener(new DropTargetAdapter() {
+			@Override
+			public void dragOver(DropTargetEvent e) {
+				e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
+				if (dragItem != null) {
+					Point p = tree.toControl(e.x, e.y);
+					TreeItem item = tree.getItem(p);
+					if (item == null) {
+						e.feedback |= DND.FEEDBACK_NONE;
+					} else {
+						Rectangle bounds = item.getBounds();
+						if (p.y < bounds.y + bounds.height / 2) {
+							if (item == trtmCore)
+								e.feedback |= DND.FEEDBACK_NONE;
+							else
+								e.feedback |= DND.FEEDBACK_INSERT_BEFORE;
+						} else {
+							e.feedback |= DND.FEEDBACK_INSERT_AFTER;
+						}
+					}
+				}
+			}
+
+			@Override
+			public void drop(DropTargetEvent e) {
+				if (dragData == null) {
+					e.detail = DND.DROP_NONE;
+					return;
+				}
+				if (dragItem == null) {
+					createTreeItem(dragData);
+				} else {
+					Point p = tree.toControl(e.x, e.y);
+					TreeItem item = tree.getItem(p);
+					if (item != null) {
+						Rectangle bounds = item.getBounds();
+						TreeItem[] items = tree.getItems();
+						int index = indexOf(items, item);
+
+						if (p.y < bounds.y + bounds.height / 2) {
+							if (item != trtmCore) {
+								dragItem.setData(null);
+								createTreeItem(dragData, index);
+								entries.remove(dragData);
+								entries.add(index - 1, dragData);
+							}
+						} else {
+							dragItem.setData(null);
+							createTreeItem(dragData, index + 1);
+							entries.remove(dragData);
+							entries.add(index, dragData);
+						}
+					}
+				}
+			}
+		});
+
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -109,7 +216,7 @@ public class ModManagementDialog {
 		btnLoad.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				File temp = UIUtils.promptForLoadFile(shell);
+				File temp = UIUtils.promptForLoadFile(shell, "Load Mod", new String[] { "*.zip;*.ftl" });
 				if (temp != null) {
 					try {
 						DatabaseEntry de = new DatabaseEntry(temp);
@@ -157,6 +264,7 @@ public class ModManagementDialog {
 						}
 					}
 				});
+				db.cacheAnimations();
 				dispose();
 			}
 		});
@@ -202,10 +310,27 @@ public class ModManagementDialog {
 	}
 
 	private TreeItem createTreeItem(DatabaseEntry de) {
-		TreeItem trtm = new TreeItem(tree, SWT.NONE);
+		return createTreeItem(de, tree.getItemCount());
+	}
+
+	private TreeItem createTreeItem(DatabaseEntry de, int index) {
+		TreeItem trtm = new TreeItem(tree, SWT.NONE, index);
 		trtm.setText(de.getName());
 		trtm.setData(de);
 		return trtm;
+	}
+
+	private int indexOf(TreeItem[] items, TreeItem item) {
+		if (items == null)
+			throw new IllegalArgumentException("Array must not be null.");
+		if (item == null)
+			throw new IllegalArgumentException("Item must not be null.");
+		int result = -1;
+		for (int i = 0; i < items.length && result == -1; i++) {
+			if (items[i] == item)
+				result = i;
+		}
+		return result;
 	}
 
 	private boolean contains(Object[] array, Object object) {
