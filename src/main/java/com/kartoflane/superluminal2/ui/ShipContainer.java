@@ -13,7 +13,6 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -33,6 +32,7 @@ import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
+import com.kartoflane.superluminal2.utils.Utils;
 
 /**
  * A simple class serving as a holder and communication layer between different controllers.
@@ -150,16 +150,20 @@ public class ShipContainer implements Disposable {
 	}
 
 	public void updateGameObjects() {
-		// Update image offsets, as they cannot be updated in ImageObjects, since they lack the needed data
 		ShipObject ship = shipController.getGameObject();
+		Point offset = findShipOffset();
+		ship.setXOffset(offset.x / 35);
+		ship.setYOffset(offset.y / 35);
+
+		// Update image offsets, as they cannot be updated in ImageObjects, since they lack the needed data
 		ImageController imageC = null;
 
 		// Shield image is anchored at the center of the smallest rectangle that contains all rooms
 		imageC = getImageController(Images.SHIELD);
-		Point center = findShipOffset();
 		Point size = findShipSize();
-		center.x += size.x / 2;
-		center.y += size.y / 2;
+		Point center = new Point(0, 0);
+		center.x = offset.x + size.x / 2;
+		center.y = offset.y + size.y / 2;
 
 		Rectangle ellipse = new Rectangle(0, 0, 0, 0);
 		ellipse.x = imageC.getX() - center.x - shipController.getX();
@@ -377,8 +381,6 @@ public class ShipContainer implements Disposable {
 	public void remove(AbstractController controller) {
 		if (controller instanceof RoomController) {
 			RoomController room = (RoomController) controller;
-			Systems id = getActiveSystem(room.getGameObject());
-			unassign(id);
 			roomControllers.remove(room);
 			shipController.getGameObject().remove(room.getGameObject());
 		} else if (controller instanceof DoorController) {
@@ -467,6 +469,13 @@ public class ShipContainer implements Disposable {
 		controller.delete();
 		remove(controller);
 		updateBoundingArea();
+
+		if (controller instanceof RoomController) {
+			RoomController rc = (RoomController) controller;
+			for (Systems sys : getAllAssignedSystems(rc.getGameObject())) {
+				unassign(sys);
+			}
+		}
 	}
 
 	public void restore(AbstractController controller) {
