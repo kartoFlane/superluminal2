@@ -27,7 +27,6 @@ import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
 import com.kartoflane.superluminal2.components.interfaces.SizeListener;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
@@ -37,6 +36,7 @@ import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public abstract class AbstractController implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
 		MouseInputListener, Collidable, Boundable, Follower, Followable, SizeListener {
@@ -98,13 +98,13 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			int nx = x, ny = y;
 
 			Rectangle boundingArea = getBoundingArea();
-			if (x <= boundingArea.x)
+			if (x < boundingArea.x)
 				nx = boundingArea.x;
-			else if (x >= boundingArea.x + boundingArea.width)
+			else if (x > boundingArea.x + boundingArea.width)
 				nx = boundingArea.x + boundingArea.width;
-			if (y <= boundingArea.y)
+			if (y < boundingArea.y)
 				ny = boundingArea.y;
-			else if (y >= boundingArea.y + boundingArea.height)
+			else if (y > boundingArea.y + boundingArea.height)
 				ny = boundingArea.y + boundingArea.height;
 
 			x = nx;
@@ -118,7 +118,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 		model.setLocation(x, y);
 
-		if (isFollowActive() && followers != null) { // followers set is lazily initiated when it's needed
+		if (isFollowActive() && followers != null) { // followers set is lazily instantiated when it's needed
 			for (Follower fol : followers)
 				fol.updateFollower();
 		}
@@ -155,13 +155,13 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			int nx = dx, ny = dy;
 
 			Rectangle boundingArea = getBoundingArea();
-			if (getX() + dx <= boundingArea.x)
+			if (getX() + dx < boundingArea.x)
 				nx = boundingArea.x - getX();
-			else if (getX() + dx >= boundingArea.x + boundingArea.width)
+			else if (getX() + dx > boundingArea.x + boundingArea.width)
 				nx = boundingArea.x + boundingArea.width - getX();
-			if (getY() + dy <= boundingArea.y)
+			if (getY() + dy < boundingArea.y)
 				ny = boundingArea.y - getY();
-			else if (getY() + dy >= boundingArea.y + boundingArea.height)
+			else if (getY() + dy > boundingArea.y + boundingArea.height)
 				ny = boundingArea.y + boundingArea.height - getY();
 
 			dx = nx;
@@ -176,7 +176,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			return false;
 
 		model.translate(dx, dy);
-		if (isFollowActive() && followers != null) { // followers set is lazily initiated when it's needed
+		if (isFollowActive() && followers != null) { // followers set is lazily instantiated when it's needed
 			for (Follower fol : followers)
 				fol.updateFollower();
 		}
