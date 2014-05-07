@@ -40,9 +40,7 @@ public class ManipulationTool extends Tool {
 		window.setSidebarContent(pointerC);
 
 		OverviewWindow.staticUpdate();
-
 		Manager.setSelected(null);
-
 		setStateManipulate();
 
 		cursor.setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
@@ -312,6 +310,13 @@ public class ManipulationTool extends Tool {
 	@Override
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
+		for (Layers layer : LayeredPainter.getInstance().getLayerMap().descendingKeySet()) {
+			for (AbstractController control : LayeredPainter.getInstance().getLayerMap().get(layer)) {
+				if (control != null && control.isVisible()) {
+					control.mouseExit(e);
+				}
+			}
+		}
 	}
 
 	@Override
