@@ -8,12 +8,15 @@ import java.util.Iterator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -58,6 +61,8 @@ public class DroneSelectionDialog {
 	private Button btnCancel;
 	private Button btnConfirm;
 	private Tree tree;
+	private TreeColumn trclmnBlueprint;
+	private TreeColumn trclmnName;
 
 	public DroneSelectionDialog(Shell parent) {
 		instance = this;
@@ -74,11 +79,11 @@ public class DroneSelectionDialog {
 		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
 
-		TreeColumn trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
+		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
 		trclmnBlueprint.setText("Blueprint");
 
-		TreeColumn trclmnName = new TreeColumn(tree, SWT.RIGHT);
+		trclmnName = new TreeColumn(tree, SWT.RIGHT);
 		trclmnName.setWidth(defaultNameTabWidth);
 		trclmnName.setText("Name");
 
@@ -238,9 +243,23 @@ public class DroneSelectionDialog {
 			}
 		});
 
+		ControlAdapter resizer = new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				final int BORDER_OFFSET = 5;
+				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
+			}
+		};
+		tree.addControlListener(resizer);
+		trclmnBlueprint.addControlListener(resizer);
+
 		shell.setMinimumSize(minTreeWidth + defaultDataWidth, 300);
 		shell.pack();
-		shell.setSize(shell.getSize().x + 5, shell.getSize().y);
+		Point size = shell.getSize();
+		shell.setSize(size.x + 5, size.y);
+		Point parSize = parent.getSize();
+		Point parLoc = parent.getLocation();
+		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 	}
 
 	private void open() {
