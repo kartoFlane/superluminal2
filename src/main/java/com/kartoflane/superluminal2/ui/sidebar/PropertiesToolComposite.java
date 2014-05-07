@@ -17,20 +17,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Utils;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -41,12 +36,12 @@ import com.kartoflane.superluminal2.ui.DroneSelectionDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
+import com.kartoflane.superluminal2.utils.IOUtils;
 
 public class PropertiesToolComposite extends Composite {
 
 	private static int selectedTab = 0;
 	private ShipContainer container;
-	private static int crewBudget = 8;
 
 	private Text txtHull;
 	private Button btnHullBrowse;
@@ -75,15 +70,6 @@ public class PropertiesToolComposite extends Composite {
 	private Spinner spPower;
 	private TabItem tbtmCrew;
 	private Composite compCrew;
-	private Tree crewTree;
-	private TreeItem trtmCrewSlot1;
-	private TreeItem trtmCrewSlot2;
-	private TreeItem trtmCrewSlot3;
-	private TreeItem trtmCrewSlot4;
-	private TreeItem trtmCrewSlot5;
-	private TreeItem trtmCrewSlot6;
-	private TreeItem trtmCrewSlot7;
-	private TreeItem trtmCrewSlot8;
 	private Label lblDesc;
 	private Spinner spMinSec;
 	private Spinner spMaxSec;
@@ -99,6 +85,7 @@ public class PropertiesToolComposite extends Composite {
 	private Group grpDrones;
 	private Spinner spDrones;
 	private Spinner spDroneSlots;
+	private Label lblNYI;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -563,62 +550,9 @@ public class PropertiesToolComposite extends Composite {
 		tbtmCrew.setControl(compCrew);
 		compCrew.setLayout(new GridLayout(1, false));
 
-		crewTree = new Tree(compCrew, SWT.BORDER);
-		crewTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-
-		trtmCrewSlot1 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot1.setText("Empty");
-
-		trtmCrewSlot2 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot2.setText("Empty");
-
-		trtmCrewSlot3 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot3.setText("Empty");
-
-		trtmCrewSlot4 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot4.setText("Empty");
-
-		trtmCrewSlot5 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot5.setText("Empty");
-
-		trtmCrewSlot6 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot6.setText("Empty");
-
-		trtmCrewSlot7 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot7.setText("Empty");
-
-		trtmCrewSlot8 = new TreeItem(crewTree, SWT.NONE);
-		trtmCrewSlot8.setText("Empty");
-
-		Menu crewMenu = new Menu(crewTree);
-		crewTree.setMenu(crewMenu);
-
-		MenuItem mntmHuman = new MenuItem(crewMenu, SWT.NONE);
-		mntmHuman.setText("Human");
-
-		MenuItem mntmEngi = new MenuItem(crewMenu, SWT.NONE);
-		mntmEngi.setText("Engi");
-
-		MenuItem mntmZoltan = new MenuItem(crewMenu, SWT.NONE);
-		mntmZoltan.setText("Zoltan");
-
-		MenuItem mntmRock = new MenuItem(crewMenu, SWT.NONE);
-		mntmRock.setText("Rock");
-
-		MenuItem mntmMantis = new MenuItem(crewMenu, SWT.NONE);
-		mntmMantis.setText("Mantis");
-
-		MenuItem mntmSlug = new MenuItem(crewMenu, SWT.NONE);
-		mntmSlug.setText("Slug");
-
-		MenuItem mntmCrystal = new MenuItem(crewMenu, SWT.NONE);
-		mntmCrystal.setText("Crystal");
-
-		MenuItem mntmGhost = new MenuItem(crewMenu, SWT.NONE);
-		mntmGhost.setText("Ghost");
-
-		MenuItem mntmRandom = new MenuItem(crewMenu, SWT.NONE);
-		mntmRandom.setText("Random");
+		lblNYI = new Label(compCrew, SWT.NONE);
+		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
+		lblNYI.setText("(not yet implemented)");
 
 		pack();
 		updateData();
@@ -635,28 +569,28 @@ public class PropertiesToolComposite extends Composite {
 		// Update image path text fields and scroll them to the end to show the file's name
 		String content = container.getImage(Images.HULL);
 
-		txtHull.setText(content == null ? "" : Utils.trimProtocol(content));
+		txtHull.setText(content == null ? "" : IOUtils.trimProtocol(content));
 		txtHull.selectAll();
 		btnHullView.setEnabled(content != null);
 
 		content = container.getImage(Images.CLOAK);
-		txtCloak.setText(content == null ? "" : Utils.trimProtocol(content));
+		txtCloak.setText(content == null ? "" : IOUtils.trimProtocol(content));
 		txtCloak.selectAll();
 		btnCloakView.setEnabled(content != null);
 
 		if (ship.isPlayerShip()) {
 			content = container.getImage(Images.FLOOR);
-			txtFloor.setText(content == null ? "" : Utils.trimProtocol(content));
+			txtFloor.setText(content == null ? "" : IOUtils.trimProtocol(content));
 			txtFloor.selectAll();
 			btnFloorView.setEnabled(content != null);
 
 			content = container.getImage(Images.SHIELD);
-			txtShield.setText(content == null ? "" : Utils.trimProtocol(content));
+			txtShield.setText(content == null ? "" : IOUtils.trimProtocol(content));
 			txtShield.selectAll();
 			btnShieldView.setEnabled(content != null);
 
 			content = container.getImage(Images.THUMBNAIL);
-			txtMini.setText(content == null || !ship.isPlayerShip() ? "" : Utils.trimProtocol(content));
+			txtMini.setText(content == null || !ship.isPlayerShip() ? "" : IOUtils.trimProtocol(content));
 			txtMini.selectAll();
 			btnMiniView.setEnabled(content != null);
 		}
