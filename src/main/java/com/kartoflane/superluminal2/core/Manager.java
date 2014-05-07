@@ -1,8 +1,20 @@
 package com.kartoflane.superluminal2.core;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.components.Hotkey;
@@ -17,6 +29,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
+import com.kartoflane.superluminal2.utils.IOUtils;
 
 /**
  * Manager class to manage the current ship, interface flags, selection.
@@ -25,6 +38,10 @@ import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
  * 
  */
 public class Manager {
+	private static final Logger log = LogManager.getLogger(Manager.class);
+
+	/** In 'path/file.ext/inner' matches 'path/file.ext' */
+	private static final Pattern FILE_PTRN = Pattern.compile(".+\\.[^/]+(?=/)");
 
 	public static final HashMap<Tools, Tool> TOOL_MAP = new HashMap<Tools, Tool>();
 	public static final LinkedList<Deletable> DELETED_LIST = new LinkedList<Deletable>();
@@ -183,5 +200,56 @@ public class Manager {
 
 	public static Hotkey getHotkey(Hotkeys key) {
 		return HOTKEY_MAP.get(key);
+	}
+
+	public static InputStream getInputStream(String path) {
+		InputStream result = null;
+		String protocol = IOUtils.getProtocol(path);
+		String loadPath = IOUtils.trimProtocol(path);
+
+		try {
+			// Employ "protocols" to spare the Cache from having to guess where the file is located
+			if (protocol.equals("db:")) {
+				// Refers to file in database
+				result = Database.getInstance().getInputStream(loadPath);
+			} else if (protocol.equals("cpath:")) {
+				// Refers to file in classpath
+				result = Manager.class.getResourceAsStream(loadPath);
+			} else if (protocol.equals("file:")) {
+				// Refers to file in OS' filesystem
+				result = new FileInputStream(new File(loadPath));
+			} else if (protocol.equals("zip:")) {
+				// Refers to file in a zip archive
+				Matcher m = FILE_PTRN.matcher(loadPath);
+				if (m.find()) {
+					String zipPath = m.group();
+					String innerPath = loadPath.replace(zipPath + "/", "");
+					try {
+						ZipFile zf = new ZipFile(zipPath);
+						ZipEntry ze = zf.getEntry(innerPath);
+						if (ze == null)
+							throw new IllegalArgumentException(String.format("Inner path '%s' was not found in archive '%s'", innerPath, zipPath));
+
+						// Closing the ZipFile also closes all streams that it opened...
+						// Copy the stream so that it's possible to access the image
+						// without having to keep the archive open
+						result = IOUtils.cloneStream(zf.getInputStream(ze));
+						zf.close();
+					} catch (ZipException e) {
+						log.warn(String.format("File is not a zip archive: '%s'", zipPath));
+					}
+				} else {
+					log.warn(String.format("Path was wrongly formatted: '%s'", loadPath));
+				}
+			} else {
+				throw new IllegalArgumentException(String.format("Path uses unknown protocol, or doesn't have it: '%s'", path));
+			}
+		} catch (FileNotFoundException e) {
+			log.warn(String.format("%s - resource could not be found.", path));
+		} catch (IOException e) {
+			log.error(String.format("An error has occured while getting input stream for %s: ", loadPath), e);
+		}
+
+		return result;
 	}
 }

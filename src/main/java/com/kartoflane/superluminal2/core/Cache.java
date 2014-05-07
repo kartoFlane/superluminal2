@@ -1,19 +1,10 @@
 package com.kartoflane.superluminal2.core;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,9 +24,6 @@ import org.eclipse.swt.widgets.Display;
  */
 public class Cache {
 	private static final Logger log = LogManager.getLogger(Cache.class);
-
-	/** In 'path/file.ext/inner' matches 'path/file.ext' */
-	private static final Pattern FILE_PTRN = Pattern.compile(".+\\.[^/]+(?=/)");
 
 	private static HashMap<String, Image> cachedImageMap = new HashMap<String, Image>();
 	private static HashMap<RGB, Color> cachedColorMap = new HashMap<RGB, Color>();
@@ -94,64 +82,18 @@ public class Cache {
 		if (path == null) {
 			throw new NullPointerException("Path is null.");
 		} else {
-			String loadPath = null;
-			String protocol = null;
 			try {
 				if (image == null) {
-					InputStream is = null;
-					loadPath = Utils.trimProtocol(path);
-					protocol = Utils.getProtocol(path);
-
-					// Employ "protocols" to spare the Cache from having to guess where the file is located
-					if (protocol.equals("db:")) {
-						// Refers to file in database
-						is = Database.getInstance().getInputStream(loadPath);
-					} else if (protocol.equals("cpath:")) {
-						// Refers to file in classpath
-						is = customer.getClass().getResourceAsStream(loadPath);
-					} else if (protocol.equals("file:")) {
-						// Refers to file in OS' filesystem
-						is = new FileInputStream(new File(loadPath));
-					} else if (protocol.equals("zip:")) {
-						// Refers to file in a zip archive
-						Matcher m = FILE_PTRN.matcher(loadPath);
-						if (m.find()) {
-							String zipPath = m.group();
-							String innerPath = loadPath.replace(zipPath + "/", "");
-							try {
-								ZipFile zf = new ZipFile(zipPath);
-								ZipEntry ze = zf.getEntry(innerPath);
-								if (ze == null)
-									throw new IllegalArgumentException(String.format("Inner path '%s' was not found in archive '%s'", innerPath, zipPath));
-
-								// Closing the ZipFile also closes all streams that it opened...
-								// Copy the stream so that it's possible to access the image
-								// without having to keep the archive open
-								is = Utils.cloneStream(zf.getInputStream(ze));
-								zf.close();
-							} catch (ZipException e) {
-								log.warn(String.format("File is not a zip archive: '%s'", zipPath));
-							}
-						} else {
-							log.warn(String.format("Path was wrongly formatted: '%s'", loadPath));
-						}
-					} else {
-						throw new IllegalArgumentException(String.format("Path uses unknown protocol, or doesn't have it: '%s'", path));
-					}
-
+					InputStream is = Manager.getInputStream(path);
 					image = new Image(Display.getCurrent(), is);
 					cachedImageMap.put(path, image);
 				}
 
 				customers.add(customer);
 			} catch (SWTException e) {
-				log.warn(String.format("%s - resource contains invalid data.", loadPath));
+				log.warn(String.format("%s - resource contains invalid data.", path));
 			} catch (IllegalArgumentException e) {
 				log.warn("", e);
-			} catch (FileNotFoundException e) {
-				log.warn(String.format("%s - resource could not be found.", loadPath));
-			} catch (IOException e) {
-				log.error("An error has occured while loading image: ", e);
 			}
 		}
 

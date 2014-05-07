@@ -6,6 +6,28 @@ public class GlowSet implements Comparable<GlowSet>, Identifiable {
 
 	public enum Glows {
 		CLOAK, BLUE, GREEN, YELLOW;
+
+		/**
+		 * @return an array of all glows, sans {@link Glows#CLOAK}
+		 */
+		public static Glows[] getGlows() {
+			return new Glows[] { BLUE, GREEN, YELLOW };
+		}
+
+		public String getSuffix() {
+			switch (this) {
+				case CLOAK:
+					return "_glow";
+				case BLUE:
+					return "1";
+				case GREEN:
+					return "2";
+				case YELLOW:
+					return "3";
+				default:
+					return "";
+			}
+		}
 	}
 
 	private final String namespace;
@@ -23,6 +45,10 @@ public class GlowSet implements Comparable<GlowSet>, Identifiable {
 
 	public GlowSet(String namespace) {
 		this.namespace = namespace;
+	}
+
+	public String getNamespace() {
+		return namespace;
 	}
 
 	@Override
