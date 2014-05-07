@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.TabItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.RoomController;
+import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 
 public class SettingsDialog {
 	private static SettingsDialog instance = null;
@@ -38,13 +40,13 @@ public class SettingsDialog {
 		shell.setText(Superluminal.APP_NAME + " - Settings");
 		shell.setLayout(new GridLayout(2, false));
 
-		TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
+		final TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		TabItem tbtmBehaviour = new TabItem(tabFolder, SWT.NONE);
 		tbtmBehaviour.setText("Behaviour");
 
-		ScrolledComposite scBehaviour = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
+		final ScrolledComposite scBehaviour = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
 		scBehaviour.setAlwaysShowScrollBars(true);
 		tbtmBehaviour.setControl(scBehaviour);
 		scBehaviour.setExpandHorizontal(true);
@@ -74,7 +76,7 @@ public class SettingsDialog {
 		TabItem tbtmConfig = new TabItem(tabFolder, SWT.NONE);
 		tbtmConfig.setText("Config");
 
-		ScrolledComposite scConfig = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
+		final ScrolledComposite scConfig = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
 		scConfig.setAlwaysShowScrollBars(true);
 		tbtmConfig.setControl(scConfig);
 		scConfig.setExpandHorizontal(true);
@@ -125,7 +127,7 @@ public class SettingsDialog {
 		TabItem tbtmKeybinds = new TabItem(tabFolder, SWT.NONE);
 		tbtmKeybinds.setText("Keybinds");
 
-		ScrolledComposite scKeybinds = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
+		final ScrolledComposite scKeybinds = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
 		scKeybinds.setAlwaysShowScrollBars(true);
 		tbtmKeybinds.setControl(scKeybinds);
 		scKeybinds.setExpandHorizontal(true);
@@ -159,14 +161,22 @@ public class SettingsDialog {
 				Manager.rememberGeometry = btnGeometry.getSelection();
 				Manager.startMaximised = btnMaximise.getSelection();
 
+				// Hotkeys
+
+				// TODO apply settings
+
 				if (Manager.sidebarOnRightSide != btnSidebar.getSelection()) {
 					Manager.sidebarOnRightSide = btnSidebar.getSelection();
 					EditorWindow.getInstance().layoutSidebar();
 				}
 
-				// Hotkeys
-
-				// TODO apply settings
+				ShipContainer container = Manager.getCurrentShip();
+				if (container != null) {
+					ShipController sc = container.getShipController();
+					for (RoomController rc : container.getRoomControllers()) {
+						rc.setCollidable(!Manager.allowRoomOverlap && !sc.isSelected());
+					}
+				}
 
 				dispose();
 			}
@@ -187,7 +197,20 @@ public class SettingsDialog {
 			}
 		});
 
-		shell.setMinimumSize(400, 300);
+		tabFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int i = tabFolder.getSelectionIndex();
+				if (i == 0)
+					scBehaviour.forceFocus();
+				else if (i == 1)
+					scConfig.forceFocus();
+				else if (i == 2)
+					scKeybinds.forceFocus();
+			}
+		});
+
+		shell.setMinimumSize(400, 0);
 		shell.pack();
 
 		Point size = shell.getSize();
