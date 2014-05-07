@@ -91,10 +91,6 @@ public class OverviewWindow {
 		final MenuItem mntmRemoveAlias = new MenuItem(overviewMenu, SWT.NONE);
 		mntmRemoveAlias.setText("Remove Alias");
 
-		new AliasDialog(shell);
-
-		// Finalize
-
 		shell.addListener(SWT.Close, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -188,7 +184,7 @@ public class OverviewWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Alias alias = (Alias) tree.getSelection()[0].getData();
-				AliasDialog dialog = AliasDialog.getInstance();
+				AliasDialog dialog = new AliasDialog(shell);
 				dialog.setAlias(alias);
 				dialog.open();
 			}
@@ -246,13 +242,15 @@ public class OverviewWindow {
 	}
 
 	public void update(AbstractController controller) {
+		if (controller == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+
 		TreeItem item = controllerMap.get(controller);
 		if (item == null) {
 			item = createItem(controller);
 			controllerMap.put(controller, item);
-			return; // no need to update, since we've already created a new item
+			return; // No need to update, since we've already created a new item
 		}
-		// throw new IllegalArgumentException("DataCarrier " + data + " has not yet been added to the manager.");
 
 		update(item);
 	}

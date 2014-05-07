@@ -71,7 +71,7 @@ public class AliasDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				alias.setAlias(aliasText.getText());
-				shell.setVisible(false);
+				dispose();
 				OverviewWindow.staticUpdate((AbstractController) alias);
 			}
 		});
@@ -79,14 +79,14 @@ public class AliasDialog {
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				shell.setVisible(false);
+				dispose();
 			}
 		});
 
 		shell.addListener(SWT.Close, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				shell.setVisible(false);
+				dispose();
 				e.doit = false;
 			}
 		});
@@ -127,4 +127,9 @@ public class AliasDialog {
 	public Alias getAlias() {
 		return alias;
 	}
+
+	public void dispose() {
+		shell.dispose();
+	}
+
 }
