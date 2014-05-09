@@ -17,7 +17,7 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 
 	private static final long serialVersionUID = -3093852547910315659L;
 
-	private int id = -2;
+	private int id = -1;
 	private int locX = 0;
 	private int locY = 0;
 	private int sizeW = 0;
@@ -160,7 +160,7 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 * @return center of the tile at which the slot will be located in this room, in pixels
 	 */
 	public Point getSlotLocation(int slotId) {
-		Point size = getSize();
+		Point size = model.getSize();
 		int w = size.x / ShipContainer.CELL_SIZE;
 		int h = size.y / ShipContainer.CELL_SIZE;
 
@@ -175,10 +175,12 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 				y * ShipContainer.CELL_SIZE + ShipContainer.CELL_SIZE / 2 + 1);
 	}
 
+	/**
+	 * @return rectangle representing the area of the room
+	 */
 	@Override
 	public Rectangle getBounds() {
-		return new Rectangle(locX - sizeW / 2, locY - sizeH / 2,
-				locX + sizeW / 2, locY + sizeH / 2);
+		return new Rectangle(locX, locY, sizeW, sizeH);
 	}
 
 	@Override
@@ -198,6 +200,10 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 
 	@Override
 	public String toString() {
+		if (id == -1) {
+			return "-1: Airlock";
+		}
+
 		ArrayList<Systems> systems = Manager.getCurrentShip().getAllAssignedSystems(this);
 		String result = getId() + ": ";
 		if (systems.size() == 0) {

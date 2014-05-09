@@ -1,5 +1,7 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
+import java.io.File;
+
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
@@ -115,7 +117,9 @@ public class SystemController extends ObjectController implements Controller {
 	 * @see {@link Cache#checkOutImage(Object, String)}
 	 */
 	public void setInteriorPath(String interiorPath) {
+		File f = new File(interiorPath);
 		getGameObject().setInteriorPath(interiorPath);
+		getGameObject().setInteriorNamespace(f.getName().replace(".png", ""));
 		updateView();
 		redraw();
 	}

@@ -21,6 +21,7 @@ import com.kartoflane.superluminal2.utils.Utils;
 public class ShipObject extends GameObject {
 
 	private static final long serialVersionUID = 5820228601368854867L;
+	public static final RoomObject AIRLOCK_OBJECT = new RoomObject();
 
 	private boolean isPlayer = false;
 	private String blueprintName = PlayerShipBlueprints.HARD.toString();
@@ -789,6 +790,8 @@ public class ShipObject extends GameObject {
 	 * @return room with the given ID, or null if none was found
 	 */
 	public RoomObject getRoomById(int id) {
+		if (id == -1)
+			return AIRLOCK_OBJECT;
 		RoomObject[] roomz = getRooms();
 		try {
 			return roomz[binarySearch(roomz, id, 0, roomz.length)];
@@ -888,6 +891,20 @@ public class ShipObject extends GameObject {
 		}
 	}
 
+	public boolean hasOverlappingRooms() {
+		boolean result = false;
+		for (RoomObject r : rooms) {
+			Rectangle b = r.getBounds();
+			for (RoomObject o : rooms) {
+				if (r != o && b.intersects(o.getBounds())) {
+					result = true;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Automatically links doors to adjacent rooms.
 	 */
@@ -906,17 +923,22 @@ public class ShipObject extends GameObject {
 				if (door.getRightRoom() == null)
 					door.setRightRoom(getRoomAt(door.getX(), door.getY()));
 			}
+
+			// When linking to airlocks, the airlock has to be linked as the right "room"
+			if (door.getLeftRoom() == AIRLOCK_OBJECT && door.getRightRoom() != AIRLOCK_OBJECT) {
+				door.setLeftRoom(door.getRightRoom());
+				door.setRightRoom(AIRLOCK_OBJECT);
+			}
 		}
 	}
 
 	private RoomObject getRoomAt(int x, int y) {
 		for (RoomObject room : rooms) {
-			if (x >= room.getX() && y >= room.getY() &&
-					x <= room.getX() + room.getW() && y <= room.getY() + room.getH())
+			if (room.getBounds().contains(x, y))
 				return room;
 		}
 
-		return null;
+		return AIRLOCK_OBJECT;
 	}
 
 	/**

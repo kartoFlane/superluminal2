@@ -141,11 +141,11 @@ public class UIUtils {
 		return result;
 	}
 
-	public static File promptForSaveFile(Shell parentShell) {
+	public static File promptForSaveFile(Shell parentShell, String title, String[] extensions) {
 		File result = null;
 		FileDialog dialog = new FileDialog(parentShell, SWT.SAVE);
-		dialog.setFilterExtensions(new String[] { "*.zip", "*.ftl" });
-		dialog.setText("Save Ship");
+		dialog.setFilterExtensions(extensions);
+		dialog.setText(title);
 		dialog.setOverwrite(true);
 
 		String path = dialog.open();

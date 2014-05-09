@@ -96,16 +96,9 @@ public class GlowObject implements Comparable<GlowObject>, Identifiable {
 	 *            the station to which the glow is assigned
 	 */
 	public void setData(RoomObject room, StationObject station) {
-		// TODO
 		Point glowLoc = room.getSlotLocation(station.getSlotId());
 		glowLoc.x -= ShipContainer.CELL_SIZE / 2;
 		glowLoc.y -= ShipContainer.CELL_SIZE / 2;
-		Point roomLoc = room.getLocation();
-		roomLoc.x = roomLoc.x * ShipContainer.CELL_SIZE;
-		roomLoc.y = roomLoc.y * ShipContainer.CELL_SIZE;
-
-		glowLoc.x -= roomLoc.x;
-		glowLoc.y -= roomLoc.y;
 
 		switch (station.getSlotDirection()) {
 			case UP:

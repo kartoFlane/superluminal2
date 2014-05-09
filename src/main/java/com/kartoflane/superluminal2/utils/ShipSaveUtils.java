@@ -134,16 +134,14 @@ public class ShipSaveUtils {
 			if (path != null) {
 				InputStream is = Manager.getInputStream(path);
 				SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
-				if (cloaking.getInteriorNamespace() != null) {
-					File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" +
-							cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png");
+				File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" +
+						cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png");
 
-					fileImage.getParentFile().mkdirs();
-					OutputStream out = new FileOutputStream(fileImage);
-					IOUtils.write(is, out);
-					is.close();
-					out.close();
-				}
+				fileImage.getParentFile().mkdirs();
+				OutputStream out = new FileOutputStream(fileImage);
+				IOUtils.write(is, out);
+				is.close();
+				out.close();
 			} else {
 				for (Glows glowId : Glows.getGlows()) {
 					path = set.getImage(glowId);
@@ -249,7 +247,7 @@ public class ShipSaveUtils {
 
 				StationObject station = system.getStation();
 
-				if (sys.canContainStation() && station.getSlotId() != -2) {
+				if (sys.canContainStation()) {
 					Element slotEl = new Element("slot");
 
 					// Medbay and Clonebay slots don't have a direction - they're always NONE

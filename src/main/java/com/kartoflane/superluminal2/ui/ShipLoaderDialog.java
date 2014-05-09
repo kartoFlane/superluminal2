@@ -266,10 +266,16 @@ public class ShipLoaderDialog {
 					try {
 						ShipObject object = ShipLoadUtils.loadShipXML(metadata.getElement());
 
+						if (!Manager.allowRoomOverlap && object.hasOverlappingRooms()) {
+							log.info("Ship contains overlapping rooms, but overlap is disabled - forcing room overlap enable.");
+							Manager.allowRoomOverlap = true;
+						}
+
 						Manager.loadShip(object);
 
-						if (Manager.closeLoader)
-							shell.setVisible(false);
+						if (Manager.closeLoader) {
+							dispose();
+						}
 					} catch (IllegalArgumentException ex) {
 						handleException(metadata, ex);
 					} catch (JDOMParseException ex) {

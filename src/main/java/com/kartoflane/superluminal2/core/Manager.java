@@ -139,6 +139,7 @@ public class Manager {
 		if (currentShip.isSaved()) {
 			closeShipForce();
 		} else {
+			closeShipForce();
 			// TODO UI prompts and shit
 		}
 	}
