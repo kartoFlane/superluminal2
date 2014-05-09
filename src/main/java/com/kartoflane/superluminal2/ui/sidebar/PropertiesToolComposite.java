@@ -13,6 +13,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
@@ -24,6 +25,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DroneList;
@@ -86,6 +88,9 @@ public class PropertiesToolComposite extends Composite {
 	private Spinner spDrones;
 	private Spinner spDroneSlots;
 	private Label lblNYI;
+	private Label lblBlueprint;
+	private Text txtBlueprint;
+	private Combo cmbShips;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -343,7 +348,26 @@ public class PropertiesToolComposite extends Composite {
 		tbtmGeneral.setControl(compGeneral);
 		compGeneral.setLayout(new GridLayout(2, false));
 
+		lblBlueprint = new Label(compGeneral, SWT.NONE);
+		lblBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lblBlueprint.setText("Blueprint:");
+
 		if (ship.isPlayerShip()) {
+			lblBlueprint.setText("Replaced Ship:");
+
+			cmbShips = new Combo(compGeneral, SWT.READ_ONLY);
+			cmbShips.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			for (PlayerShipBlueprints blueprint : PlayerShipBlueprints.values()) {
+				cmbShips.add(blueprint.toString());
+			}
+
+			cmbShips.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ship.setBlueprintName(cmbShips.getText());
+				}
+			});
+
 			Label lblName = new Label(compGeneral, SWT.NONE);
 			lblName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 			lblName.setText("Name:");
@@ -351,7 +375,24 @@ public class PropertiesToolComposite extends Composite {
 			txtName = new Text(compGeneral, SWT.BORDER);
 			txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-			// TODO listener to apply changes
+			txtName.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					ship.setShipName(txtName.getText());
+				}
+			});
+		} else {
+			lblBlueprint.setText("Blueprint Name:");
+
+			txtBlueprint = new Text(compGeneral, SWT.BORDER);
+			txtBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+			txtBlueprint.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					ship.setBlueprintName(txtBlueprint.getText());
+				}
+			});
 		}
 
 		Label lblClass = new Label(compGeneral, SWT.NONE);
@@ -360,6 +401,13 @@ public class PropertiesToolComposite extends Composite {
 
 		txtClass = new Text(compGeneral, SWT.BORDER);
 		txtClass.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+		txtClass.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				ship.setShipClass(txtClass.getText());
+			}
+		});
 
 		if (ship.isPlayerShip()) {
 			lblDesc = new Label(compGeneral, SWT.NONE);
@@ -375,10 +423,9 @@ public class PropertiesToolComposite extends Composite {
 				@Override
 				public void modifyText(ModifyEvent e) {
 					lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
+					ship.setShipDescription(txtDesc.getText());
 				}
 			});
-
-			// TODO listener to apply changes
 		}
 
 		Label lblHealth = new Label(compGeneral, SWT.NONE);
@@ -389,6 +436,13 @@ public class PropertiesToolComposite extends Composite {
 		spHealth.setMinimum(0);
 		spHealth.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
+		spHealth.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ship.setHealth(spHealth.getSelection());
+			}
+		});
+
 		Label lblReactor = new Label(compGeneral, SWT.NONE);
 		lblReactor.setText("Reactor Power:");
 
@@ -396,6 +450,13 @@ public class PropertiesToolComposite extends Composite {
 		spPower.setTextLimit(3);
 		spPower.setMinimum(0);
 		spPower.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+
+		spPower.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ship.setPower(spPower.getSelection());
+			}
+		});
 
 		if (!ship.isPlayerShip()) {
 			Label lblMinSector = new Label(compGeneral, SWT.NONE);
@@ -604,6 +665,9 @@ public class PropertiesToolComposite extends Composite {
 		spPower.setSelection(ship.getPower());
 
 		if (ship.isPlayerShip()) {
+			int index = cmbShips.indexOf(ship.getBlueprintName());
+			cmbShips.select(index == -1 ? 0 : index);
+
 			content = ship.getShipName();
 			txtName.setText(ship.isPlayerShip() && content != null ? content : "");
 
@@ -611,6 +675,8 @@ public class PropertiesToolComposite extends Composite {
 			txtDesc.setText(ship.isPlayerShip() && content != null ? content : "");
 			lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
 		} else {
+			txtBlueprint.setText(ship.getBlueprintName());
+
 			spMinSec.setSelection(ship.getMinSector());
 			spMaxSec.setSelection(ship.getMaxSector());
 			spMinSec.setEnabled(!ship.isPlayerShip());
