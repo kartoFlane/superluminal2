@@ -62,7 +62,7 @@ public class ShipContainer implements Disposable {
 	private boolean doorsVisible = true;
 	private boolean stationsVisible = true;
 
-	private boolean shipSaved = true;
+	private boolean shipSaved = false;
 
 	private ShipController shipController = null;
 
@@ -254,6 +254,14 @@ public class ShipContainer implements Disposable {
 
 	public AbstractController getController(GameObject object) {
 		return objectControllerMap.get(object);
+	}
+
+	public void setCloakedAppearance(boolean cloak) {
+		ImageController cloakC = getImageController(Images.CLOAK);
+		ImageController hullC = getImageController(Images.HULL);
+
+		cloakC.setVisible(cloak);
+		hullC.setAlpha(cloak ? 255 / 3 : 255);
 	}
 
 	/**

@@ -54,8 +54,9 @@ public class Superluminal {
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
+	 * - add Edit > Reset All Door Links
+	 * - drag .zip/.ftl files into mod management dialog to add them
 	 * - add augments to armaments tab
-	 * - remember room overlap in config?
 	 * - changing interior image from 2x2 to 2x1 (for example) leaves unredrawn canvas area
 	 * - dragging reorder to ship overview
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
@@ -68,6 +69,7 @@ public class Superluminal {
 	 * - add gibs
 	 * - add reordering to ship overview
 	 * - properties: crew tab
+	 * - glow placement modification
 	 * 
 	 * - entity deletion --> add (to) undo
 	 * - undo przy pomocy reflection -- UndoableBooleanFieldEdit, etc ?? ...chyba nie
@@ -116,6 +118,7 @@ public class Superluminal {
 		Manager.checkUpdates = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CHECK_UPDATES));
 		Manager.startMaximised = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.START_MAX));
 		Manager.closeLoader = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CLOSE_LOADER));
+		Manager.allowRoomOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP));
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();
@@ -243,6 +246,7 @@ public class Superluminal {
 			appConfig.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
 			appConfig.setProperty(SuperluminalConfig.CHECK_UPDATES, "" + Manager.checkUpdates);
 			appConfig.setProperty(SuperluminalConfig.CLOSE_LOADER, "" + Manager.closeLoader);
+			appConfig.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
 			if (Manager.rememberGeometry && !Manager.startMaximised)
 				appConfig.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 			appConfig.writeConfig();
@@ -392,6 +396,10 @@ public class Superluminal {
 		hotkey = Manager.getHotkey(Hotkeys.SETTINGS);
 		hotkey.setKey('o');
 		hotkey.setCtrl(true);
+
+		hotkey = Manager.getHotkey(Hotkeys.CLOAK);
+		hotkey.setKey('c');
+		hotkey.setShift(true);
 
 		// View hotkeys
 		Manager.getHotkey(Hotkeys.TOGGLE_GRID).setKey('x');

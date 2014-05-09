@@ -21,6 +21,7 @@ public class SuperluminalConfig {
 	public static final String CLOSE_LOADER = "closeLoaderAfterLoading";
 	public static final String GEOMETRY = "geometry";
 	public static final String CHECK_UPDATES = "checkUpdatesOnStartup";
+	public static final String ALLOW_OVERLAP = "allowRoomOverlap";
 
 	public SuperluminalConfig(Properties config, File configFile) {
 		this.config = config;
@@ -34,6 +35,7 @@ public class SuperluminalConfig {
 		config.setProperty(SuperluminalConfig.CLOSE_LOADER, "false");
 		config.setProperty(SuperluminalConfig.GEOMETRY, "");
 		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "true");
+		config.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "false");
 	}
 
 	/**
@@ -97,6 +99,7 @@ public class SuperluminalConfig {
 			configComments += " " + SIDEBAR_SIDE + " - If true, the sidebar will appear on the right side of the editor's main display.\n";
 			configComments += " " + CLOSE_LOADER + " - If true, ship loader window will automatically close after a ship is loaded.\n";
 			configComments += " " + CHECK_UPDATES + " - If true, the program will automatically check for updates each time it is started.\n";
+			configComments += " " + ALLOW_OVERLAP + " - If true, room collision will be disabled, allowing rooms to be placed on top of each other.\n";
 			configComments += "\n";
 			configComments += " " + GEOMETRY + " - Last saved size of the main window.\n";
 			configComments += "\n";

@@ -134,6 +134,11 @@ public class SettingsDialog {
 		scKeybinds.setExpandVertical(true);
 
 		Composite compKeybinds = new Composite(scKeybinds, SWT.NONE);
+		compKeybinds.setLayout(new GridLayout(1, false));
+
+		Label lblNYI = new Label(compKeybinds, SWT.NONE);
+		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
+		lblNYI.setText("(UI not yet implemented - can be edited by hand in hotkeys.xml.\nEditor must not be running, or the changes will not be applied)");
 		scKeybinds.setContent(compKeybinds);
 		scKeybinds.setMinSize(compKeybinds.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -248,5 +253,4 @@ public class SettingsDialog {
 	public void dispose() {
 		shell.dispose();
 	}
-
 }

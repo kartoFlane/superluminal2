@@ -66,4 +66,12 @@ public class ImageController extends ObjectController {
 	public DataComposite getDataComposite(Composite parent) {
 		return new ImageDataComposite(parent, this);
 	}
+
+	public void setAlpha(int alpha) {
+		view.setAlpha(alpha);
+	}
+
+	public int getAlpha() {
+		return view.getAlpha();
+	}
 }

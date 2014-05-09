@@ -107,6 +107,7 @@ public class EditorWindow {
 	private MenuItem mntmCloseShip;
 	private SashForm editorContainer;
 	private MenuItem mntmModMan;
+	private ToolItem tltmCloak;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -292,7 +293,7 @@ public class EditorWindow {
 		tltmPointer.setImage(Cache.checkOutImage(this, "cpath:/assets/pointer.png"));
 		tltmPointer.addSelectionListener(toolSelectionAdapter);
 		tltmPointer.setData(Tools.POINTER);
-		tltmPointer.setToolTipText("Manipulation Tool (" + Manager.getHotkey(Hotkeys.POINTER_TOOL) + ")");
+		tltmPointer.setToolTipText(String.format("Manipulation Tool (%s)", Manager.getHotkey(Hotkeys.POINTER_TOOL)));
 		toolItemMap.put(Tools.POINTER, tltmPointer);
 
 		// Room tool
@@ -300,7 +301,7 @@ public class EditorWindow {
 		tltmCreation.setImage(Cache.checkOutImage(this, "cpath:/assets/wrench.png"));
 		tltmCreation.addSelectionListener(toolSelectionAdapter);
 		tltmCreation.setData(Tools.CREATOR);
-		tltmCreation.setToolTipText("Creation Tool (" + Manager.getHotkey(Hotkeys.CREATE_TOOL) + ")");
+		tltmCreation.setToolTipText(String.format("Creation Tool (%s)", Manager.getHotkey(Hotkeys.CREATE_TOOL)));
 		toolItemMap.put(Tools.CREATOR, tltmCreation);
 
 		// Gib tool
@@ -308,7 +309,7 @@ public class EditorWindow {
 		tltmGib.setImage(Cache.checkOutImage(this, "cpath:/assets/gib.png"));
 		tltmGib.addSelectionListener(toolSelectionAdapter);
 		tltmGib.setData(Tools.GIB);
-		tltmGib.setToolTipText("Gib Tool (" + Manager.getHotkey(Hotkeys.GIB_TOOL) + ")");
+		tltmGib.setToolTipText(String.format("Gib Tool (%s)", Manager.getHotkey(Hotkeys.GIB_TOOL)));
 		toolItemMap.put(Tools.GIB, tltmGib);
 
 		// Properties button
@@ -316,7 +317,7 @@ public class EditorWindow {
 		tltmProperties.setImage(Cache.checkOutImage(this, "cpath:/assets/system.png"));
 		tltmProperties.addSelectionListener(toolSelectionAdapter);
 		tltmProperties.setData(Tools.CONFIG);
-		tltmProperties.setToolTipText("Properties (" + Manager.getHotkey(Hotkeys.PROPERTIES_TOOL) + ")");
+		tltmProperties.setToolTipText(String.format("Properties (%s)", Manager.getHotkey(Hotkeys.PROPERTIES_TOOL)));
 		toolItemMap.put(Tools.CONFIG, tltmProperties);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
@@ -324,12 +325,23 @@ public class EditorWindow {
 		// Manager button
 		tltmManager = new ToolItem(toolBar, SWT.PUSH);
 		tltmManager.setImage(Cache.checkOutImage(this, "cpath:/assets/overview.png"));
-		tltmManager.setToolTipText("Overview (" + Manager.getHotkey(Hotkeys.OVERVIEW_TOOL) + ")");
+		tltmManager.setToolTipText(String.format("Overview (%s)", Manager.getHotkey(Hotkeys.OVERVIEW_TOOL)));
 		tltmManager.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				OverviewWindow window = new OverviewWindow(shell);
 				window.open();
+			}
+		});
+
+		tltmCloak = new ToolItem(toolBar, SWT.CHECK);
+		tltmCloak.setImage(Cache.checkOutImage(this, "cpath:/assets/cloak.png"));
+		tltmCloak.setToolTipText(String.format("View Cloaked Appearance (%s)", Manager.getHotkey(Hotkeys.CLOAK)));
+		tltmCloak.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ShipContainer container = Manager.getCurrentShip();
+				container.setCloakedAppearance(tltmCloak.getSelection());
 			}
 		});
 
@@ -544,7 +556,8 @@ public class EditorWindow {
 				File temp = saveDestination;
 				// Only prompt for save directory if the user hasn't chosen any yet
 				if (saveDestination == null) {
-					temp = UIUtils.promptForSaveFile(shell);
+					// temp = UIUtils.promptForSaveFile(shell, "Save Ship", new String[] { "*.ftl", "*.zip" });
+					temp = UIUtils.promptForDirectory(shell, "Save Ship", "Please select the directory to which the ship will be exported.");
 				}
 
 				if (temp != null) { // User could've aborted selection, which returns null.
@@ -569,7 +582,7 @@ public class EditorWindow {
 
 				// Always prompt for save directory
 				// File temp = promptForSaveFile();
-				File temp = UIUtils.promptForDirectory(shell, "", "");
+				File temp = UIUtils.promptForDirectory(shell, "Save Ship", "Please select the directory to which the ship will be exported.");
 
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
@@ -860,6 +873,9 @@ public class EditorWindow {
 		tltmGib.setEnabled(enable);
 		tltmProperties.setEnabled(enable);
 		tltmManager.setEnabled(enable);
+		tltmCloak.setEnabled(enable);
+		if (!enable && tltmCloak.getSelection())
+			tltmCloak.setSelection(false);
 
 		sideContainer.getVerticalBar().setEnabled(enable);
 	}
@@ -1038,6 +1054,11 @@ public class EditorWindow {
 			tltmProperties.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).passes(e.keyCode) && tltmManager.isEnabled()) {
 			tltmManager.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.CLOAK).passes(e.keyCode) && tltmCloak.isEnabled()) {
+			tltmCloak.setSelection(!tltmCloak.getSelection());
+			tltmCloak.notifyListeners(SWT.Selection, null);
+
+			// Creation Tool hotkeys
 		} else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
 			if (!tltmCreation.getSelection())
 				tltmCreation.notifyListeners(SWT.Selection, null);

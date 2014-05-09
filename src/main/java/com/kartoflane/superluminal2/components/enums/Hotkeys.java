@@ -23,6 +23,7 @@ public enum Hotkeys {
 	SETTINGS,
 	UNDO,
 	REDO,
+	CLOAK,
 
 	// View
 	TOGGLE_GRID,
