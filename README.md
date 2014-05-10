@@ -2,7 +2,7 @@ Superluminal2
 =============
 
 Superluminal2 is a ship editor for the game FTL: Faster Than Light, and the expansion, FTL: Advanced Edition.
-The editor provides a layer of abstraction over the game's files, making the task of creating a functional ship much less daunting and easier.
+The editor provides a layer of abstraction over the game's files, making the task of creating a functional ship much easier and less daunting.
 
 It is a complete rewrite of, and successor to, the original editor ([Superluminal](https://github.com/kartoFlane/Superluminal)).
 
