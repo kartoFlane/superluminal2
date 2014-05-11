@@ -6,14 +6,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ImageController;
-import com.kartoflane.superluminal2.tools.ManipulationTool;
 
 public class ImageDataComposite extends Composite implements DataComposite {
 
-	private ManipulationTool tool = null;
 	private ImageController controller = null;
 	private Label label = null;
 
@@ -21,7 +18,6 @@ public class ImageDataComposite extends Composite implements DataComposite {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(3, false));
 
-		tool = (ManipulationTool) Manager.getSelectedTool();
 		controller = control;
 
 		label = new Label(this, SWT.NONE);
