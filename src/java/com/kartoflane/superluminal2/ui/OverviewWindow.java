@@ -52,6 +52,8 @@ public class OverviewWindow {
 	private ToolItem tltmRemove;
 
 	public OverviewWindow(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE);
@@ -323,6 +325,10 @@ public class OverviewWindow {
 		return !shell.isDisposed() && tree.isFocusControl();
 	}
 
+	public boolean isDisposed() {
+		return shell.isDisposed();
+	}
+
 	private TreeItem createItem(AbstractController controller) {
 		TreeItem parent = controller instanceof RoomController ? trtmRooms :
 				controller instanceof DoorController ? trtmDoors : trtmMounts;
@@ -337,5 +343,6 @@ public class OverviewWindow {
 
 	public void dispose() {
 		shell.dispose();
+		instance = null;
 	}
 }

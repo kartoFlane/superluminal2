@@ -14,8 +14,10 @@ import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 
@@ -35,8 +37,11 @@ public class AboutDialog {
 	private Link linkWidget;
 	private Label lblText;
 	private Composite container;
+	private Button btnOk;
 
 	public AboutDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		Display display = parent.getDisplay();
@@ -77,7 +82,7 @@ public class AboutDialog {
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
-		Button btnOk = new Button(container, SWT.NONE);
+		btnOk = new Button(container, SWT.NONE);
 		GridData gd_btnOk = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
 		gd_btnOk.widthHint = 80;
 		btnOk.setLayoutData(gd_btnOk);
@@ -86,7 +91,15 @@ public class AboutDialog {
 		btnOk.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				shell.dispose();
+				dispose();
+			}
+		});
+
+		shell.addListener(SWT.Close, new Listener() {
+			@Override
+			public void handleEvent(Event e) {
+				btnOk.notifyListeners(SWT.Selection, null);
+				e.doit = false;
 			}
 		});
 	}
@@ -155,5 +168,10 @@ public class AboutDialog {
 
 	public static AboutDialog getInstance() {
 		return instance;
+	}
+
+	public void dispose() {
+		shell.dispose();
+		instance = null;
 	}
 }

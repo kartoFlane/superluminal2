@@ -72,6 +72,8 @@ public class WeaponSelectionDialog {
 	private TreeColumn trclmnName;
 
 	public WeaponSelectionDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		treeItemMap = new HashMap<WeaponTypes, TreeItem>();
@@ -104,7 +106,7 @@ public class WeaponSelectionDialog {
 		gl_compData.marginWidth = 0;
 		compData.setLayout(gl_compData);
 
-		canvas = new Canvas(compData, SWT.NONE);
+		canvas = new Canvas(compData, SWT.DOUBLE_BUFFERED);
 		GridData gd_canvas = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
 		gd_canvas.heightHint = 100;
 		canvas.setLayoutData(gd_canvas);
@@ -468,6 +470,7 @@ public class WeaponSelectionDialog {
 
 	public void dispose() {
 		shell.dispose();
+		instance = null;
 	}
 
 	public boolean isActive() {

@@ -29,6 +29,8 @@ public class AliasDialog {
 	private Text aliasText;
 
 	public AliasDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		shell = new Shell(parent, SWT.TITLE | SWT.APPLICATION_MODAL);
@@ -130,6 +132,6 @@ public class AliasDialog {
 
 	public void dispose() {
 		shell.dispose();
+		instance = null;
 	}
-
 }

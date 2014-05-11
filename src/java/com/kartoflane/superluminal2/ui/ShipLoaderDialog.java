@@ -77,6 +77,8 @@ public class ShipLoaderDialog {
 	private TreeColumn trclmnClass;
 
 	public ShipLoaderDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		preview = new Preview();
@@ -116,7 +118,7 @@ public class ShipLoaderDialog {
 		Composite metadataComposite = new Composite(scrolledComposite, SWT.NONE);
 		metadataComposite.setLayout(new GridLayout(2, false));
 
-		canvas = new Canvas(metadataComposite, SWT.NONE);
+		canvas = new Canvas(metadataComposite, SWT.DOUBLE_BUFFERED);
 		GridData gd_canvas = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
 		gd_canvas.heightHint = 100;
 		canvas.setLayoutData(gd_canvas);
@@ -357,8 +359,8 @@ public class ShipLoaderDialog {
 		blueprintTreeMap.clear();
 
 		Database db = Database.getInstance();
-
 		MetadataIterator it = new MetadataIterator(metadataMap, sortByBlueprint);
+
 		for (it.first(); it.hasNext(); it.next()) {
 			String blueprint = it.current();
 			boolean isPlayer = db.isPlayerShip(blueprint);
@@ -433,6 +435,7 @@ public class ShipLoaderDialog {
 		blueprintTreeMap.clear();
 		preview.dispose();
 		shell.dispose();
+		instance = null;
 	}
 
 	private class MetadataIterator implements Iterator<String> {

@@ -49,6 +49,8 @@ public class SystemsMenu {
 	private MenuItem mntmMind;
 
 	public SystemsMenu(Control parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 		createContent(parent);
 	}
@@ -119,6 +121,7 @@ public class SystemsMenu {
 
 	public void dispose() {
 		systemMenu.dispose();
+		instance = null;
 	}
 
 	public boolean isDisposed() {

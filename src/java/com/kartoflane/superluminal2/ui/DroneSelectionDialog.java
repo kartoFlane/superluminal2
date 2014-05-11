@@ -65,6 +65,8 @@ public class DroneSelectionDialog {
 	private TreeColumn trclmnName;
 
 	public DroneSelectionDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		treeItemMap = new HashMap<DroneTypes, TreeItem>();
@@ -432,6 +434,7 @@ public class DroneSelectionDialog {
 
 	public void dispose() {
 		shell.dispose();
+		instance = null;
 	}
 
 	public boolean isActive() {

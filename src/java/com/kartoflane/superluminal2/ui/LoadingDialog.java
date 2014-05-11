@@ -5,7 +5,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 
@@ -21,6 +23,8 @@ public class LoadingDialog {
 	private Display display = null;
 
 	public LoadingDialog(Shell parentShell, String title, String message) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 		display = Display.getCurrent();
 
@@ -41,6 +45,13 @@ public class LoadingDialog {
 
 		ProgressBar progressBar = new ProgressBar(shell, SWT.SMOOTH | SWT.INDETERMINATE);
 		progressBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
+		shell.addListener(SWT.Close, new Listener() {
+			@Override
+			public void handleEvent(Event e) {
+				e.doit = false;
+			}
+		});
 
 		shell.pack();
 
@@ -74,5 +85,6 @@ public class LoadingDialog {
 		// Wakes the display from sleep
 		// Without this call, the dialog would wait for user input, and then disappear.
 		display.asyncExec(null);
+		instance = null;
 	}
 }

@@ -44,6 +44,8 @@ public class GlowSelectionDialog {
 	private Canvas canvas;
 
 	public GlowSelectionDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -209,6 +211,7 @@ public class GlowSelectionDialog {
 	public void dispose() {
 		preview.dispose();
 		shell.dispose();
+		instance = null;
 	}
 
 	public boolean isActive() {

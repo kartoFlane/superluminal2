@@ -34,6 +34,8 @@ public class SettingsDialog {
 	private Button btnCancel;
 
 	public SettingsDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
@@ -215,7 +217,7 @@ public class SettingsDialog {
 			}
 		});
 
-		shell.setMinimumSize(400, 0);
+		shell.setMinimumSize(400, 300);
 		shell.pack();
 
 		Point size = shell.getSize();
@@ -252,5 +254,6 @@ public class SettingsDialog {
 
 	public void dispose() {
 		shell.dispose();
+		instance = null;
 	}
 }
