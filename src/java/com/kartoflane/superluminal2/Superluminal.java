@@ -40,8 +40,8 @@ public class Superluminal {
 
 	public static final String APP_NAME = "Superluminal";
 	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta");
-	public static final String APP_UPDATE_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skel_common/auto_update.xml";
-	public static final String APP_URL = "http://www.google.com/"; // TODO
+	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
+	public static final String APP_FORUM_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
 
 	public static final String HOTKEYS_FILE = "hotkeys.xml";
@@ -50,25 +50,19 @@ public class Superluminal {
 	/**
 	 * settings ideas:
 	 * - checkboxes to make floor/cloak/shield/mounts follow hull, something along these lines
-	 * - whether to load data from game's archives, or unpack them and use that
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - add Edit > Reset All Door Links
-	 * - drag .zip/.ftl files into mod management dialog to add them
-	 * - add augments to armaments tab
+	 * - ship offset modification
+	 * - properties: crew tab
+	 * - add gibs
+	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
+	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * - changing interior image from 2x2 to 2x1 (for example) leaves unredrawn canvas area
 	 * - dragging reorder to ship overview
-	 * - figure out a better way to represent weapon stats in weapon selection dialog
-	 * - rudimentary image viewer
-	 * - ship offset modification
-	 * - add blueprint name selection to general tab?
-	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
 	 * - come up with a way to set which system is first when assigned to the same room?
 	 * - rework interior drawing -> currently drawn on room layer, so higher rooms obscur the image -> bad
-	 * - add gibs
 	 * - add reordering to ship overview
-	 * - properties: crew tab
 	 * - glow placement modification
 	 * 
 	 * - entity deletion --> add (to) undo
@@ -268,12 +262,13 @@ public class Superluminal {
 	public static void checkForUpdates(boolean manual) {
 		log.info("Checking for updates...");
 
+		final String[] downloadLink = new String[1];
 		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
 		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new LoadTask() {
 			public void execute() {
 				InputStream is = null;
 				try {
-					URL url = new URL(APP_UPDATE_URL);
+					URL url = new URL(APP_UPDATE_FETCH_URL);
 					is = url.openStream();
 
 					Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
@@ -281,6 +276,7 @@ public class Superluminal {
 					Element latest = root.getChild("latest");
 					String id = latest.getAttributeValue("id");
 
+					downloadLink[0] = latest.getAttributeValue("url");
 					remoteVersion[0] = new ComparableVersion(id);
 				} catch (UnknownHostException e) {
 					log.warn("Update check failed -- connection to the repository could not be estabilished.");
@@ -313,7 +309,7 @@ public class Superluminal {
 				box.setMessage(buf.toString());
 
 				if (box.open() == SWT.YES) {
-					URL url = new URL(APP_URL);
+					URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
 
 					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
