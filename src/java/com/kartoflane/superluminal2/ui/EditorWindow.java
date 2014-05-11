@@ -569,26 +569,16 @@ public class EditorWindow {
 					return;
 				}
 
-				// TODO ask if user wants to pack into .ftl or not
-
 				File temp = saveDestination;
 				// Only prompt for save directory if the user hasn't chosen any yet
 				if (saveDestination == null) {
-					SaveOptionsDialog dialog = new SaveOptionsDialog(shell, container.getShipController().getGameObject());
+					SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
 					temp = dialog.open();
 				}
 
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
-					log.trace("Saving ship to " + saveDestination.getAbsolutePath());
-
-					try {
-						ShipSaveUtils.saveShipXML(saveDestination, container);
-						log.trace("Ship saved successfully.");
-					} catch (Exception ex) {
-						log.error("An error occured while saving the ship: ", ex);
-						UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
-					}
+					saveShip(container);
 				}
 			}
 		});
@@ -599,20 +589,12 @@ public class EditorWindow {
 				ShipContainer container = Manager.getCurrentShip();
 
 				// Always prompt for save directory
-				// File temp = promptForSaveFile();
-				File temp = UIUtils.promptForDirectory(shell, "Save Ship", "Please select the directory to which the ship will be exported.");
+				SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
+				File temp = dialog.open();
 
-				if (temp != null) { // User could've aborted selection, which returns null.
+				if (temp != null) {
 					saveDestination = temp;
-					log.trace("Saving ship to " + saveDestination.getAbsolutePath());
-
-					try {
-						ShipSaveUtils.saveShipXML(saveDestination, container);
-						log.trace("Ship saved successfully.");
-					} catch (Exception ex) {
-						log.error("An error occured while saving the ship: ", ex);
-						UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
-					}
+					saveShip(container);
 				}
 			}
 		});
@@ -804,6 +786,33 @@ public class EditorWindow {
 
 	public void open() {
 		shell.open();
+	}
+
+	private void saveShip(ShipContainer container) {
+		if (saveDestination == null)
+			throw new IllegalStateException("Save destination must not be null.");
+
+		if (saveDestination.isDirectory()) {
+			log.trace("Saving ship to " + saveDestination.getAbsolutePath());
+
+			try {
+				ShipSaveUtils.saveShipXML(saveDestination, container);
+				log.trace("Ship saved successfully.");
+			} catch (Exception ex) {
+				log.error("An error occured while saving the ship: ", ex);
+				UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+			}
+		} else {
+			log.trace("Saving ship as " + saveDestination.getAbsolutePath());
+
+			try {
+				ShipSaveUtils.saveShipFTL(saveDestination, container);
+				log.trace("Ship saved successfully.");
+			} catch (Exception ex) {
+				log.error("An error occured while saving the ship: ", ex);
+				UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+			}
+		}
 	}
 
 	/**

@@ -1,8 +1,5 @@
 package com.kartoflane.superluminal2.ui.sidebar;
 
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
@@ -23,19 +20,21 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
-import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.ui.AugmentSelectionDialog;
 import com.kartoflane.superluminal2.ui.DroneSelectionDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
 import com.kartoflane.superluminal2.utils.IOUtils;
@@ -78,6 +77,7 @@ public class PropertiesToolComposite extends Composite {
 	private TabFolder tabFolder;
 	private ArrayList<Button> btnWeapons = new ArrayList<Button>();
 	private ArrayList<Button> btnDrones = new ArrayList<Button>();
+	private ArrayList<Button> btnAugments = new ArrayList<Button>();
 	private Spinner spMissiles;
 	private Spinner spWeaponSlots;
 	private Button btnWeaponList;
@@ -91,6 +91,9 @@ public class PropertiesToolComposite extends Composite {
 	private Label lblBlueprint;
 	private Text txtBlueprint;
 	private Combo cmbShips;
+	private Text txtLayout;
+	private Text txtImage;
+	private Group grpAugments;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -245,21 +248,10 @@ public class PropertiesToolComposite extends Composite {
 					type = Images.THUMBNAIL;
 
 				String path = container.getImage(type);
-				if (path == null)
-					return;
 
-				File file = new File(path);
-				if (file.exists()) {
-					if (Desktop.isDesktopSupported()) {
-						Desktop desktop = Desktop.getDesktop();
-						if (desktop != null) {
-							try {
-								desktop.open(file.getParentFile());
-							} catch (IOException ex) {
-							}
-						}
-					} else
-						Superluminal.log.error("Unable to open file location - AWT Desktop not supported.");
+				if (path != null) {
+					ImageViewerDialog dialog = new ImageViewerDialog(EditorWindow.getInstance().getShell());
+					dialog.open(path);
 				}
 			}
 		};
@@ -427,6 +419,34 @@ public class PropertiesToolComposite extends Composite {
 				}
 			});
 		}
+
+		Label lblLayout = new Label(compGeneral, SWT.NONE);
+		lblLayout.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblLayout.setText("Layout Filename:");
+
+		txtLayout = new Text(compGeneral, SWT.BORDER);
+		txtLayout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+		txtLayout.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				ship.setLayout(txtLayout.getText());
+			}
+		});
+
+		Label lblImageNamespace = new Label(compGeneral, SWT.NONE);
+		lblImageNamespace.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblImageNamespace.setText("Image Namespace:");
+
+		txtImage = new Text(compGeneral, SWT.BORDER);
+		txtImage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+		txtImage.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				ship.setImageNamespace(txtImage.getText());
+			}
+		});
 
 		Label lblHealth = new Label(compGeneral, SWT.NONE);
 		lblHealth.setText("Hull Health:");
@@ -598,6 +618,44 @@ public class PropertiesToolComposite extends Composite {
 			});
 		}
 
+		grpAugments = new Group(compArm, SWT.NONE);
+		grpAugments.setLayout(new GridLayout(1, false));
+		grpAugments.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		grpAugments.setText("Augments");
+
+		SelectionAdapter augmentListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int i = btnAugments.indexOf(e.getSource());
+
+				if (i != -1) {
+					ShipObject ship = container.getShipController().getGameObject();
+					AugmentObject current = ship.getAugments()[i];
+
+					AugmentSelectionDialog dialog = new AugmentSelectionDialog(EditorWindow.getInstance().getShell());
+					AugmentObject neu = dialog.open(current);
+
+					if (neu != null) {
+						// If the augment is the default dummy, then replace the first occurence of
+						// the dummy aug, so that there are no gaps
+						if (current == Database.DEFAULT_AUGMENT_OBJ)
+							ship.changeAugment(current, neu);
+						else
+							ship.changeAugment(i, neu);
+						updateData();
+					}
+				}
+			}
+		};
+
+		for (int i = 0; i < 3; i++) {
+			Button btn = new Button(grpAugments, SWT.NONE);
+			btn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+			btn.setText("<augment slot>");
+			btn.addSelectionListener(augmentListener);
+			btnAugments.add(btn);
+		}
+
 		/*
 		 * =========================================================================
 		 * XXX: Crew tab
@@ -632,34 +690,45 @@ public class PropertiesToolComposite extends Composite {
 
 		txtHull.setText(content == null ? "" : IOUtils.trimProtocol(content));
 		txtHull.selectAll();
+		txtHull.clearSelection();
 		btnHullView.setEnabled(content != null);
 
 		content = container.getImage(Images.CLOAK);
 		txtCloak.setText(content == null ? "" : IOUtils.trimProtocol(content));
 		txtCloak.selectAll();
+		txtCloak.clearSelection();
 		btnCloakView.setEnabled(content != null);
 
 		if (ship.isPlayerShip()) {
 			content = container.getImage(Images.FLOOR);
 			txtFloor.setText(content == null ? "" : IOUtils.trimProtocol(content));
 			txtFloor.selectAll();
+			txtFloor.clearSelection();
 			btnFloorView.setEnabled(content != null);
 
 			content = container.getImage(Images.SHIELD);
 			txtShield.setText(content == null ? "" : IOUtils.trimProtocol(content));
 			txtShield.selectAll();
+			txtShield.clearSelection();
 			btnShieldView.setEnabled(content != null);
 
 			content = container.getImage(Images.THUMBNAIL);
 			txtMini.setText(content == null || !ship.isPlayerShip() ? "" : IOUtils.trimProtocol(content));
 			txtMini.selectAll();
+			txtMini.clearSelection();
 			btnMiniView.setEnabled(content != null);
 		}
 
 		// General tab
 
 		content = ship.getShipClass();
-		txtClass.setText(content == null ? "" : content);
+		txtClass.setText(content == null ? "Ship Class" : content);
+
+		content = ship.getLayout();
+		txtLayout.setText(content == null ? "myship" : content);
+
+		content = ship.getImageNamespace();
+		txtImage.setText(content == null ? "myship" : content);
 
 		spHealth.setSelection(ship.getHealth());
 		spPower.setSelection(ship.getPower());
@@ -669,10 +738,10 @@ public class PropertiesToolComposite extends Composite {
 			cmbShips.select(index == -1 ? 0 : index);
 
 			content = ship.getShipName();
-			txtName.setText(ship.isPlayerShip() && content != null ? content : "");
+			txtName.setText(ship.isPlayerShip() && content == null ? "The Nameless One" : content);
 
 			content = ship.getShipDescription();
-			txtDesc.setText(ship.isPlayerShip() && content != null ? content : "");
+			txtDesc.setText(ship.isPlayerShip() && content == null ? "" : content);
 			lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
 		} else {
 			txtBlueprint.setText(ship.getBlueprintName());
@@ -712,6 +781,12 @@ public class PropertiesToolComposite extends Composite {
 
 			DroneList dList = ship.getDroneList();
 			btnDroneList.setText(dList.getBlueprintName());
+		}
+
+		int count = 0;
+		for (AugmentObject augment : ship.getAugments()) {
+			btnAugments.get(count).setText(augment.toString());
+			count++;
 		}
 	}
 
@@ -808,7 +883,8 @@ public class PropertiesToolComposite extends Composite {
 		boolean result = false;
 		result |= txtClass.isFocusControl() || spHealth.isFocusControl() || spPower.isFocusControl() ||
 				spMissiles.isFocusControl() || spWeaponSlots.isFocusControl() ||
-				spDrones.isFocusControl() || spDroneSlots.isFocusControl();
+				spDrones.isFocusControl() || spDroneSlots.isFocusControl() ||
+				txtLayout.isFocusControl() || txtImage.isFocusControl();
 		if (container.getShipController().isPlayerShip()) {
 			result |= txtName.isFocusControl() || txtDesc.isFocusControl();
 		} else {
