@@ -7,8 +7,14 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 	private static final long serialVersionUID = 7946331800522010830L;
 
 	private final String blueprintName;
-	private String title;
-	private String description;
+	private String title = "";
+	private String description = "";
+
+	/** Creates a default augment object. */
+	public AugmentObject() {
+		blueprintName = "Default Augment";
+		title = "<No Augment>";
+	}
 
 	public AugmentObject(String blueprintName) {
 		this.blueprintName = blueprintName;
@@ -58,5 +64,10 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 			return blueprintName.equals(other.blueprintName);
 		} else
 			return false;
+	}
+
+	@Override
+	public String toString() {
+		return title;
 	}
 }

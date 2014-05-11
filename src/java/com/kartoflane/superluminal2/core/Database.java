@@ -20,6 +20,7 @@ import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
+import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
@@ -28,6 +29,7 @@ public class Database {
 
 	public static final Logger log = LogManager.getLogger(Database.class);
 
+	public static final AugmentObject DEFAULT_AUGMENT_OBJ = new AugmentObject();
 	public static final AnimationObject DEFAULT_ANIM_OBJ = new AnimationObject();
 	public static final WeaponObject DEFAULT_WEAPON_OBJ = new WeaponObject();
 	public static final DroneObject DEFAULT_DRONE_OBJ = new DroneObject();
@@ -35,6 +37,13 @@ public class Database {
 	public static final GlowObject DEFAULT_GLOW_OBJ = new GlowObject();
 	public static final WeaponList DEFAULT_WEAPON_LIST = new WeaponList();
 	public static final DroneList DEFAULT_DRONE_LIST = new DroneList();
+	public static final RoomObject AIRLOCK_OBJECT = new RoomObject();
+
+	/**
+	 * Arbitrary value that needs to be added to enemy ships' ellipse's Y offset
+	 * in order for them to load correctly.
+	 */
+	public static final int ENEMY_SHIELD_Y_OFFSET = 110;
 
 	private static Database instance;
 
@@ -135,6 +144,11 @@ public class Database {
 		} catch (IOException e) {
 			log.error(String.format("An error has occured while closing database entry '%s': ", de.getName()), e);
 		}
+	}
+
+	public void reorderEntry(DatabaseEntry de, int index) {
+		dataEntries.remove(de);
+		dataEntries.add(index, de);
 	}
 
 	public void cacheAnimations() {

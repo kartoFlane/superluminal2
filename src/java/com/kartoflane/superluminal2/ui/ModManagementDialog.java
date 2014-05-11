@@ -14,6 +14,7 @@ import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -26,6 +27,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
@@ -57,6 +59,8 @@ public class ModManagementDialog {
 	private DropTarget dropTarget;
 
 	public ModManagementDialog(Shell parent) {
+		if (instance != null)
+			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
 		final ArrayList<DatabaseEntry> entries = new ArrayList<DatabaseEntry>();
@@ -82,12 +86,13 @@ public class ModManagementDialog {
 
 		// Need to specify a transfer type, even if it's not used, because
 		// otherwise it's not even possible to initiate drag and drop...
-		Transfer[] types = new Transfer[] { TextTransfer.getInstance() };
+		Transfer[] sourceTypes = new Transfer[] { TextTransfer.getInstance() };
 		dragSource = new DragSource(tree, DND.DROP_MOVE);
-		dragSource.setTransfer(types);
+		dragSource.setTransfer(sourceTypes);
 
-		dropTarget = new DropTarget(tree, DND.DROP_MOVE);
-		dropTarget.setTransfer(types);
+		Transfer[] dropTypes = new Transfer[] { TextTransfer.getInstance(), FileTransfer.getInstance() };
+		dropTarget = new DropTarget(tree, DND.DROP_MOVE | DND.DROP_DEFAULT);
+		dropTarget.setTransfer(dropTypes);
 
 		btnLoad = new Button(shell, SWT.NONE);
 		GridData gd_btnLoad = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -144,28 +149,48 @@ public class ModManagementDialog {
 				if (dragItem != null && dragItem.getData() == null)
 					dragItem.dispose();
 				dragItem = null;
+				dragData = null;
 			}
 		});
 
 		dropTarget.addDropListener(new DropTargetAdapter() {
 			@Override
 			public void dragOver(DropTargetEvent e) {
+				e.detail = DND.DROP_MOVE;
 				e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
 				if (dragItem != null) {
 					Point p = tree.toControl(e.x, e.y);
 					TreeItem item = tree.getItem(p);
 					if (item == null) {
-						e.feedback |= DND.FEEDBACK_NONE;
+						e.detail = DND.DROP_NONE;
+						e.feedback = DND.FEEDBACK_NONE;
 					} else {
 						Rectangle bounds = item.getBounds();
 						if (p.y < bounds.y + bounds.height / 2) {
-							if (item == trtmCore)
-								e.feedback |= DND.FEEDBACK_NONE;
-							else
+							if (item == trtmCore) {
+								e.detail = DND.DROP_NONE;
+								e.feedback = DND.FEEDBACK_NONE;
+							} else {
 								e.feedback |= DND.FEEDBACK_INSERT_BEFORE;
+							}
 						} else {
 							e.feedback |= DND.FEEDBACK_INSERT_AFTER;
 						}
+					}
+				} else {
+					Object object = FileTransfer.getInstance().nativeToJava(e.currentDataType);
+					if (object instanceof String[]) {
+						String fileList[] = (String[]) object;
+						for (String path : fileList) {
+							if (!path.endsWith(".ftl") && !path.endsWith(".zip")) {
+								e.detail = DND.DROP_NONE;
+								e.feedback = DND.FEEDBACK_NONE;
+								break;
+							}
+						}
+					} else {
+						e.detail = DND.DROP_NONE;
+						e.feedback = DND.FEEDBACK_NONE;
 					}
 				}
 			}
@@ -173,31 +198,47 @@ public class ModManagementDialog {
 			@Override
 			public void drop(DropTargetEvent e) {
 				if (dragData == null) {
-					e.detail = DND.DROP_NONE;
-					return;
-				}
-				if (dragItem == null) {
-					createTreeItem(dragData);
-				} else {
-					Point p = tree.toControl(e.x, e.y);
-					TreeItem item = tree.getItem(p);
-					if (item != null) {
-						Rectangle bounds = item.getBounds();
-						TreeItem[] items = tree.getItems();
-						int index = indexOf(items, item);
-
-						if (p.y < bounds.y + bounds.height / 2) {
-							if (item != trtmCore) {
-								dragItem.setData(null);
-								createTreeItem(dragData, index);
-								entries.remove(dragData);
-								entries.add(index - 1, dragData);
+					Object object = FileTransfer.getInstance().nativeToJava(e.currentDataType);
+					if (object instanceof String[]) {
+						String fileList[] = (String[]) object;
+						// Already ensured that all items are .ftl or .zip
+						for (String path : fileList) {
+							File file = new File(path);
+							try {
+								DatabaseEntry de = new DatabaseEntry(file);
+								if (!entries.contains(de)) {
+									createTreeItem(de);
+									entries.add(de);
+								}
+							} catch (IOException ex) {
+								log.warn(String.format("An error has occured while loading mod file '%s': ", file.getName(), ex));
 							}
-						} else {
-							dragItem.setData(null);
-							createTreeItem(dragData, index + 1);
-							entries.remove(dragData);
-							entries.add(index, dragData);
+						}
+					}
+				} else {
+					if (dragItem == null) {
+						createTreeItem(dragData);
+					} else {
+						Point p = tree.toControl(e.x, e.y);
+						TreeItem item = tree.getItem(p);
+						if (item != null) {
+							Rectangle bounds = item.getBounds();
+							TreeItem[] items = tree.getItems();
+							int index = indexOf(items, item);
+
+							if (p.y < bounds.y + bounds.height / 2) {
+								if (item != trtmCore) {
+									dragItem.setData(null);
+									createTreeItem(dragData, index);
+									entries.remove(dragData);
+									entries.add(index - 1, dragData);
+								}
+							} else {
+								dragItem.setData(null);
+								createTreeItem(dragData, index + 1);
+								entries.remove(dragData);
+								entries.add(index, dragData);
+							}
 						}
 					}
 				}
@@ -216,16 +257,34 @@ public class ModManagementDialog {
 		btnLoad.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				File temp = UIUtils.promptForLoadFile(shell, "Load Mod", new String[] { "*.zip;*.ftl" });
-				if (temp != null) {
-					try {
-						DatabaseEntry de = new DatabaseEntry(temp);
-						if (!entries.contains(de)) {
-							createTreeItem(de);
-							entries.add(de);
+				FileDialog dialog = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
+				dialog.setFilterExtensions(new String[] { "*.zip;*.ftl" });
+				dialog.setText("Load Mod");
+
+				String path = dialog.open();
+				File[] results = null;
+				if (path == null) {
+					// User aborted selection
+					// Nothing to do here
+				} else {
+					String[] paths = dialog.getFileNames();
+					results = new File[paths.length];
+					for (int i = 0; i < paths.length; i++) {
+						results[i] = new File(dialog.getFilterPath() + "/" + paths[i]);
+					}
+				}
+
+				if (results != null) {
+					for (File f : results) {
+						try {
+							DatabaseEntry de = new DatabaseEntry(f);
+							if (!entries.contains(de)) {
+								createTreeItem(de);
+								entries.add(de);
+							}
+						} catch (IOException ex) {
+							log.warn(String.format("An error has occured while loading mod file '%s': ", f.getName()), ex);
 						}
-					} catch (IOException ex) {
-						log.warn(String.format("An error has occured while loading mod file '%s': ", temp.getName(), ex));
 					}
 				}
 			}
@@ -261,6 +320,10 @@ public class ModManagementDialog {
 						for (DatabaseEntry de : db.getDatabaseEntries()) {
 							if (!entries.contains(de))
 								db.removeEntry(de);
+						}
+						// Reorder entries to match user input
+						for (DatabaseEntry de : entries) {
+							db.reorderEntry(de, entries.indexOf(de));
 						}
 					}
 				});
@@ -303,6 +366,7 @@ public class ModManagementDialog {
 		if (disabledColor != null)
 			disabledColor.dispose();
 		shell.dispose();
+		instance = null;
 	}
 
 	public boolean isActive() {
