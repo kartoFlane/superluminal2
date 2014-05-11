@@ -206,9 +206,16 @@ public class ShipLoadUtils {
 				attr = sysEl.getAttributeValue("img");
 				if (attr != null) {
 					system.setInteriorNamespace(attr);
-				} else if (!isPlayer) {
+					system.setInteriorPath("db:img/ship/interior/" + system.getInteriorNamespace() + ".png");
+				} else if (isPlayer) {
+					// No 'img' attribute, use default
+					system.setInteriorNamespace(system.getSystemId().getDefaultInteriorNamespace());
+					if (system.getInteriorNamespace() != null)
+						system.setInteriorPath("db:img/ship/interior/" + system.getInteriorNamespace() + ".png");
+				} else {
 					// Enemy ships' systems don't use interior images or glows
 					system.setInteriorNamespace(null);
+					system.setInteriorPath(null);
 				}
 
 				// When an interior image doesn't have a corresponding glow,
@@ -429,7 +436,7 @@ public class ShipLoadUtils {
 			if (augmentObject == null)
 				throw new IllegalArgumentException("AugBlueprint not found: " + attr);
 
-			ship.add(augmentObject);
+			ship.changeAugment(Database.DEFAULT_AUGMENT_OBJ, augmentObject);
 		}
 
 		return ship;
@@ -490,12 +497,10 @@ public class ShipLoadUtils {
 						ship.setVertical(sc.nextInt());
 						break;
 					case ELLIPSE:
-						Rectangle ellipse = new Rectangle(0, 0, 0, 0);
-						ellipse.width = sc.nextInt();
-						ellipse.height = sc.nextInt();
-						ellipse.x = sc.nextInt();
-						ellipse.y = sc.nextInt();
-						ship.setEllipse(ellipse);
+						ship.setEllipseWidth(sc.nextInt());
+						ship.setEllipseHeight(sc.nextInt());
+						ship.setEllipseX(sc.nextInt());
+						ship.setEllipseY(sc.nextInt() + (ship.isPlayerShip() ? 0 : Database.ENEMY_SHIELD_Y_OFFSET));
 						break;
 					case ROOM:
 						RoomObject room = new RoomObject();

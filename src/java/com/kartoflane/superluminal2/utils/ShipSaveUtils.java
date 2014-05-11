@@ -1,15 +1,22 @@
 package com.kartoflane.superluminal2.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.eclipse.swt.graphics.Rectangle;
 import org.jdom2.Comment;
@@ -43,22 +50,69 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 public class ShipSaveUtils {
 
 	public static void saveShipFTL(File saveFile, ShipContainer container) throws IllegalArgumentException, IOException {
-		if (container == null)
-			throw new IllegalArgumentException("ShipContainer must not be null.");
-
-		ShipObject ship = container.getShipController().getGameObject();
-
-		if (ship == null)
-			throw new IllegalArgumentException("Ship object must not be null.");
 		if (saveFile == null)
 			throw new IllegalArgumentException("Destination file must not be null.");
 		if (saveFile.isDirectory())
 			throw new IllegalArgumentException("Not a file: " + saveFile.getName());
 
-		// TODO
+		HashMap<String, byte[]> fileMap = saveShip(container);
+
+		// Write the zip archive
+		ZipInputStream in = null;
+		ZipOutputStream out = null;
+		try {
+			in = new ZipInputStream(new ByteArrayInputStream(createZip(fileMap)));
+			out = new ZipOutputStream(new FileOutputStream(saveFile));
+
+			ZipEntry entry = null;
+			while ((entry = in.getNextEntry()) != null) {
+				out.putNextEntry(entry);
+
+				byte[] byteBuff = new byte[4096];
+				int bytesRead = 0;
+				while ((bytesRead = in.read(byteBuff)) != -1)
+					out.write(byteBuff, 0, bytesRead);
+
+				in.closeEntry();
+			}
+		} finally {
+			if (in != null)
+				in.close();
+			if (out != null)
+				out.close();
+		}
 	}
 
 	public static void saveShipXML(File destination, ShipContainer container) throws IllegalArgumentException, IOException {
+		if (destination == null)
+			throw new IllegalArgumentException("Destination file must not be null.");
+		if (!destination.isDirectory())
+			throw new IllegalArgumentException("Not a directory: " + destination.getName());
+
+		HashMap<String, byte[]> fileMap = saveShip(container);
+
+		// Write the files
+		for (String fileName : fileMap.keySet()) {
+			ByteArrayInputStream in = null;
+			FileOutputStream out = null;
+
+			File file = new File(destination.getAbsolutePath() + "/" + fileName);
+			file.getParentFile().mkdirs();
+
+			try {
+				in = new ByteArrayInputStream(fileMap.get(fileName));
+				out = new FileOutputStream(file);
+				IOUtils.write(in, out);
+			} finally {
+				if (in != null)
+					in.close();
+				if (out != null)
+					out.close();
+			}
+		}
+	}
+
+	public static HashMap<String, byte[]> saveShip(ShipContainer container) throws IOException {
 		if (container == null)
 			throw new IllegalArgumentException("ShipContainer must not be null.");
 
@@ -66,31 +120,34 @@ public class ShipSaveUtils {
 
 		if (ship == null)
 			throw new IllegalArgumentException("Ship object must not be null.");
-		if (destination == null)
-			throw new IllegalArgumentException("Destination file must not be null.");
-		if (!destination.isDirectory())
-			throw new IllegalArgumentException("Not a directory: " + destination.getName());
 
 		container.updateGameObjects();
 		ship.coalesceRooms();
 		ship.linkDoors();
 		GlowObject[] newGlows = ship.createGlows();
 
-		// Write the files
-		File blueprints = new File(destination.getAbsolutePath() + "/data/" +
-				Database.getInstance().getAssociatedFile(ship.getBlueprintName()) + ".append");
-		IOUtils.writeFileXML(generateBlueprintXML(ship), blueprints);
+		HashMap<String, byte[]> fileMap = new HashMap<String, byte[]>();
+		String fileName = null;
+		byte[] bytes = null;
 
-		File fileTXT = new File(destination.getAbsolutePath() + "/data/" + ship.getLayout() + ".txt");
-		saveLayoutTXT(ship, fileTXT);
+		// Create the files in memory
+		fileName = "data/" + Database.getInstance().getAssociatedFile(ship.getBlueprintName()) + ".append";
+		bytes = IOUtils.readDocument(generateBlueprintXML(ship)).getBytes();
+		fileMap.put(fileName, bytes);
 
-		File fileXML = new File(destination.getAbsolutePath() + "/data/" + ship.getLayout() + ".xml");
-		saveLayoutXML(ship, fileXML);
+		fileName = "data/" + ship.getLayout() + ".txt";
+		bytes = generateLayoutTXT(ship).getBytes();
+		fileMap.put(fileName, bytes);
+
+		fileName = "data/" + ship.getLayout() + ".xml";
+		bytes = IOUtils.readDocument(generateLayoutXML(ship)).getBytes();
+		fileMap.put(fileName, bytes);
 
 		// Create the rooms.xml.append file for glow locations
 		if (newGlows.length != 0) {
-			File rooms = new File(destination.getAbsolutePath() + "/data/rooms.xml.append");
-			IOUtils.writeFileXML(generateRoomsXML(newGlows), rooms);
+			fileName = "data/rooms.xml.append";
+			bytes = IOUtils.readDocument(generateRoomsXML(newGlows)).getBytes();
+			fileMap.put(fileName, bytes);
 		}
 
 		// Copy images
@@ -100,14 +157,9 @@ public class ShipSaveUtils {
 
 			if (path != null) {
 				InputStream is = Manager.getInputStream(path);
-				File fileImage = new File(destination.getAbsolutePath() + "/" + img.getDatRelativePath(ship) +
-						img.getPrefix() + ship.getImageNamespace() + img.getSuffix() + ".png");
-
-				fileImage.getParentFile().mkdirs();
-				OutputStream out = new FileOutputStream(fileImage);
-				IOUtils.write(is, out);
+				fileName = img.getDatRelativePath(ship) + img.getPrefix() + ship.getImageNamespace() + img.getSuffix() + ".png";
+				fileMap.put(fileName, IOUtils.readStream(is));
 				is.close();
-				out.close();
 			}
 		}
 
@@ -117,13 +169,9 @@ public class ShipSaveUtils {
 
 			if (path != null) {
 				InputStream is = Manager.getInputStream(path);
-				File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" + object.getInteriorNamespace() + ".png");
-
-				fileImage.getParentFile().mkdirs();
-				OutputStream out = new FileOutputStream(fileImage);
-				IOUtils.write(is, out);
+				fileName = "img/ship/interior/" + object.getInteriorNamespace() + ".png";
+				fileMap.put(fileName, IOUtils.readStream(is));
 				is.close();
-				out.close();
 			}
 		}
 
@@ -132,34 +180,28 @@ public class ShipSaveUtils {
 			String path = set.getImage(Glows.CLOAK);
 
 			if (path != null) {
-				InputStream is = Manager.getInputStream(path);
 				SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
-				File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" +
-						cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png");
-
-				fileImage.getParentFile().mkdirs();
-				OutputStream out = new FileOutputStream(fileImage);
-				IOUtils.write(is, out);
+				InputStream is = Manager.getInputStream(path);
+				fileName = "img/ship/interior/" + cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png";
+				fileMap.put(fileName, IOUtils.readStream(is));
 				is.close();
-				out.close();
 			} else {
 				for (Glows glowId : Glows.getGlows()) {
 					path = set.getImage(glowId);
 
 					if (path != null) {
 						InputStream is = Manager.getInputStream(path);
-						File fileImage = new File(destination.getAbsolutePath() + "/img/ship/interior/" +
-								set.getIdentifier() + glowId.getSuffix() + ".png");
-
-						fileImage.getParentFile().mkdirs();
-						OutputStream out = new FileOutputStream(fileImage);
-						IOUtils.write(is, out);
+						fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
+						fileMap.put(fileName, IOUtils.readStream(is));
 						is.close();
-						out.close();
 					}
 				}
 			}
 		}
+
+		// TODO gib images
+
+		return fileMap;
 	}
 
 	public static void saveLayoutTXT(ShipObject ship, File f) throws FileNotFoundException, IOException {
@@ -365,6 +407,8 @@ public class ShipSaveUtils {
 		}
 
 		for (AugmentObject aug : ship.getAugments()) {
+			if (aug == Database.DEFAULT_AUGMENT_OBJ)
+				continue;
 			e = new Element("aug");
 			e.setAttribute("name", aug.getBlueprintName());
 			shipBlueprint.addContent(e); // Add <aug> to <shipBlueprint>
@@ -408,7 +452,7 @@ public class ShipSaveUtils {
 		buf.append("\r\n");
 		buf.append("" + ellipse.x);
 		buf.append("\r\n");
-		buf.append("" + ellipse.y);
+		buf.append("" + (ellipse.y - (ship.isPlayerShip() ? 0 : Database.ENEMY_SHIELD_Y_OFFSET)));
 		buf.append("\r\n");
 
 		for (RoomObject room : ship.getRooms()) {
@@ -552,5 +596,23 @@ public class ShipSaveUtils {
 
 		doc.setRootElement(root);
 		return doc;
+	}
+
+	private static byte[] createZip(Map<String, byte[]> files) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ZipOutputStream zf = new ZipOutputStream(bos);
+		Iterator<String> it = files.keySet().iterator();
+		String fileName = null;
+		ZipEntry ze = null;
+
+		while (it.hasNext()) {
+			fileName = it.next();
+			ze = new ZipEntry(fileName);
+			zf.putNextEntry(ze);
+			zf.write(files.get(fileName));
+		}
+		zf.close();
+
+		return bos.toByteArray();
 	}
 }

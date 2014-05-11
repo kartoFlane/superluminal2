@@ -24,7 +24,7 @@ public class ShipObject extends GameObject {
 
 	private boolean isPlayer = false;
 	private String blueprintName = PlayerShipBlueprints.HARD.toString();
-	private String layout = "layout";
+	private String layout = "myship";
 	private String img = "myship";
 
 	private String shipClass = "Ship Class";

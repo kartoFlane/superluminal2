@@ -577,6 +577,11 @@ public class ShipContainer implements Disposable {
 		center.y = offset.y + center.y / 2;
 
 		shield.setFollowOffset(center.x + ship.getEllipse().x, center.y + ship.getEllipse().y);
+		if (!ship.isPlayerShip()) {
+			Rectangle ellipse = ship.getEllipse();
+			shield.setSize(ellipse.width * 2, ellipse.height * 2);
+		}
+		shield.updateView();
 
 		imageControllerMap.put(Images.SHIELD, shield);
 		add(shield);
@@ -592,6 +597,7 @@ public class ShipContainer implements Disposable {
 		hull.setSize(ship.getHullSize());
 		hull.setFollowOffset(offset);
 		hull.updateFollower();
+		hull.updateView();
 
 		imageControllerMap.put(Images.HULL, hull);
 		add(hull);
@@ -606,6 +612,7 @@ public class ShipContainer implements Disposable {
 		center = Utils.add(hull.getLocationCorner(), ship.getCloakOffset());
 		cloak.setLocationCorner(center.x, center.y);
 		cloak.updateFollowOffset();
+		cloak.updateView();
 
 		imageControllerMap.put(Images.CLOAK, cloak);
 		add(cloak);
@@ -621,6 +628,7 @@ public class ShipContainer implements Disposable {
 		center.x = (int) Math.round((floor.getW() - hull.getW()) / 2.0) + offset.x;
 		center.y = (int) Math.round((floor.getH() - hull.getH()) / 2.0) + offset.y;
 		floor.setFollowOffset(center.x, center.y);
+		floor.updateView();
 
 		imageControllerMap.put(Images.FLOOR, floor);
 		add(floor);
