@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -49,34 +50,73 @@ public class IOUtils {
 			return "";
 	}
 
-	public static String readFile(File f) throws FileNotFoundException, IOException {
-		DecodeResult dr = decodeText(new FileInputStream(f), f.getName());
+	public static String readFileText(File f) throws FileNotFoundException, IOException {
+		FileInputStream fis = new FileInputStream(f);
+		DecodeResult dr = decodeText(fis, f.getName());
+		fis.close();
 		return dr.text;
 	}
 
 	public static Document readFileXML(File f) throws FileNotFoundException, IOException, JDOMParseException {
-		String contents = readFile(f);
+		String contents = readFileText(f);
 		return parseXML(contents);
 	}
 
-	public static String readStream(InputStream is, String label) throws IOException {
+	/**
+	 * Reads the stream supplied in argument, and decodes it as text.<br>
+	 * This method fully reads the stream, and as such after this method has been invoked,
+	 * the stream will have reached EOF.<br>
+	 * This method does not close the stream.
+	 * 
+	 * @param is
+	 *            The stream to be read.
+	 * @param label
+	 *            How error messages should refer to the stream, or null.
+	 */
+	public static String readStreamText(InputStream is, String label) throws IOException {
 		DecodeResult dr = decodeText(is, label);
 		return dr.text;
 	}
 
+	/**
+	 * Reads the stream supplied in argument, decodes it as text, and interprets it as XML.<br>
+	 * This method fully reads the stream, and as such after this method has been invoked,
+	 * the stream will have reached EOF.<br>
+	 * This method does not close the stream.
+	 * 
+	 * @param is
+	 *            The stream to be read.
+	 * @param label
+	 *            How error messages should refer to the stream, or null.
+	 */
 	public static Document readStreamXML(InputStream is, String label) throws IOException, JDOMParseException {
-		String contents = readStream(is, label);
+		String contents = readStreamText(is, label);
 		return parseXML(contents);
 	}
 
+	/**
+	 * Clones the stream supplied in argument.<br>
+	 * This method fully reads the stream, and as such after this method has been invoked,
+	 * the stream will have reached EOF.<br>
+	 * This method does not close the stream.
+	 */
 	public static InputStream cloneStream(InputStream is) throws IOException {
+		return new ByteArrayInputStream(readStream(is));
+	}
+
+	/**
+	 * Reads the stream supplied in argument.<br>
+	 * This method fully reads the stream, and as such after this method has been invoked,
+	 * the stream will have reached EOF.<br>
+	 * This method does not close the stream.
+	 */
+	public static byte[] readStream(InputStream is) throws IOException {
 		int read = 0;
 		byte[] bytes = new byte[1024 * 1024];
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		while ((read = is.read(bytes)) != -1)
 			baos.write(bytes, 0, read);
-		byte[] ba = baos.toByteArray();
-		return new ByteArrayInputStream(ba);
+		return baos.toByteArray();
 	}
 
 	public static Document parseXML(String contents) throws JDOMParseException {
@@ -88,6 +128,12 @@ public class IOUtils {
 		return parser.build(contents);
 	}
 
+	/**
+	 * Writes the contents of the input stream to the output stream.<br>
+	 * This method fully reads the input stream, and as such after this method has been invoked,
+	 * the stream will have reached EOF.<br>
+	 * This method does not close the streams.
+	 */
 	public static void write(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024 * 10];
 		int len;
@@ -130,7 +176,29 @@ public class IOUtils {
 	}
 
 	/**
-	 * Encodes a string (throwing an exception on bad chars) to bytes in a stream.
+	 * @return string representation of the Document's XML code
+	 */
+	public static String readDocument(Document doc) throws IOException {
+		if (doc == null)
+			throw new IllegalArgumentException("Document must not be null.");
+
+		String result = null;
+		StringWriter writer = null;
+		try {
+			writer = new StringWriter();
+			SloppyXMLOutputProcessor.sloppyPrint(doc, writer, null);
+
+			result = writer.toString();
+		} finally {
+			if (writer != null)
+				writer.close();
+		}
+
+		return result;
+	}
+
+	/**
+	 * Encodes a string (throwing an exception on bad chars) to bytes in a stream.<br>
 	 * Line endings will not be normalized.
 	 * 
 	 * @param text
@@ -155,9 +223,10 @@ public class IOUtils {
 	}
 
 	/**
-	 * Determines text encoding for an InputStream and decodes its bytes as a string.
+	 * Determines text encoding for an InputStream and decodes its bytes as a string.<br>
 	 * 
-	 * CR and CR-LF line endings will be normalized to LF.
+	 * CR and CR-LF line endings will be normalized to LF.<br>
+	 * This method does not close the stream.
 	 * 
 	 * @param is
 	 *            a stream to read
