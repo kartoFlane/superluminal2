@@ -100,5 +100,11 @@
 				<module>modules/linux64</module>
 			</modules>
 		</profile>
+		<profile>
+			<id>compile</id>
+			<modules>
+				<module>modules/core</module>
+			</modules>
+		</profile>
 	</profiles>
 </project>

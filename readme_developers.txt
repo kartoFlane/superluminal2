@@ -5,30 +5,49 @@ The build process for this project is automated by Maven.
 
 To build, run "mvn clean package" in this folder.
 
+To just compile the source code, run "mvn -P compile clean package" in this folder
+(compiled code will be located in "modules/core/target")
 
 
-"img/"
-  Screenshots.
+Explanation of the directory structure:
 
-"skel_common/"
-  Files to include in distribution archives.
+  "img/"
+	Screenshots.
 
-"skel_win/", "skel_linux/" and "skel_mac/"
-  System-specific files to include in distribution archives.
+  "modules/"
+    This directory contains modules of the project's main POM.
+    
+	"core/"
+	  This directory contains the POM that compiles the program's source code.
+	  The code itself is located in "src/" directory in the main repo.
 
-"skel_exe/"
-  Materials to create superluminal.exe (not part of Maven).
-    - Get Launch4j: http://launch4j.sourceforge.net/index.html
-    - Drag "launch4j_*.xml" onto "launch4jc.exe".
-    - "superluminal.exe" will appear alongside the xml.
-    - Drag superluminal.exe into "skel_win/".
-    - Run "mvn clean package".
+    "{platform}{arch}/"
+      These directories contain POMs that assemble the platform-specific jars and
+      distribution zip/tar archives.
 
-    - The manifest files will be embedded to prevent VirtualStore redirection.
+  "skels/"
+    Subdirectories of this directory contain files to include in the
+    distributions' archives.
+    
+    "common/"
+      Files to include in all distribution archives.
+  
+        "auto_update.xml"
+          Info about the latest release, downloaded periodically by clients.
+
+    "win/", "linux/" and "mac/"
+      System-specific files to include in distribution archives.
+
+    "exe/"
+      Materials to create superluminal.exe (not part of Maven).
+        - Get Launch4j: http://launch4j.sourceforge.net/index.html
+        - Drag "launch4j_*.xml" onto "launch4jc.exe".
+        - "superluminal.exe" will appear alongside the xml.
+        - Drag superluminal.exe into "skel_win/".
+        - Run "mvn clean package".
+
+      The manifest files will be embedded to prevent VirtualStore redirection.
         http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware
-
-"auto_update.xml"
-  Info about the latest release, downloaded periodically by clients.
 
 
 
