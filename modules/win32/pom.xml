@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.kartoflane</groupId>
+		<artifactId>superluminal</artifactId>
+		<version>2.0.0</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>sl-win32</artifactId>
+	<packaging>jar</packaging>
+	<name>Superluminal Win-32</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.kartoflane</groupId>
+			<artifactId>sl-core</artifactId>
+			<version>${project.version}</version>
+			<!-- Exclude the compilation dependency -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.swt</groupId>
+					<artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<!-- SWT Windows 32-bit -->
+		<dependency>
+			<groupId>org.eclipse.swt</groupId>
+			<artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+			<version>${swt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<!-- Build jar -->
+					<execution>
+						<id>jar-with-dependencies-win32</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>com.kartoflane.superluminal2.Superluminal</mainClass>
+								</manifest>
+								<manifestEntries>
+									<Built-By>kartoFlane</Built-By>
+								</manifestEntries>
+							</archive>
+							<finalName>superluminal2-win32</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+					
+					<!-- Build zip archive -->
+					<execution>
+						<id>dist-win-32</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>dist.xml</descriptor>
+							</descriptors>
+							<finalName>${project.name} v${project.version}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<outputDirectory>../../target</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -1,15 +1,15 @@
 <assembly>
-	<id>dist-win-32</id>
+	<id>dist-win-64</id>
 	<formats>
 		<format>zip</format>
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>skel_common</directory>
+			<directory>../../skels/common</directory>
 			<outputDirectory>/</outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>skel_win</directory>
+			<directory>../../skels/win</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>*</include>
@@ -19,7 +19,7 @@
 			<directory>${project.build.directory}</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>superluminal2-win32.jar</include>
+				<include>superluminal2-win64.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>

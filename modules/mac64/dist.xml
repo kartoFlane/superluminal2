@@ -1,27 +1,25 @@
 <assembly>
-	<id>dist-mac-32</id>
+	<id>dist-mac-64</id>
 	<formats>
 		<format>tar.gz</format>
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>skel_common</directory>
+			<directory>../../skels/common</directory>
 			<outputDirectory>/</outputDirectory>
 		</fileSet>
 		<fileSet>  <!-- Non-executables. -->
-			<directory>skel_mac</directory>
+			<directory>../../skels/mac</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.command</exclude>
-				<exclude>**/*.sh</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>  <!-- Executables. -->
-			<directory>skel_mac</directory>
+			<directory>../../skels/mac</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.command</include>
-				<include>**/*.sh</include>
 			</includes>
 			<fileMode>755</fileMode>
 		</fileSet>
@@ -29,7 +27,7 @@
 			<directory>${project.build.directory}</directory>
 			<outputDirectory>/Superluminal2.app/Contents/Resources/</outputDirectory>
 			<includes>
-				<include>superluminal2-mac32.jar</include>
+				<include>superluminal2-mac.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>

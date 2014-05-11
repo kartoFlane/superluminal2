@@ -1,26 +1,24 @@
 <assembly>
-	<id>dist-linux-32</id>
+	<id>dist-linux-64</id>
 	<formats>
 		<format>tar.gz</format>
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>skel_common</directory>
+			<directory>../../skels/common</directory>
 			<outputDirectory>/</outputDirectory>
 		</fileSet>
 		<fileSet>  <!-- Non-executables. -->
-			<directory>skel_linux</directory>
+			<directory>../../skels/linux</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
-				<exclude>**/*.command</exclude>
 				<exclude>**/*.sh</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>  <!-- Executables. -->
-			<directory>skel_linux</directory>
+			<directory>../../skels/linux</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>**/*.command</include>
 				<include>**/*.sh</include>
 			</includes>
 			<fileMode>755</fileMode>
@@ -29,7 +27,7 @@
 			<directory>${project.build.directory}</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>superluminal2-linux32.jar</include>
+				<include>superluminal2-linux64.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>

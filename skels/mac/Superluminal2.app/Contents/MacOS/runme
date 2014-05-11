@@ -8,7 +8,7 @@ contentdir="${0%/*/*}";
 maindir="${contentdir%/*/*}";
 resdir="${contentdir}/Resources";
 
-classpath="${resdir}/superluminal2.jar";
+classpath="${resdir}/superluminal2-mac.jar";
 
 cd "${maindir}";
 
