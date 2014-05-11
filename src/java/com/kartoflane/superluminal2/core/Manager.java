@@ -96,10 +96,10 @@ public class Manager {
 		return selectedController;
 	}
 
-	public static void createNewShip() {
+	public static void createNewShip(boolean playerShip) {
 		closeShip();
 
-		currentShip = new ShipContainer(new ShipObject(true)); // TODO dialog prompt to choose if player ship?
+		currentShip = new ShipContainer(new ShipObject(playerShip));
 		currentShip.getShipController().reposition(3 * ShipContainer.CELL_SIZE, 3 * ShipContainer.CELL_SIZE);
 
 		EditorWindow.getInstance().enableTools(true);

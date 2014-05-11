@@ -108,6 +108,8 @@ public class EditorWindow {
 	private SashForm editorContainer;
 	private MenuItem mntmModMan;
 	private ToolItem tltmCloak;
+	private MenuItem mntmResetLinks;
+	private MenuItem mntmOptimalOffset;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -185,6 +187,15 @@ public class EditorWindow {
 
 		mntmRedo = new MenuItem(menuEdit, SWT.NONE);
 		mntmRedo.setText("Redo\t" + Manager.getHotkey(Hotkeys.REDO));
+
+		new MenuItem(menuEdit, SWT.SEPARATOR);
+
+		mntmResetLinks = new MenuItem(menuEdit, SWT.NONE);
+		mntmResetLinks.setText("Reset All Door Links");
+
+		mntmOptimalOffset = new MenuItem(menuEdit, SWT.NONE);
+		mntmOptimalOffset.setEnabled(false);
+		mntmOptimalOffset.setText("Calculate Optimal Offset");
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
@@ -329,7 +340,9 @@ public class EditorWindow {
 		tltmManager.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				OverviewWindow window = new OverviewWindow(shell);
+				OverviewWindow window = OverviewWindow.getInstance();
+				if (window == null || window.isDisposed())
+					window = new OverviewWindow(shell);
 				window.open();
 			}
 		});
@@ -342,6 +355,8 @@ public class EditorWindow {
 			public void widgetSelected(SelectionEvent e) {
 				ShipContainer container = Manager.getCurrentShip();
 				container.setCloakedAppearance(tltmCloak.getSelection());
+				if (!tltmCloak.getSelection() && Manager.getSelected() == container.getImageController(Images.CLOAK))
+					Manager.setSelected(null);
 			}
 		});
 
@@ -529,7 +544,10 @@ public class EditorWindow {
 		mntmNewShip.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Manager.createNewShip();
+				NewShipDialog dialog = new NewShipDialog(shell);
+				int response = dialog.open();
+				if (response != -1)
+					Manager.createNewShip(response == 0);
 			}
 		});
 
@@ -556,8 +574,8 @@ public class EditorWindow {
 				File temp = saveDestination;
 				// Only prompt for save directory if the user hasn't chosen any yet
 				if (saveDestination == null) {
-					// temp = UIUtils.promptForSaveFile(shell, "Save Ship", new String[] { "*.ftl", "*.zip" });
-					temp = UIUtils.promptForDirectory(shell, "Save Ship", "Please select the directory to which the ship will be exported.");
+					SaveOptionsDialog dialog = new SaveOptionsDialog(shell, container.getShipController().getGameObject());
+					temp = dialog.open();
 				}
 
 				if (temp != null) { // User could've aborted selection, which returns null.
@@ -624,6 +642,24 @@ public class EditorWindow {
 		});
 
 		mntmRedo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO
+			}
+		});
+
+		mntmResetLinks.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.getCurrentShip().getShipController().getGameObject().resetDoorLinks();
+				if (Manager.getSelected() != null) {
+					ManipulationToolComposite mtc = (ManipulationToolComposite) getSidebarContent();
+					mtc.getDataComposite().updateData();
+				}
+			}
+		});
+
+		mntmOptimalOffset.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// TODO
@@ -730,7 +766,7 @@ public class EditorWindow {
 				AboutDialog aboutDialog = new AboutDialog(shell);
 				aboutDialog.setMessage(buf.toString());
 				try {
-					aboutDialog.setLink(new URL(Superluminal.APP_URL), "Editor's thread at the official FTL forums");
+					aboutDialog.setLink(new URL(Superluminal.APP_FORUM_URL), "Editor's thread at the official FTL forums");
 				} catch (MalformedURLException ex) {
 				}
 
@@ -893,6 +929,8 @@ public class EditorWindow {
 		// Edit
 		mntmUndo.setEnabled(false); // TODO
 		mntmRedo.setEnabled(false); // TODO
+		mntmResetLinks.setEnabled(enable);
+		mntmOptimalOffset.setEnabled(false); // TODO
 		mntmDelete.setEnabled(enable);
 
 		// View

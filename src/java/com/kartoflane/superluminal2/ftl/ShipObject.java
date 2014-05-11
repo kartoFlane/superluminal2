@@ -21,7 +21,6 @@ import com.kartoflane.superluminal2.utils.Utils;
 public class ShipObject extends GameObject {
 
 	private static final long serialVersionUID = 5820228601368854867L;
-	public static final RoomObject AIRLOCK_OBJECT = new RoomObject();
 
 	private boolean isPlayer = false;
 	private String blueprintName = PlayerShipBlueprints.HARD.toString();
@@ -37,12 +36,12 @@ public class ShipObject extends GameObject {
 	private TreeSet<MountObject> mounts;
 	private HashSet<GibObject> gibs;
 
-	private ArrayList<AugmentObject> augments;
 	private HashMap<Systems, SystemObject> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
 	private HashMap<Races, Integer> crewCountMap;
 	private HashMap<Races, Integer> crewMaxMap;
 
+	private ArrayList<AugmentObject> augments;
 	private ArrayList<WeaponObject> weapons;
 	private ArrayList<DroneObject> drones;
 	private WeaponList weaponList = Database.DEFAULT_WEAPON_LIST;
@@ -52,7 +51,7 @@ public class ShipObject extends GameObject {
 	private int yOffset = 0;
 	private int horizontal = 0;
 	private int vertical = 0;
-	private Rectangle ellipse = new Rectangle(0, 0, 0, 0);
+	private Rectangle ellipse = new Rectangle(0, 0, 150, 150);
 
 	private Point hullOffset = new Point(0, 0);
 	private Point hullSize = new Point(0, 0);
@@ -90,6 +89,10 @@ public class ShipObject extends GameObject {
 			drones.add(Database.DEFAULT_DRONE_OBJ);
 		}
 
+		for (int i = 0; i < 3; i++) {
+			augments.add(Database.DEFAULT_AUGMENT_OBJ);
+		}
+
 		for (Systems system : Systems.values())
 			systemMap.put(system, new SystemObject(system));
 		for (Images image : Images.values()) {
@@ -107,6 +110,11 @@ public class ShipObject extends GameObject {
 		this();
 
 		this.isPlayer = isPlayer;
+
+		if (!isPlayer) {
+			ImageObject shieldObject = imageMap.get(Images.SHIELD);
+			shieldObject.setImagePath("db:img/ship/enemy_shields.png");
+		}
 	}
 
 	public void update() {
@@ -296,7 +304,7 @@ public class ShipObject extends GameObject {
 	 * @param xOff
 	 *            offset from the ship's center
 	 * @param yOff
-	 *            offset from teh ship's center
+	 *            offset from the ship's center
 	 * @param width
 	 *            half of the image's width
 	 * @param height
@@ -307,6 +315,22 @@ public class ShipObject extends GameObject {
 		ellipse.y = yOff;
 		ellipse.width = width;
 		ellipse.height = height;
+	}
+
+	public void setEllipseX(int x) {
+		ellipse.x = x;
+	}
+
+	public void setEllipseY(int y) {
+		ellipse.y = y;
+	}
+
+	public void setEllipseWidth(int w) {
+		ellipse.width = w;
+	}
+
+	public void setEllipseHeight(int h) {
+		ellipse.height = h;
 	}
 
 	/**
@@ -749,6 +773,50 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
+	 * Puts the new augment at the specified index in the augment list.
+	 */
+	public void changeAugment(int index, AugmentObject neu) {
+		if (index < 0 || index > 3)
+			throw new IllegalArgumentException("Index is out of bounds: " + index);
+		if (neu == null)
+			throw new IllegalArgumentException("New augment must not be null.");
+		augments.set(index, neu);
+		coalesceAugments();
+	}
+
+	/**
+	 * Removes the first occurence of the old augment, and puts the new augment in its place.
+	 * 
+	 * @return index at which the new augment was placed
+	 */
+	public int changeAugment(AugmentObject old, AugmentObject neu) {
+		if (old == null)
+			throw new IllegalArgumentException("Old augment must not be null.");
+		if (neu == null)
+			throw new IllegalArgumentException("New augment must not be null.");
+
+		int i = augments.indexOf(old);
+		if (i == -1)
+			throw new IllegalArgumentException("Old augment not found.");
+		augments.set(i, neu);
+		return i;
+	}
+
+	/**
+	 * Coalesces augments, moving all dummy augments to the end of the list, so that
+	 * there are no gaps between 'real' augments.
+	 */
+	private void coalesceAugments() {
+		for (int i = 0; i < augments.size(); i++) {
+			AugmentObject augment = augments.get(i);
+			if (augment == Database.DEFAULT_AUGMENT_OBJ) {
+				augments.remove(augment);
+				augments.add(augment);
+			}
+		}
+	}
+
+	/**
 	 * Modifying the array doesn't change the order of elements in the ship.
 	 * 
 	 * @return an array of all rooms in this ship
@@ -791,7 +859,7 @@ public class ShipObject extends GameObject {
 	 */
 	public RoomObject getRoomById(int id) {
 		if (id == -1)
-			return AIRLOCK_OBJECT;
+			return Database.AIRLOCK_OBJECT;
 		RoomObject[] roomz = getRooms();
 		try {
 			return roomz[binarySearch(roomz, id, 0, roomz.length)];
@@ -925,10 +993,20 @@ public class ShipObject extends GameObject {
 			}
 
 			// When linking to airlocks, the airlock has to be linked as the right "room"
-			if (door.getLeftRoom() == AIRLOCK_OBJECT && door.getRightRoom() != AIRLOCK_OBJECT) {
+			if (door.getLeftRoom() == Database.AIRLOCK_OBJECT && door.getRightRoom() != Database.AIRLOCK_OBJECT) {
 				door.setLeftRoom(door.getRightRoom());
-				door.setRightRoom(AIRLOCK_OBJECT);
+				door.setRightRoom(Database.AIRLOCK_OBJECT);
 			}
+		}
+	}
+
+	/**
+	 * Resets door links to null, so that they will be automatically linked.
+	 */
+	public void resetDoorLinks() {
+		for (DoorObject door : doors) {
+			door.setLeftRoom(null);
+			door.setRightRoom(null);
 		}
 	}
 
@@ -938,7 +1016,7 @@ public class ShipObject extends GameObject {
 				return room;
 		}
 
-		return AIRLOCK_OBJECT;
+		return Database.AIRLOCK_OBJECT;
 	}
 
 	/**
