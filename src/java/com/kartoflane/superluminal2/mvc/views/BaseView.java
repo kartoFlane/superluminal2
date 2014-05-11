@@ -248,7 +248,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	/**
 	 * Paints the image in the given area, modifying the image to fit.
 	 */
-	protected void paintImage(PaintEvent e, Image image, Rectangle cachedBounds, int x, int y, int w, int h, int alpha) {
+	protected void paintImageResize(PaintEvent e, Image image, Rectangle cachedBounds, int x, int y, int w, int h, int alpha) {
 		if (image != null) {
 			int prevAlpha = e.gc.getAlpha();
 			e.gc.setAlpha(alpha);
@@ -262,9 +262,9 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	/**
 	 * Paints the image in the given area, modifying the image to fit.
 	 */
-	protected void paintImage(PaintEvent e, Image image, Rectangle cachedBounds, Rectangle rect, int alpha) {
+	protected void paintImageResize(PaintEvent e, Image image, Rectangle cachedBounds, Rectangle rect, int alpha) {
 		if (image != null) {
-			paintImage(e, image, cachedBounds, rect.x, rect.y, rect.width, rect.height, alpha);
+			paintImageResize(e, image, cachedBounds, rect.x, rect.y, rect.width, rect.height, alpha);
 		}
 	}
 
@@ -273,7 +273,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	 */
 	protected void paintImage(PaintEvent e, Image image, Rectangle cachedBounds, int alpha) {
 		if (image != null) {
-			paintImage(e, image, cachedBounds, model.getX() - cachedBounds.width / 2, model.getY() - cachedBounds.height / 2,
+			paintImageResize(e, image, cachedBounds, model.getX() - cachedBounds.width / 2, model.getY() - cachedBounds.height / 2,
 					cachedBounds.width, cachedBounds.height, alpha);
 		}
 	}
@@ -313,7 +313,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	 * @param h
 	 *            height of the destination area at which the image will be drawn
 	 */
-	protected void paintImage(PaintEvent e, Image image, int srcX, int srcY, int srcW, int srcH, int x, int y, int w, int h, int alpha) {
+	protected void paintImageResize(PaintEvent e, Image image, int srcX, int srcY, int srcW, int srcH, int x, int y, int w, int h, int alpha) {
 		if (image != null) {
 			int prevAlpha = e.gc.getAlpha();
 			e.gc.setAlpha(alpha);
