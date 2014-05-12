@@ -139,13 +139,15 @@ public class Grid {
 	}
 
 	/**
-	 * @return a Cell with the given position in the grid, or null if out of bounds.
+	 * @return a Cell with the given position in the grid.
 	 */
 	public CellController getCell(int i, int j) {
 		try {
-			return cells.get(i).get(j);
+			int sx = Math.min(i, cells.size() - 1);
+			int sy = Math.min(j, cells.get(sx).size() - 1);
+			return cells.get(sx).get(sy);
 		} catch (Exception e) {
-			return null;
+			return cells.get(0).get(0);
 		}
 	}
 
