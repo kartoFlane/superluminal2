@@ -92,6 +92,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		scaleSysLevel.setMinimum(1);
 		scaleSysLevel.setPageIncrement(1);
 		scaleSysLevel.setIncrement(1);
+		scaleSysLevel.setSelection(1);
 		scaleSysLevel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 
 		txtSysLevel = new Text(this, SWT.BORDER | SWT.READ_ONLY);
@@ -120,6 +121,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleMaxLevel.setMinimum(1);
 			scaleMaxLevel.setPageIncrement(1);
 			scaleMaxLevel.setIncrement(1);
+			scaleMaxLevel.setSelection(1);
 			scaleMaxLevel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 
 			txtMaxLevel = new Text(this, SWT.BORDER | SWT.READ_ONLY);
@@ -139,48 +141,120 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					if (!shipC.isPlayerShip()) {
 						scaleSysLevel.setMaximum(scaleMaxLevel.getSelection());
 						scaleSysLevel.notifyListeners(SWT.Selection, null);
+						scaleSysLevel.setEnabled(scaleMaxLevel.getSelection() > 1);
+						scaleSysLevel.setSelection(Math.min(scaleSysLevel.getSelection(), scaleSysLevel.getMaximum()));
+					}
+				}
+			});
+		} else {
+			imagesComposite = new Composite(this, SWT.NONE);
+			GridLayout gl_imagesComposite = new GridLayout(4, false);
+			gl_imagesComposite.marginHeight = 0;
+			gl_imagesComposite.marginWidth = 0;
+			imagesComposite.setLayout(gl_imagesComposite);
+			imagesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+
+			// Interior widgets
+			Label lblInterior = new Label(imagesComposite, SWT.NONE);
+			lblInterior.setText("Interior image:");
+
+			btnInteriorView = new Button(imagesComposite, SWT.NONE);
+			btnInteriorView.setEnabled(false);
+			btnInteriorView.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+			btnInteriorView.setText("View");
+
+			btnInteriorBrowse = new Button(imagesComposite, SWT.NONE);
+			btnInteriorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			btnInteriorBrowse.setText("Browse");
+
+			btnInteriorClear = new Button(imagesComposite, SWT.NONE);
+			btnInteriorClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			btnInteriorClear.setText("Reset");
+
+			txtInterior = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
+			txtInterior.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+
+			// Glow widgets
+			lblGlow = new Label(imagesComposite, SWT.NONE);
+			lblGlow.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			lblGlow.setText("Manning glow:");
+
+			btnGlow = new Button(imagesComposite, SWT.NONE);
+			GridData gd_btnGlow = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1);
+			gd_btnGlow.widthHint = 120;
+			btnGlow.setLayoutData(gd_btnGlow);
+			btnGlow.setText("None");
+
+			SelectionAdapter imageViewListener = new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Systems sys = container.getActiveSystem(roomC.getGameObject());
+					SystemController system = container.getSystemController(sys);
+					File file = new File(system.getInteriorPath());
+
+					if (file != null && file.exists()) {
+						if (Desktop.isDesktopSupported()) {
+							Desktop desktop = Desktop.getDesktop();
+							if (desktop != null) {
+								try {
+									desktop.open(file.getParentFile());
+								} catch (IOException ex) {
+								}
+							}
+						} else {
+							Superluminal.log.error("Unable to open file location - AWT Desktop not supported.");
+						}
+					}
+				}
+			};
+			btnInteriorView.addSelectionListener(imageViewListener);
+
+			SelectionAdapter imageBrowseListener = new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Systems sys = container.getActiveSystem(roomC.getGameObject());
+					SystemController system = container.getSystemController(sys);
+					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
+					dialog.setFilterExtensions(new String[] { "*.png" });
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path != null) {
+						system.setInteriorPath("file:" + path);
+						updateData();
+					}
+				}
+			};
+			btnInteriorBrowse.addSelectionListener(imageBrowseListener);
+
+			SelectionAdapter imageClearListener = new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Systems sys = container.getActiveSystem(roomC.getGameObject());
+					SystemController system = container.getSystemController(sys);
+
+					system.setInteriorPath(null);
+					updateData();
+				}
+			};
+			btnInteriorClear.addSelectionListener(imageClearListener);
+
+			btnGlow.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Systems sys = container.getActiveSystem(roomC.getGameObject());
+					SystemObject systemObject = container.getSystemController(sys).getGameObject();
+
+					GlowSelectionDialog dialog = new GlowSelectionDialog(EditorWindow.getInstance().getShell());
+					GlowSet glowSet = dialog.open(systemObject);
+
+					if (glowSet != null) {
+						btnGlow.setText(glowSet.getIdentifier());
+						systemObject.setGlowSet(glowSet);
 					}
 				}
 			});
 		}
-
-		imagesComposite = new Composite(this, SWT.NONE);
-		GridLayout gl_imagesComposite = new GridLayout(4, false);
-		gl_imagesComposite.marginHeight = 0;
-		gl_imagesComposite.marginWidth = 0;
-		imagesComposite.setLayout(gl_imagesComposite);
-		imagesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-
-		// Interior widgets
-		Label lblInterior = new Label(imagesComposite, SWT.NONE);
-		lblInterior.setText("Interior image:");
-
-		btnInteriorView = new Button(imagesComposite, SWT.NONE);
-		btnInteriorView.setEnabled(false);
-		btnInteriorView.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		btnInteriorView.setText("View");
-
-		btnInteriorBrowse = new Button(imagesComposite, SWT.NONE);
-		btnInteriorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnInteriorBrowse.setText("Browse");
-
-		btnInteriorClear = new Button(imagesComposite, SWT.NONE);
-		btnInteriorClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btnInteriorClear.setText("Clear");
-
-		txtInterior = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
-		txtInterior.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
-
-		// Glow widgets
-		lblGlow = new Label(imagesComposite, SWT.NONE);
-		lblGlow.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblGlow.setText("Manning glow:");
-
-		btnGlow = new Button(imagesComposite, SWT.NONE);
-		GridData gd_btnGlow = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1);
-		gd_btnGlow.widthHint = 120;
-		btnGlow.setLayoutData(gd_btnGlow);
-		btnGlow.setText("None");
 
 		btnSystem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -199,76 +273,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				SystemController system = container.getSystemController(sys);
 				system.setAvailableAtStart(btnAvailable.getSelection());
 				roomC.redraw();
-			}
-		});
-
-		SelectionAdapter imageViewListener = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getActiveSystem(roomC.getGameObject());
-				SystemController system = container.getSystemController(sys);
-				File file = new File(system.getInteriorPath());
-
-				if (file != null && file.exists()) {
-					if (Desktop.isDesktopSupported()) {
-						Desktop desktop = Desktop.getDesktop();
-						if (desktop != null) {
-							try {
-								desktop.open(file.getParentFile());
-							} catch (IOException ex) {
-							}
-						}
-					} else {
-						Superluminal.log.error("Unable to open file location - AWT Desktop not supported.");
-					}
-				}
-			}
-		};
-		btnInteriorView.addSelectionListener(imageViewListener);
-
-		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getActiveSystem(roomC.getGameObject());
-				SystemController system = container.getSystemController(sys);
-				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
-				dialog.setFilterExtensions(new String[] { "*.png" });
-				String path = dialog.open();
-
-				// path == null only when user cancels
-				if (path != null) {
-					system.setInteriorPath("file:" + path);
-					updateData();
-				}
-			}
-		};
-		btnInteriorBrowse.addSelectionListener(imageBrowseListener);
-
-		SelectionAdapter imageClearListener = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getActiveSystem(roomC.getGameObject());
-				SystemController system = container.getSystemController(sys);
-
-				system.setInteriorPath(null);
-				updateData();
-			}
-		};
-		btnInteriorClear.addSelectionListener(imageClearListener);
-
-		btnGlow.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getActiveSystem(roomC.getGameObject());
-				SystemObject systemObject = container.getSystemController(sys).getGameObject();
-
-				GlowSelectionDialog dialog = new GlowSelectionDialog(EditorWindow.getInstance().getShell());
-				GlowSet glowSet = dialog.open(systemObject);
-
-				if (glowSet != null) {
-					btnGlow.setText(glowSet.getIdentifier());
-					systemObject.setGlowSet(glowSet);
-				}
 			}
 		});
 
@@ -296,13 +300,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 		btnSystem.setText(system.toString());
 
-		// Enable/disable buttons
-		btnInteriorBrowse.setEnabled(system.canContainInterior());
-		btnInteriorClear.setEnabled(system.canContainInterior());
-		btnInteriorView.setEnabled(system.getInteriorPath() != null);
-
-		btnGlow.setEnabled(system.canContainGlow() && playerShip);
-
 		btnAvailable.setEnabled(system.getSystemId() != Systems.EMPTY);
 		scaleSysLevel.setEnabled(system.getSystemId() != Systems.EMPTY);
 		if (!playerShip)
@@ -312,38 +309,47 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			// Update widgets with the system's data
 			btnAvailable.setSelection(system.isAvailableAtStart());
 
-			if (!playerShip) {
-				scaleMaxLevel.setMaximum(system.getLevelCap());
-				scaleMaxLevel.setSelection(system.getLevelMax());
-				scaleMaxLevel.notifyListeners(SWT.Selection, null);
-			}
 			scaleSysLevel.setMaximum(playerShip ? system.getLevelCap() : scaleMaxLevel.getSelection());
 			scaleSysLevel.setSelection(system.getLevel());
 			scaleSysLevel.notifyListeners(SWT.Selection, null);
 
-			String temp = system.getInteriorPath();
-			txtInterior.setText(temp == null ? "" : IOUtils.trimProtocol(temp));
-			txtInterior.selectAll();
-			txtInterior.clearSelection();
+			if (!playerShip) {
+				scaleMaxLevel.setMaximum(system.getLevelCap());
+				scaleMaxLevel.setSelection(system.getLevelMax());
+				scaleMaxLevel.notifyListeners(SWT.Selection, null);
 
-			if (system.canContainGlow() && playerShip) {
-				btnGlow.setText(system.getGameObject().getGlowSet().getIdentifier());
+				scaleSysLevel.setEnabled(scaleMaxLevel.getSelection() > 1);
 			} else {
-				btnGlow.setText("None");
+				btnInteriorBrowse.setEnabled(system.canContainInterior());
+				btnInteriorClear.setEnabled(system.canContainInterior());
+				btnInteriorView.setEnabled(system.getInteriorPath() != null);
+
+				String temp = system.getInteriorPath();
+				txtInterior.setText(temp == null ? "" : IOUtils.trimProtocol(temp));
+				txtInterior.selectAll();
+				txtInterior.clearSelection();
+
+				btnGlow.setEnabled(system.canContainGlow());
+				if (system.canContainGlow() && playerShip) {
+					btnGlow.setText(system.getGameObject().getGlowSet().getIdentifier());
+				} else {
+					btnGlow.setText("None");
+				}
 			}
 		} else {
 			// No system - reset to default
-			if (!playerShip) {
-				scaleMaxLevel.setMaximum(2);
-				scaleMaxLevel.setSelection(1);
-				txtMaxLevel.setText("");
-			}
 			scaleSysLevel.setMaximum(2);
 			scaleSysLevel.setSelection(1);
 			txtSysLevel.setText("");
 
-			txtInterior.setText("");
-			btnGlow.setText("None");
+			if (!playerShip) {
+				scaleMaxLevel.setMaximum(2);
+				scaleMaxLevel.setSelection(1);
+				txtMaxLevel.setText("");
+			} else {
+				txtInterior.setText("");
+				btnGlow.setText("None");
+			}
 		}
 		OverviewWindow.staticUpdate(roomC);
 	}
