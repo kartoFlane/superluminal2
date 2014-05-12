@@ -38,7 +38,8 @@ public class ShipObject extends GameObject {
 
 	private HashMap<Systems, SystemObject> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
-	private HashMap<Races, Integer> crewCountMap;
+	private ArrayList<Races> crewList;
+	private HashMap<Races, Integer> crewMinMap;
 	private HashMap<Races, Integer> crewMaxMap;
 
 	private ArrayList<AugmentObject> augments;
@@ -78,7 +79,8 @@ public class ShipObject extends GameObject {
 		systemMap = new HashMap<Systems, SystemObject>();
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
-		crewCountMap = new HashMap<Races, Integer>();
+		crewList = new ArrayList<Races>();
+		crewMinMap = new HashMap<Races, Integer>();
 		crewMaxMap = new HashMap<Races, Integer>();
 
 		weapons = new ArrayList<WeaponObject>();
@@ -100,10 +102,12 @@ public class ShipObject extends GameObject {
 			object.setAlias(image.name().toLowerCase());
 			imageMap.put(image, object);
 		}
-		for (Races race : Races.values()) {
-			crewCountMap.put(race, 0);
+		for (Races race : Races.getRaces()) {
+			crewMinMap.put(race, 0);
 			crewMaxMap.put(race, 0);
 		}
+		for (int i = 0; i < 8; i++)
+			crewList.add(Races.NO_CREW);
 	}
 
 	public ShipObject(boolean isPlayer) {
@@ -717,15 +721,72 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
+	 * Puts the new race at the specified index in the race list.
+	 */
+	public void changeCrew(int index, Races neu) {
+		if (neu == null)
+			throw new IllegalArgumentException("New augment must not be null.");
+		if (index < 0 || index > 3)
+			throw new IllegalArgumentException("Index is out of bounds: " + index);
+		crewList.set(index, neu);
+		coalesceCrew();
+	}
+
+	/**
+	 * Removes the first occurence of the old race, and puts the new race in its place.
+	 * 
+	 * @return index at which the new race was placed
+	 */
+	public int changeCrew(Races old, Races neu) {
+		if (old == null)
+			throw new IllegalArgumentException("Old augment must not be null.");
+		if (neu == null)
+			throw new IllegalArgumentException("New augment must not be null.");
+
+		int i = crewList.indexOf(old);
+		if (i == -1)
+			throw new IllegalArgumentException("Old crew not found.");
+		crewList.set(i, neu);
+		return i;
+	}
+
+	public int getCrewCount(Races old) {
+		int result = 0;
+		for (Races race : crewList) {
+			if (race == old)
+				result++;
+		}
+		return result;
+	}
+
+	public Races[] getCrew() {
+		return crewList.toArray(new Races[0]);
+	}
+
+	/**
+	 * Coalesces the crew list, moving all null entries to the end of the list, so that
+	 * there are no gaps between real crew members.
+	 */
+	private void coalesceCrew() {
+		for (int i = 0; i < crewList.size(); i++) {
+			Races crew = crewList.get(i);
+			if (crew == Races.NO_CREW) {
+				crewList.remove(crew);
+				crewList.add(crew);
+			}
+		}
+	}
+
+	/**
 	 * If player ship - the amount of crew members of the given race that the ship starts with<br>
 	 * If enemy ship - the minimum amount of crew members of the given race that the ship can have
 	 */
-	public void setCrewCount(Races race, int amount) {
+	public void setCrewMin(Races race, int amount) {
 		if (race == null)
 			throw new IllegalArgumentException("Race must not be null.");
 		if (amount < 0)
 			throw new IllegalArgumentException("Amount must be non-negative.");
-		crewCountMap.put(race, amount);
+		crewMinMap.put(race, amount);
 	}
 
 	/**
@@ -734,10 +795,10 @@ public class ShipObject extends GameObject {
 	 *         if enemy ship -
 	 *         the minimum amount of crew members of the given race that the ship can have.
 	 */
-	public int getCrewCount(Races race) {
+	public int getCrewMin(Races race) {
 		if (race == null)
 			throw new IllegalArgumentException("Race must not be null.");
-		return crewCountMap.get(race);
+		return crewMinMap.get(race);
 	}
 
 	/**

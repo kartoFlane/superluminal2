@@ -210,8 +210,7 @@ public class ShipLoadUtils {
 				} else if (isPlayer) {
 					// No 'img' attribute, use default
 					system.setInteriorNamespace(system.getSystemId().getDefaultInteriorNamespace());
-					if (system.getInteriorNamespace() != null)
-						system.setInteriorPath("db:img/ship/interior/" + system.getInteriorNamespace() + ".png");
+					system.setInteriorPath(null);
 				} else {
 					// Enemy ships' systems don't use interior images or glows
 					system.setInteriorNamespace(null);
@@ -414,12 +413,18 @@ public class ShipLoadUtils {
 				throw new IllegalArgumentException("Race class not recognised: " + attr);
 			}
 
-			attr = crew.getAttributeValue("amount");
-			if (attr == null)
-				throw new IllegalArgumentException("<crewCount> tag is missing 'amount' attribute.");
-			ship.setCrewCount(race, Integer.valueOf(attr));
+			if (ship.isPlayerShip()) {
+				attr = crew.getAttributeValue("amount");
+				if (attr == null)
+					throw new IllegalArgumentException("<crewCount> tag is missing 'amount' attribute.");
+				for (int i = 0; i < Integer.valueOf(attr); i++)
+					ship.changeCrew(Races.NO_CREW, race);
+			} else {
+				attr = crew.getAttributeValue("amount");
+				if (attr == null)
+					throw new IllegalArgumentException("<crewCount> tag is missing 'amount' attribute.");
+				ship.setCrewMin(race, Integer.valueOf(attr));
 
-			if (!ship.isPlayerShip()) {
 				attr = crew.getAttributeValue("max");
 				if (attr == null)
 					throw new IllegalArgumentException("<crewCount> tag is missing 'max' attribute.");

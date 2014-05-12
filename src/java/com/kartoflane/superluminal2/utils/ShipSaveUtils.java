@@ -387,23 +387,30 @@ public class ShipSaveUtils {
 			shipBlueprint.addContent(e); // Add <maxSector> to <shipBlueprint>
 		}
 
-		for (Races race : Races.values()) {
-			int amount = ship.getCrewCount(race);
-			int max = ship.getCrewMax(race);
+		if (ship.isPlayerShip()) {
+			for (Races race : ship.getCrew()) {
+				if (race == Races.NO_CREW)
+					continue;
+				e = new Element("crewCount");
+				e.setAttribute("amount", "1");
+				e.setAttribute("class", race.name().toLowerCase());
 
-			// 'amount' is shared between player and enemy ships
-			e = new Element("crewCount");
-			e.setAttribute("amount", "" + amount);
-
-			// 'max' is exclusive to enemy ships
-			if (!ship.isPlayerShip())
-				e.setAttribute("max", "" + max);
-
-			e.setAttribute("class", race.name().toLowerCase());
-
-			// Don't print an empty tag
-			if (amount > 0 && (ship.isPlayerShip() || max > 0))
 				shipBlueprint.addContent(e); // Add <crewCount> to <shipBlueprint>
+			}
+		} else {
+			for (Races race : Races.getRaces()) {
+				int amount = ship.getCrewMin(race);
+				int max = ship.getCrewMax(race);
+
+				e = new Element("crewCount");
+				e.setAttribute("amount", "" + amount);
+				e.setAttribute("max", "" + max);
+				e.setAttribute("class", race.name().toLowerCase());
+
+				// Don't print an empty tag
+				if (amount > 0 && (ship.isPlayerShip() || max > 0))
+					shipBlueprint.addContent(e); // Add <crewCount> to <shipBlueprint>
+			}
 		}
 
 		for (AugmentObject aug : ship.getAugments()) {
