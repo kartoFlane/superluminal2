@@ -142,7 +142,7 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 
 	@Override
 	public String toString() {
-		return shortName;
+		return title;
 	}
 
 	@Override

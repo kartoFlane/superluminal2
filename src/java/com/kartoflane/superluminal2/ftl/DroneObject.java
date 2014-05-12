@@ -104,7 +104,7 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 
 	@Override
 	public String toString() {
-		return shortName;
+		return title;
 	}
 
 	@Override
