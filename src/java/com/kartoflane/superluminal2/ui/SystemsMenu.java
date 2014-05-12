@@ -17,7 +17,6 @@ import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
-import com.kartoflane.superluminal2.ui.sidebar.data.RoomDataComposite;
 
 public class SystemsMenu {
 
@@ -25,7 +24,7 @@ public class SystemsMenu {
 
 	private ShipContainer container = null;
 	private RoomController controller = null;
-	private RoomDataComposite dataComposite = null;
+	private ManipulationToolComposite mtc = null;
 
 	private Menu systemMenu;
 	private Menu menuAssign;
@@ -66,11 +65,12 @@ public class SystemsMenu {
 	public void open() {
 		if (Manager.getSelectedToolId() != Tools.POINTER)
 			throw new IllegalStateException("Manipulation tool is not selected.");
+		if (Manager.getSelected() == null)
+			throw new IllegalStateException("The select controller is null.");
 		if (Manager.getSelected() instanceof RoomController == false)
 			throw new IllegalStateException("The selected controller is not a RoomController.");
 
-		ManipulationToolComposite mtc = (ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent();
-		dataComposite = (RoomDataComposite) mtc.getDataComposite();
+		mtc = (ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent();
 		container = Manager.getCurrentShip();
 
 		Systems sys = container.getActiveSystem(controller.getGameObject());
@@ -83,10 +83,11 @@ public class SystemsMenu {
 			item.setSelection(roomSystem.getSystemId() == systemId);
 
 			if (container.isAssigned(systemId)) {
+				Cache.checkInImage(item, systemId.getSmallIcon());
 				item.setImage(Cache.checkOutImage(item, "cpath:/assets/tick.png"));
 			} else {
 				Cache.checkInImage(item, "cpath:/assets/tick.png");
-				item.setImage(null);
+				item.setImage(Cache.checkOutImage(item, systemId.getSmallIcon()));
 			}
 		}
 
@@ -251,7 +252,7 @@ public class SystemsMenu {
 					container.assign(Systems.BATTERY, controller);
 				}
 
-				dataComposite.updateData();
+				mtc.updateData();
 				controller.redraw();
 				OverviewWindow.staticUpdate(controller);
 			}
@@ -293,7 +294,7 @@ public class SystemsMenu {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				container.setActiveSystem(controller.getGameObject(), sys);
-				dataComposite.updateData();
+				mtc.updateData();
 			}
 		});
 
@@ -301,7 +302,7 @@ public class SystemsMenu {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				container.unassign(sys);
-				dataComposite.updateData();
+				mtc.updateData();
 			}
 		});
 
