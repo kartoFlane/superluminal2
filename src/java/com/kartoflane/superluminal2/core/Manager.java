@@ -43,6 +43,13 @@ public class Manager {
 	/** In 'path/file.ext/inner' matches 'path/file.ext' */
 	private static final Pattern FILE_PTRN = Pattern.compile(".+\\.[^/]+(?=/)");
 
+	/**
+	 * SWT uses the default ampersand char (\u0026) for some platform-specific stuff, resulting
+	 * in the character not appearing in tooltips, etc.
+	 * Using the fullwidth ampersand allows to work around that.
+	 */
+	public static final char AMPERSAND = '\uFF06';
+
 	public static final HashMap<Tools, Tool> TOOL_MAP = new HashMap<Tools, Tool>();
 	public static final LinkedList<Deletable> DELETED_LIST = new LinkedList<Deletable>();
 	public static final HashMap<Hotkeys, Hotkey> HOTKEY_MAP = new HashMap<Hotkeys, Hotkey>();
@@ -55,6 +62,8 @@ public class Manager {
 	public static boolean checkUpdates = true;
 	public static Point windowSize = null;
 	public static String resourcePath = "";
+	public static boolean allowRoomOverlap = false;
+	public static boolean shownSlotWarning = false;
 
 	// Runtime variables
 	public static boolean leftMouseDown = false;
@@ -62,7 +71,6 @@ public class Manager {
 	public static boolean modShift = false;
 	public static boolean modAlt = false;
 	public static boolean modCtrl = false;
-	public static boolean allowRoomOverlap = false;
 
 	private static AbstractController selectedController;
 	private static ShipContainer currentShip = null;
@@ -106,7 +114,7 @@ public class Manager {
 		EditorWindow.getInstance().enableOptions(true);
 		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
-		selectTool(Tools.POINTER);
+		selectTool(Tools.CONFIG);
 		OverviewWindow.staticUpdate();
 	}
 
@@ -128,7 +136,7 @@ public class Manager {
 		EditorWindow.getInstance().enableOptions(true);
 		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
-		selectTool(Tools.POINTER);
+		selectTool(Tools.CONFIG);
 		OverviewWindow.staticUpdate();
 	}
 

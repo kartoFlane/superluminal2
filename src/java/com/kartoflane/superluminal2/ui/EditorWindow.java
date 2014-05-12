@@ -48,6 +48,7 @@ import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.DoorTool;
 import com.kartoflane.superluminal2.tools.GibTool;
+import com.kartoflane.superluminal2.tools.ImagesTool;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.tools.MountTool;
 import com.kartoflane.superluminal2.tools.PropertyTool;
@@ -84,6 +85,7 @@ public class EditorWindow {
 	private ToolItem tltmCreation;
 	private ToolItem tltmGib;
 	private ToolItem tltmProperties;
+	private ToolItem tltmImages;
 	private ToolItem tltmManager;
 
 	private MenuItem mntmUndo;
@@ -134,6 +136,7 @@ public class EditorWindow {
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
 		Manager.TOOL_MAP.put(Tools.GIB, new GibTool(this));
+		Manager.TOOL_MAP.put(Tools.IMAGES, new ImagesTool(this));
 		Manager.TOOL_MAP.put(Tools.CONFIG, new PropertyTool(this));
 		Manager.TOOL_MAP.put(Tools.ROOM, new RoomTool(this));
 		Manager.TOOL_MAP.put(Tools.DOOR, new DoorTool(this));
@@ -312,7 +315,7 @@ public class EditorWindow {
 		tltmCreation.setImage(Cache.checkOutImage(this, "cpath:/assets/wrench.png"));
 		tltmCreation.addSelectionListener(toolSelectionAdapter);
 		tltmCreation.setData(Tools.CREATOR);
-		tltmCreation.setToolTipText(String.format("Creation Tool (%s)", Manager.getHotkey(Hotkeys.CREATE_TOOL)));
+		tltmCreation.setToolTipText(String.format("Layout Creation Tool (%s)", Manager.getHotkey(Hotkeys.CREATE_TOOL)));
 		toolItemMap.put(Tools.CREATOR, tltmCreation);
 
 		// Gib tool
@@ -323,12 +326,20 @@ public class EditorWindow {
 		tltmGib.setToolTipText(String.format("Gib Tool (%s)", Manager.getHotkey(Hotkeys.GIB_TOOL)));
 		toolItemMap.put(Tools.GIB, tltmGib);
 
+		// Images button
+		tltmImages = new ToolItem(toolBar, SWT.RADIO);
+		tltmImages.setImage(Cache.checkOutImage(this, "cpath:/assets/images.png"));
+		tltmImages.addSelectionListener(toolSelectionAdapter);
+		tltmImages.setData(Tools.IMAGES);
+		tltmImages.setToolTipText(String.format("Ship Images (%s)", Manager.getHotkey(Hotkeys.IMAGES_TOOL)));
+		toolItemMap.put(Tools.IMAGES, tltmImages);
+
 		// Properties button
 		tltmProperties = new ToolItem(toolBar, SWT.RADIO);
 		tltmProperties.setImage(Cache.checkOutImage(this, "cpath:/assets/system.png"));
 		tltmProperties.addSelectionListener(toolSelectionAdapter);
 		tltmProperties.setData(Tools.CONFIG);
-		tltmProperties.setToolTipText(String.format("Properties (%s)", Manager.getHotkey(Hotkeys.PROPERTIES_TOOL)));
+		tltmProperties.setToolTipText(String.format("Ship Loadout " + Manager.AMPERSAND + " Properties (%s)", Manager.getHotkey(Hotkeys.PROPERTIES_TOOL)));
 		toolItemMap.put(Tools.CONFIG, tltmProperties);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
@@ -367,6 +378,7 @@ public class EditorWindow {
 
 		// Editor container - canvas, sidebar
 		editorContainer = new SashForm(mainContainer, SWT.SMOOTH);
+		editorContainer.setSashWidth(7);
 		editorContainer.setLayout(new FormLayout());
 		editorContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
@@ -636,7 +648,7 @@ public class EditorWindow {
 				Manager.getCurrentShip().getShipController().getGameObject().resetDoorLinks();
 				if (Manager.getSelected() != null) {
 					ManipulationToolComposite mtc = (ManipulationToolComposite) getSidebarContent();
-					mtc.getDataComposite().updateData();
+					mtc.updateData();
 				}
 			}
 		});
@@ -916,6 +928,7 @@ public class EditorWindow {
 		tltmPointer.setEnabled(enable);
 		tltmCreation.setEnabled(enable);
 		tltmGib.setEnabled(enable);
+		tltmImages.setEnabled(enable);
 		tltmProperties.setEnabled(enable);
 		tltmManager.setEnabled(enable);
 		tltmCloak.setEnabled(enable);

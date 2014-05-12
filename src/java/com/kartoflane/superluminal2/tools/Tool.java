@@ -29,6 +29,7 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 		CREATOR,
 		GIB,
 		CONFIG,
+		IMAGES,
 		ROOM,
 		DOOR,
 		WEAPON,

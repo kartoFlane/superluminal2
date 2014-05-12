@@ -37,7 +37,7 @@ public class CreationToolComposite extends Composite {
 
 		Label label = new Label(this, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
-		label.setText("Creation Tool");
+		label.setText("Layout Creation Tool");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));

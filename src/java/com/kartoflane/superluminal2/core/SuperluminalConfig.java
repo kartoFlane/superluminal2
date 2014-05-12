@@ -23,6 +23,8 @@ public class SuperluminalConfig {
 	public static final String CHECK_UPDATES = "checkUpdatesOnStartup";
 	public static final String ALLOW_OVERLAP = "allowRoomOverlap";
 
+	public static final String SLOT_WARNING = "shownSlotWarning";
+
 	public SuperluminalConfig(Properties config, File configFile) {
 		this.config = config;
 		this.configFile = configFile;
@@ -36,6 +38,7 @@ public class SuperluminalConfig {
 		config.setProperty(SuperluminalConfig.GEOMETRY, "");
 		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "true");
 		config.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "false");
+		config.setProperty(SuperluminalConfig.SLOT_WARNING, "false");
 	}
 
 	/**

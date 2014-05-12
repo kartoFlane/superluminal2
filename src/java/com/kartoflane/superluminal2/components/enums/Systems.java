@@ -115,4 +115,13 @@ public enum Systems {
 				return null;
 		}
 	}
+
+	public String getIcon() {
+		return "cpath:/assets/system/" + toString().toLowerCase() + ".png";
+	}
+
+	public String getSmallIcon() {
+		return "cpath:/assets/smallsystem/" + toString().toLowerCase() + ".png";
+
+	}
 }

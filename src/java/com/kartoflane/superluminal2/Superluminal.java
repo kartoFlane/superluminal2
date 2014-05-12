@@ -39,7 +39,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta2");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -53,8 +53,17 @@ public class Superluminal {
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - ship offset modification
 	 * - properties: crew tab
+	 * - weapon selection reportedly clunky -> remember previous selection, + search function?
+	 * - artillery weapon UI idea:
+	 * Additionally, when placing artillery room(s), there should be a separate category under Armaments for Artillery weapons, and the selection of such for each. The best way, in my opinion, is to
+	 * have the categories Weapons, Drones, Artillery, and Augments. Under Artillery, a number of slot selector should be added (with a warning that having more than one artillery weapon will prevent
+	 * the second, third, etc weapons from being accessed/disabled/enabled during play), to allow the builder to select the weapons for the artillery. From my understanding, any weapon in the game can
+	 * be used in an artillery slot, but can only fire based on the artillery cooldown. In addition, for each slot that a person wants to set up artillery for, a Power selector (max 4 - though can it
+	 * be exceeded? If so, add it. :P) should be added to the right of each Artillery weapon choice, so that way it will make adding multiple-artillery setups to AI (or human-controlled) ships much
+	 * easier.
+	 * 
+	 * - ship offset modification
 	 * - add gibs
 	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
@@ -68,6 +77,9 @@ public class Superluminal {
 	 * - entity deletion --> add (to) undo
 	 * - undo przy pomocy reflection -- UndoableBooleanFieldEdit, etc ?? ...chyba nie
 	 * 
+	 * Suggestions:
+	 * - detachable toolbar?
+	 * - detachable sidebar elements?
 	 */
 
 	public static void main(String[] args) {
@@ -113,6 +125,7 @@ public class Superluminal {
 		Manager.startMaximised = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.START_MAX));
 		Manager.closeLoader = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CLOSE_LOADER));
 		Manager.allowRoomOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP));
+		Manager.shownSlotWarning = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SLOT_WARNING));
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();
@@ -241,6 +254,7 @@ public class Superluminal {
 			appConfig.setProperty(SuperluminalConfig.CHECK_UPDATES, "" + Manager.checkUpdates);
 			appConfig.setProperty(SuperluminalConfig.CLOSE_LOADER, "" + Manager.closeLoader);
 			appConfig.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
+			appConfig.setProperty(SuperluminalConfig.SLOT_WARNING, "" + Manager.shownSlotWarning);
 			if (Manager.rememberGeometry && !Manager.startMaximised)
 				appConfig.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 			appConfig.writeConfig();
@@ -324,7 +338,10 @@ public class Superluminal {
 				log.warn("An error has occured while displaying update result.", e);
 			}
 		} else {
-			log.info("Program is up to date.");
+			if (APP_VERSION.compareTo(remoteVersion[0]) == 0)
+				log.info("Program is up to date.");
+			else
+				log.info("Program is up to date. (actually ahead)");
 			if (manual) {
 				// The user manually initiated the version check, so probably expects some kind of response in either case.
 				UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, APP_NAME + " is up to date.");
@@ -347,7 +364,8 @@ public class Superluminal {
 		Manager.getHotkey(Hotkeys.POINTER_TOOL).setKey('q');
 		Manager.getHotkey(Hotkeys.CREATE_TOOL).setKey('w');
 		Manager.getHotkey(Hotkeys.GIB_TOOL).setKey('e');
-		Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).setKey('r');
+		Manager.getHotkey(Hotkeys.IMAGES_TOOL).setKey('r');
+		Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).setKey('t');
 		Manager.getHotkey(Hotkeys.ROOM_TOOL).setKey('a');
 		Manager.getHotkey(Hotkeys.DOOR_TOOL).setKey('s');
 		Manager.getHotkey(Hotkeys.MOUNT_TOOL).setKey('d');
