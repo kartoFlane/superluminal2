@@ -1,5 +1,5 @@
 <versions>
-	<latest id="2.0.0 beta" url="https://sourceforge.net/projects/superluminal2/" />
+	<latest id="2.0.0 beta2" url="https://www.dropbox.com/sh/o6cqrz0iatyaja7/AAC3yKcTx36V20VdkKguQkw8a" />
 	<changelog>
 		<version id="2.0.0 beta2">
 			<change>Fixed several crashes</change>
