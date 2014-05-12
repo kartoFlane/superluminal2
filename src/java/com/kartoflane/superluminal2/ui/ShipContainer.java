@@ -147,6 +147,8 @@ public class ShipContainer implements Disposable {
 		}
 
 		createImageControllers();
+
+		updateBoundingArea();
 	}
 
 	public void updateGameObjects() {
@@ -358,7 +360,7 @@ public class ShipContainer implements Disposable {
 	public void add(AbstractController controller) {
 		if (controller instanceof RoomController) {
 			RoomController room = (RoomController) controller;
-			if (room.getId() == -2)
+			if (room.getId() == Database.AIRLOCK_OBJECT.getId())
 				room.setId(getNextRoomId());
 			roomControllers.add(room);
 			shipController.getGameObject().add(room.getGameObject());
