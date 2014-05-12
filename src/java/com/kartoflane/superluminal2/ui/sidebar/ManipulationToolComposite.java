@@ -22,7 +22,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
-public class ManipulationToolComposite extends Composite implements DataComposite {
+public class ManipulationToolComposite extends Composite {
 	private Button btnPinned;
 
 	private Composite boundsContainer;
@@ -199,7 +199,6 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		controller.redraw();
 	}
 
-	@Override
 	public void setController(AbstractController controller) {
 		dataLoad = true;
 
@@ -218,13 +217,13 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 			setEnabled(true);
 
 			if (this.controller != null && this.controller.getClass().equals(controller.getClass())) {
-				// if the previously selected object is of the same type as the newly
+				// If the previously selected object is of the same type as the newly
 				// selected one, don't dispose the composite -- just update it with new data
 				DataComposite dc = getDataComposite();
 				dc.setController(controller);
 				dc.updateData();
 			} else {
-				// if they are of different types, or no object was previously selected,
+				// If they are of different types, or no object was previously selected,
 				// create a new composite and insert it into the data container
 				Composite c = (Composite) getDataComposite();
 				if (c != null)
@@ -245,7 +244,7 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		EditorWindow.getInstance().updateSidebarScroll();
 	}
 
-	public DataComposite getDataComposite() {
+	private DataComposite getDataComposite() {
 		if (dataContainer.getChildren().length == 0)
 			return null;
 		else
@@ -270,6 +269,9 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		btnDown.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		btnRight.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 		spNudge.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+
+		if (getDataComposite() != null)
+			getDataComposite().updateData();
 
 		dataLoad = false;
 	}

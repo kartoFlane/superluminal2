@@ -10,19 +10,20 @@ import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
+import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
-import com.kartoflane.superluminal2.ui.sidebar.data.DoorDataComposite;
 
 public class ManipulationTool extends Tool {
 
 	private enum States {
 		NORMAL,
 		ROOM_RESIZE,
-		DOOR_LINK
+		DOOR_LINK_LEFT,
+		DOOR_LINK_RIGHT
 	}
 
 	private States state = States.NORMAL;
@@ -81,13 +82,22 @@ public class ManipulationTool extends Tool {
 		return state == States.NORMAL;
 	}
 
-	public void setStateDoorLink() {
-		state = States.DOOR_LINK;
+	public void setStateDoorLinkLeft() {
+		state = States.DOOR_LINK_LEFT;
 		cursor.updateView();
 	}
 
-	public boolean isStateDoorLink() {
-		return state == States.DOOR_LINK;
+	public void setStateDoorLinkRight() {
+		state = States.DOOR_LINK_RIGHT;
+		cursor.updateView();
+	}
+
+	public boolean isStateDoorLinkLeft() {
+		return state == States.DOOR_LINK_LEFT;
+	}
+
+	public boolean isStateDoorLinkRight() {
+		return state == States.DOOR_LINK_RIGHT;
 	}
 
 	public void setStateRoomResize() {
@@ -133,7 +143,7 @@ public class ManipulationTool extends Tool {
 			cursor.resize(room.getSize());
 			cursor.reposition(room.getLocation());
 
-		} else if (state == States.DOOR_LINK) {
+		} else if (state == States.DOOR_LINK_LEFT || state == States.DOOR_LINK_RIGHT) {
 			// get the controller at the mouse click pos, and if found, notify it about mouseDown event
 			AbstractController control = null;
 			for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
@@ -144,11 +154,15 @@ public class ManipulationTool extends Tool {
 				}
 			}
 
-			// TODO rework
+			RoomController roomC = control instanceof RoomController ? (RoomController) control : null;
+			DoorController doorC = (DoorController) Manager.getSelected();
+
+			if (state == States.DOOR_LINK_LEFT)
+				doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
+			else
+				doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
 			ManipulationToolComposite mtc = (ManipulationToolComposite) window.getSidebarContent();
-			DoorDataComposite ddc = (DoorDataComposite) mtc.getDataComposite();
-			RoomController roomController = control instanceof RoomController ? (RoomController) control : null;
-			ddc.linkDoor(roomController);
+			mtc.updateData();
 
 			setStateManipulate();
 		}
@@ -195,7 +209,6 @@ public class ManipulationTool extends Tool {
 			if (!room.isResizing())
 				setStateManipulate();
 
-		} else if (state == States.DOOR_LINK) {
 		}
 	}
 
@@ -264,7 +277,7 @@ public class ManipulationTool extends Tool {
 			if (!room.isResizing())
 				setStateManipulate();
 
-		} else if (state == States.DOOR_LINK) {
+		} else if (state == States.DOOR_LINK_LEFT || state == States.DOOR_LINK_RIGHT) {
 			// move the cursor around to follow mouse
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
 			// always redraw it - prevents an odd visual bug where the controller sometimes doesn't register that it was moved

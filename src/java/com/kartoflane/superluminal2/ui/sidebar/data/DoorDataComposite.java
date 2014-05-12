@@ -23,8 +23,6 @@ public class DoorDataComposite extends Composite implements DataComposite {
 	private static final String selectRoomText = "Select a room";
 
 	private ManipulationTool tool = null;
-	/** Determines which door's link is being set during linking */
-	private boolean leftLinking = true;
 
 	private Button btnHorizontal;
 	private Button btnIdLeft;
@@ -105,8 +103,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 				if (btn.getSelection()) {
 					btn.setText(selectRoomText);
 					btnIdRight.setEnabled(false);
-					leftLinking = true;
-					tool.setStateDoorLink();
+					tool.setStateDoorLinkLeft();
 				} else {
 					RoomObject room = controller.getLeftRoom();
 					btn.setText(room == null ? autolinkText : room.toString());
@@ -124,8 +121,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 				if (btn.getSelection()) {
 					btn.setText(selectRoomText);
 					btnIdLeft.setEnabled(false);
-					leftLinking = false;
-					tool.setStateDoorLink();
+					tool.setStateDoorLinkRight();
 				} else {
 					RoomObject room = controller.getRightRoom();
 					btn.setText(room == null ? autolinkText : room.toString());
@@ -156,6 +152,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 	public void updateData() {
 		controller.verifyLinks();
 
+		RoomObject linkedRoom = null;
 		String alias = controller.getAlias();
 		label.setText("Door" + (alias == null || alias.equals("") ? "" : " (" + alias + ")"));
 
@@ -164,29 +161,20 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		lblIdLeft.setText((controller.isHorizontal() ? "Upper" : "Left") + " ID:");
 		lblIdRight.setText((controller.isHorizontal() ? "Lower" : "Right") + " ID:");
 
-		RoomObject linkedRoom = controller.getLeftRoom();
+		linkedRoom = controller.getLeftRoom();
 		btnIdLeft.setText(linkedRoom == null ? autolinkText : linkedRoom.toString());
+		btnIdLeft.setEnabled(true);
+		btnIdLeft.setSelection(false);
 		btnSelectLeft.setEnabled(linkedRoom != null);
+
 		linkedRoom = controller.getRightRoom();
 		btnIdRight.setText(linkedRoom == null ? autolinkText : linkedRoom.toString());
+		btnIdRight.setEnabled(true);
+		btnIdRight.setSelection(false);
 		btnSelectRight.setEnabled(linkedRoom != null);
 
 		lblIdLeft.pack();
 		lblIdRight.pack();
-	}
-
-	public void linkDoor(RoomController room) {
-		if (leftLinking) {
-			controller.setLeftRoom(room == null ? null : room.getGameObject());
-			btnIdLeft.setSelection(false);
-			btnIdRight.setEnabled(true);
-			updateData();
-		} else {
-			controller.setRightRoom(room == null ? null : room.getGameObject());
-			btnIdLeft.setEnabled(true);
-			btnIdRight.setSelection(false);
-			updateData();
-		}
 	}
 
 	@Override
