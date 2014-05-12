@@ -62,7 +62,7 @@
 									<Built-By>kartoFlane</Built-By>
 								</manifestEntries>
 							</archive>
-							<finalName>superluminal2-linux64</finalName>
+							<finalName>superluminal2-linux</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 					</execution>

@@ -27,7 +27,7 @@
 			<directory>${project.build.directory}</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>superluminal2-linux64.jar</include>
+				<include>superluminal2-linux.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>

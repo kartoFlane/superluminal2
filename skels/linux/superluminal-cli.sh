@@ -8,4 +8,4 @@ else
 fi
 
 cd "${maindir}";
-java -jar superluminal2.jar "$@";
+java -jar superluminal2-linux.jar "$@";
