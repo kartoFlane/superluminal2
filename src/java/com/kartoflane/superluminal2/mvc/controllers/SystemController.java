@@ -29,6 +29,7 @@ public class SystemController extends ObjectController implements Controller {
 		setLocModifiable(false);
 
 		setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+		setInteriorPath(getInteriorPath());
 	}
 
 	/**
@@ -117,9 +118,21 @@ public class SystemController extends ObjectController implements Controller {
 	 * @see {@link Cache#checkOutImage(Object, String)}
 	 */
 	public void setInteriorPath(String interiorPath) {
-		File f = new File(interiorPath);
-		getGameObject().setInteriorPath(interiorPath);
-		getGameObject().setInteriorNamespace(f.getName().replace(".png", ""));
+		SystemObject system = getGameObject();
+
+		if (interiorPath == null && container.getShipController().isPlayerShip()) {
+			system.setInteriorNamespace(system.getSystemId().getDefaultInteriorNamespace());
+			if (system.getInteriorNamespace() != null)
+				system.setInteriorPath("db:img/ship/interior/" + system.getInteriorNamespace() + ".png"); // Default
+			else
+				system.setInteriorPath(null); // No image at all
+
+		} else if (interiorPath != null) {
+			File f = new File(interiorPath);
+			system.setInteriorPath(interiorPath);
+			system.setInteriorNamespace(f.getName().replace(".png", ""));
+		}
+
 		updateView();
 		redraw();
 	}
