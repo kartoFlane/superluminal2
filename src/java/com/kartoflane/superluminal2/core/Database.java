@@ -18,6 +18,7 @@ import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
+import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.RoomObject;
@@ -35,6 +36,7 @@ public class Database {
 	public static final DroneObject DEFAULT_DRONE_OBJ = new DroneObject();
 	public static final GlowSet DEFAULT_GLOW_SET = new GlowSet();
 	public static final GlowObject DEFAULT_GLOW_OBJ = new GlowObject();
+	public static final GibObject DEFAULT_GIB_OBJ = new GibObject();
 	public static final WeaponList DEFAULT_WEAPON_LIST = new WeaponList();
 	public static final DroneList DEFAULT_DRONE_LIST = new DroneList();
 	public static final RoomObject AIRLOCK_OBJECT = new RoomObject();

@@ -20,6 +20,9 @@ public class GibObject extends GameObject implements Comparable<GibObject> {
 	private int offsetX = 0;
 	private int offsetY = 0;
 
+	/**
+	 * Creates a new default gib object.
+	 */
 	public GibObject() {
 		setDeletable(true);
 	}

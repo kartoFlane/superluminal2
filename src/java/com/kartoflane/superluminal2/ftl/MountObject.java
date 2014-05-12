@@ -20,7 +20,7 @@ public class MountObject extends GameObject implements Alias, Movable, Comparabl
 	private int id = -2;
 	private boolean mirrored = false;
 	private boolean rotated = false;
-	private GibObject gib = null;
+	private GibObject gib = Database.DEFAULT_GIB_OBJ;
 	private Directions direction = Directions.UP;
 
 	private WeaponObject weapon = null;
