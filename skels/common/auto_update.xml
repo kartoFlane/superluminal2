@@ -1,7 +1,13 @@
 <versions>
 	<latest id="2.0.0 beta" url="https://sourceforge.net/projects/superluminal2/" />
 	<changelog>
-		<version id="2.0.0 beta">
+		<version id="2.0.0 beta2">
+			<change>Fixed several crashes</change>
+			<change>Fixed bugs with newly created rooms and mounts</change>
+			<change>Split images tab from properties tool into its own tool</change>
+			<change>Weapon/drone slots allow up to 8 slots, but display a warning when going over 4</change>
+		</version>
+		<version id="2.0.0 beta1">
 			<change>Beta release</change>
 		</version>
 	</changelog>
