@@ -66,6 +66,10 @@ public class Preview implements PaintListener {
 		}
 	}
 
+	public String getImagePath() {
+		return imagePath;
+	}
+
 	public void setDrawBackground(boolean draw) {
 		drawBackground = draw;
 	}

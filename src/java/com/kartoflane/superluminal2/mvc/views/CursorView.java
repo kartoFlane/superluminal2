@@ -30,9 +30,9 @@ public class CursorView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			paintBackground(e, backgroundColor, alpha);
+			paintBackgroundSquare(e, backgroundColor, alpha);
 			paintImage(e, image, cachedImageBounds, alpha);
-			paintBorder(e, borderColor, borderThickness, alpha);
+			paintBorderSquare(e, borderColor, borderThickness, alpha);
 		}
 	}
 

@@ -8,7 +8,7 @@ public class GibView extends BaseView {
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
 			paintImage(e, image, cachedImageBounds, alpha);
-			paintBorder(e, borderColor, borderThickness, alpha);
+			paintBorderSquare(e, borderColor, borderThickness, alpha);
 		}
 	}
 

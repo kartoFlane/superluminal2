@@ -2,10 +2,11 @@ package com.kartoflane.superluminal2.mvc.views;
 
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 
-import com.kartoflane.superluminal2.components.Triangle;
+import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
@@ -24,7 +25,7 @@ public class RoomView extends BaseView {
 	private Color gridColor = null;
 	private Color handleColor = null;
 	private Color denyColor = null;
-	private Triangle[] resizeHandles = null;
+	private Polygon[] resizeHandles = null;
 
 	public RoomView() {
 		super();
@@ -37,9 +38,18 @@ public class RoomView extends BaseView {
 		setBackgroundColor(FLOOR_RGB);
 		setBorderThickness(2);
 
-		resizeHandles = new Triangle[4];
-		for (int i = 0; i < 4; i++)
-			resizeHandles[i] = new Triangle();
+		resizeHandles = new Polygon[4];
+		Point[] points = new Point[] { new Point(0, 0), new Point(0, 0), new Point(0, 0) };
+		points[1].x += RESIZE_HANDLE_LENGTH;
+		points[2].y += RESIZE_HANDLE_LENGTH;
+
+		resizeHandles[0] = new Polygon(points);
+		resizeHandles[1] = new Polygon(points);
+		resizeHandles[2] = new Polygon(points);
+		resizeHandles[3] = new Polygon(points);
+		resizeHandles[1].rotate((float) (Math.PI / 2), 0, 0);
+		resizeHandles[2].rotate((float) (Math.PI / 2) * 3, 0, 0);
+		resizeHandles[3].rotate((float) Math.PI, 0, 0);
 	}
 
 	private ObjectModel getModel() {
@@ -55,7 +65,7 @@ public class RoomView extends BaseView {
 	 * 
 	 * @return array of length 4, containing triangles representing the resize handles for the room.
 	 */
-	public Triangle[] getResizeHandles() {
+	public Polygon[] getResizeHandles() {
 		return resizeHandles;
 	}
 
@@ -65,10 +75,10 @@ public class RoomView extends BaseView {
 			Systems sys = Manager.getCurrentShip().getActiveSystem(getGameObject());
 			SystemController systemC = Manager.getCurrentShip().getSystemController(sys);
 
-			paintBackground(e, backgroundColor, alpha);
+			paintBackgroundSquare(e, backgroundColor, alpha);
 			// system does not follow room's size, so system's availability has to be painted in the room's view
 			if (!systemC.isAvailableAtStart())
-				paintBackground(e, denyColor, alpha / 2);
+				paintBackgroundSquare(e, denyColor, alpha / 2);
 
 			// draw fake grid lines inside of rooms
 			if (controller.getW() > ShipContainer.CELL_SIZE || controller.getH() > ShipContainer.CELL_SIZE) {
@@ -81,7 +91,7 @@ public class RoomView extends BaseView {
 			// draw system, so that border and handles are drawn on top of it
 			systemC.redraw(e);
 
-			paintBorder(e, borderColor, borderThickness, alpha);
+			paintBorderSquare(e, borderColor, borderThickness, alpha);
 
 			if (controller.isSelected() && !controller.isPinned())
 				paintResizeHandles(e, handleColor, alpha / 2);
@@ -111,7 +121,7 @@ public class RoomView extends BaseView {
 		e.gc.setBackground(color);
 
 		for (int i = 0; i < 4; i++)
-			resizeHandles[i].paintControl(e);
+			resizeHandles[i].fill(e);
 
 		e.gc.setAlpha(prevAlpha);
 		e.gc.setBackground(prevColor);
@@ -153,20 +163,20 @@ public class RoomView extends BaseView {
 		// top left corner
 		int x = bounds.x + 1;
 		int y = bounds.y + 1;
-		resizeHandles[0].set(x, y, x + RESIZE_HANDLE_LENGTH, y, x, y + RESIZE_HANDLE_LENGTH);
+		resizeHandles[0].setLocation(x + RESIZE_HANDLE_LENGTH / 2, y + RESIZE_HANDLE_LENGTH / 2);
 
 		// top right corner
 		x = bounds.x + controller.getW() + borderThickness - 1;
-		resizeHandles[1].set(x, y, x - RESIZE_HANDLE_LENGTH, y, x, y + RESIZE_HANDLE_LENGTH);
+		resizeHandles[1].setLocation(x - RESIZE_HANDLE_LENGTH / 2, y + RESIZE_HANDLE_LENGTH / 2);
 
 		// bottom right corner
 		y = bounds.y + controller.getH() + borderThickness - 1;
-		resizeHandles[3].set(x, y, x - RESIZE_HANDLE_LENGTH, y, x, y - RESIZE_HANDLE_LENGTH);
-		// yes, this is supposed to stay out of order -- this way we can access the triangle
+		resizeHandles[3].setLocation(x - RESIZE_HANDLE_LENGTH / 2, y - RESIZE_HANDLE_LENGTH / 2);
+		// Yes, this is supposed to stay out of order -- this way we can access the triangle
 		// on the opposite corner via resizeHandles[3 - id]
 
 		// bottom left corner
-		x = bounds.x + 1;
-		resizeHandles[2].set(x, y, x + RESIZE_HANDLE_LENGTH, y, x, y - RESIZE_HANDLE_LENGTH);
+		x = bounds.x + 2;
+		resizeHandles[2].setLocation(x + RESIZE_HANDLE_LENGTH / 2, y - RESIZE_HANDLE_LENGTH / 2);
 	}
 }

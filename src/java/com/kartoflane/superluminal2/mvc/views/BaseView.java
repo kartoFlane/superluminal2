@@ -82,12 +82,12 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		setAlpha(255);
 	}
 
-	/** In radians, 0 = north */
+	/** In degrees, 0 = north */
 	public void setRotation(float rotation) {
 		this.rotation = rotation;
 	}
 
-	/** In radians, 0 = north */
+	/** In degrees, 0 = north */
 	public float getRotation() {
 		return rotation;
 	}
@@ -245,6 +245,12 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	public void paintControl(PaintEvent e) {
 	}
 
+	/*
+	 * ====================================================================================
+	 * XXX: Paint image methods
+	 * ====================================================================================
+	 */
+
 	/**
 	 * Paints the image in the given area, modifying the image to fit.
 	 */
@@ -372,20 +378,26 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		}
 	}
 
-	protected void paintBackground(PaintEvent e, Color backgroundColor, int alpha) {
+	/*
+	 * ====================================================================================
+	 * XXX: Paint background methods
+	 * ====================================================================================
+	 */
+
+	protected void paintBackgroundSquare(PaintEvent e, Color backgroundColor, int alpha) {
 		if (backgroundColor != null) {
-			paintBackground(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
+			paintBackgroundSquare(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
 					model.getW(), model.getH(), backgroundColor, alpha);
 		}
 	}
 
-	protected void paintBackground(PaintEvent e, Rectangle rect, Color backgroundColor, int alpha) {
+	protected void paintBackgroundSquare(PaintEvent e, Rectangle rect, Color backgroundColor, int alpha) {
 		if (backgroundColor != null) {
-			paintBackground(e, rect.x, rect.y, rect.width, rect.height, backgroundColor, alpha);
+			paintBackgroundSquare(e, rect.x, rect.y, rect.width, rect.height, backgroundColor, alpha);
 		}
 	}
 
-	protected void paintBackground(PaintEvent e, int x, int y, int w, int h, Color backgroundColor, int alpha) {
+	protected void paintBackgroundSquare(PaintEvent e, int x, int y, int w, int h, Color backgroundColor, int alpha) {
 		if (backgroundColor != null) {
 			Color prevBgColor = e.gc.getBackground();
 			int prevAlpha = e.gc.getAlpha();
@@ -400,20 +412,65 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		}
 	}
 
-	protected void paintBorder(PaintEvent e, Color borderColor, int borderThickness, int alpha) {
-		if (borderColor != null) {
-			paintBorder(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
-					model.getW(), model.getH(), borderColor, borderThickness, alpha);
+	protected void paintBackgroundOval(PaintEvent e, Color backgroundColor, int alpha) {
+		if (backgroundColor != null) {
+			paintBackgroundOval(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
+					model.getW(), model.getH(), backgroundColor, alpha);
 		}
 	}
 
-	protected void paintBorder(PaintEvent e, Rectangle rect, Color borderColor, int borderThickness, int alpha) {
-		if (borderColor != null) {
-			paintBorder(e, rect.x, rect.y, rect.width, rect.height, borderColor, borderThickness, alpha);
+	protected void paintBackgroundOval(PaintEvent e, Rectangle rect, Color backgroundColor, int alpha) {
+		if (backgroundColor != null) {
+			paintBackgroundOval(e, rect.x, rect.y, rect.width, rect.height, backgroundColor, alpha);
 		}
 	}
 
-	protected void paintBorder(PaintEvent e, int x, int y, int w, int h, Color borderColor, int borderThickness, int alpha) {
+	protected void paintBackgroundOval(PaintEvent e, int x, int y, int w, int h, Color backgroundColor, int alpha) {
+		if (backgroundColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+
+			e.gc.setBackground(backgroundColor);
+			e.gc.setAlpha(alpha);
+
+			e.gc.fillOval(x, y, w, h);
+
+			e.gc.setBackground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+		}
+	}
+
+	protected void paintBackgroundPolygon(PaintEvent e, int[] polygon, Color backgroundColor, int alpha) {
+		if (backgroundColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+
+			e.gc.setBackground(backgroundColor);
+			e.gc.setAlpha(alpha);
+
+			e.gc.fillPolygon(polygon);
+
+			e.gc.setBackground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+		}
+	}
+
+	/*
+	 * ====================================================================================
+	 * XXX: Paint border methods
+	 * ====================================================================================
+	 */
+
+	protected void paintBorderSquare(PaintEvent e, Color borderColor, int borderThickness, int alpha) {
+		paintBorderSquare(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
+				model.getW(), model.getH(), borderColor, borderThickness, alpha);
+	}
+
+	protected void paintBorderSquare(PaintEvent e, Rectangle rect, Color borderColor, int borderThickness, int alpha) {
+		paintBorderSquare(e, rect.x, rect.y, rect.width, rect.height, borderColor, borderThickness, alpha);
+	}
+
+	protected void paintBorderSquare(PaintEvent e, int x, int y, int w, int h, Color borderColor, int borderThickness, int alpha) {
 		if (borderColor != null) {
 			Color prevBgColor = e.gc.getBackground();
 			int prevAlpha = e.gc.getAlpha();
@@ -426,6 +483,53 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			// Lines are drawn from the center, which makes the math a little funky
 			e.gc.drawRectangle(x + borderThickness / 2, y + borderThickness / 2,
 					w - 1 - borderThickness / 2, h - 1 - borderThickness / 2);
+
+			e.gc.setForeground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+			e.gc.setLineWidth(prevWidth);
+		}
+	}
+
+	protected void paintBorderOval(PaintEvent e, Color borderColor, int borderThickness, int alpha) {
+		paintBorderOval(e, model.getX() - model.getW() / 2, model.getY() - model.getH() / 2,
+				model.getW(), model.getH(), borderColor, borderThickness, alpha);
+	}
+
+	protected void paintBorderOval(PaintEvent e, Rectangle rect, Color borderColor, int borderThickness, int alpha) {
+		paintBorderOval(e, rect.x, rect.y, rect.width, rect.height, borderColor, borderThickness, alpha);
+	}
+
+	protected void paintBorderOval(PaintEvent e, int x, int y, int w, int h, Color borderColor, int borderThickness, int alpha) {
+		if (borderColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+			int prevWidth = e.gc.getLineWidth();
+
+			e.gc.setForeground(borderColor);
+			e.gc.setAlpha(alpha);
+			e.gc.setLineWidth(borderThickness);
+
+			// Lines are drawn from the center, which makes the math a little funky
+			e.gc.drawOval(x + borderThickness / 2, y + borderThickness / 2,
+					w - 1 - borderThickness / 2, h - 1 - borderThickness / 2);
+
+			e.gc.setForeground(prevBgColor);
+			e.gc.setAlpha(prevAlpha);
+			e.gc.setLineWidth(prevWidth);
+		}
+	}
+
+	protected void paintBorderPolygon(PaintEvent e, int[] polygon, Color borderColor, int borderThickness, int alpha) {
+		if (borderColor != null) {
+			Color prevBgColor = e.gc.getBackground();
+			int prevAlpha = e.gc.getAlpha();
+			int prevWidth = e.gc.getLineWidth();
+
+			e.gc.setForeground(borderColor);
+			e.gc.setAlpha(alpha);
+			e.gc.setLineWidth(borderThickness);
+
+			e.gc.drawPolygon(polygon);
 
 			e.gc.setForeground(prevBgColor);
 			e.gc.setAlpha(prevAlpha);

@@ -20,7 +20,7 @@ public class CellView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			paintBorder(e, borderColor, borderThickness, alpha);
+			paintBorderSquare(e, borderColor, borderThickness, alpha);
 		}
 	}
 

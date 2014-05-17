@@ -15,7 +15,7 @@ public class ImageView extends BaseView {
 			int th = h == -1 ? cachedImageBounds.height : h;
 			paintImageResize(e, image, cachedImageBounds, controller.getX() - tw / 2, controller.getY() - th / 2,
 					tw, th, alpha);
-			paintBorder(e, borderColor, borderThickness, 255);
+			paintBorderSquare(e, borderColor, borderThickness, 255);
 		}
 	}
 

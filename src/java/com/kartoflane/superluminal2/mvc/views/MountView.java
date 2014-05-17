@@ -44,7 +44,7 @@ public class MountView extends BaseView {
 					controller.getY() - weaponOffset.y,
 					frameSize.x, frameSize.y, alpha);
 
-			paintBorder(e, controller.getX() - weaponOffset.x,
+			paintBorderSquare(e, controller.getX() - weaponOffset.x,
 					controller.getY() - weaponOffset.y,
 					frameSize.x, frameSize.y, borderColor, borderThickness, alpha);
 
