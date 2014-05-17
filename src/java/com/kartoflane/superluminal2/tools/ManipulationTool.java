@@ -133,7 +133,6 @@ public class ManipulationTool extends Tool {
 				selected.mouseDown(e);
 		}
 		// not using else if here, since a state change can occur in the previous step
-		// TODO 'tis an ugly solution, think of something more elegant
 		if (state == States.ROOM_RESIZE) {
 			RoomController room = (RoomController) selected;
 
@@ -270,9 +269,11 @@ public class ManipulationTool extends Tool {
 			int w = Math.max(Math.abs(anchor.x - pointer.x), ShipContainer.CELL_SIZE);
 			int h = Math.max(Math.abs(anchor.y - pointer.y), ShipContainer.CELL_SIZE);
 
-			cursor.updateView();
-			cursor.resize(w, h);
-			cursor.reposition(x + w / 2, y + h / 2);
+			if (cursor.getW() != w || cursor.getH() != h) {
+				cursor.updateView();
+				cursor.resize(w, h);
+				cursor.reposition(x + w / 2, y + h / 2);
+			}
 
 			if (!room.isResizing())
 				setStateManipulate();
@@ -295,8 +296,8 @@ public class ManipulationTool extends Tool {
 					// --- control doesn't contain the mouse pointer OR
 					// ----- control is not the same object as controller AND
 					// ----- both control and controller contain the mouse pointer
-					if (control.isSelectable() && ((!control.getBounds().contains(e.x, e.y))
-							|| (controller != null && control != controller && control.getBounds().contains(e.x, e.y) && controller.getBounds().contains(e.x, e.y))))
+					if (control.isSelectable() && ((!control.contains(e.x, e.y))
+							|| (controller != null && control != controller && control.contains(e.x, e.y) && controller.contains(e.x, e.y))))
 						control.mouseExit(e);
 
 					// also pass on mouseMove event
