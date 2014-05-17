@@ -230,13 +230,19 @@ public class ShipSaveUtils {
 		IOUtils.writeFileXML(generateLayoutXML(ship), f);
 	}
 
+	/**
+	 * This method generates the shipBlueprint tag that describes the ship passed as argument.
+	 * 
+	 * @param ship
+	 *            the ship to be saved
+	 * @return the XML document containing the shipBlueprint tag
+	 */
 	public static Document generateBlueprintXML(ShipObject ship) {
 		Document doc = new Document();
 		Element root = new Element("wrapper");
 		Element e = null;
 		String attr = null;
 
-		// Prepare the document
 		Element shipBlueprint = new Element("shipBlueprint");
 		attr = ship.getBlueprintName();
 		shipBlueprint.setAttribute("name", attr == null ? "" : attr);
@@ -245,22 +251,35 @@ public class ShipSaveUtils {
 		attr = ship.getImageNamespace();
 		shipBlueprint.setAttribute("img", attr == null ? "" : attr);
 
+		// The ship's class name, used for flavor only on player ships,
+		// but on enemy ships it is used as the enemy ship's name
 		e = new Element("class");
 		attr = ship.getShipClass();
 		e.setText(attr == null ? "" : attr);
-		shipBlueprint.addContent(e); // Add <class> to <shipBlueprint>
+		shipBlueprint.addContent(e);
 
 		// Name and description only affect player ships
 		if (ship.isPlayerShip()) {
 			e = new Element("name");
 			attr = ship.getShipName();
 			e.setText(attr == null ? "" : attr);
-			shipBlueprint.addContent(e); // Add <name> to <shipBlueprint>
+			shipBlueprint.addContent(e);
 
 			e = new Element("desc");
 			attr = ship.getShipDescription();
 			e.setText(attr == null ? "" : attr);
-			shipBlueprint.addContent(e); // Add <desc> to <shipBlueprint>
+			shipBlueprint.addContent(e);
+		}
+		// Sector tags
+		// Enemy exclusive
+		else {
+			e = new Element("minSector");
+			e.setText("" + ship.getMinSector());
+			shipBlueprint.addContent(e);
+
+			e = new Element("maxSector");
+			e.setText("" + ship.getMaxSector());
+			shipBlueprint.addContent(e);
 		}
 
 		Element systemList = new Element("systemList");
@@ -313,11 +332,11 @@ public class ShipSaveUtils {
 
 		e = new Element("weaponSlots");
 		e.setText("" + ship.getWeaponSlots());
-		shipBlueprint.addContent(e); // Add <weaponSlots> to <shipBlueprint>
+		shipBlueprint.addContent(e);
 
 		e = new Element("droneSlots");
 		e.setText("" + ship.getDroneSlots());
-		shipBlueprint.addContent(e); // Add <droneSlots> to <shipBlueprint>
+		shipBlueprint.addContent(e);
 
 		Element weaponList = new Element("weaponList");
 		weaponList.setAttribute("missiles", "" + ship.getMissilesAmount());
@@ -367,27 +386,18 @@ public class ShipSaveUtils {
 		}
 		shipBlueprint.addContent(droneList);
 
+		// Defines the ship's health points
 		e = new Element("health");
 		e.setAttribute("amount", "" + ship.getHealth());
-		shipBlueprint.addContent(e); // Add <health> to <shipBlueprint>
+		shipBlueprint.addContent(e);
 
+		// Defines the amount of power the ship starts with
 		e = new Element("maxPower");
 		e.setAttribute("amount", "" + ship.getPower());
-		shipBlueprint.addContent(e); // Add <maxPower> to <shipBlueprint>
-
-		// Sector tags
-		// Enemy exclusive
-		if (!ship.isPlayerShip()) {
-			e = new Element("minSector");
-			e.setText("" + ship.getMinSector());
-			shipBlueprint.addContent(e); // Add <minSector> to <shipBlueprint>
-
-			e = new Element("maxSector");
-			e.setText("" + ship.getMaxSector());
-			shipBlueprint.addContent(e); // Add <maxSector> to <shipBlueprint>
-		}
+		shipBlueprint.addContent(e);
 
 		if (ship.isPlayerShip()) {
+			// List every crew member individually to allow ordering of crew
 			for (Races race : ship.getCrew()) {
 				if (race == Races.NO_CREW)
 					continue;
@@ -395,7 +405,7 @@ public class ShipSaveUtils {
 				e.setAttribute("amount", "1");
 				e.setAttribute("class", race.name().toLowerCase());
 
-				shipBlueprint.addContent(e); // Add <crewCount> to <shipBlueprint>
+				shipBlueprint.addContent(e);
 			}
 		} else {
 			for (Races race : Races.getRaces()) {
@@ -409,16 +419,21 @@ public class ShipSaveUtils {
 
 				// Don't print an empty tag
 				if (amount > 0 && (ship.isPlayerShip() || max > 0))
-					shipBlueprint.addContent(e); // Add <crewCount> to <shipBlueprint>
+					shipBlueprint.addContent(e);
 			}
 		}
+
+		// <boardingAI> tag, enemy exclusive and not modifiable in the editor, since it only has a single value
+		e = new Element("boardingAI");
+		e.setText("sabotage");
+		shipBlueprint.addContent(e);
 
 		for (AugmentObject aug : ship.getAugments()) {
 			if (aug == Database.DEFAULT_AUGMENT_OBJ)
 				continue;
 			e = new Element("aug");
 			e.setAttribute("name", aug.getBlueprintName());
-			shipBlueprint.addContent(e); // Add <aug> to <shipBlueprint>
+			shipBlueprint.addContent(e);
 		}
 
 		root.addContent(shipBlueprint);
