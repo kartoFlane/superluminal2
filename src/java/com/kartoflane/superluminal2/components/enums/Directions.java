@@ -21,6 +21,11 @@ public enum Directions {
 
 	@Override
 	public String toString() {
-		return name().toLowerCase();
+		switch (this) {
+			case NONE:
+				return "no";
+			default:
+				return name().toLowerCase();
+		}
 	}
 }
