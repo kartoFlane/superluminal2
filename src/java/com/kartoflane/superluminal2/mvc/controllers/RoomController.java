@@ -173,7 +173,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 
 		if (res)
 			((ManipulationTool) Manager.getSelectedTool()).setStateRoomResize();
-		// tool returns to normal state on its own
+		// Tool returns to normal state on its own
 	}
 
 	public boolean canResize() {
@@ -195,7 +195,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 			if (e.button == 1 && isSelected() && !isPinned()) {
 				for (int i = 0; i < 4; i++) {
 					if (getView().getResizeHandles()[i].contains(e.x, e.y)) {
-						resizeAnchor = Grid.getInstance().snapToGrid(getView().getResizeHandles()[3 - i].getFirstPoint(), Snapmodes.CROSS);
+						resizeAnchor = Grid.getInstance().snapToGrid(getView().getResizeHandles()[3 - i].getCenter(), Snapmodes.CROSS);
 						canResize = true;
 						setResizing(true);
 
@@ -214,12 +214,12 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 
 			if (e.button == 1) {
 				if (isResizing()) {
-					// confirm resize
+					// Confirm resize
 					setResizing(false);
 
 					if (canResize) {
 						setVisible(false);
-						// if the area is clear, resize and reposition the room
+						// If the area is clear, resize and reposition the room
 						Point resLoc = CursorController.getInstance().getLocation();
 						Point resSize = CursorController.getInstance().getSize();
 
@@ -227,7 +227,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 						int h = resSize.y;
 						w = (w + 1) / ShipContainer.CELL_SIZE;
 						h = (h + 1) / ShipContainer.CELL_SIZE;
-						resLoc = Grid.getInstance().snapToGrid(resLoc, getSnapMode(w, h)); // figure out the snapmode that goes here TODO
+						resLoc = Grid.getInstance().snapToGrid(resLoc, getSnapMode(w, h));
 						resSize = Grid.getInstance().snapToGrid(resSize, Snapmodes.CROSS);
 
 						setSize(resSize);
@@ -236,7 +236,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 						setFollowOffset(getX() - getParent().getX(), getY() - getParent().getY());
 						((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
 
-						Manager.getCurrentShip().updateBoundingArea();
+						container.updateBoundingArea();
 						setVisible(true);
 					}
 					updateView();
@@ -291,7 +291,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 						updateFollowOffset();
 
 						((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
-						Manager.getCurrentShip().updateBoundingArea();
+						container.updateBoundingArea();
 					}
 				}
 			}
