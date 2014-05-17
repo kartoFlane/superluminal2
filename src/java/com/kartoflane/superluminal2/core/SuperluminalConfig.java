@@ -13,7 +13,7 @@ public class SuperluminalConfig {
 	private Properties config;
 	private File configFile;
 
-	// all keys the config can save
+	// All keys the config can save
 	public static final String FTL_RESOURCE = "ftlResourcePath";
 	public static final String SAVE_GEOMETRY = "rememberGeometry";
 	public static final String SIDEBAR_SIDE = "sidebarRightSide";
@@ -22,23 +22,13 @@ public class SuperluminalConfig {
 	public static final String GEOMETRY = "geometry";
 	public static final String CHECK_UPDATES = "checkUpdatesOnStartup";
 	public static final String ALLOW_OVERLAP = "allowRoomOverlap";
-
 	public static final String SLOT_WARNING = "shownSlotWarning";
 
 	public SuperluminalConfig(Properties config, File configFile) {
 		this.config = config;
 		this.configFile = configFile;
 
-		// Setup defaults
-		config.setProperty(SuperluminalConfig.FTL_RESOURCE, "");
-		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "true");
-		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "false");
-		config.setProperty(SuperluminalConfig.START_MAX, "false");
-		config.setProperty(SuperluminalConfig.CLOSE_LOADER, "false");
-		config.setProperty(SuperluminalConfig.GEOMETRY, "");
-		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "true");
-		config.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "false");
-		config.setProperty(SuperluminalConfig.SLOT_WARNING, "false");
+		setDefaults();
 	}
 
 	/**
@@ -88,6 +78,37 @@ public class SuperluminalConfig {
 
 	public String getProperty(String key) {
 		return config.getProperty(key);
+	}
+
+	/**
+	 * Resets the config properties to their default values.
+	 */
+	public void setDefaults() {
+		config.setProperty(FTL_RESOURCE, "");
+		config.setProperty(SAVE_GEOMETRY, "true");
+		config.setProperty(SIDEBAR_SIDE, "false");
+		config.setProperty(START_MAX, "false");
+		config.setProperty(CLOSE_LOADER, "false");
+		config.setProperty(GEOMETRY, "");
+		config.setProperty(CHECK_UPDATES, "true");
+		config.setProperty(ALLOW_OVERLAP, "false");
+		config.setProperty(SLOT_WARNING, "false");
+	}
+
+	/**
+	 * Updates the config properties with the current runtime values.
+	 */
+	public void setCurrent() {
+		config.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
+		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "" + Manager.rememberGeometry);
+		config.setProperty(SuperluminalConfig.START_MAX, "" + Manager.startMaximised);
+		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
+		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "" + Manager.checkUpdates);
+		config.setProperty(SuperluminalConfig.CLOSE_LOADER, "" + Manager.closeLoader);
+		config.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
+		config.setProperty(SuperluminalConfig.SLOT_WARNING, "" + Manager.shownSlotWarning);
+		if (Manager.rememberGeometry && !Manager.startMaximised)
+			config.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 	}
 
 	public void writeConfig() throws IOException {
