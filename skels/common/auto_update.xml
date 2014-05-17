@@ -1,6 +1,13 @@
 <versions>
-	<latest id="2.0.0 beta2" url="https://www.dropbox.com/sh/o6cqrz0iatyaja7/AAC3yKcTx36V20VdkKguQkw8a" />
+	<latest id="2.0.0 beta3" url="https://www.dropbox.com/sh/o6cqrz0iatyaja7/AAC3yKcTx36V20VdkKguQkw8a" />
 	<changelog>
+		<version id="2.0.0 beta3">
+			<change>Fixed several minor bugs</change>
+			<change>Weapon mounts can now display any weapon without actually changing the loadout</change>
+			<change>Added ship offset modification</change>
+			<change>Added help icons</change>
+			<change>A lot of minor tweaks and fixes</change>
+		</version>
 		<version id="2.0.0 beta2">
 			<change>Fixed several crashes</change>
 			<change>Fixed bugs with newly created rooms and mounts</change>
