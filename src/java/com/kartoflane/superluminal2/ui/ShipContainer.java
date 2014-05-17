@@ -13,6 +13,7 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -82,6 +83,7 @@ public class ShipContainer implements Disposable {
 		this();
 
 		shipController = ShipController.newInstance(this, ship);
+		Manager.addModifierListener(shipController);
 
 		Grid grid = Grid.getInstance();
 
@@ -149,8 +151,13 @@ public class ShipContainer implements Disposable {
 		createImageControllers();
 
 		updateBoundingArea();
+		updateChildBoundingAreas();
 	}
 
+	/**
+	 * This method causes game objects to be updated with data represented by the models.<br>
+	 * It should be called right before saving the ship.
+	 */
 	public void updateGameObjects() {
 		ShipObject ship = shipController.getGameObject();
 		Point offset = findShipOffset();
@@ -535,6 +542,7 @@ public class ShipContainer implements Disposable {
 		imageControllerMap.clear();
 		objectControllerMap.clear();
 
+		Manager.removeModifierListener(shipController);
 		shipController.dispose();
 		shipController = null;
 
@@ -559,6 +567,11 @@ public class ShipContainer implements Disposable {
 		Point offset = findShipOffset();
 		Point size = findShipSize();
 		shipController.setBoundingPoints(0, 0, gridSize.x - offset.x - size.x, gridSize.y - offset.y - size.y);
+		offset.x = offset.x / CELL_SIZE;
+		offset.y = offset.y / CELL_SIZE;
+		shipController.getGameObject().setXOffset(offset.x);
+		shipController.getGameObject().setYOffset(offset.y);
+		shipController.updateProps();
 	}
 
 	private void createImageControllers() {
