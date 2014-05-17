@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ui;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,8 +11,6 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -40,7 +39,10 @@ import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.interfaces.ModifierListener;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -58,6 +60,7 @@ import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 
 public class EditorWindow {
 	private static final Logger log = LogManager.getLogger(EditorWindow.class);
@@ -69,6 +72,8 @@ public class EditorWindow {
 
 	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<Tools, ToolItem>();
 	private final RGB canvasRGB = new RGB(164, 164, 164);
+
+	private ArrayList<ModifierListener> modListeners = new ArrayList<ModifierListener>();
 
 	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
 	private Color canvasColor = null;
@@ -112,11 +117,12 @@ public class EditorWindow {
 	private ToolItem tltmCloak;
 	private MenuItem mntmResetLinks;
 	private MenuItem mntmOptimalOffset;
+	private MenuItem mntmReloadDb;
 
 	public EditorWindow(Display display) {
 		instance = this;
 
-		shell = new Shell(display);
+		shell = new Shell(display, SWT.SHELL_TRIM | SWT.SMOOTH);
 		shell.setText(String.format("%s v%s - FTL Ship Editor", Superluminal.APP_NAME, Superluminal.APP_VERSION));
 		GridLayout gl_shell = new GridLayout(1, false);
 		gl_shell.marginHeight = 0;
@@ -172,6 +178,9 @@ public class EditorWindow {
 
 		mntmModMan = new MenuItem(menuFile, SWT.NONE);
 		mntmModMan.setText("Mod Management\t" + Manager.getHotkey(Hotkeys.MANAGE_MOD));
+
+		mntmReloadDb = new MenuItem(menuFile, SWT.NONE);
+		mntmReloadDb.setText("Reload Database");
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
@@ -413,75 +422,47 @@ public class EditorWindow {
 					return;
 
 				// update modifier states for use in other places in the application
-				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT)
+				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT) {
 					Manager.modShift = true;
-				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT)
+					for (ModifierListener ml : modListeners)
+						ml.notifyModShift(true);
+				}
+				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT) {
 					Manager.modAlt = true;
-				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL)
+					for (ModifierListener ml : modListeners)
+						ml.notifyModAlt(true);
+				}
+				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL) {
 					Manager.modCtrl = true;
+					for (ModifierListener ml : modListeners)
+						ml.notifyModControl(true);
+				}
 
 				handleHotkeys(e);
-
-				// ====== Tool-specific hotkeys
-
-				if (Manager.getSelectedToolId() == Tools.POINTER) {
-					// Arrow keys movement
-					if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
-							e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {
-						AbstractController selected = Manager.getSelected();
-						if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
-							ManipulationToolComposite mtc = (ManipulationToolComposite) getSidebarContent();
-
-							Point p = selected.getPresentedLocation();
-							Rectangle oldBounds = null;
-
-							oldBounds = selected.getBounds();
-
-							int nudgeAmount = Manager.modShift && selected.getPresentedFactor() == 1 ? ShipContainer.CELL_SIZE : 1;
-
-							selected.setPresentedLocation(p.x + (e.keyCode == SWT.ARROW_RIGHT ? nudgeAmount : e.keyCode == SWT.ARROW_LEFT ? -nudgeAmount : 0),
-									p.y + (e.keyCode == SWT.ARROW_DOWN ? nudgeAmount : e.keyCode == SWT.ARROW_UP ? -nudgeAmount : 0));
-							selected.updateFollowOffset();
-							Manager.getCurrentShip().updateBoundingArea();
-							selected.updateView();
-
-							selected.redraw();
-							canvasRedraw(oldBounds);
-
-							mtc.updateData();
-
-							e.doit = false;
-						}
-					} else if (Manager.getHotkey(Hotkeys.DELETE).passes(e.keyCode) || e.keyCode == SWT.DEL) {
-						// Deletion
-						mntmDelete.notifyListeners(SWT.Selection, null);
-					} else if (Manager.getHotkey(Hotkeys.PIN).passes(e.keyCode)) {
-						// Pin
-						AbstractController selected = Manager.getSelected();
-						if (selected != null) {
-							selected.setPinned(!selected.isPinned());
-							((ManipulationToolComposite) getSidebarContent()).updateData();
-							e.doit = false;
-						}
-					}
-				}
 			}
 		});
 
 		shell.getDisplay().addFilter(SWT.KeyUp, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT)
+				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT) {
 					Manager.modShift = false;
-				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT)
-					Manager.modAlt = false;
-				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL)
-					Manager.modCtrl = false;
-
-				if (e.keyCode == SWT.SPACE) {
-					if (Manager.getSelected() != null)
-						e.doit = false;
+					for (ModifierListener ml : modListeners)
+						ml.notifyModShift(false);
 				}
+				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT) {
+					Manager.modAlt = false;
+					for (ModifierListener ml : modListeners)
+						ml.notifyModAlt(false);
+				}
+				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL) {
+					Manager.modCtrl = false;
+					for (ModifierListener ml : modListeners)
+						ml.notifyModControl(false);
+				}
+
+				if (e.keyCode == SWT.SPACE && Manager.getSelected() != null)
+					e.doit = false;
 			}
 		});
 
@@ -492,13 +473,8 @@ public class EditorWindow {
 			}
 		});
 
-		sideContainer.addControlListener(new ControlListener() {
-			@Override
-			public void controlMoved(ControlEvent e) {
-			}
-
-			@Override
-			public void controlResized(ControlEvent e) {
+		sideContainer.addListener(SWT.Resize, new Listener() {
+			public void handleEvent(Event e) {
 				Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
 				ShipContainer ship = Manager.getCurrentShip();
@@ -506,6 +482,7 @@ public class EditorWindow {
 					ship.updateBoundingArea();
 					ship.updateChildBoundingAreas();
 					ship.getShipController().updateView();
+					ship.getShipController().updateProps();
 					ship.getShipController().redraw();
 				}
 
@@ -514,13 +491,8 @@ public class EditorWindow {
 			}
 		});
 
-		shell.addControlListener(new ControlListener() {
-			@Override
-			public void controlMoved(ControlEvent e) {
-			}
-
-			@Override
-			public void controlResized(ControlEvent e) {
+		shell.addListener(SWT.Resize, new Listener() {
+			public void handleEvent(Event e) {
 				shellResizing = true;
 
 				Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
@@ -530,6 +502,7 @@ public class EditorWindow {
 					ship.updateBoundingArea();
 					ship.updateChildBoundingAreas();
 					ship.getShipController().updateView();
+					ship.getShipController().updateProps();
 					ship.getShipController().redraw();
 				}
 
@@ -591,6 +564,8 @@ public class EditorWindow {
 				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
 					saveShip(container);
+				} else {
+					log.trace("User exited save dialog, ship was not saved.");
 				}
 			}
 		});
@@ -604,9 +579,11 @@ public class EditorWindow {
 				SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
 				File temp = dialog.open();
 
-				if (temp != null) {
+				if (temp != null) { // User could've aborted selection, which returns null.
 					saveDestination = temp;
 					saveShip(container);
+				} else {
+					log.trace("User exited save dialog, ship was not saved.");
 				}
 			}
 		});
@@ -616,6 +593,21 @@ public class EditorWindow {
 			public void widgetSelected(SelectionEvent e) {
 				ModManagementDialog dialog = new ModManagementDialog(shell);
 				dialog.open();
+			}
+		});
+
+		mntmReloadDb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				UIUtils.showLoadDialog(shell, null, null, new LoadTask() {
+					public void execute() {
+						log.debug("Reloading Database...");
+						Database db = Database.getInstance();
+						for (DatabaseEntry de : db.getEntries())
+							de.reload();
+						db.cacheAnimations();
+					}
+				});
 			}
 		});
 
@@ -780,11 +772,12 @@ public class EditorWindow {
 		canvas.addMouseTrackListener(MouseInputDispatcher.getInstance());
 
 		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
-		Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
 		shell.setSize(Manager.windowSize);
 		shell.setMaximized(Manager.startMaximised);
 		shell.setMinimized(false);
+
+		Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
 
 		sideContainer.setFocus();
 		enableTools(false);
@@ -967,6 +960,7 @@ public class EditorWindow {
 
 		// Disable mod management, only available when a ship is not loaded
 		mntmModMan.setEnabled(!enable);
+		mntmReloadDb.setEnabled(!enable);
 	}
 
 	public boolean optionsEnabled() {
@@ -1023,6 +1017,14 @@ public class EditorWindow {
 
 	public boolean forceFocus() {
 		return canvas.forceFocus();
+	}
+
+	public void addModifierListener(ModifierListener ml) {
+		modListeners.add(ml);
+	}
+
+	public void removeModifierListener(ModifierListener ml) {
+		modListeners.remove(ml);
 	}
 
 	public void dispose() {
@@ -1110,6 +1112,8 @@ public class EditorWindow {
 			tltmCreation.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.GIB_TOOL).passes(e.keyCode) && tltmGib.isEnabled()) {
 			tltmGib.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.IMAGES_TOOL).passes(e.keyCode) && tltmImages.isEnabled()) {
+			tltmImages.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).passes(e.keyCode) && tltmProperties.isEnabled()) {
 			tltmProperties.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).passes(e.keyCode) && tltmManager.isEnabled()) {
@@ -1139,6 +1143,50 @@ public class EditorWindow {
 				tltmCreation.notifyListeners(SWT.Selection, null);
 			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
 			ctool.selectSubtool(Tools.STATION);
+		}
+
+		// ====== Tool-specific hotkeys
+
+		else if (Manager.getSelectedToolId() == Tools.POINTER) {
+			// Arrow keys movement
+			if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
+					e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {
+				AbstractController selected = Manager.getSelected();
+				if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
+					ManipulationToolComposite mtc = (ManipulationToolComposite) getSidebarContent();
+
+					Point p = selected.getPresentedLocation();
+					Rectangle oldBounds = null;
+
+					oldBounds = selected.getBounds();
+
+					int nudgeAmount = Manager.modShift && selected.getPresentedFactor() == 1 ? ShipContainer.CELL_SIZE : 1;
+
+					selected.setPresentedLocation(p.x + (e.keyCode == SWT.ARROW_RIGHT ? nudgeAmount : e.keyCode == SWT.ARROW_LEFT ? -nudgeAmount : 0),
+							p.y + (e.keyCode == SWT.ARROW_DOWN ? nudgeAmount : e.keyCode == SWT.ARROW_UP ? -nudgeAmount : 0));
+					selected.updateFollowOffset();
+					Manager.getCurrentShip().updateBoundingArea();
+					selected.updateView();
+
+					selected.redraw();
+					canvasRedraw(oldBounds);
+
+					mtc.updateData();
+
+					e.doit = false;
+				}
+			} else if (Manager.getHotkey(Hotkeys.DELETE).passes(e.keyCode) || e.keyCode == SWT.DEL) {
+				// Deletion
+				mntmDelete.notifyListeners(SWT.Selection, null);
+			} else if (Manager.getHotkey(Hotkeys.PIN).passes(e.keyCode)) {
+				// Pin
+				AbstractController selected = Manager.getSelected();
+				if (selected != null) {
+					selected.setPinned(!selected.isPinned());
+					((ManipulationToolComposite) getSidebarContent()).updateData();
+					e.doit = false;
+				}
+			}
 		}
 	}
 }

@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Point;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
+import com.kartoflane.superluminal2.components.interfaces.ModifierListener;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
@@ -40,8 +41,16 @@ import com.kartoflane.superluminal2.utils.IOUtils;
 public class Manager {
 	private static final Logger log = LogManager.getLogger(Manager.class);
 
-	/** In 'path/file.ext/inner' matches 'path/file.ext' */
-	private static final Pattern FILE_PTRN = Pattern.compile(".+\\.[^/]+(?=/)");
+	/**
+	 * A regex pattern which matches the path to the file, along with its extension.
+	 * For example, in 'C:/path/file.ext/inner/path' matches 'C:/path/file.ext'<br>
+	 * <br>
+	 * To be specific, matches all strings that meet the following conditions:<br>
+	 * - Starts with a non-zero number of any characters<br>
+	 * - Those characters then have to be terminated by a period<br>
+	 * - After that, a non-zero number of any characters other than a forward slash
+	 */
+	private static final Pattern FILE_PTRN = Pattern.compile(".+\\.[^/]+");
 
 	/**
 	 * SWT uses the default ampersand char (\u0026) for some platform-specific stuff, resulting
@@ -114,7 +123,7 @@ public class Manager {
 		EditorWindow.getInstance().enableOptions(true);
 		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
-		selectTool(Tools.CONFIG);
+		selectTool(Tools.IMAGES);
 		OverviewWindow.staticUpdate();
 	}
 
@@ -136,7 +145,7 @@ public class Manager {
 		EditorWindow.getInstance().enableOptions(true);
 		EditorWindow.getInstance().setVisibilityOptions(true);
 		// select the manipulation tool by default
-		selectTool(Tools.CONFIG);
+		selectTool(Tools.IMAGES);
 		OverviewWindow.staticUpdate();
 	}
 
@@ -211,6 +220,77 @@ public class Manager {
 		return HOTKEY_MAP.get(key);
 	}
 
+	/** Loads the default hotkey values, which are later overridden by config or the user. */
+	public static void loadDefaultHotkeys() {
+		Hotkey hotkey = null;
+
+		// Tool hotkeys
+		getHotkey(Hotkeys.POINTER_TOOL).setKey('q');
+		getHotkey(Hotkeys.CREATE_TOOL).setKey('w');
+		getHotkey(Hotkeys.GIB_TOOL).setKey('e');
+		getHotkey(Hotkeys.IMAGES_TOOL).setKey('r');
+		getHotkey(Hotkeys.PROPERTIES_TOOL).setKey('t');
+		getHotkey(Hotkeys.ROOM_TOOL).setKey('a');
+		getHotkey(Hotkeys.DOOR_TOOL).setKey('s');
+		getHotkey(Hotkeys.MOUNT_TOOL).setKey('d');
+		getHotkey(Hotkeys.STATION_TOOL).setKey('f');
+		getHotkey(Hotkeys.OVERVIEW_TOOL).setKey('o');
+
+		// Command hotkeys
+		getHotkey(Hotkeys.PIN).setKey(' ');
+
+		hotkey = getHotkey(Hotkeys.DELETE);
+		hotkey.setKey('d');
+		hotkey.setShift(true);
+
+		hotkey = getHotkey(Hotkeys.UNDO);
+		hotkey.setKey('z');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.REDO);
+		hotkey.setKey('y');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.NEW_SHIP);
+		hotkey.setKey('n');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.LOAD_SHIP);
+		hotkey.setKey('l');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.SAVE_SHIP);
+		hotkey.setKey('s');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.CLOSE_SHIP);
+		hotkey.setKey('w');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.MANAGE_MOD);
+		hotkey.setKey('m');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.SETTINGS);
+		hotkey.setKey('o');
+		hotkey.setCtrl(true);
+
+		hotkey = getHotkey(Hotkeys.CLOAK);
+		hotkey.setKey('c');
+		hotkey.setShift(true);
+
+		// View hotkeys
+		getHotkey(Hotkeys.TOGGLE_GRID).setKey('x');
+		getHotkey(Hotkeys.SHOW_ANCHOR).setKey('1');
+		getHotkey(Hotkeys.SHOW_MOUNTS).setKey('2');
+		getHotkey(Hotkeys.SHOW_ROOMS).setKey('3');
+		getHotkey(Hotkeys.SHOW_DOORS).setKey('4');
+		getHotkey(Hotkeys.SHOW_STATIONS).setKey('5');
+		getHotkey(Hotkeys.SHOW_HULL).setKey('6');
+		getHotkey(Hotkeys.SHOW_FLOOR).setKey('7');
+		getHotkey(Hotkeys.SHOW_SHIELD).setKey('8');
+	}
+
 	public static InputStream getInputStream(String path) {
 		InputStream result = null;
 		String protocol = IOUtils.getProtocol(path);
@@ -225,14 +305,18 @@ public class Manager {
 				// Refers to file in classpath
 				result = Manager.class.getResourceAsStream(loadPath);
 			} else if (protocol.equals("file:")) {
-				// Refers to file in OS' filesystem
+				// Refers to file in the OS' filesystem
 				result = new FileInputStream(new File(loadPath));
 			} else if (protocol.equals("zip:")) {
 				// Refers to file in a zip archive
 				Matcher m = FILE_PTRN.matcher(loadPath);
 				if (m.find()) {
-					String zipPath = m.group();
+					String zipPath = m.group(1);
 					String innerPath = loadPath.replace(zipPath + "/", "");
+
+					if (innerPath == null || innerPath.equals(""))
+						throw new IllegalArgumentException("Path doesn't have an inner path: " + path);
+
 					try {
 						ZipFile zf = new ZipFile(zipPath);
 						ZipEntry ze = zf.getEntry(innerPath);
@@ -240,7 +324,7 @@ public class Manager {
 							throw new IllegalArgumentException(String.format("Inner path '%s' was not found in archive '%s'", innerPath, zipPath));
 
 						// Closing the ZipFile also closes all streams that it opened...
-						// Copy the stream so that it's possible to access the image
+						// Copy the stream so that it's possible to access the file
 						// without having to keep the archive open
 						result = IOUtils.cloneStream(zf.getInputStream(ze));
 						zf.close();
@@ -260,5 +344,13 @@ public class Manager {
 		}
 
 		return result;
+	}
+
+	public static void addModifierListener(ModifierListener ml) {
+		EditorWindow.getInstance().addModifierListener(ml);
+	}
+
+	public static void removeModifierListener(ModifierListener ml) {
+		EditorWindow.getInstance().removeModifierListener(ml);
 	}
 }

@@ -165,6 +165,22 @@ public class DatabaseEntry {
 	}
 
 	/**
+	 * Clears all data that was loaded and cached in this entry.
+	 */
+	public void clear() {
+		shipMetadata.clear();
+		animationObjects.clear();
+		weaponObjects.clear();
+		droneObjects.clear();
+		augmentObjects.clear();
+		glowObjects.clear();
+		glowSets.clear();
+		weaponLists.clear();
+		droneLists.clear();
+		animSheetMap.clear();
+	}
+
+	/**
 	 * Closes this entry and releases any system resources associated with the stream.
 	 */
 	public void close() throws IOException {
@@ -173,6 +189,16 @@ public class DatabaseEntry {
 			resource.close();
 		} else
 			archive.close();
+	}
+
+	public void dispose() throws IOException {
+		close();
+		clear();
+	}
+
+	public void reload() {
+		clear();
+		load();
 	}
 
 	public void store(AnimationObject anim) {
@@ -556,7 +582,7 @@ public class DatabaseEntry {
 		}
 
 		// Clear anim sheets, as they're no longer needed
-		clearAnimSheets();
+		animSheetMap.clear();
 
 		log.trace(getName() + " was loaded successfully.");
 	}
@@ -609,11 +635,6 @@ public class DatabaseEntry {
 				}
 			}
 		}
-	}
-
-	private void clearAnimSheets() {
-		animSheetMap.clear();
-		animSheetMap = null;
 	}
 
 	/**

@@ -75,13 +75,14 @@ public class ModManagementDialog {
 
 		trtmCore = new TreeItem(tree, SWT.NONE);
 		trtmCore.setText("DatabaseCore");
+		trtmCore.setData(db.getCore());
 		RGB rgb = trtmCore.getBackground().getRGB();
 		rgb.red = (int) (0.85 * rgb.red);
 		rgb.green = (int) (0.85 * rgb.green);
 		rgb.blue = (int) (0.85 * rgb.blue);
 		disabledColor = Cache.checkOutColor(this, rgb);
 		trtmCore.setBackground(disabledColor);
-		trtmCore.setData(db.getCore());
+
 		entries.add(db.getCore());
 
 		// Need to specify a transfer type, even if it's not used, because
@@ -119,7 +120,7 @@ public class ModManagementDialog {
 		btnCancel.setLayoutData(gd_btnCancel);
 		btnCancel.setText("Cancel");
 
-		for (DatabaseEntry de : db.getDatabaseEntries()) {
+		for (DatabaseEntry de : db.getEntries()) {
 			if (de == db.getCore())
 				continue;
 			createTreeItem(de);
@@ -130,7 +131,7 @@ public class ModManagementDialog {
 			@Override
 			public void dragStart(DragSourceEvent e) {
 				TreeItem[] selection = tree.getSelection();
-				if (selection.length > 0 && selection[0].getItemCount() == 0) {
+				if (selection.length > 0 && selection[0].getItemCount() == 0 && selection[0] != trtmCore) {
 					e.doit = true;
 					dragItem = selection[0];
 				} else {
@@ -215,7 +216,7 @@ public class ModManagementDialog {
 							}
 						}
 					}
-				} else {
+				} else if (dragData != db.getCore()) {
 					if (dragItem == null) {
 						createTreeItem(dragData);
 					} else {
@@ -311,13 +312,13 @@ public class ModManagementDialog {
 				UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new LoadTask() {
 					public void execute() {
 						// Load added entries
-						DatabaseEntry[] dbEntries = db.getDatabaseEntries();
+						DatabaseEntry[] dbEntries = db.getEntries();
 						for (DatabaseEntry de : entries) {
 							if (!contains(dbEntries, de))
 								db.addEntry(de);
 						}
 						// Unload deleted entries
-						for (DatabaseEntry de : db.getDatabaseEntries()) {
+						for (DatabaseEntry de : db.getEntries()) {
 							if (!entries.contains(de))
 								db.removeEntry(de);
 						}

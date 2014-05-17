@@ -55,16 +55,11 @@ public class Database {
 	// Dynamically loaded
 	private ArrayList<DatabaseEntry> dataEntries = new ArrayList<DatabaseEntry>();
 
-	private Database() {
-	}
-
-	public Database(FTLPack data, FTLPack resource) throws FileNotFoundException, IOException {
-		this();
+	/**
+	 * Creates an empty Database.
+	 */
+	public Database() {
 		instance = this;
-
-		DatabaseEntry core = new DatabaseEntry(data, resource);
-		core.store(DEFAULT_ANIM_OBJ);
-		dataEntries.add(core);
 
 		String blueprints = "blueprints.xml";
 		String dlcBlueprints = "dlcBlueprints.xml";
@@ -122,15 +117,23 @@ public class Database {
 		shipFileMap.put("BOSS_3_HARD_DLC", bosses);
 	}
 
+	public Database(FTLPack data, FTLPack resource) throws FileNotFoundException, IOException {
+		this();
+
+		DatabaseEntry core = new DatabaseEntry(data, resource);
+		core.store(DEFAULT_ANIM_OBJ);
+		dataEntries.add(core);
+	}
+
 	public static Database getInstance() {
 		return instance;
 	}
 
 	public DatabaseEntry getCore() {
-		return dataEntries.get(0);
+		return dataEntries.size() > 0 ? dataEntries.get(0) : null;
 	}
 
-	public DatabaseEntry[] getDatabaseEntries() {
+	public DatabaseEntry[] getEntries() {
 		return dataEntries.toArray(new DatabaseEntry[0]);
 	}
 
@@ -142,7 +145,7 @@ public class Database {
 	public void removeEntry(DatabaseEntry de) {
 		try {
 			dataEntries.remove(de);
-			de.close();
+			de.dispose();
 		} catch (IOException e) {
 			log.error(String.format("An error has occured while closing database entry '%s': ", de.getName()), e);
 		}
@@ -153,6 +156,9 @@ public class Database {
 		dataEntries.add(index, de);
 	}
 
+	/**
+	 * Updates all WeaponObject's animations, so that they display the correct weapon image.
+	 */
 	public void cacheAnimations() {
 		for (WeaponTypes type : WeaponTypes.values()) {
 			for (WeaponObject object : getWeaponsByType(type)) {

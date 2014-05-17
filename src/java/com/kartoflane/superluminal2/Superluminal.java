@@ -39,7 +39,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta2");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta3");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -53,8 +53,13 @@ public class Superluminal {
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - properties: crew tab
+	 * - hotkey disable doesnt work on linux (focus is messing up?)
+	 * - Window resize doesnt refresh grid on linux (resize event is called before setSize() is called?)
+	 * 
+	 * - Help icons with tooltips explaining stuff
+	 * - tree columns' names -> don't allow them to be resized to the point where they fall outside of the tree
 	 * - weapon selection reportedly clunky -> remember previous selection, + search function?
+	 * - properties: crew tab
 	 * - artillery weapon UI idea:
 	 * Additionally, when placing artillery room(s), there should be a separate category under Armaments for Artillery weapons, and the selection of such for each. The best way, in my opinion, is to
 	 * have the categories Weapons, Drones, Artillery, and Augments. Under Artillery, a number of slot selector should be added (with a warning that having more than one artillery weapon will prevent
@@ -63,9 +68,10 @@ public class Superluminal {
 	 * be exceeded? If so, add it. :P) should be added to the right of each Artillery weapon choice, so that way it will make adding multiple-artillery setups to AI (or human-controlled) ships much
 	 * easier.
 	 * 
-	 * - ship offset modification
+	 * - boarding AI selection: invasion / sabotage ??
+	 * 
 	 * - add gibs
-	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this
+	 * - include fine offsets in ship positioning? --> offset hangar image from anchor to indicate this | http://www.ftlgame.com/forum/viewtopic.php?f=12&t=11251&p=69515#p69515
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * - changing interior image from 2x2 to 2x1 (for example) leaves unredrawn canvas area
 	 * - dragging reorder to ship overview
@@ -76,6 +82,9 @@ public class Superluminal {
 	 * 
 	 * - entity deletion --> add (to) undo
 	 * - undo przy pomocy reflection -- UndoableBooleanFieldEdit, etc ?? ...chyba nie
+	 * 
+	 * - Rework highlight to be cursor based? --> allows to show mounts/rooms that are hidden beneath hull/other rooms
+	 * - rework the layered painter to allow more freedom in arranging stuff's ordering
 	 * 
 	 * Suggestions:
 	 * - detachable toolbar?
@@ -129,6 +138,8 @@ public class Superluminal {
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();
+		Manager.loadDefaultHotkeys();
+
 		File hotkeysFile = new File(HOTKEYS_FILE);
 		if (hotkeysFile.exists())
 			loadHotkeys(hotkeysFile);
@@ -155,7 +166,12 @@ public class Superluminal {
 			editorWindow = new EditorWindow(display);
 		} catch (Exception e) {
 			log.error("Exception occured while creating EditorWindow: ", e);
-			UIUtils.showErrorDialog(null, null, "An error has occured while creating the editor's GUI: " + e.getMessage());
+
+			StringBuilder buf = new StringBuilder();
+			buf.append("An error has occured while creating the editor's GUI:\n");
+			buf.append(e.getClass().getSimpleName() + ": " + e.getMessage());
+			buf.append("\n\nCheck the log for details.");
+			UIUtils.showErrorDialog(null, null, buf.toString());
 			System.exit(1);
 		}
 
@@ -185,9 +201,9 @@ public class Superluminal {
 
 		// Exit program if dats were not found, or load them if they were
 		if (datsDir == null) {
-			UIUtils.showErrorDialog(editorWindow.getShell(), null, "FTL resources were not found.\nThe editor will now exit.");
-			log.debug("No FTL dats path found, exiting.");
-			System.exit(1);
+			UIUtils.showWarningDialog(editorWindow.getShell(), null, "FTL resources were not found.\nThe editor will not be able to load any data from the game,\nand may crash unexpectedly.");
+			log.debug("No FTL dats path found - creating empty Database.");
+			new Database();
 		} else {
 			try {
 				log.trace("Loading dat archives...");
@@ -247,16 +263,7 @@ public class Superluminal {
 
 		// Save config
 		try {
-			appConfig.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
-			appConfig.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "" + Manager.rememberGeometry);
-			appConfig.setProperty(SuperluminalConfig.START_MAX, "" + Manager.startMaximised);
-			appConfig.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
-			appConfig.setProperty(SuperluminalConfig.CHECK_UPDATES, "" + Manager.checkUpdates);
-			appConfig.setProperty(SuperluminalConfig.CLOSE_LOADER, "" + Manager.closeLoader);
-			appConfig.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
-			appConfig.setProperty(SuperluminalConfig.SLOT_WARNING, "" + Manager.shownSlotWarning);
-			if (Manager.rememberGeometry && !Manager.startMaximised)
-				appConfig.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
+			appConfig.setCurrent();
 			appConfig.writeConfig();
 		} catch (IOException e) {
 			String errorMsg = String.format("Error writing config to \"%s\".", configFile.getPath());
@@ -353,78 +360,6 @@ public class Superluminal {
 	private static void initHotkeys() {
 		for (Hotkeys keyId : Hotkeys.values())
 			Manager.HOTKEY_MAP.put(keyId, new Hotkey(keyId));
-		loadDefaultHotkeys();
-	}
-
-	/** Loads the default hotkey values, which are later overridden by config or the user. */
-	private static void loadDefaultHotkeys() {
-		Hotkey hotkey = null;
-
-		// Tool hotkeys
-		Manager.getHotkey(Hotkeys.POINTER_TOOL).setKey('q');
-		Manager.getHotkey(Hotkeys.CREATE_TOOL).setKey('w');
-		Manager.getHotkey(Hotkeys.GIB_TOOL).setKey('e');
-		Manager.getHotkey(Hotkeys.IMAGES_TOOL).setKey('r');
-		Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).setKey('t');
-		Manager.getHotkey(Hotkeys.ROOM_TOOL).setKey('a');
-		Manager.getHotkey(Hotkeys.DOOR_TOOL).setKey('s');
-		Manager.getHotkey(Hotkeys.MOUNT_TOOL).setKey('d');
-		Manager.getHotkey(Hotkeys.STATION_TOOL).setKey('f');
-		Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).setKey('o');
-
-		// Command hotkeys
-		Manager.getHotkey(Hotkeys.PIN).setKey(' ');
-
-		hotkey = Manager.getHotkey(Hotkeys.DELETE);
-		hotkey.setKey('d');
-		hotkey.setShift(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.UNDO);
-		hotkey.setKey('z');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.REDO);
-		hotkey.setKey('y');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.NEW_SHIP);
-		hotkey.setKey('n');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.LOAD_SHIP);
-		hotkey.setKey('l');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.SAVE_SHIP);
-		hotkey.setKey('s');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.CLOSE_SHIP);
-		hotkey.setKey('w');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.MANAGE_MOD);
-		hotkey.setKey('m');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.SETTINGS);
-		hotkey.setKey('o');
-		hotkey.setCtrl(true);
-
-		hotkey = Manager.getHotkey(Hotkeys.CLOAK);
-		hotkey.setKey('c');
-		hotkey.setShift(true);
-
-		// View hotkeys
-		Manager.getHotkey(Hotkeys.TOGGLE_GRID).setKey('x');
-		Manager.getHotkey(Hotkeys.SHOW_ANCHOR).setKey('1');
-		Manager.getHotkey(Hotkeys.SHOW_MOUNTS).setKey('2');
-		Manager.getHotkey(Hotkeys.SHOW_ROOMS).setKey('3');
-		Manager.getHotkey(Hotkeys.SHOW_DOORS).setKey('4');
-		Manager.getHotkey(Hotkeys.SHOW_STATIONS).setKey('5');
-		Manager.getHotkey(Hotkeys.SHOW_HULL).setKey('6');
-		Manager.getHotkey(Hotkeys.SHOW_FLOOR).setKey('7');
-		Manager.getHotkey(Hotkeys.SHOW_SHIELD).setKey('8');
 	}
 
 	/**
@@ -446,36 +381,37 @@ public class Superluminal {
 				}
 
 				Hotkeys action = null;
+				String loading = null;
+				String attr = null;
 				try {
 					action = Hotkeys.valueOf(actionName);
 				} catch (IllegalArgumentException e) {
 					log.warn("Action '" + actionName + "' was not recognised, and was not loaded.");
+					continue;
 				}
-				String loading = null;
-				String attr = null;
 				try {
 					loading = "shift";
 					attr = bind.getAttributeValue(loading);
 					if (attr == null)
-						throw new NullPointerException();
+						throw new IllegalArgumentException(action + " keybind if missing 'shift' attribute.");
 					boolean shift = Boolean.valueOf(attr);
 
 					loading = "ctrl";
 					attr = bind.getAttributeValue(loading);
 					if (attr == null)
-						throw new NullPointerException();
+						throw new IllegalArgumentException(action + " keybind if missing 'ctrl' attribute.");
 					boolean ctrl = Boolean.valueOf(attr);
 
 					loading = "alt";
 					attr = bind.getAttributeValue(loading);
 					if (attr == null)
-						throw new NullPointerException();
+						throw new IllegalArgumentException(action + " keybind if missing 'alt' attribute.");
 					boolean alt = Boolean.valueOf(attr);
 
 					loading = "char";
 					attr = bind.getAttributeValue(loading);
 					if (attr.length() != 1)
-						throw new IllegalArgumentException();
+						throw new IllegalArgumentException(action + " keybind if missing 'char' attribute.");
 					int ch = attr.charAt(0);
 
 					Hotkey h = Manager.getHotkey(action);
