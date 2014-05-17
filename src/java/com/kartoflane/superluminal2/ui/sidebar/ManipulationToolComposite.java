@@ -65,7 +65,9 @@ public class ManipulationToolComposite extends Composite {
 		lblX.setText("X:");
 
 		spX = new Spinner(boundsContainer, SWT.BORDER);
-		spX.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+		GridData gd_spX = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
+		gd_spX.widthHint = 35;
+		spX.setLayoutData(gd_spX);
 		spX.setEnabled(false);
 		spX.setTextLimit(4);
 		spX.setMaximum(9999);
@@ -75,7 +77,9 @@ public class ManipulationToolComposite extends Composite {
 		lblY.setText("Y:");
 
 		spY = new Spinner(boundsContainer, SWT.BORDER);
-		spY.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+		GridData gd_spY = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
+		gd_spY.widthHint = 35;
+		spY.setLayoutData(gd_spY);
 		spY.setEnabled(false);
 		spY.setTextLimit(4);
 		spY.setMaximum(9999);
@@ -96,6 +100,9 @@ public class ManipulationToolComposite extends Composite {
 		btnLeft.setLayoutData(gd_btnLeft);
 
 		spNudge = new Spinner(boundsContainer, SWT.BORDER);
+		GridData gd_spNudge = new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1);
+		gd_spNudge.widthHint = 20;
+		spNudge.setLayoutData(gd_spNudge);
 		spNudge.setMinimum(1);
 		spNudge.setToolTipText("This determines how much the selected object\nwill move when you press the arrows.");
 
@@ -289,7 +296,7 @@ public class ManipulationToolComposite extends Composite {
 	}
 
 	private void applyLocation() {
-		if (controller.isLocModifiable()) {
+		if (controller != null && controller.isLocModifiable()) {
 			Rectangle oldBounds = controller.getBounds();
 
 			controller.setPresentedLocation(spX.getSelection(), spY.getSelection());

@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ui.sidebar.data;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -10,12 +11,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.EditorWindow;
-import org.eclipse.swt.widgets.Text;
+import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
 
 public class MountDataComposite extends Composite implements DataComposite {
 
@@ -25,12 +27,15 @@ public class MountDataComposite extends Composite implements DataComposite {
 	private Button btnRotated;
 	private Button btnMirrored;
 	private DirectionCombo cmbDirection;
-	private Text txtWeapon;
+	private Button btnWeapon;
+	private Label lblWeaponInfo;
+	private Label lblDirHelp;
 
 	public MountDataComposite(Composite parent, MountController control) {
 		super(parent, SWT.NONE);
 
 		controller = control;
+		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
 
 		setLayout(new GridLayout(2, false));
 
@@ -53,18 +58,28 @@ public class MountDataComposite extends Composite implements DataComposite {
 		Label lblDirection = new Label(this, SWT.NONE);
 		lblDirection.setText("Power-up Direction:");
 
+		lblDirHelp = new Label(this, SWT.NONE);
+		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblDirHelp.setImage(helpImage);
+		lblDirHelp.setToolTipText("This determines the direction in which the weapon\nwill 'slide' when it is powered up.");
+
 		cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, true);
-		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
 		gd_cmbDirection.widthHint = 80;
 		cmbDirection.setLayoutData(gd_cmbDirection);
 		cmbDirection.select(0);
 
 		Label lblWeapon = new Label(this, SWT.NONE);
-		lblWeapon.setText("Weapon:");
+		lblWeapon.setText("Displayed Weapon:");
 
-		txtWeapon = new Text(this, SWT.BORDER | SWT.READ_ONLY);
-		txtWeapon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		txtWeapon.setText("None");
+		lblWeaponInfo = new Label(this, SWT.NONE);
+		lblWeaponInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblWeaponInfo.setImage(helpImage);
+		lblWeaponInfo.setToolTipText("This setting is only cosmetic, and allows\nyou to view how a given weapon would\nlook,were it placed on this mount.");
+
+		btnWeapon = new Button(this, SWT.NONE);
+		btnWeapon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		btnWeapon.setText("<No Weapon>");
 
 		btnRotated.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -90,6 +105,19 @@ public class MountDataComposite extends Composite implements DataComposite {
 				controller.setDirection(cmbDirection.getDirection());
 			}
 		});
+		btnWeapon.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WeaponObject current = controller.getWeapon();
+				WeaponSelectionDialog dialog = new WeaponSelectionDialog(EditorWindow.getInstance().getShell());
+				WeaponObject neu = dialog.open(current);
+
+				if (neu != null) {
+					controller.setWeapon(neu);
+					updateData();
+				}
+			}
+		});
 
 		updateData();
 	}
@@ -105,11 +133,17 @@ public class MountDataComposite extends Composite implements DataComposite {
 		cmbDirection.select(DirectionCombo.toIndex(controller.getDirection()));
 
 		WeaponObject weapon = controller.getWeapon();
-		txtWeapon.setText(weapon.toString());
+		btnWeapon.setText(weapon.toString());
 	}
 
 	@Override
 	public void setController(AbstractController controller) {
 		this.controller = (MountController) controller;
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		Cache.checkInImage(this, "cpath:/assets/help.png");
 	}
 }

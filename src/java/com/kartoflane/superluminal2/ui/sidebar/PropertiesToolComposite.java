@@ -7,6 +7,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -21,6 +22,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Races;
+import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
@@ -77,12 +79,19 @@ public class PropertiesToolComposite extends Composite {
 	private Composite compArtillery;
 	private Label label;
 	private CrewMenu crewMenu;
+	private Label lblHullHelp;
+	private Label lblReactorInfo;
+	private Label lblLayoutInfo;
+	private Label lblImageHelp;
+	private Label lblBlueprintHelp;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(1, false));
 
 		container = Manager.getCurrentShip();
+		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
+
 		final ShipObject ship = container.getShipController().getGameObject();
 		final boolean[] created = { false };
 
@@ -114,17 +123,21 @@ public class PropertiesToolComposite extends Composite {
 
 		Composite compGeneral = new Composite(tabFolder, SWT.NONE);
 		tbtmGeneral.setControl(compGeneral);
-		compGeneral.setLayout(new GridLayout(2, false));
+		compGeneral.setLayout(new GridLayout(4, false));
 
 		lblBlueprint = new Label(compGeneral, SWT.NONE);
-		lblBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lblBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		lblBlueprint.setText("Blueprint:");
+
+		lblBlueprintHelp = new Label(compGeneral, SWT.NONE);
+		lblBlueprintHelp.setImage(helpImage);
 
 		if (ship.isPlayerShip()) {
 			lblBlueprint.setText("Replaced Ship:");
+			lblBlueprintHelp.setToolTipText("This determines which ship your ship is going to replace.\nCurrently, there is no way to add new player ships, so you\nhave to replace one that already exists.");
 
 			cmbShips = new Combo(compGeneral, SWT.READ_ONLY);
-			cmbShips.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			cmbShips.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 			for (PlayerShipBlueprints blueprint : PlayerShipBlueprints.values()) {
 				cmbShips.add(blueprint.toString());
 			}
@@ -137,11 +150,11 @@ public class PropertiesToolComposite extends Composite {
 			});
 
 			Label lblName = new Label(compGeneral, SWT.NONE);
-			lblName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+			lblName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1));
 			lblName.setText("Name:");
 
 			txtName = new Text(compGeneral, SWT.BORDER);
-			txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
 			txtName.addModifyListener(new ModifyListener() {
 				@Override
@@ -151,24 +164,26 @@ public class PropertiesToolComposite extends Composite {
 			});
 		} else {
 			lblBlueprint.setText("Blueprint Name:");
+			lblBlueprintHelp.setToolTipText("This determines your ship's blueprint name.\nBlueprint name is a unique identifier of the\nship, that the game uses internally.");
 
 			txtBlueprint = new Text(compGeneral, SWT.BORDER);
-			txtBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			txtBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
 			txtBlueprint.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
+					txtBlueprint.setText(txtBlueprint.getText().toUpperCase());
 					ship.setBlueprintName(txtBlueprint.getText());
 				}
 			});
 		}
 
 		Label lblClass = new Label(compGeneral, SWT.NONE);
-		lblClass.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblClass.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1));
 		lblClass.setText("Class:");
 
 		txtClass = new Text(compGeneral, SWT.BORDER);
-		txtClass.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		txtClass.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
 		txtClass.addModifyListener(new ModifyListener() {
 			@Override
@@ -179,11 +194,11 @@ public class PropertiesToolComposite extends Composite {
 
 		if (ship.isPlayerShip()) {
 			lblDesc = new Label(compGeneral, SWT.NONE);
-			lblDesc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			lblDesc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 			lblDesc.setText("Description: (0/255)");
 
 			txtDesc = new Text(compGeneral, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-			GridData gd_txtDesc = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+			GridData gd_txtDesc = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
 			gd_txtDesc.heightHint = 80;
 			txtDesc.setLayoutData(gd_txtDesc);
 
@@ -197,11 +212,15 @@ public class PropertiesToolComposite extends Composite {
 		}
 
 		Label lblLayout = new Label(compGeneral, SWT.NONE);
-		lblLayout.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		lblLayout.setText("Layout Filename:");
 
+		lblLayoutInfo = new Label(compGeneral, SWT.NONE);
+		lblLayoutInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1));
+		lblLayoutInfo.setImage(helpImage);
+		lblLayoutInfo.setToolTipText("This field specifies the name of the ship's layout files,\nlike kestral.txt and kestral.xml");
+
 		txtLayout = new Text(compGeneral, SWT.BORDER);
-		txtLayout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		txtLayout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
 		txtLayout.addModifyListener(new ModifyListener() {
 			@Override
@@ -211,11 +230,15 @@ public class PropertiesToolComposite extends Composite {
 		});
 
 		Label lblImageNamespace = new Label(compGeneral, SWT.NONE);
-		lblImageNamespace.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		lblImageNamespace.setText("Image Namespace:");
 
+		lblImageHelp = new Label(compGeneral, SWT.NONE);
+		lblImageHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1));
+		lblImageHelp.setImage(helpImage);
+		lblImageHelp.setToolTipText("This field specifies the name of the ship's image files,\nlike kestral_base.png");
+
 		txtImage = new Text(compGeneral, SWT.BORDER);
-		txtImage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		txtImage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
 		txtImage.addModifyListener(new ModifyListener() {
 			@Override
@@ -230,7 +253,9 @@ public class PropertiesToolComposite extends Composite {
 		spHealth = new Spinner(compGeneral, SWT.BORDER);
 		spHealth.setTextLimit(3);
 		spHealth.setMinimum(0);
-		spHealth.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		GridData gd_spHealth = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
+		gd_spHealth.widthHint = 25;
+		spHealth.setLayoutData(gd_spHealth);
 
 		spHealth.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -239,13 +264,20 @@ public class PropertiesToolComposite extends Composite {
 			}
 		});
 
+		lblHullHelp = new Label(compGeneral, SWT.NONE);
+		lblHullHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblHullHelp.setImage(helpImage);
+		lblHullHelp.setToolTipText("This defines the amount of health your ship starts with.\nThe default is 30 for a player ship.");
+
 		Label lblReactor = new Label(compGeneral, SWT.NONE);
 		lblReactor.setText("Reactor Power:");
 
 		spPower = new Spinner(compGeneral, SWT.BORDER);
 		spPower.setTextLimit(3);
 		spPower.setMinimum(0);
-		spPower.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		GridData gd_spPower = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
+		gd_spPower.widthHint = 25;
+		spPower.setLayoutData(gd_spPower);
 
 		spPower.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -253,6 +285,11 @@ public class PropertiesToolComposite extends Composite {
 				ship.setPower(spPower.getSelection());
 			}
 		});
+
+		lblReactorInfo = new Label(compGeneral, SWT.NONE);
+		lblReactorInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblReactorInfo.setImage(helpImage);
+		lblReactorInfo.setToolTipText("This sets the amount of power the ship starts with.\nThe reactor can only be upgraded to level 25 ingame,\nbut can be set to a higher value when creating your\nship in this editor.");
 
 		if (!ship.isPlayerShip()) {
 			Label lblMinSector = new Label(compGeneral, SWT.NONE);
@@ -262,16 +299,42 @@ public class PropertiesToolComposite extends Composite {
 			spMinSec.setTextLimit(1);
 			spMinSec.setMaximum(8);
 			spMinSec.setMinimum(1);
-			spMinSec.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			GridData gd_spMinSec = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
+			gd_spMinSec.widthHint = 25;
+			spMinSec.setLayoutData(gd_spMinSec);
+
+			spMinSec.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ship.setMinSector(spMinSec.getSelection());
+				}
+			});
+
+			Label lblMinSecInfo = new Label(compGeneral, SWT.NONE);
+			lblMinSecInfo.setImage(helpImage);
+			lblMinSecInfo.setToolTipText("This determines the minimum sector in which the enemy can be encountered.");
 
 			Label lblMaxSector = new Label(compGeneral, SWT.NONE);
 			lblMaxSector.setText("Max Sector:");
 
 			spMaxSec = new Spinner(compGeneral, SWT.BORDER);
-			spMaxSec.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			spMaxSec.setTextLimit(1);
 			spMaxSec.setMaximum(8);
 			spMaxSec.setMinimum(1);
+			GridData gd_spMaxSec = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
+			gd_spMaxSec.widthHint = 25;
+			spMaxSec.setLayoutData(gd_spMaxSec);
+
+			spMaxSec.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ship.setMaxSector(spMaxSec.getSelection());
+				}
+			});
+
+			Label lblMaxSecInfo = new Label(compGeneral, SWT.NONE);
+			lblMaxSecInfo.setImage(helpImage);
+			lblMaxSecInfo.setToolTipText("This determines the maximum sector in which the enemy can be encountered.");
 		}
 
 		/*
@@ -297,14 +360,18 @@ public class PropertiesToolComposite extends Composite {
 
 		spMissiles = new Spinner(grpWeapons, SWT.BORDER);
 		spMissiles.setMaximum(999);
-		spMissiles.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		GridData gd_spMissiles = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_spMissiles.widthHint = 25;
+		spMissiles.setLayoutData(gd_spMissiles);
 
 		Label lblWeaponSlots = new Label(grpWeapons, SWT.NONE);
 		lblWeaponSlots.setText("Slots");
 
 		spWeaponSlots = new Spinner(grpWeapons, SWT.BORDER);
 		spWeaponSlots.setMaximum(8);
-		spWeaponSlots.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		GridData gd_spWeaponSlots = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_spWeaponSlots.widthHint = 25;
+		spWeaponSlots.setLayoutData(gd_spWeaponSlots);
 		spWeaponSlots.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -362,14 +429,18 @@ public class PropertiesToolComposite extends Composite {
 
 		spDrones = new Spinner(grpDrones, SWT.BORDER);
 		spDrones.setMaximum(999);
-		spDrones.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		GridData gd_spDrones = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_spDrones.widthHint = 25;
+		spDrones.setLayoutData(gd_spDrones);
 
 		Label lblDroneSlots = new Label(grpDrones, SWT.NONE);
 		lblDroneSlots.setText("Slots");
 
 		spDroneSlots = new Spinner(grpDrones, SWT.BORDER);
 		spDroneSlots.setMaximum(8);
-		spDroneSlots.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		GridData gd_spDroneSlots = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_spDroneSlots.widthHint = 25;
+		spDroneSlots.setLayoutData(gd_spDroneSlots);
 		spDroneSlots.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -516,6 +587,7 @@ public class PropertiesToolComposite extends Composite {
 				btnCrewMembers.add(btn);
 			}
 		} else {
+			// TODO
 		}
 		Label lblNYI = new Label(compCrew, SWT.NONE);
 		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
@@ -554,7 +626,7 @@ public class PropertiesToolComposite extends Composite {
 			txtName.setText(ship.isPlayerShip() && content == null ? "The Nameless One" : content);
 
 			content = ship.getShipDescription();
-			txtDesc.setText(ship.isPlayerShip() && content == null ? "" : content);
+			txtDesc.setText(ship.isPlayerShip() && content == null ? "Ship Class" : content);
 			lblDesc.setText("Description: (" + txtDesc.getText().length() + "/255)");
 		} else {
 			txtBlueprint.setText(ship.getBlueprintName());
