@@ -36,4 +36,9 @@ public enum Hotkeys {
 	SHOW_HULL,
 	SHOW_FLOOR,
 	SHOW_SHIELD;
+
+	@Override
+	public String toString() {
+		return name();
+	}
 }

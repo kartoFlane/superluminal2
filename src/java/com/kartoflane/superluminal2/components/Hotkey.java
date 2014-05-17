@@ -60,7 +60,8 @@ public class Hotkey {
 	 * @return true if the hotkey is tiggered, false otherwise
 	 */
 	public boolean passes(int keyCode) {
-		return Manager.modShift == shift && Manager.modCtrl == ctrl && Manager.modAlt == alt && key == keyCode;
+		return Manager.modShift == shift && Manager.modCtrl == ctrl && Manager.modAlt == alt &&
+				Character.toLowerCase(key) == Character.toLowerCase(keyCode);
 	}
 
 	@Override
