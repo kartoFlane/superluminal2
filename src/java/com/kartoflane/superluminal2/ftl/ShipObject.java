@@ -86,7 +86,7 @@ public class ShipObject extends GameObject {
 		weapons = new ArrayList<WeaponObject>();
 		drones = new ArrayList<DroneObject>();
 
-		for (int i = 0; i <= 4; i++) {
+		for (int i = 0; i < 8; i++) {
 			weapons.add(Database.DEFAULT_WEAPON_OBJ);
 			drones.add(Database.DEFAULT_DRONE_OBJ);
 		}
