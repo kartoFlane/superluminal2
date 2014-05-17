@@ -12,14 +12,14 @@ To just compile the source code, run "mvn -P compile clean package" in this fold
 Explanation of the directory structure:
 
   "img/"
-	Screenshots.
+    Screenshots.
 
   "modules/"
     This directory contains modules of the project's main POM.
     
-	"core/"
-	  This directory contains the POM that compiles the program's source code.
-	  The code itself is located in "src/" directory in the main repo.
+    "core/"
+      This directory contains the POM that compiles the program's source code.
+      The code itself is located in "src/" directory in the main repo.
 
     "{platform}{arch}/"
       These directories contain POMs that assemble the platform-specific jars and
@@ -31,9 +31,9 @@ Explanation of the directory structure:
     
     "common/"
       Files to include in all distribution archives.
-  
-        "auto_update.xml"
-          Info about the latest release, downloaded periodically by clients.
+
+      "auto_update.xml"
+        Info about the latest release, downloaded periodically by clients.
 
     "win/", "linux/" and "mac/"
       System-specific files to include in distribution archives.
@@ -51,7 +51,7 @@ Explanation of the directory structure:
 
 
 
-This project depends on the following libraries.
+This project depends on the following libraries:
 - JDOM 2.x
     http://www.jdom.org/
     (For JavaDocs, look left.)
