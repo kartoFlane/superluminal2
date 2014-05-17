@@ -4,6 +4,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 public class Utils {
@@ -40,13 +41,23 @@ public class Utils {
 		return Math.min(a, Math.min(b, c));
 	}
 
+	public static int[] toArray(Rectangle rect) {
+		return new int[] {
+				rect.x, rect.y,
+				rect.x + rect.width, rect.y,
+				rect.x, rect.y + rect.height,
+				rect.x + rect.width, rect.y + rect.height
+		};
+	}
+
 	/**
-	 * Corrects the bounds by including rotation. This way bounds
-	 * cover the entire area of the controller, and can be reliably
-	 * used to redraw it.
+	 * Rotates the rectangle around its center by the given angle.
 	 * 
 	 * @param b
-	 *            the rectangle representing the controller's bounds
+	 *            the rectangle to be rotated
+	 * @param rotation
+	 *            angle in degrees
+	 * @return the rotated rectangle
 	 */
 	public static Rectangle rotate(Rectangle r, float rotation) {
 		Rectangle b = copy(r);
@@ -58,14 +69,30 @@ public class Utils {
 			int a = b.width;
 			b.width = b.height;
 			b.height = a;
-		} else if (rotation % 45 == 0) {
-			// TODO ?
 		} else {
-			// TODO perform sine/cosine calculations, or approximations of those...
-			// end.x = (int) (start.x + Math.cos(rad) * distance - Math.sin(rad) * distance);
-			// end.y = (int) (start.y + Math.sin(rad) * distance + Math.cos(rad) * distance);
+			Point c = new Point(b.x + b.width / 2, b.y + b.height / 2);
+			Polygon p = new Polygon(toArray(b));
+			p.rotate((float) Math.toRadians(rotation), c.x, c.y);
+			b = p.getBounds();
 		}
 		return b;
+	}
+
+	/**
+	 * 
+	 * @param point
+	 *            the point to be rotated
+	 * @param the
+	 *            point around which the point will be rotated
+	 * @param rad
+	 *            angle in radians
+	 * @return the rotated point
+	 */
+	public static Point rotate(Point point, int cx, int cy, float rad) {
+		Point p = copy(point);
+		p.x = (int) (Math.cos(rad) * (point.x - cx) - Math.sin(rad) * (point.y - cy) + cx);
+		p.y = (int) (Math.sin(rad) * (point.x - cx) + Math.cos(rad) * (point.y - cy) + cy);
+		return p;
 	}
 
 	/**
