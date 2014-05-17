@@ -1,5 +1,9 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -17,6 +21,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.mvc.views.Preview;
+import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public class ImageViewerDialog {
@@ -26,6 +31,7 @@ public class ImageViewerDialog {
 	private Shell shell = null;
 	private Canvas canvas;
 	private Button btnClose;
+	private Button btnShow;
 
 	public ImageViewerDialog(Shell parent) {
 		if (instance != null)
@@ -34,28 +40,16 @@ public class ImageViewerDialog {
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
 		shell.setText(Superluminal.APP_NAME + " - Image Viewer");
-		shell.setLayout(new GridLayout(1, false));
+		shell.setLayout(new GridLayout(2, false));
 
 		canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
-		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		preview = new Preview();
+		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
 		RGB rgb = canvas.getBackground().getRGB();
+		preview = new Preview();
 		preview.setBackgroundColor((int) (0.9 * rgb.red), (int) (0.9 * rgb.green), (int) (0.9 * rgb.blue));
 		preview.setDrawBackground(true);
 		canvas.addPaintListener(preview);
-
-		btnClose = new Button(shell, SWT.NONE);
-		GridData gd_btnClose = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
-		gd_btnClose.widthHint = 80;
-		btnClose.setLayoutData(gd_btnClose);
-		btnClose.setText("Close");
-
-		btnClose.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				dispose();
-			}
-		});
 
 		canvas.addControlListener(new ControlListener() {
 			@Override
@@ -66,6 +60,49 @@ public class ImageViewerDialog {
 			public void controlResized(ControlEvent e) {
 				updatePreview();
 				canvas.redraw();
+			}
+		});
+
+		btnShow = new Button(shell, SWT.NONE);
+		GridData gd_btnShow = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+		gd_btnShow.widthHint = 80;
+		btnShow.setLayoutData(gd_btnShow);
+		btnShow.setText("Show File");
+
+		btnClose = new Button(shell, SWT.NONE);
+		GridData gd_btnClose = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
+		gd_btnClose.widthHint = 80;
+		btnClose.setLayoutData(gd_btnClose);
+		btnClose.setText("Close");
+
+		btnShow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String path = preview.getImagePath();
+				if (path != null)
+					return;
+
+				File file = new File(path);
+				if (file.exists()) {
+					if (Desktop.isDesktopSupported()) {
+						Desktop desktop = Desktop.getDesktop();
+						if (desktop != null) {
+							try {
+								desktop.open(file.getParentFile());
+							} catch (IOException ex) {
+							}
+						}
+					} else {
+						Superluminal.log.error("Unable to open file location - AWT Desktop not supported.");
+					}
+				}
+			}
+		});
+
+		btnClose.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dispose();
 			}
 		});
 
@@ -105,6 +142,8 @@ public class ImageViewerDialog {
 		preview.setImage(path == null ? "db:img/nullResource.png" : path);
 		updatePreview();
 		canvas.redraw();
+
+		btnShow.setEnabled(IOUtils.getProtocol(path).equals("file:"));
 		shell.open();
 	}
 

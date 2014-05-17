@@ -1,9 +1,5 @@
 package com.kartoflane.superluminal2.ui.sidebar.data;
 
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -17,7 +13,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
-import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.GlowSet;
@@ -28,6 +23,7 @@ import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GlowSelectionDialog;
+import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
@@ -190,20 +186,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				public void widgetSelected(SelectionEvent e) {
 					Systems sys = container.getActiveSystem(roomC.getGameObject());
 					SystemController system = container.getSystemController(sys);
-					File file = new File(system.getInteriorPath());
-
-					if (file != null && file.exists()) {
-						if (Desktop.isDesktopSupported()) {
-							Desktop desktop = Desktop.getDesktop();
-							if (desktop != null) {
-								try {
-									desktop.open(file.getParentFile());
-								} catch (IOException ex) {
-								}
-							}
-						} else {
-							Superluminal.log.error("Unable to open file location - AWT Desktop not supported.");
-						}
+					String path = system.getInteriorPath();
+					if (path != null) {
+						ImageViewerDialog dialog = new ImageViewerDialog(EditorWindow.getInstance().getShell());
+						dialog.open(path);
 					}
 				}
 			};
