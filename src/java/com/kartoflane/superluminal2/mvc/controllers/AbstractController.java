@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.mvc.controllers;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.swt.events.MouseEvent;
@@ -20,6 +21,8 @@ import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Followable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
+import com.kartoflane.superluminal2.components.interfaces.LocationListener;
+import com.kartoflane.superluminal2.components.interfaces.ModifierListener;
 import com.kartoflane.superluminal2.components.interfaces.MouseInputListener;
 import com.kartoflane.superluminal2.components.interfaces.Pinnable;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
@@ -39,13 +42,15 @@ import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public abstract class AbstractController implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
-		MouseInputListener, Collidable, Boundable, Follower, Followable, SizeListener {
+		MouseInputListener, Collidable, Boundable, Follower, Followable, SizeListener, LocationListener, ModifierListener {
 
 	protected Followable parent = null;
 	protected Point followOffset = null;
 	protected HashSet<Follower> followers = null;
 
+	protected HashSet<LocationListener> locListeners = null;
 	protected HashSet<SizeListener> sizeListeners = null;
+	protected HashSet<PropController> props = null;
 
 	protected BaseModel model = null;
 	protected BaseView view = null;
@@ -122,6 +127,11 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			for (Follower fol : followers)
 				fol.updateFollower();
 		}
+		if (locListeners != null) {
+			for (LocationListener listener : locListeners) {
+				listener.notifyLocationChanged(getX(), getY());
+			}
+		}
 		return true;
 	}
 
@@ -180,6 +190,11 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			for (Follower fol : followers)
 				fol.updateFollower();
 		}
+		if (locListeners != null) {
+			for (LocationListener listener : locListeners) {
+				listener.notifyLocationChanged(getX(), getY());
+			}
+		}
 		return true;
 	}
 
@@ -228,7 +243,26 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return Utils.rotate(model.getBounds(), getRotation());
 	}
 
-	private float getRotation() {
+	/**
+	 * @param rad
+	 *            angle in degrees, 0 = north.
+	 */
+	public void setRotation(float angle) {
+		view.setRotation(angle);
+	}
+
+	/**
+	 * @param rad
+	 *            angle in degrees
+	 */
+	public void rotate(float angle) {
+		view.setRotation(view.getRotation() + angle);
+	}
+
+	/**
+	 * @return rotation in degrees, 0 = north.
+	 */
+	public float getRotation() {
 		return view.getRotation();
 	}
 
@@ -679,6 +713,13 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		setBoundingArea(start.x, start.y, end.x - start.x, end.y - start.y);
 	}
 
+	public Point[] getBoundingPoints() {
+		Rectangle b = model.getBoundingArea();
+		return new Point[] {
+				new Point(b.x, b.y), new Point(b.x + b.width, b.y + b.height)
+		};
+	}
+
 	public void updateBoundingArea() {
 	}
 
@@ -687,16 +728,20 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			return;
 		model.dispose();
 		view.dispose();
+
+		for (PropController prop : getProps()) {
+			prop.dispose();
+		}
 	}
 
 	@Override
 	public boolean contains(int x, int y) {
-		return getBounds().contains(x, y);
+		return getBounds().contains(x, y); // Some controllers modify their bounds, so use that instead of the model's
 	}
 
 	@Override
 	public boolean intersects(Rectangle rect) {
-		return getBounds().intersects(rect);
+		return getBounds().intersects(rect); // Some controllers modify their bounds, so use that instead of the model's
 	}
 
 	public void setLocModifiable(boolean b) {
@@ -744,6 +789,21 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return model.getTolerance();
 	}
 
+	public void addLocationListener(LocationListener listener) {
+		if (locListeners == null)
+			locListeners = new HashSet<LocationListener>();
+		locListeners.add(listener);
+	}
+
+	public void removeLocationListener(LocationListener listener) {
+		if (locListeners == null)
+			locListeners = new HashSet<LocationListener>();
+		locListeners.remove(listener);
+	}
+
+	public void notifyLocationChanged(int x, int y) {
+	}
+
 	public void addSizeListener(SizeListener listener) {
 		if (sizeListeners == null)
 			sizeListeners = new HashSet<SizeListener>();
@@ -758,6 +818,56 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	public void notifySizeChanged(int w, int h) {
 		resize(w, h);
+	}
+
+	public void notifyModShift(boolean pressed) {
+	}
+
+	public void notifyModControl(boolean pressed) {
+	}
+
+	public void notifyModAlt(boolean pressed) {
+	}
+
+	public void addProp(PropController prop) {
+		if (props == null)
+			props = new HashSet<PropController>();
+		if (getProp(prop.getIdentifier()) != null)
+			throw new IllegalArgumentException(String.format("This object already owns a prop named '%s'", prop.getIdentifier()));
+		props.add(prop);
+	}
+
+	public void removeProp(PropController prop) {
+		if (props == null)
+			props = new HashSet<PropController>();
+		props.remove(prop);
+	}
+
+	public PropController[] getProps() {
+		if (props == null)
+			return new PropController[0];
+		return props.toArray(new PropController[0]);
+	}
+
+	/**
+	 * @param id
+	 *            the identifier of the sought prop
+	 * @return prop with the given identifier, or null if not found
+	 */
+	public PropController getProp(String id) {
+		if (props == null) {
+			return null;
+		} else {
+			PropController result = null;
+			Iterator<PropController> it = props.iterator();
+			while (it.hasNext() && result == null) {
+				PropController p = it.next();
+				if (p.getIdentifier().equals(id))
+					result = p;
+			}
+
+			return result;
+		}
 	}
 
 	public static boolean collidesAs(Rectangle rect, AbstractController col) {
