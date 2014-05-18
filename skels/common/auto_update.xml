@@ -1,6 +1,12 @@
 <versions>
 	<latest id="2.0.0 beta3" url="https://www.dropbox.com/sh/o6cqrz0iatyaja7/AAC3yKcTx36V20VdkKguQkw8a" />
 	<changelog>
+		<version id="2.0.0 beta4">
+			<change>Added fine ship offset modification</change>
+			<change>Added optimal offset calculation</change>
+			<change>Added hangar image background</change>
+			<change>Added enemy shields resizing</change>
+		</version>
 		<version id="2.0.0 beta3">
 			<change>Fixed several minor bugs</change>
 			<change>Weapon mounts can now display any weapon without actually changing the loadout</change>

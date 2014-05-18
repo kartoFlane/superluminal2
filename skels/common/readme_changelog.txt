@@ -7,6 +7,7 @@ Changelog
   the ship will be positioned in-game.
 - Added more tooltips
 - Added mouse shortcuts to Weapon Mounting Tool
+- Added enemy shield resizing
 
 2.0.0 beta3:
 - Fixed weapon mounts with direction NONE being incorrectly saved ('none' instead of 'no')
