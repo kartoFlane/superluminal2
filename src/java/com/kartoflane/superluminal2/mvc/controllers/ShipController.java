@@ -49,7 +49,7 @@ public class ShipController extends ObjectController {
 		gridSize = Grid.getInstance().snapToGrid(gridSize, Snapmodes.CROSS);
 		setBoundingArea(0, 0, gridSize.x, gridSize.y);
 		setSnapMode(Snapmodes.CROSS);
-
+		setPresentedFactor(ShipContainer.CELL_SIZE);
 		setSize(ShipContainer.CELL_SIZE / 2, ShipContainer.CELL_SIZE / 2);
 
 		createProps();
@@ -122,6 +122,7 @@ public class ShipController extends ObjectController {
 		opc.setBackgroundColor(255, 0, 0);
 		opc.addToPainter(Layers.SHIP_ORIGIN);
 		opc.setSnapMode(Snapmodes.EDGE_V);
+		opc.setPresentedFactor(ShipContainer.CELL_SIZE);
 		opc.setCompositeTitle("X Offset");
 		addProp(opc);
 
@@ -146,6 +147,7 @@ public class ShipController extends ObjectController {
 		opc.setBackgroundColor(0, 255, 0);
 		opc.addToPainter(Layers.SHIP_ORIGIN);
 		opc.setSnapMode(Snapmodes.EDGE_H);
+		opc.setPresentedFactor(ShipContainer.CELL_SIZE);
 		opc.setCompositeTitle("Y Offset");
 		addProp(opc);
 
@@ -265,21 +267,6 @@ public class ShipController extends ObjectController {
 		vOff.updateFollower();
 	}
 
-	public void setVisible(boolean vis) {
-		super.setVisible(vis);
-		getProp(LINE_H_PROP_ID).setVisible(vis);
-		getProp(LINE_V_PROP_ID).setVisible(vis);
-		getProp(OFFSET_X_PROP_ID).setVisible(vis);
-		getProp(OFFSET_Y_PROP_ID).setVisible(vis);
-		getProp(OFFSET_FINE_X_PROP_ID).setVisible(vis);
-		getProp(OFFSET_FINE_Y_PROP_ID).setVisible(vis);
-	}
-
-	@Override
-	public int getPresentedFactor() {
-		return ShipContainer.CELL_SIZE;
-	}
-
 	@Override
 	public Point getPresentedLocation() {
 		return new Point(getX() / getPresentedFactor(), getY() / getPresentedFactor());
@@ -390,11 +377,6 @@ public class ShipController extends ObjectController {
 		@Override
 		public void rotate(float rad) {
 			polygon.rotate(rad);
-		}
-
-		@Override
-		public int getPresentedFactor() {
-			return ShipContainer.CELL_SIZE;
 		}
 
 		@Override

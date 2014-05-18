@@ -12,7 +12,7 @@ import com.kartoflane.superluminal2.mvc.views.PropView;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.PropDataComposite;
 
-public abstract class PropController extends AbstractController implements Identifiable {
+public class PropController extends AbstractController implements Identifiable {
 
 	protected final String identifier;
 	protected Shapes shape;

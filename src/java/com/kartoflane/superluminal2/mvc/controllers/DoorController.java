@@ -36,6 +36,7 @@ public class DoorController extends ObjectController {
 		setCollidable(true);
 		setTolerance(COLLISION_TOLERANCE);
 		setParent(container.getShipController());
+		setPresentedFactor(ShipContainer.CELL_SIZE);
 		setSize(DoorObject.DOOR_WIDTH, DoorObject.DOOR_HEIGHT);
 	}
 
@@ -136,11 +137,6 @@ public class DoorController extends ObjectController {
 	@Override
 	public void setPresentedSize(int w, int h) {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getPresentedFactor() {
-		return ShipContainer.CELL_SIZE;
 	}
 
 	@Override

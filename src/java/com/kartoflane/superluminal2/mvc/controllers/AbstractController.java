@@ -55,6 +55,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	protected BaseModel model = null;
 	protected BaseView view = null;
 
+	protected int presentedFactor = 1;
 	protected boolean selectable = true;
 	protected boolean selected = false;
 	protected boolean moving = false;
@@ -361,11 +362,19 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	/**
 	 * Presented factor is the number by which the controller's dimensions and location are multiplied
 	 * before they are displayed in the sidebar.
+	 */
+	public void setPresentedFactor(int i) {
+		presentedFactor = i;
+	}
+
+	/**
+	 * Presented factor is the number by which the controller's dimensions and location are multiplied
+	 * before they are displayed in the sidebar.
 	 * 
 	 * @return the presented factor of the room
 	 */
 	public int getPresentedFactor() {
-		return 1;
+		return presentedFactor;
 	}
 
 	/**
@@ -578,6 +587,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	public void setVisible(boolean vis) {
 		view.setVisible(vis);
+		if (props != null) {
+			for (PropController prop : props)
+				prop.setVisible(vis);
+		}
 		redraw();
 	}
 

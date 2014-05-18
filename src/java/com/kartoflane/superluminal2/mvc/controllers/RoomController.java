@@ -57,6 +57,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 		setCollidable(!Manager.allowRoomOverlap);
 		setTolerance(COLLISION_TOLERANCE);
 		setParent(container.getShipController());
+		setPresentedFactor(ShipContainer.CELL_SIZE);
 	}
 
 	/**
@@ -149,11 +150,6 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 			updateBoundingArea();
 			setPresentedLocation(presLoc.x, presLoc.y);
 		}
-	}
-
-	@Override
-	public int getPresentedFactor() {
-		return ShipContainer.CELL_SIZE;
 	}
 
 	public void setId(int id) {
