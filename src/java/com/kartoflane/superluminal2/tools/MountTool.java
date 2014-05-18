@@ -126,7 +126,31 @@ public class MountTool extends Tool {
 			window.canvasRedraw(oldBounds);
 			mount.redraw();
 			OverviewWindow.staticUpdate();
+		} else if (e.button == 3) {
+			if (Manager.modShift) {
+				Directions dir = toolMount.getDirection();
+				toolMount.setDirection(dir.nextDirection());
+				toolMount.updateView();
+			} else if (Manager.modAlt) {
+				toolMount.setVisible(false);
+				cursor.setVisible(false);
+				toolMount.setMirrored(!toolMount.isMirrored());
+				toolMount.updateView();
+				cursor.updateView();
+				toolMount.setVisible(true);
+				cursor.setVisible(true);
+			} else {
+				toolMount.setVisible(false);
+				cursor.setVisible(false);
+				toolMount.setRotated(!toolMount.isRotated());
+				toolMount.updateView();
+				cursor.updateView();
+				toolMount.setVisible(true);
+				cursor.setVisible(true);
+			}
+			window.updateSidebarContent();
 		}
+
 		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {
 			cursor.setVisible(false);
