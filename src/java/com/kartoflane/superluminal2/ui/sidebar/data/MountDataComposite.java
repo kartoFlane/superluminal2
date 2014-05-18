@@ -25,7 +25,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 
 	private Label label;
 	private Button btnRotated;
+	private Label lblRotHelp;
 	private Button btnMirrored;
+	private Label lblMirHelp;
 	private DirectionCombo cmbDirection;
 	private Button btnWeapon;
 	private Label lblWeaponInfo;
@@ -41,19 +43,29 @@ public class MountDataComposite extends Composite implements DataComposite {
 
 		label = new Label(this, SWT.NONE);
 		label.setAlignment(SWT.CENTER);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		label.setText("Mount");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
 		btnRotated = new Button(this, SWT.CHECK);
-		btnRotated.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
+		btnRotated.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		btnRotated.setText("Rotated");
 
+		lblRotHelp = new Label(this, SWT.NONE);
+		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblRotHelp.setImage(helpImage);
+		lblRotHelp.setToolTipText("This determines the direction the weapon is going to face,\nand in which it's going to shoot.");
+
 		btnMirrored = new Button(this, SWT.CHECK);
-		btnMirrored.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
+		btnMirrored.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		btnMirrored.setText("Mirrored");
+
+		lblMirHelp = new Label(this, SWT.NONE);
+		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblMirHelp.setImage(helpImage);
+		lblMirHelp.setToolTipText("Flips the weapon along X or Y axis, depending on Rotation.");
 
 		Label lblDirection = new Label(this, SWT.NONE);
 		lblDirection.setText("Power-up Direction:");

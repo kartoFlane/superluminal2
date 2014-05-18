@@ -31,6 +31,7 @@ import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.AugmentSelectionDialog;
 import com.kartoflane.superluminal2.ui.CrewMenu;
@@ -38,9 +39,10 @@ import com.kartoflane.superluminal2.ui.DroneSelectionDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
-public class PropertiesToolComposite extends Composite {
+public class PropertiesToolComposite extends Composite implements DataComposite {
 
 	private static int selectedTab = 0;
 	private ShipContainer container;
@@ -691,7 +693,16 @@ public class PropertiesToolComposite extends Composite {
 	private void clearWeaponSlots() {
 		for (Button b : btnWeapons)
 			b.dispose();
+		for (Button b : btnDrones)
+			b.dispose();
+		for (Button b : btnAugments)
+			b.dispose();
+		for (Button b : btnCrewMembers)
+			b.dispose();
 		btnWeapons.clear();
+		btnDrones.clear();
+		btnAugments.clear();
+		btnCrewMembers.clear();
 		compArm.layout();
 	}
 
@@ -789,5 +800,15 @@ public class PropertiesToolComposite extends Composite {
 			result |= spMinSec.isFocusControl() || spMaxSec.isFocusControl();
 		}
 		return result;
+	}
+
+	public void setController(AbstractController c) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		Cache.checkInImage(this, "cpath:/assets/help.png");
 	}
 }

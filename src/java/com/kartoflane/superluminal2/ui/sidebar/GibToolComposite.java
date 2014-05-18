@@ -6,7 +6,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-public class GibToolComposite extends Composite {
+import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+
+public class GibToolComposite extends Composite implements DataComposite {
 	private Composite dataContainer;
 
 	public GibToolComposite(Composite parent) {
@@ -31,5 +35,18 @@ public class GibToolComposite extends Composite {
 		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
 		lblNYI.setText("(not yet implemented)");
 
+	}
+
+	public void updateData() {
+	}
+
+	public void setController(AbstractController c) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		Cache.checkInImage(this, "cpath:/assets/help.png");
 	}
 }

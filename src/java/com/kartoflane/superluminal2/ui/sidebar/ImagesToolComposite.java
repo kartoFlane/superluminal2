@@ -14,12 +14,14 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.ShipContainer;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.IOUtils;
 
-public class ImagesToolComposite extends Composite {
+public class ImagesToolComposite extends Composite implements DataComposite {
 	private ShipContainer container;
 
 	private Text txtHull;
@@ -288,5 +290,9 @@ public class ImagesToolComposite extends Composite {
 			txtMini.clearSelection();
 			btnMiniView.setEnabled(content != null);
 		}
+	}
+
+	public void setController(AbstractController c) {
+		throw new UnsupportedOperationException();
 	}
 }

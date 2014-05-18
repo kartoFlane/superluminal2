@@ -15,10 +15,12 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
-public class CreationToolComposite extends Composite {
+public class CreationToolComposite extends Composite implements DataComposite {
 
 	private Composite toolContainer;
 	private Composite dataContainer;
@@ -97,6 +99,11 @@ public class CreationToolComposite extends Composite {
 	public void updateData() {
 		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
 		selectSubtool(ctool.getSelectedSubtool());
+		for (Control c : dataContainer.getChildren()) {
+			if (c instanceof DataComposite) {
+				((DataComposite) c).updateData();
+			}
+		}
 	}
 
 	private void selectSubtool(Tools toolId) {
@@ -129,5 +136,9 @@ public class CreationToolComposite extends Composite {
 		for (Control c : dataContainer.getChildren())
 			c.dispose();
 		dataContainer.layout(true);
+	}
+
+	public void setController(AbstractController c) {
+		throw new UnsupportedOperationException();
 	}
 }

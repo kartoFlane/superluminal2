@@ -5,6 +5,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -22,7 +23,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
-public class ManipulationToolComposite extends Composite {
+public class ManipulationToolComposite extends Composite implements DataComposite {
 	private Button btnPinned;
 
 	private Composite boundsContainer;
@@ -43,19 +44,30 @@ public class ManipulationToolComposite extends Composite {
 
 	public ManipulationToolComposite(Composite parent, boolean location, boolean size) {
 		super(parent, SWT.NONE);
-		setLayout(new GridLayout(1, false));
+		setLayout(new GridLayout(2, false));
 
 		Label label = new Label(this, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
+		label.setAlignment(SWT.CENTER);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		label.setText("Manipulation Tool");
 
+		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
+		Label lblHelp = new Label(this, SWT.NONE);
+		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblHelp.setImage(helpImage);
+		StringBuilder buf = new StringBuilder();
+		buf.append("- Left-click on a highlighted object to select it.\n");
+		buf.append("- Left-click on empty space to deselect.\n");
+		buf.append("- Only one object can be selected at a time.");
+		lblHelp.setToolTipText(buf.toString());
+
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 
 		boundsContainer = new Composite(this, SWT.BORDER);
 		GridLayout gl_boundsContainer = new GridLayout(3, false);
 		boundsContainer.setLayout(gl_boundsContainer);
-		boundsContainer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		boundsContainer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
 
 		btnPinned = new Button(boundsContainer, SWT.CHECK);
 		btnPinned.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
@@ -122,7 +134,7 @@ public class ManipulationToolComposite extends Composite {
 
 		dataContainer = new Composite(this, SWT.BORDER);
 		dataContainer.setLayout(new FillLayout(SWT.HORIZONTAL));
-		dataContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		dataContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		btnPinned.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -314,5 +326,11 @@ public class ManipulationToolComposite extends Composite {
 		boolean result = btnPinned.isFocusControl() || spNudge.isFocusControl();
 		result |= spX.isFocusControl() || spY.isFocusControl();
 		return result;
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		Cache.checkInImage(this, "cpath:/assets/help.png");
 	}
 }
