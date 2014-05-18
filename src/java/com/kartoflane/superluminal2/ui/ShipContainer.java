@@ -14,6 +14,7 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
+import com.kartoflane.superluminal2.components.interfaces.LocationListener;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -50,6 +51,7 @@ public class ShipContainer implements Disposable {
 	/** The size of a single cell. Both width and height are equal to this value. */
 	public static final int CELL_SIZE = 35;
 	public static final String HANGAR_IMG_PATH = "db:img/customizeUI/custom_main.png";
+	public static final String SHIELD_RESIZE_PROP_ID = "ShieldResizeHandle";
 
 	private ArrayList<RoomController> roomControllers;
 	private ArrayList<DoorController> doorControllers;
@@ -328,6 +330,7 @@ public class ShipContainer implements Disposable {
 			result.x = Math.max(horizontalSpace / CELL_SIZE, 0);
 			result.y = Math.max(verticalSpace / CELL_SIZE, 0);
 		} else {
+			// All enemy ships have to have thick offset equal to 0
 			result.x = 0;
 			result.y = 0;
 		}
@@ -350,12 +353,13 @@ public class ShipContainer implements Disposable {
 			result.y = verticalSpace % CELL_SIZE;
 		} else {
 			// Enemy window is 376 x 504, 55px top margin
-			// final int WIDTH = 376;
+			// final int enemyWindowWidth = 376;
+			// All enemy ships have to have fine horizontal offset equal to 0, that way they're centered
 			int enemyWindowHeight = 504;
 			int topMargin = 55;
 
 			shipController.getGameObject().setHorizontal(0);
-			shipController.getGameObject().setHorizontal((enemyWindowHeight - size.y) / 2 - 3 * topMargin / 2);
+			shipController.getGameObject().setVertical((enemyWindowHeight - size.y) / 2 - 3 * topMargin / 2);
 		}
 
 		return result;
@@ -713,6 +717,31 @@ public class ShipContainer implements Disposable {
 
 		imageControllerMap.put(Images.SHIELD, shield);
 		add(shield);
+
+		if (!ship.isPlayerShip()) {
+			// Shield resize prop
+			PropController prop = new PropController(shield, SHIELD_RESIZE_PROP_ID);
+			prop.setSelectable(true);
+			prop.setBackgroundColor(128, 128, 255);
+			prop.setBorderColor(0, 0, 0);
+			prop.setBorderThickness(3);
+			prop.setCompositeTitle("Shield Resize Handle");
+			prop.setSize(CELL_SIZE / 2, CELL_SIZE / 2);
+			prop.setLocation(shield.getX() + shield.getW() / 2, shield.getY() + shield.getH() / 2);
+			prop.updateFollowOffset();
+			prop.addToPainter(Layers.SHIP_ORIGIN);
+			shield.addProp(prop);
+			prop.addLocationListener(new LocationListener() {
+				@Override
+				public void notifyLocationChanged(int x, int y) {
+					ImageController shieldC = getImageController(Images.SHIELD);
+					shieldC.setVisible(false);
+					shieldC.setSize(Math.abs(x - shieldC.getX()) * 2, Math.abs(y - shieldC.getY()) * 2);
+					shieldC.updateView();
+					shieldC.setVisible(true);
+				}
+			});
+		}
 
 		// Load hull
 		imgObject = ship.getImage(Images.HULL);
