@@ -62,7 +62,7 @@
 									<Built-By>kartoFlane</Built-By>
 								</manifestEntries>
 							</archive>
-							<finalName>superluminal2-win32</finalName>
+							<finalName>superluminal2-win</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 					</execution>

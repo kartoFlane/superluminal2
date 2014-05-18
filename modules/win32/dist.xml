@@ -19,7 +19,7 @@
 			<directory>${project.build.directory}</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>superluminal2-win32.jar</include>
+				<include>superluminal2-win.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>

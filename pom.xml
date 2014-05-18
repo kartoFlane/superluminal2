@@ -101,6 +101,30 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>win</id>
+			<modules>
+				<module>modules/core</module>
+				<module>modules/win32</module>
+				<module>modules/win64</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>linux</id>
+			<modules>
+				<module>modules/core</module>
+				<module>modules/linux32</module>
+				<module>modules/linux64</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mac</id>
+			<modules>
+				<module>modules/core</module>
+				<module>modules/mac32</module>
+				<module>modules/mac64</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>compile</id>
 			<modules>
 				<module>modules/core</module>

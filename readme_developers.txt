@@ -3,10 +3,11 @@ The build process for this project is automated by Maven.
   http://docs.codehaus.org/display/MAVENUSER/Getting+Started+with+Maven
 
 
-To build, run "mvn clean package" in this folder.
-
-To just compile the source code, run "mvn -P compile clean package" in this folder
-(compiled code will be located in "modules/core/target")
+To build for all platforms, run "mvn clean package" in this folder.
+To build for a specific platform, add '-P win', '-P linux' or '-P mac' to
+the above command (without the quotes)
+To just compile the source code, add '-P compile' to the above command
+(compiled jar will be located in "modules/core/target")
 
 
 Explanation of the directory structure:

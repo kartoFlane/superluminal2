@@ -1,5 +1,13 @@
 Changelog
 
+2.0.0 beta4:
+- Added Calculate Optimal Offset option - calculates both thick and fine offsets
+- Added fine offset modification (HORIZONTAL and VERTICAL properties)
+- Added ability to show the hangar image as background, which accurately shows where
+  the ship will be positioned in-game.
+- Added more tooltips
+- Added mouse shortcuts to Weapon Mounting Tool
+
 2.0.0 beta3:
 - Fixed weapon mounts with direction NONE being incorrectly saved ('none' instead of 'no')
 - Fixed a bug that caused the grid not to be resized properly when the editor was started
