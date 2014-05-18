@@ -693,16 +693,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private void clearWeaponSlots() {
 		for (Button b : btnWeapons)
 			b.dispose();
-		for (Button b : btnDrones)
-			b.dispose();
-		for (Button b : btnAugments)
-			b.dispose();
-		for (Button b : btnCrewMembers)
-			b.dispose();
 		btnWeapons.clear();
-		btnDrones.clear();
-		btnAugments.clear();
-		btnCrewMembers.clear();
 		compArm.layout();
 	}
 

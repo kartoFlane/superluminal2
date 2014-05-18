@@ -131,7 +131,6 @@ public class SystemsMenu {
 
 	private void createContent(Control parent) {
 		systemMenu = new Menu(parent);
-		parent.setMenu(systemMenu);
 
 		mntmAssign = new MenuItem(systemMenu, SWT.CASCADE);
 		mntmAssign.setText("Assign");

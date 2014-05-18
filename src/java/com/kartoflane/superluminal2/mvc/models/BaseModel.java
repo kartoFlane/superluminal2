@@ -126,7 +126,7 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 	@Override
 	public boolean setSize(int w, int h) {
 		if (w < 0 || h < 0)
-			throw new IllegalArgumentException("Room's dimensions must be non-negative integers.");
+			throw new IllegalArgumentException("Model's ddimensions must be non-negative integers.");
 
 		size.x = w;
 		size.y = h;

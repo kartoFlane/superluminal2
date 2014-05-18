@@ -58,7 +58,6 @@ import com.kartoflane.superluminal2.tools.PropertyTool;
 import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
-import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
@@ -645,10 +644,7 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Manager.getCurrentShip().getShipController().getGameObject().resetDoorLinks();
-				if (Manager.getSelected() != null) {
-					ManipulationToolComposite mtc = (ManipulationToolComposite) getSidebarContent();
-					mtc.updateData();
-				}
+				updateSidebarContent();
 			}
 		});
 
@@ -1199,8 +1195,6 @@ public class EditorWindow {
 					e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {
 				AbstractController selected = Manager.getSelected();
 				if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
-					ManipulationToolComposite mtc = (ManipulationToolComposite) getSidebarContent();
-
 					Point p = selected.getPresentedLocation();
 					Rectangle oldBounds = null;
 
@@ -1217,7 +1211,7 @@ public class EditorWindow {
 					selected.redraw();
 					canvasRedraw(oldBounds);
 
-					mtc.updateData();
+					updateSidebarContent();
 
 					e.doit = false;
 				}
@@ -1229,7 +1223,7 @@ public class EditorWindow {
 				AbstractController selected = Manager.getSelected();
 				if (selected != null) {
 					selected.setPinned(!selected.isPinned());
-					((ManipulationToolComposite) getSidebarContent()).updateData();
+					updateSidebarContent();
 					e.doit = false;
 				}
 			}

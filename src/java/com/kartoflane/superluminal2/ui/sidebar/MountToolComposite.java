@@ -83,7 +83,7 @@ public class MountToolComposite extends Composite implements DataComposite {
 		lblMirHelp = new Label(this, SWT.NONE);
 		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblMirHelp.setImage(helpImage);
-		lblMirHelp.setToolTipText("Flips the weapon along X or Y axis, depending on Rotation.");
+		lblMirHelp.setToolTipText("Flips the weapon along X or Y axis, depending on rotation.");
 
 		btnMirrored.addSelectionListener(new SelectionAdapter() {
 			@Override
