@@ -552,9 +552,23 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		painter.add(controller, layer);
 	}
 
+	public void addToPainterBottom(Layers layer) {
+		LayeredPainter painter = LayeredPainter.getInstance();
+		if (layer == null || !painter.getLayers().contains(layer))
+			throw new IllegalArgumentException("Illegal layer.");
+
+		this.layer = layer;
+		painter.addToBottom(controller, layer);
+	}
+
 	/** Unregisters this view from the LayeredPainter object */
 	public void removeFromPainter() {
 		LayeredPainter.getInstance().remove(controller);
+	}
+
+	/** Unregisters this view from the specfied layer */
+	public void removeFromPainter(Layers layer) {
+		LayeredPainter.getInstance().remove(controller, layer);
 	}
 
 	@Override

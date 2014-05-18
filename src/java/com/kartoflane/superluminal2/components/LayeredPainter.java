@@ -26,6 +26,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
  */
 public class LayeredPainter implements PaintListener {
 	public enum Layers {
+		BACKGROUND,
 		MOUNT,
 		IMAGES,
 		GRID,
@@ -42,9 +43,9 @@ public class LayeredPainter implements PaintListener {
 	private static final LayeredPainter instance = new LayeredPainter();
 
 	/** Specifies the layer order for selection and highlighting purposes. */
-	private static final Layers[] selectionOrder = { Layers.GRID, Layers.IMAGES, Layers.MOUNT,
-			Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.STATION, Layers.DOOR, Layers.OVERLAY,
-			Layers.SHIP_ORIGIN, Layers.CURSOR };
+	private static final Layers[] selectionOrder = { Layers.BACKGROUND, Layers.GRID, Layers.IMAGES,
+			Layers.MOUNT, Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.STATION, Layers.DOOR,
+			Layers.OVERLAY, Layers.SHIP_ORIGIN, Layers.CURSOR };
 
 	/** Specifies the order in which the layers are drawn. */
 	protected TreeMap<Layers, ArrayList<AbstractController>> layerMap = new TreeMap<Layers, ArrayList<AbstractController>>();
@@ -66,6 +67,8 @@ public class LayeredPainter implements PaintListener {
 	public void add(AbstractController controller, Layers layer) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
+		if (layer == null)
+			throw new IllegalArgumentException("Layer must not be null.");
 		ArrayList<AbstractController> list = layerMap.get(layer);
 		list.add(controller);
 	}
@@ -77,17 +80,32 @@ public class LayeredPainter implements PaintListener {
 	public void addToBottom(AbstractController controller, Layers layer) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
+		if (layer == null)
+			throw new IllegalArgumentException("Layer must not be null.");
 		ArrayList<AbstractController> list = layerMap.get(layer);
 		list.add(0, controller);
 	}
 
+	/**
+	 * Removes the controller from all layers.
+	 */
 	public void remove(AbstractController controller) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
 		for (Layers layer : Layers.values()) {
-			if (layerMap.get(layer).remove(controller))
-				break;
+			layerMap.get(layer).remove(controller);
 		}
+	}
+
+	/**
+	 * Removes the controller from the specified layer.
+	 */
+	public boolean remove(AbstractController controller, Layers layer) {
+		if (controller == null)
+			throw new IllegalArgumentException("Controller is null.");
+		if (layer == null)
+			throw new IllegalArgumentException("Layer must not be null.");
+		return layerMap.get(layer).remove(controller);
 	}
 
 	public boolean contains(AbstractController controller) {
@@ -132,6 +150,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return the topmost visible Controller in a layer at a point, or null if none was found. */
 	public AbstractController getControllerAt(int x, int y, Layers layer) {
+		if (layer == null)
+			throw new IllegalArgumentException("Layer must not be null.");
 		// Layers are arranged in such a way that the bottom-most controller is the first in the layer's list.
 		// Therefore, we need to iterate over the list in reverse order to get the topmost controller.
 		for (int i = layerMap.get(layer).size() - 1; i >= 0; i--) {
@@ -148,6 +168,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return the topmost visible, selectable Controller in a layer at a point, or null if none was found. */
 	public AbstractController getSelectableControllerAt(int x, int y, Layers layer) {
+		if (layer == null)
+			throw new IllegalArgumentException("Layer must not be null.");
 		// Layers are arranged in such a way that the bottom-most controller is the first in the layer's list.
 		// Therefore, we need to iterate over the list in reverse order to get the topmost controller.
 		for (int i = layerMap.get(layer).size() - 1; i >= 0; i--) {
@@ -196,6 +218,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return the topmost Controller matching the conditions set by the predicate. */
 	public AbstractController getControllerMatching(Predicate<AbstractController> p, Layers layer) {
+		if (layer == null)
+			throw new IllegalArgumentException("Layer must not be null.");
 		for (int i = layerMap.get(layer).size() - 1; i >= 0; i--) {
 			AbstractController controller = layerMap.get(layer).get(i);
 			if (p.accept(controller)) {
@@ -276,6 +300,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** @return all controllers on the given layer matching the conditions set by the predicate */
 	public List<AbstractController> getAllControllersMatching(Predicate<AbstractController> p, Layers layer) {
+		if (layer == null)
+			throw new IllegalArgumentException("Layer must not be null.");
 		ArrayList<AbstractController> list = new ArrayList<AbstractController>();
 
 		for (AbstractController controller : layerMap.get(layer)) {

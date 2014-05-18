@@ -2,9 +2,9 @@ package com.kartoflane.superluminal2.components.enums;
 
 public enum Directions {
 	UP,
+	RIGHT,
 	DOWN,
 	LEFT,
-	RIGHT,
 	NONE;
 
 	/**
@@ -17,6 +17,10 @@ public enum Directions {
 			return NONE;
 		else
 			return valueOf(value);
+	}
+
+	public Directions nextDirection() {
+		return Directions.values()[(ordinal() + 1) % Directions.values().length];
 	}
 
 	@Override

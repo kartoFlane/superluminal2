@@ -26,16 +26,6 @@ public abstract class ObjectController extends AbstractController implements Ali
 	}
 
 	@Override
-	public void setLocModifiable(boolean b) {
-		model.setLocModifiable(b);
-	}
-
-	@Override
-	public boolean isLocModifiable() {
-		return model.isLocModifiable();
-	}
-
-	@Override
 	protected ObjectModel getModel() {
 		return (ObjectModel) model;
 	}

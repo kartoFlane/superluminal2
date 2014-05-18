@@ -4,7 +4,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
-import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.Shapes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
@@ -72,11 +71,6 @@ public abstract class PropController extends AbstractController implements Ident
 
 	public Polygon getPolygon() {
 		return polygon;
-	}
-
-	public void setLayer(Layers layer) {
-		view.removeFromPainter();
-		view.addToPainter(layer);
 	}
 
 	public void setFlippedX(boolean flip) {

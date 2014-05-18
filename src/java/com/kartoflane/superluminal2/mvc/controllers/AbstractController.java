@@ -96,6 +96,22 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		view.updateView();
 	}
 
+	public void addToPainter(Layers layer) {
+		view.addToPainter(layer);
+	}
+
+	public void addToPainterBottom(Layers layer) {
+		view.addToPainterBottom(layer);
+	}
+
+	public void removeFromPainter() {
+		view.removeFromPainter();
+	}
+
+	public void removeFromPainter(Layers layer) {
+		view.removeFromPainter(layer);
+	}
+
 	public boolean setLocation(int x, int y) {
 		// if the new location falls outside of the area the object is
 		// bounded to, change the parameters to be as close the border as possible
@@ -745,10 +761,11 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void setLocModifiable(boolean b) {
+		model.setLocModifiable(b);
 	}
 
 	public boolean isLocModifiable() {
-		return false;
+		return model.isLocModifiable();
 	}
 
 	@Override
