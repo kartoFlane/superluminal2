@@ -1,5 +1,5 @@
 <versions>
-	<latest id="2.0.0 beta3" url="https://www.dropbox.com/sh/o6cqrz0iatyaja7/AAC3yKcTx36V20VdkKguQkw8a" />
+	<latest id="2.0.0 beta4" url="https://www.dropbox.com/sh/o6cqrz0iatyaja7/AAC3yKcTx36V20VdkKguQkw8a" />
 	<changelog>
 		<version id="2.0.0 beta4">
 			<change>Added fine ship offset modification</change>
