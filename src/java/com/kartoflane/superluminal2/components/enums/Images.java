@@ -3,7 +3,7 @@ package com.kartoflane.superluminal2.components.enums;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 
 public enum Images {
-	SHIELD, HULL, FLOOR, CLOAK, THUMBNAIL;
+	SHIELD, HULL, FLOOR, CLOAK, THUMBNAIL, HANGAR;
 
 	/**
 	 * Returns the dat-relative path for this image type.<br>

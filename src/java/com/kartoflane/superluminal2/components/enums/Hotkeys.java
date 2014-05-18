@@ -28,6 +28,7 @@ public enum Hotkeys {
 
 	// View
 	TOGGLE_GRID,
+	TOGGLE_HANGAR,
 	SHOW_ANCHOR,
 	SHOW_MOUNTS,
 	SHOW_ROOMS,

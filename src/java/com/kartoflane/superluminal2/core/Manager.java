@@ -29,7 +29,6 @@ import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.utils.IOUtils;
 
 /**
@@ -104,8 +103,11 @@ public class Manager {
 			selectedController = controller;
 		}
 
-		if (selectedTool == Tools.POINTER)
-			((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).setController(controller);
+		try {
+			EditorWindow.getInstance().setSidebarContentController(controller);
+		} catch (UnsupportedOperationException e) {
+			// Ignore
+		}
 	}
 
 	/** Returns the currently selected controller. */
@@ -122,6 +124,7 @@ public class Manager {
 		EditorWindow.getInstance().enableTools(true);
 		EditorWindow.getInstance().enableOptions(true);
 		EditorWindow.getInstance().setVisibilityOptions(true);
+
 		// select the manipulation tool by default
 		selectTool(Tools.IMAGES);
 		OverviewWindow.staticUpdate();
@@ -144,6 +147,7 @@ public class Manager {
 		EditorWindow.getInstance().enableTools(true);
 		EditorWindow.getInstance().enableOptions(true);
 		EditorWindow.getInstance().setVisibilityOptions(true);
+
 		// select the manipulation tool by default
 		selectTool(Tools.IMAGES);
 		OverviewWindow.staticUpdate();
@@ -280,7 +284,8 @@ public class Manager {
 		hotkey.setShift(true);
 
 		// View hotkeys
-		getHotkey(Hotkeys.TOGGLE_GRID).setKey('x');
+		getHotkey(Hotkeys.TOGGLE_GRID).setKey('g');
+		getHotkey(Hotkeys.TOGGLE_HANGAR).setKey('h');
 		getHotkey(Hotkeys.SHOW_ANCHOR).setKey('1');
 		getHotkey(Hotkeys.SHOW_MOUNTS).setKey('2');
 		getHotkey(Hotkeys.SHOW_ROOMS).setKey('3');

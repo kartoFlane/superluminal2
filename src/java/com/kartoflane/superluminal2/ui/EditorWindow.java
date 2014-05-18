@@ -47,6 +47,7 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
+import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.DoorTool;
 import com.kartoflane.superluminal2.tools.GibTool;
@@ -58,6 +59,7 @@ import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
@@ -118,6 +120,7 @@ public class EditorWindow {
 	private MenuItem mntmResetLinks;
 	private MenuItem mntmOptimalOffset;
 	private MenuItem mntmReloadDb;
+	private MenuItem mntmHangar;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -206,7 +209,6 @@ public class EditorWindow {
 		mntmResetLinks.setText("Reset All Door Links");
 
 		mntmOptimalOffset = new MenuItem(menuEdit, SWT.NONE);
-		mntmOptimalOffset.setEnabled(false);
 		mntmOptimalOffset.setText("Calculate Optimal Offset");
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
@@ -229,6 +231,11 @@ public class EditorWindow {
 		mntmGrid = new MenuItem(menuView, SWT.CHECK);
 		mntmGrid.setText("Show Grid\t" + Manager.getHotkey(Hotkeys.TOGGLE_GRID));
 		mntmGrid.setSelection(true);
+
+		mntmHangar = new MenuItem(menuView, SWT.CHECK);
+		mntmHangar.setText("Show Hangar\t" + Manager.getHotkey(Hotkeys.TOGGLE_HANGAR));
+
+		new MenuItem(menuView, SWT.SEPARATOR);
 
 		MenuItem mntmShipComponents = new MenuItem(menuView, SWT.CASCADE);
 		mntmShipComponents.setText("Ship Components");
@@ -648,7 +655,17 @@ public class EditorWindow {
 		mntmOptimalOffset.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO
+				ShipContainer container = Manager.getCurrentShip();
+				ShipController shipC = container.getShipController();
+				Point offset = container.findOptimalThickOffset();
+				Point fineOffset = container.findOptimalFineOffset();
+
+				shipC.select();
+				container.setShipFineOffset(fineOffset.x, fineOffset.y);
+				container.setShipOffset(offset.x, offset.y);
+
+				shipC.updateProps();
+				shipC.deselect();
 			}
 		});
 
@@ -681,6 +698,13 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Grid.getInstance().setVisible(mntmGrid.getSelection());
+			}
+		});
+
+		mntmHangar.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.getCurrentShip().setHangarVisible(mntmHangar.getSelection());
 			}
 		});
 
@@ -858,6 +882,24 @@ public class EditorWindow {
 			return null;
 	}
 
+	public void updateSidebarContent() {
+		Control c = sideContainer.getContent();
+		if (c != null) {
+			if (c instanceof DataComposite) {
+				((DataComposite) c).updateData();
+			}
+		}
+	}
+
+	public void setSidebarContentController(AbstractController controller) throws UnsupportedOperationException {
+		Control c = sideContainer.getContent();
+		if (c != null) {
+			if (c instanceof DataComposite) {
+				((DataComposite) c).setController(controller);
+			}
+		}
+	}
+
 	/**
 	 * Disposes the content of the sidebar, and sets the content to null.<br>
 	 * Prevents the editor from crashing when trying to change the sidebar positioning after closing a ship.
@@ -945,10 +987,11 @@ public class EditorWindow {
 		mntmUndo.setEnabled(false); // TODO
 		mntmRedo.setEnabled(false); // TODO
 		mntmResetLinks.setEnabled(enable);
-		mntmOptimalOffset.setEnabled(false); // TODO
+		mntmOptimalOffset.setEnabled(enable); // TODO
 		mntmDelete.setEnabled(enable);
 
 		// View
+		mntmHangar.setEnabled(enable);
 		mntmShowAnchor.setEnabled(enable);
 		mntmShowMounts.setEnabled(enable);
 		mntmShowRooms.setEnabled(enable);
@@ -969,12 +1012,11 @@ public class EditorWindow {
 
 	/**
 	 * Toggles all visibility-related options.
-	 * 
-	 * @param set
 	 */
 	public void setVisibilityOptions(boolean set) {
 		ShipContainer container = Manager.getCurrentShip();
 
+		mntmHangar.setSelection(false);
 		mntmShowAnchor.setSelection(set);
 		mntmShowMounts.setSelection(set);
 		mntmShowRooms.setSelection(set);
@@ -985,6 +1027,7 @@ public class EditorWindow {
 		mntmShowShield.setSelection(set);
 
 		if (container != null) {
+			container.setHangarVisible(false);
 			container.setAnchorVisible(set);
 			container.setMountsVisible(set);
 			container.setRoomsVisible(set);
@@ -1079,6 +1122,9 @@ public class EditorWindow {
 		else if (Manager.getHotkey(Hotkeys.TOGGLE_GRID).passes(e.keyCode) && mntmGrid.isEnabled()) {
 			mntmGrid.setSelection(!mntmGrid.getSelection());
 			mntmGrid.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.TOGGLE_HANGAR).passes(e.keyCode) && mntmHangar.isEnabled()) {
+			mntmHangar.setSelection(!mntmHangar.getSelection());
+			mntmHangar.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.SHOW_ANCHOR).passes(e.keyCode) && mntmShowAnchor.isEnabled()) {
 			mntmShowAnchor.setSelection(!mntmShowAnchor.getSelection());
 			mntmShowAnchor.notifyListeners(SWT.Selection, null);

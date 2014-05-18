@@ -8,10 +8,12 @@ import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
+import com.kartoflane.superluminal2.components.interfaces.Follower;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -29,6 +31,7 @@ import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.mvc.controllers.ImageController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
+import com.kartoflane.superluminal2.mvc.controllers.PropController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
@@ -46,6 +49,7 @@ public class ShipContainer implements Disposable {
 
 	/** The size of a single cell. Both width and height are equal to this value. */
 	public static final int CELL_SIZE = 35;
+	public static final String HANGAR_IMG_PATH = "db:img/customizeUI/custom_main.png";
 
 	private ArrayList<RoomController> roomControllers;
 	private ArrayList<DoorController> doorControllers;
@@ -149,6 +153,10 @@ public class ShipContainer implements Disposable {
 		}
 
 		createImageControllers();
+		ImageController hangarC = getImageController(Images.HANGAR);
+		Point fo = hangarC.getFollowOffset();
+		hangarC.setFollowOffset(fo.x - ship.getHorizontal(), fo.y - ship.getVertical());
+		hangarC.updateFollower();
 
 		updateBoundingArea();
 		updateChildBoundingAreas();
@@ -304,6 +312,96 @@ public class ShipContainer implements Disposable {
 				my = t;
 		}
 		return Grid.getInstance().snapToGrid(mx, my, Snapmodes.CROSS);
+	}
+
+	public Point findOptimalThickOffset() {
+		Point result = new Point(0, 0);
+		Point size = findShipSize();
+
+		if (shipController.isPlayerShip()) {
+			int hangarWidth = 235;
+			int hangarHeight = 180;
+
+			int horizontalSpace = hangarWidth - size.x / 2;
+			int verticalSpace = hangarHeight - size.y / 2;
+
+			result.x = Math.max(horizontalSpace / CELL_SIZE, 0);
+			result.y = Math.max(verticalSpace / CELL_SIZE, 0);
+		} else {
+			result.x = 0;
+			result.y = 0;
+		}
+
+		return result;
+	}
+
+	public Point findOptimalFineOffset() {
+		Point result = new Point(0, 0);
+		Point size = findShipSize();
+
+		if (shipController.isPlayerShip()) {
+			int hangarWidth = 235;
+			int hangarHeight = 180;
+
+			int horizontalSpace = hangarWidth - size.x / 2;
+			int verticalSpace = hangarHeight - size.y / 2;
+
+			result.x = horizontalSpace % CELL_SIZE;
+			result.y = verticalSpace % CELL_SIZE;
+		} else {
+			// Enemy window is 376 x 504, 55px top margin
+			// final int WIDTH = 376;
+			int enemyWindowHeight = 504;
+			int topMargin = 55;
+
+			shipController.getGameObject().setHorizontal(0);
+			shipController.getGameObject().setHorizontal((enemyWindowHeight - size.y) / 2 - 3 * topMargin / 2);
+		}
+
+		return result;
+	}
+
+	public void setShipOffset(int x, int y) {
+		ImageController hangarC = getImageController(Images.HANGAR);
+		if (hangarC == null)
+			return;
+
+		ShipObject ship = shipController.getGameObject();
+		for (Follower fol : shipController.getFollowers()) {
+			if (fol instanceof PropController == false && fol != hangarC) {
+				Point old = fol.getFollowOffset();
+				fol.setFollowOffset(old.x + (x - ship.getXOffset()) * CELL_SIZE,
+						old.y + (y - ship.getYOffset()) * CELL_SIZE);
+				fol.updateFollower();
+			}
+		}
+
+		ship.setXOffset(x);
+		ship.setYOffset(y);
+	}
+
+	/**
+	 * Horizontal:<br>
+	 * - positive values move the ship to the right (hangar to the left relative to the ship)<br>
+	 * Vertical:<br>
+	 * - positive values move the ship to the bottom (hangar to the top relative to the ship)
+	 * 
+	 * @param x
+	 * @param y
+	 */
+	public void setShipFineOffset(int x, int y) {
+		ImageController hangarC = getImageController(Images.HANGAR);
+		if (hangarC == null)
+			return;
+
+		ShipObject ship = shipController.getGameObject();
+		Point fo = hangarC.getFollowOffset();
+
+		hangarC.setFollowOffset(fo.x + ship.getHorizontal() - x, fo.y + ship.getVertical() - y);
+		hangarC.updateFollower();
+
+		ship.setHorizontal(x);
+		ship.setVertical(y);
 	}
 
 	public void assign(Systems sys, RoomController room) {
@@ -581,6 +679,21 @@ public class ShipContainer implements Disposable {
 		Point offset = null;
 		Point center = null;
 
+		// Load hangar image
+		imgObject = new ImageObject();
+		imgObject.setAlias("hangar");
+		imgObject.setImagePath(HANGAR_IMG_PATH);
+		ImageController hangar = ImageController.newInstance(shipController, imgObject);
+		hangar.setSelectable(false);
+		hangar.removeFromPainter();
+		hangar.addToPainter(Layers.BACKGROUND);
+		hangar.setImage(imgObject.getImagePath());
+		offset = hangar.getSize();
+		hangar.setFollowOffset(offset.x / 2 - 365, offset.y / 2 - 30);
+		hangar.updateFollower();
+		hangar.updateView();
+		imageControllerMap.put(Images.HANGAR, hangar);
+
 		// Load shield
 		imgObject = ship.getImage(Images.SHIELD);
 		ImageController shield = ImageController.newInstance(shipController, imgObject);
@@ -656,6 +769,14 @@ public class ShipContainer implements Disposable {
 		imageControllerMap.put(Images.THUMBNAIL, thumbnail);
 		add(thumbnail);
 		thumbnail.setVisible(false);
+	}
+
+	public void setHangarVisible(boolean vis) {
+		getImageController(Images.HANGAR).setVisible(vis);
+	}
+
+	public boolean isHangarVisible() {
+		return getImageController(Images.HANGAR).isVisible();
 	}
 
 	public void setAnchorVisible(boolean vis) {
