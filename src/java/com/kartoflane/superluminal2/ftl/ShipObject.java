@@ -118,6 +118,7 @@ public class ShipObject extends GameObject {
 		if (!isPlayer) {
 			ImageObject shieldObject = imageMap.get(Images.SHIELD);
 			shieldObject.setImagePath("db:img/ship/enemy_shields.png");
+			blueprintName = "NEW_ENEMY_SHIP";
 		}
 	}
 

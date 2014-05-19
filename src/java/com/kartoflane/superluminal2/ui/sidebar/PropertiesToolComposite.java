@@ -174,7 +174,6 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			txtBlueprint.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
-					txtBlueprint.setText(txtBlueprint.getText().toUpperCase());
 					ship.setBlueprintName(txtBlueprint.getText());
 				}
 			});
@@ -788,7 +787,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		if (container.getShipController().isPlayerShip()) {
 			result |= txtName.isFocusControl() || txtDesc.isFocusControl();
 		} else {
-			result |= spMinSec.isFocusControl() || spMaxSec.isFocusControl();
+			result |= spMinSec.isFocusControl() || spMaxSec.isFocusControl() ||
+					txtBlueprint.isFocusControl();
 		}
 		return result;
 	}

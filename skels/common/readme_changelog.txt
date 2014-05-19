@@ -1,5 +1,8 @@
 Changelog
 
+2.0.0 beta4a:
+- Fixed a minor oversight that would cause the editor to crash when editing enemy ships
+
 2.0.0 beta4:
 - Added Calculate Optimal Offset option - calculates both thick and fine offsets
 - Added fine offset modification (HORIZONTAL and VERTICAL properties)
