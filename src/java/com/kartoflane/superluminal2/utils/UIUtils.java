@@ -2,6 +2,8 @@ package com.kartoflane.superluminal2.utils;
 
 import java.io.File;
 
+import javax.swing.JOptionPane;
+
 import net.vhati.modmanager.core.FTLUtilities;
 
 import org.eclipse.swt.SWT;
@@ -15,6 +17,14 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.ui.LoadingDialog;
 
 public class UIUtils {
+
+	/**
+	 * Displays a Swing message dialog.<br>
+	 * Used when the user has downloaded incorrect version of the editor for their system/architecture.
+	 */
+	public static void showSwingDialog(String title, String message) {
+		JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+	}
 
 	/**
 	 * Displays a simple dialog to inform the user about an error.
@@ -229,6 +239,10 @@ public class UIUtils {
 	/**
 	 * Displays a simple dialog with an indeterminate progress bar in the UI thread, while
 	 * executing the given task in another thread, and waiting for it to finish.<br>
+	 * <br>
+	 * Note that SWT is a single-threaded library, so you <b>cannot create or modify
+	 * UI widgets</b> via LoadTask.<br>
+	 * <br>
 	 * Usage:
 	 * 
 	 * <pre>
@@ -240,7 +254,7 @@ public class UIUtils {
 	 * </pre>
 	 * 
 	 * @param parentShell
-	 *            a shell which will be the parent of the dialog. Must not be null.
+	 *            the shell which will be the dialog's parent. Must not be null.
 	 * @param title
 	 *            the title of the dialog window, or null for default value:<br>
 	 *            <code>APP_NAME - Loading...</code>

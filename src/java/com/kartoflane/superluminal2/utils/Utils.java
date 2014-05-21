@@ -37,6 +37,10 @@ public class Utils {
 		return new Point(p.x, p.y);
 	}
 
+	public static RGB copy(RGB rgb) {
+		return new RGB(rgb.red, rgb.green, rgb.blue);
+	}
+
 	public static int min(int a, int b, int c) {
 		return Math.min(a, Math.min(b, c));
 	}
