@@ -120,10 +120,6 @@ public class ManipulationTool extends Tool {
 
 		AbstractController selected = Manager.getSelected();
 
-		// inform the selected controller about clicks, so that it can be deselected
-		// if (selected != null)
-		// selected.mouseDown(e);
-
 		if (state == States.NORMAL) {
 			// get the controller at the mouse click pos, and if found, notify it about mouseDown event
 			AbstractController controller = getTopmostSelectableController(e.x, e.y);

@@ -206,8 +206,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 					// path == null only when user cancels
 					if (path != null) {
+						system.setVisible(false);
 						system.setInteriorPath("file:" + path);
 						updateData();
+						system.setVisible(true);
 					}
 				}
 			};
@@ -299,13 +301,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleSysLevel.setSelection(system.getLevel());
 			scaleSysLevel.notifyListeners(SWT.Selection, null);
 
-			if (!playerShip) {
-				scaleMaxLevel.setMaximum(system.getLevelCap());
-				scaleMaxLevel.setSelection(system.getLevelMax());
-				scaleMaxLevel.notifyListeners(SWT.Selection, null);
-
-				scaleSysLevel.setEnabled(scaleMaxLevel.getSelection() > 1);
-			} else {
+			if (playerShip) {
 				btnInteriorBrowse.setEnabled(system.canContainInterior());
 				btnInteriorClear.setEnabled(system.canContainInterior());
 				btnInteriorView.setEnabled(system.getInteriorPath() != null);
@@ -316,11 +312,17 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				txtInterior.clearSelection();
 
 				btnGlow.setEnabled(system.canContainGlow());
-				if (system.canContainGlow() && playerShip) {
+				if (system.canContainGlow()) {
 					btnGlow.setText(system.getGameObject().getGlowSet().getIdentifier());
 				} else {
 					btnGlow.setText("None");
 				}
+			} else {
+				scaleMaxLevel.setMaximum(system.getLevelCap());
+				scaleMaxLevel.setSelection(system.getLevelMax());
+				scaleMaxLevel.notifyListeners(SWT.Selection, null);
+
+				scaleSysLevel.setEnabled(scaleMaxLevel.getSelection() > 1);
 			}
 		} else {
 			// No system - reset to default
@@ -328,13 +330,17 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleSysLevel.setSelection(1);
 			txtSysLevel.setText("");
 
-			if (!playerShip) {
+			if (playerShip) {
+				btnInteriorBrowse.setEnabled(false);
+				btnInteriorClear.setEnabled(false);
+				btnInteriorView.setEnabled(false);
+
+				txtInterior.setText("");
+				btnGlow.setText("None");
+			} else {
 				scaleMaxLevel.setMaximum(2);
 				scaleMaxLevel.setSelection(1);
 				txtMaxLevel.setText("");
-			} else {
-				txtInterior.setText("");
-				btnGlow.setText("None");
 			}
 		}
 		OverviewWindow.staticUpdate(roomC);

@@ -317,6 +317,9 @@ public class ShipContainer implements Disposable {
 	}
 
 	public Point findOptimalThickOffset() {
+		if (roomControllers.size() == 0)
+			return new Point(0, 0);
+
 		Point result = new Point(0, 0);
 		Point size = findShipSize();
 
@@ -339,6 +342,9 @@ public class ShipContainer implements Disposable {
 	}
 
 	public Point findOptimalFineOffset() {
+		if (roomControllers.size() == 0)
+			return new Point(0, 0);
+
 		Point result = new Point(0, 0);
 		Point size = findShipSize();
 
@@ -722,23 +728,21 @@ public class ShipContainer implements Disposable {
 			// Shield resize prop
 			PropController prop = new PropController(shield, SHIELD_RESIZE_PROP_ID);
 			prop.setSelectable(true);
-			prop.setBackgroundColor(128, 128, 255);
-			prop.setBorderColor(0, 0, 0);
+			prop.setDefaultBackgroundColor(128, 128, 255);
+			prop.setDefaultBorderColor(0, 0, 0);
 			prop.setBorderThickness(3);
 			prop.setCompositeTitle("Shield Resize Handle");
 			prop.setSize(CELL_SIZE / 2, CELL_SIZE / 2);
 			prop.setLocation(shield.getX() + shield.getW() / 2, shield.getY() + shield.getH() / 2);
 			prop.updateFollowOffset();
 			prop.addToPainter(Layers.SHIP_ORIGIN);
+			prop.updateView();
 			shield.addProp(prop);
 			prop.addLocationListener(new LocationListener() {
 				@Override
 				public void notifyLocationChanged(int x, int y) {
 					ImageController shieldC = getImageController(Images.SHIELD);
-					shieldC.setVisible(false);
-					shieldC.setSize(Math.abs(x - shieldC.getX()) * 2, Math.abs(y - shieldC.getY()) * 2);
-					shieldC.updateView();
-					shieldC.setVisible(true);
+					shieldC.resize(Math.abs(x - shieldC.getX()) * 2, Math.abs(y - shieldC.getY()) * 2);
 				}
 			});
 		}
@@ -873,13 +877,15 @@ public class ShipContainer implements Disposable {
 			throw new IllegalArgumentException("System must not be null.");
 
 		Systems prevSystem = getActiveSystem(room);
+		SystemController prevSystemC = getSystemController(prevSystem);
+		prevSystemC.setVisible(false);
 
 		activeSystemMap.put(room, sys);
 
 		if (prevSystem != null && prevSystem.canContainStation())
 			getStationController(prevSystem).updateView();
 
-		getSystemController(sys).updateView();
+		getSystemController(sys).setVisible(true);
 		if (sys.canContainStation())
 			getStationController(sys).updateView();
 		getController(room).redraw();

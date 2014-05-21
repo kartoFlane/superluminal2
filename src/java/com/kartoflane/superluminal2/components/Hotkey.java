@@ -69,23 +69,23 @@ public class Hotkey {
 		if (key == '\0')
 			return "";
 
-		StringBuilder buf = new StringBuilder();
+		String msg = "";
 
 		if (shift)
-			buf.append("Shift+");
+			msg += "Shift+";
 		if (ctrl)
-			buf.append("Ctrl+");
+			msg += "Ctrl+";
 		if (alt)
-			buf.append("Alt+");
+			msg += "Alt+";
 
 		if (key == ' ')
-			buf.append("Spacebar");
+			msg += "Spacebar";
 		else if (key == '\t')
-			buf.append("Tab");
+			msg += "Tab";
 		else {
-			buf.append(Character.toUpperCase((char) key));
+			msg += Character.toUpperCase((char) key);
 		}
 
-		return buf.toString();
+		return msg;
 	}
 }
