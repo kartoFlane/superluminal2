@@ -41,7 +41,7 @@ public class Superluminal {
 	public static final String APP_NAME = "Superluminal";
 	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta5");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
-	public static final String APP_FORUM_URL = "http://www.google.com/"; // TODO
+	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
 
 	public static final String HOTKEYS_FILE = "hotkeys.xml";

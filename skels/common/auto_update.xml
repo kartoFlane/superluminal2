@@ -1,6 +1,9 @@
 <versions>
-	<latest id="2.0.0 beta4a" url="https://www.dropbox.com/sh/o6cqrz0iatyaja7/AAC3yKcTx36V20VdkKguQkw8a" />
+	<latest id="2.0.0 beta5" url="https://sourceforge.net/projects/superluminal2/" />
 	<changelog>
+		<version id="2.0.0 beta5">
+			<change>Added crew modification</change>
+		</version>
 		<version id="2.0.0 beta4">
 			<change>Added fine ship offset modification</change>
 			<change>Added optimal offset calculation</change>
