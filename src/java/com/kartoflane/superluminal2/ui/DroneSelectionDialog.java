@@ -47,6 +47,9 @@ public class DroneSelectionDialog {
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
 
+	private static DroneObject selection = null;
+	private static DroneList selectionList = null;
+
 	private DroneObject result = null;
 	private DroneList resultList = null;
 	private int response = SWT.NO;
@@ -80,6 +83,8 @@ public class DroneSelectionDialog {
 
 		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
+		// remove the horizontal bar so that it doesn't flicker when the tree is resized
+		tree.getHorizontalBar().dispose();
 
 		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
@@ -165,12 +170,14 @@ public class DroneSelectionDialog {
 					TreeItem selectedItem = tree.getSelection()[0];
 					Object o = selectedItem.getData();
 					if (o instanceof DroneList) {
-						resultList = (DroneList) o;
+						selectionList = (DroneList) o;
+						resultList = selectionList;
 						result = null;
 						btnConfirm.setEnabled(listMode && resultList != null);
 					} else if (o instanceof DroneObject) {
 						resultList = null;
-						result = (DroneObject) o;
+						selection = (DroneObject) o;
+						result = selection;
 						btnConfirm.setEnabled(!listMode && result != null);
 					} else {
 						resultList = null;
@@ -249,6 +256,8 @@ public class DroneSelectionDialog {
 			@Override
 			public void controlResized(ControlEvent e) {
 				final int BORDER_OFFSET = 5;
+				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
+					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
 			}
 		};
@@ -288,6 +297,12 @@ public class DroneSelectionDialog {
 		resultList = current;
 		result = null;
 
+		if (current == null || current == Database.DEFAULT_DRONE_LIST) {
+			resultList = selectionList;
+		} else {
+			selectionList = resultList;
+		}
+
 		open();
 
 		if (response == SWT.YES)
@@ -300,6 +315,12 @@ public class DroneSelectionDialog {
 		listMode = false;
 		resultList = null;
 		result = current;
+
+		if (current == null || current == Database.DEFAULT_DRONE_OBJ) {
+			result = selection;
+		} else {
+			selection = result;
+		}
 
 		open();
 

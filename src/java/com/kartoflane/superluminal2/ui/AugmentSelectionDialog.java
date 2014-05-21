@@ -43,6 +43,8 @@ public class AugmentSelectionDialog {
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
 
+	private static AugmentObject selection = null;
+
 	private AugmentObject result = null;
 	private int response = SWT.NO;
 
@@ -70,6 +72,8 @@ public class AugmentSelectionDialog {
 
 		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
+		// remove the horizontal bar so that it doesn't flicker when the tree is resized
+		tree.getHorizontalBar().dispose();
 
 		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
@@ -148,7 +152,8 @@ public class AugmentSelectionDialog {
 					Object o = selectedItem.getData();
 
 					if (o instanceof AugmentObject) {
-						result = (AugmentObject) o;
+						selection = (AugmentObject) o;
+						result = selection;
 						btnConfirm.setEnabled(result != null);
 					} else {
 						result = null;
@@ -225,6 +230,8 @@ public class AugmentSelectionDialog {
 			@Override
 			public void controlResized(ControlEvent e) {
 				final int BORDER_OFFSET = 5;
+				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
+					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
 			}
 		};
@@ -258,6 +265,12 @@ public class AugmentSelectionDialog {
 
 	public AugmentObject open(AugmentObject current) {
 		result = current;
+
+		if (current == null || current == Database.DEFAULT_AUGMENT_OBJ) {
+			result = selection;
+		} else {
+			selection = result;
+		}
 
 		open();
 

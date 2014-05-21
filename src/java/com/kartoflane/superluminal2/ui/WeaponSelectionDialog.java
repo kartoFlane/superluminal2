@@ -52,6 +52,9 @@ public class WeaponSelectionDialog {
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
 
+	private static WeaponObject selection = Database.DEFAULT_WEAPON_OBJ;
+	private static WeaponList selectionList = Database.DEFAULT_WEAPON_LIST;
+
 	private WeaponObject result = null;
 	private WeaponList resultList = null;
 	private int response = SWT.NO;
@@ -87,6 +90,8 @@ public class WeaponSelectionDialog {
 
 		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
+		// remove the horizontal bar so that it doesn't flicker when the tree is resized
+		tree.getHorizontalBar().dispose();
 
 		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
@@ -183,12 +188,14 @@ public class WeaponSelectionDialog {
 					TreeItem selectedItem = tree.getSelection()[0];
 					Object o = selectedItem.getData();
 					if (o instanceof WeaponList) {
-						resultList = (WeaponList) o;
+						selectionList = (WeaponList) o;
+						resultList = selectionList;
 						result = null;
 						btnConfirm.setEnabled(listMode && resultList != null);
 					} else if (o instanceof WeaponObject) {
 						resultList = null;
-						result = (WeaponObject) o;
+						selection = (WeaponObject) o;
+						result = selection;
 						btnConfirm.setEnabled(!listMode && result != null);
 					} else {
 						resultList = null;
@@ -279,6 +286,8 @@ public class WeaponSelectionDialog {
 			@Override
 			public void controlResized(ControlEvent e) {
 				final int BORDER_OFFSET = 5;
+				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
+					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
 			}
 		};
@@ -318,12 +327,19 @@ public class WeaponSelectionDialog {
 		resultList = current;
 		result = null;
 
+		if (current == null || current == Database.DEFAULT_WEAPON_LIST) {
+			resultList = selectionList;
+		} else {
+			selectionList = resultList;
+		}
+
 		open();
 
-		if (response == SWT.YES)
+		if (response == SWT.YES) {
 			return resultList;
-		else
+		} else {
 			return null;
+		}
 	}
 
 	public WeaponObject open(WeaponObject current) {
@@ -331,12 +347,19 @@ public class WeaponSelectionDialog {
 		resultList = null;
 		result = current;
 
+		if (current == null || current == Database.DEFAULT_WEAPON_OBJ) {
+			result = selection;
+		} else {
+			selection = result;
+		}
+
 		open();
 
-		if (response == SWT.YES)
+		if (response == SWT.YES) {
 			return result;
-		else
+		} else {
 			return null;
+		}
 	}
 
 	private void updateTree() {
