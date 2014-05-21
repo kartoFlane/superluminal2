@@ -12,6 +12,9 @@ public class ShipView extends BaseView {
 		super();
 
 		setBorderColor(0, 0, 0);
+		setBackgroundColor(0, 255, 255);
+		setDefaultBorderColor(0, 0, 0);
+		setDefaultBackgroundColor(0, 255, 255);
 		setBorderThickness(3);
 	}
 
@@ -34,13 +37,13 @@ public class ShipView extends BaseView {
 
 	@Override
 	public void updateView() {
-		setBackgroundColor(0, 255, 255);
+		setBackgroundColor(defaultBackground);
 		if (controller.isSelected()) {
 			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);
 		} else if (controller.isHighlighted()) {
 			setBorderColor(HIGHLIGHT_RGB);
 		} else {
-			setBorderColor(0, 0, 0);
+			setBorderColor(defaultBorder);
 		}
 	}
 }

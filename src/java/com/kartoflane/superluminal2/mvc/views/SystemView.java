@@ -27,6 +27,7 @@ public class SystemView extends BaseView {
 		if (alpha > 0) {
 			// Image is icon
 			// InteriorImage is the interior image (duh)
+			paintBackgroundSquare(e, backgroundColor, alpha / 2);
 			paintImageCorner(e, interiorImage, cachedInteriorBounds,
 					controller.getX() - controller.getW() / 2,
 					controller.getY() - controller.getH() / 2, alpha);
@@ -59,8 +60,8 @@ public class SystemView extends BaseView {
 
 	@Override
 	public void updateView() {
-		setImage("cpath:/assets/system/" + getController().toString().toLowerCase() + ".png");
 		setInteriorImage(getController().getInteriorPath());
+		setBackgroundColor(getController().isAvailableAtStart() ? null : DENY_RGB);
 		setVisible(getController().isAssigned());
 	}
 

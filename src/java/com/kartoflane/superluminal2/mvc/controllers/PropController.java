@@ -27,6 +27,7 @@ public class PropController extends AbstractController implements Identifiable {
 
 		identifier = id;
 
+		setDeletable(false);
 		setSelectable(false);
 		setLocModifiable(false);
 		setBounded(false);
@@ -137,6 +138,30 @@ public class PropController extends AbstractController implements Identifiable {
 
 	public RGB getBackgroundRGB() {
 		return view.getBackgroundRGB();
+	}
+
+	public void setDefaultBorderColor(RGB rgb) {
+		view.setDefaultBorderColor(rgb);
+	}
+
+	public void setDefaultBorderColor(int r, int g, int b) {
+		view.setDefaultBorderColor(r, g, b);
+	}
+
+	public RGB getDefaultBorderRGB() {
+		return view.getDefaultBorderRGB();
+	}
+
+	public void setDefaultBackgroundColor(RGB rgb) {
+		view.setDefaultBackgroundColor(rgb);
+	}
+
+	public void setDefaultBackgroundColor(int r, int g, int b) {
+		view.setDefaultBackgroundColor(r, g, b);
+	}
+
+	public RGB getDefaultBackgroundRGB() {
+		return view.getDefaultBackgroundRGB();
 	}
 
 	@Override

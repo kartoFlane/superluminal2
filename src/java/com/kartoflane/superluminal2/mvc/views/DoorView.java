@@ -40,11 +40,11 @@ public class DoorView extends BaseView {
 			setBorderThickness(2);
 		} else if (controller.isHighlighted()) {
 			setBorderColor(HIGHLIGHT_RGB);
-			setBackgroundColor(null);
+			setBackgroundColor(defaultBackground);
 			setBorderThickness(3);
 		} else {
-			setBorderColor(null);
-			setBackgroundColor(null);
+			setBorderColor(defaultBorder);
+			setBackgroundColor(defaultBackground);
 			setBorderThickness(2);
 		}
 

@@ -42,6 +42,9 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	protected Color backgroundColor = null;
 	protected int borderThickness = 0;
 
+	protected RGB defaultBorder = null;
+	protected RGB defaultBackground = null;
+
 	protected float rotation = 0;
 	protected int alpha = 255;
 
@@ -69,17 +72,6 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	@Override
 	public void setModel(Model model) {
 		this.model = (BaseModel) model;
-	}
-
-	@Override
-	public void updateView() {
-		// reset to defaults
-		setFlippedX(false);
-		setFlippedY(false);
-		setVisible(true);
-		setHighlighted(false);
-		setRotation(0);
-		setAlpha(255);
 	}
 
 	/** In degrees, 0 = north */
@@ -183,6 +175,18 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		return borderColor == null ? null : borderColor.getRGB();
 	}
 
+	public void setDefaultBorderColor(RGB rgb) {
+		defaultBorder = rgb;
+	}
+
+	public void setDefaultBorderColor(int red, int green, int blue) {
+		defaultBorder = new RGB(red, green, blue);
+	}
+
+	public RGB getDefaultBorderRGB() {
+		return defaultBorder == null ? null : Utils.copy(defaultBorder);
+	}
+
 	public void setBackgroundColor(RGB rgb) {
 		if (backgroundColor != null)
 			Cache.checkInColor(this, backgroundColor.getRGB());
@@ -203,6 +207,18 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 	public RGB getBackgroundRGB() {
 		return backgroundColor == null ? null : backgroundColor.getRGB();
+	}
+
+	public void setDefaultBackgroundColor(RGB rgb) {
+		defaultBackground = rgb;
+	}
+
+	public void setDefaultBackgroundColor(int red, int green, int blue) {
+		defaultBackground = new RGB(red, green, blue);
+	}
+
+	public RGB getDefaultBackgroundRGB() {
+		return defaultBackground == null ? null : Utils.copy(defaultBackground);
 	}
 
 	public void setBorderThickness(int borderThickness) {

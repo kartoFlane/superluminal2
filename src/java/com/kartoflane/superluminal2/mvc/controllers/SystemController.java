@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
@@ -28,6 +29,7 @@ public class SystemController extends ObjectController implements Controller {
 		setSelectable(false);
 		setLocModifiable(false);
 
+		view.setImage("cpath:/assets/system/" + toString().toLowerCase() + ".png");
 		setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
 		setInteriorPath(getInteriorPath());
 	}
@@ -85,6 +87,7 @@ public class SystemController extends ObjectController implements Controller {
 	public void unassign() {
 		getGameObject().setRoom(null);
 		setParent(null);
+		setVisible(false);
 		updateView();
 	}
 
@@ -96,13 +99,14 @@ public class SystemController extends ObjectController implements Controller {
 	public void assignTo(RoomObject room) {
 		unassign();
 		getGameObject().setRoom(room);
+		setVisible(true);
 		updateView();
 	}
 
 	@Override
 	public void setView(View view) {
 		super.setView(view);
-		// this.view.addToPainter(Layers.SYSTEM); // views are told to draw by room controllers
+		this.view.addToPainter(Layers.SYSTEM);
 	}
 
 	public void setAvailableAtStart(boolean available) {

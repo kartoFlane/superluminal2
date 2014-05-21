@@ -7,12 +7,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Polygon;
-import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.ftl.RoomObject;
-import com.kartoflane.superluminal2.mvc.controllers.SystemController;
-import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.Utils;
 
@@ -24,7 +19,6 @@ public class RoomView extends BaseView {
 
 	private Color gridColor = null;
 	private Color handleColor = null;
-	private Color denyColor = null;
 	private Polygon[] resizeHandles = null;
 
 	public RoomView() {
@@ -32,10 +26,11 @@ public class RoomView extends BaseView {
 
 		gridColor = Cache.checkOutColor(this, CellView.GRID_RGB);
 		handleColor = Cache.checkOutColor(this, HIGHLIGHT_RGB);
-		denyColor = Cache.checkOutColor(this, DENY_RGB);
 
 		setBorderColor(WALL_RGB);
+		setDefaultBorderColor(WALL_RGB);
 		setBackgroundColor(FLOOR_RGB);
+		setDefaultBackgroundColor(FLOOR_RGB);
 		setBorderThickness(2);
 
 		resizeHandles = new Polygon[4];
@@ -52,14 +47,6 @@ public class RoomView extends BaseView {
 		resizeHandles[3].rotate((float) Math.PI, 0, 0);
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
-	private RoomObject getGameObject() {
-		return (RoomObject) getModel().getGameObject();
-	}
-
 	/**
 	 * Visibility for the controller, to allow to check whether a triangle was clicked.
 	 * 
@@ -72,13 +59,7 @@ public class RoomView extends BaseView {
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			Systems sys = Manager.getCurrentShip().getActiveSystem(getGameObject());
-			SystemController systemC = Manager.getCurrentShip().getSystemController(sys);
-
 			paintBackgroundSquare(e, backgroundColor, alpha);
-			// system does not follow room's size, so system's availability has to be painted in the room's view
-			if (!systemC.isAvailableAtStart())
-				paintBackgroundSquare(e, denyColor, alpha / 2);
 
 			// draw fake grid lines inside of rooms
 			if (controller.getW() > ShipContainer.CELL_SIZE || controller.getH() > ShipContainer.CELL_SIZE) {
@@ -87,9 +68,6 @@ public class RoomView extends BaseView {
 				paintFakeGridLines(e);
 				e.gc.setForeground(prevFgColor);
 			}
-
-			// draw system, so that border and handles are drawn on top of it
-			systemC.redraw(e);
 
 			paintBorderSquare(e, borderColor, borderThickness, alpha);
 
@@ -132,25 +110,23 @@ public class RoomView extends BaseView {
 		super.dispose();
 		Cache.checkInColor(this, CellView.GRID_RGB);
 		Cache.checkInColor(this, HIGHLIGHT_RGB);
-		Cache.checkInColor(this, DENY_RGB);
 		handleColor = null;
 		gridColor = null;
-		denyColor = null;
 	}
 
 	@Override
 	public void updateView() {
 		if (controller.isSelected()) {
 			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);
-			setBackgroundColor(Utils.tint(FLOOR_RGB, borderColor.getRGB(), 0.33));
+			setBackgroundColor(Utils.tint(defaultBackground, borderColor.getRGB(), 0.33));
 			setBorderThickness(2);
 		} else if (controller.isHighlighted()) {
 			setBorderColor(HIGHLIGHT_RGB);
-			setBackgroundColor(FLOOR_RGB);
+			setBackgroundColor(defaultBackground);
 			setBorderThickness(3);
 		} else {
-			setBorderColor(WALL_RGB);
-			setBackgroundColor(FLOOR_RGB);
+			setBorderColor(defaultBorder);
+			setBackgroundColor(defaultBackground);
 			setBorderThickness(2);
 		}
 

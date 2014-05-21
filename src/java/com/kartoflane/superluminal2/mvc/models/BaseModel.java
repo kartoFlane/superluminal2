@@ -204,6 +204,22 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 		return Utils.copy(boundingArea);
 	}
 
+	public int getBoundingAreaX() {
+		return boundingArea == null ? 0 : boundingArea.x;
+	}
+
+	public int getBoundingAreaY() {
+		return boundingArea == null ? 0 : boundingArea.y;
+	}
+
+	public int getBoundingAreaW() {
+		return boundingArea == null ? 0 : boundingArea.width;
+	}
+
+	public int getBoundingAreaH() {
+		return boundingArea == null ? 0 : boundingArea.height;
+	}
+
 	@Override
 	public void setBoundingArea(int x, int y, int w, int h) {
 		if (boundingArea == null)

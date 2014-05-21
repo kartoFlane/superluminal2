@@ -55,7 +55,8 @@ public class PropView extends BaseView {
 		} else if (controller.isHighlighted()) {
 			setBorderColor(HIGHLIGHT_RGB);
 		} else {
-			setBorderColor(0, 0, 0);
+			setBorderColor(defaultBorder);
+			setBackgroundColor(defaultBackground);
 		}
 	}
 }

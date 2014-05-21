@@ -39,15 +39,15 @@ public class ImageView extends BaseView {
 
 		if (controller.isSelected()) {
 			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);
-			setBackgroundColor(null);
+			setBackgroundColor(defaultBackground);
 			setBorderThickness(2);
 		} else if (controller.isHighlighted()) {
 			setBorderColor(HIGHLIGHT_RGB);
-			setBackgroundColor(null);
+			setBackgroundColor(defaultBackground);
 			setBorderThickness(3);
 		} else {
-			setBorderColor(null);
-			setBackgroundColor(null);
+			setBorderColor(defaultBorder);
+			setBackgroundColor(defaultBackground);
 			setBorderThickness(2);
 		}
 	}

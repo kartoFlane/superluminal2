@@ -21,6 +21,7 @@ import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.ShipView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.ui.sidebar.data.PropDataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.ShipDataComposite;
 
 public class ShipController extends ObjectController {
@@ -78,7 +79,9 @@ public class ShipController extends ObjectController {
 				container.setShipFineOffset(x - getX(), ship.getVertical());
 			}
 		});
-		opc.setBackgroundColor(192, 0, 0);
+		opc.setLocModifiable(true);
+		opc.setDefaultBackgroundColor(192, 0, 0);
+		opc.setDefaultBorderColor(0, 0, 0);
 		opc.addToPainter(Layers.SHIP_ORIGIN);
 		opc.setCompositeTitle("Horizontal Offset");
 		addProp(opc);
@@ -96,7 +99,9 @@ public class ShipController extends ObjectController {
 				container.setShipFineOffset(ship.getHorizontal(), y - getY());
 			}
 		});
-		opc.setBackgroundColor(0, 192, 0);
+		opc.setLocModifiable(true);
+		opc.setDefaultBackgroundColor(0, 192, 0);
+		opc.setDefaultBorderColor(0, 0, 0);
 		opc.addToPainter(Layers.SHIP_ORIGIN);
 		opc.setCompositeTitle("Vertical Offset");
 		addProp(opc);
@@ -119,7 +124,8 @@ public class ShipController extends ObjectController {
 				}
 			}
 		});
-		opc.setBackgroundColor(255, 0, 0);
+		opc.setDefaultBackgroundColor(255, 0, 0);
+		opc.setDefaultBorderColor(0, 0, 0);
 		opc.addToPainter(Layers.SHIP_ORIGIN);
 		opc.setSnapMode(Snapmodes.EDGE_V);
 		opc.setPresentedFactor(ShipContainer.CELL_SIZE);
@@ -144,22 +150,29 @@ public class ShipController extends ObjectController {
 				}
 			}
 		});
-		opc.setBackgroundColor(0, 255, 0);
+		opc.setDefaultBackgroundColor(0, 255, 0);
+		opc.setDefaultBorderColor(0, 0, 0);
 		opc.addToPainter(Layers.SHIP_ORIGIN);
 		opc.setSnapMode(Snapmodes.EDGE_H);
 		opc.setPresentedFactor(ShipContainer.CELL_SIZE);
 		opc.setCompositeTitle("Y Offset");
 		addProp(opc);
 
-		LinePropController lpc = new LinePropController(this, LINE_H_PROP_ID);
-		lpc.setBorderColor(255, 0, 0);
-		lpc.addToPainterBottom(Layers.SHIP_ORIGIN);
-		addProp(lpc);
+		PropController prop = new PropController(this, LINE_H_PROP_ID);
+		prop.setDefaultBackgroundColor(255, 0, 0);
+		prop.setImage(null);
+		prop.setBorderThickness(1);
+		prop.setAlpha(255);
+		prop.addToPainterBottom(Layers.SHIP_ORIGIN);
+		addProp(prop);
 
-		lpc = new LinePropController(this, LINE_V_PROP_ID);
-		lpc.setBorderColor(0, 255, 0);
-		lpc.addToPainterBottom(Layers.SHIP_ORIGIN);
-		addProp(lpc);
+		prop = new PropController(this, LINE_V_PROP_ID);
+		prop.setDefaultBackgroundColor(0, 255, 0);
+		prop.setImage(null);
+		prop.setBorderThickness(1);
+		prop.setAlpha(255);
+		prop.addToPainterBottom(Layers.SHIP_ORIGIN);
+		addProp(prop);
 	}
 
 	@Override
@@ -229,8 +242,8 @@ public class ShipController extends ObjectController {
 
 	private void updateLines() {
 		Point gridSize = Grid.getInstance().getSize();
-		LinePropController hLine = (LinePropController) getProp(LINE_H_PROP_ID);
-		LinePropController vLine = (LinePropController) getProp(LINE_V_PROP_ID);
+		PropController hLine = getProp(LINE_H_PROP_ID);
+		PropController vLine = getProp(LINE_V_PROP_ID);
 		hLine.setSize(gridSize.x, 1);
 		vLine.setSize(1, gridSize.y);
 		hLine.setFollowOffset(hLine.getW() / 2, 0);
@@ -320,21 +333,10 @@ public class ShipController extends ObjectController {
 		super.mouseUp(e);
 	}
 
-	private class LinePropController extends PropController {
-		public LinePropController(AbstractController parent, String id) {
-			super(parent, id);
-			setBackgroundColor(null);
-			setImage(null);
-			setBorderThickness(1);
-			setAlpha(255);
-		}
-	}
-
 	private class OffsetPropController extends PropController {
 		public OffsetPropController(AbstractController parent, String id) {
 			super(parent, id);
 
-			setDeletable(false);
 			setBounded(true);
 			setSelectable(true);
 
@@ -401,6 +403,11 @@ public class ShipController extends ObjectController {
 			setBounded(false);
 			container.updateBoundingArea();
 			container.updateChildBoundingAreas();
+		}
+
+		@Override
+		public DataComposite getDataComposite(Composite parent) {
+			return new PropDataComposite(parent, this);
 		}
 	}
 }

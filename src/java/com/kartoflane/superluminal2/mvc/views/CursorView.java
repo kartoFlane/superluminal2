@@ -58,8 +58,10 @@ public class CursorView extends BaseView {
 			handleMountToolAppearance();
 		else if (toolId == Tools.STATION)
 			handleStationToolAppearance();
+		else if (toolId == Tools.GIB)
+			handleGibToolAppearance();
 		else
-			; // TODO
+			;// TODO
 	}
 
 	private void handlePointerToolAppearance() {
@@ -89,7 +91,7 @@ public class CursorView extends BaseView {
 			setBorderColor(null);
 			setAlpha(255 / 3);
 		} else {
-			setBackgroundColor(null);
+			setBackgroundColor(defaultBackground);
 			setBorderColor(tool.canCreate() ? ALLOW_RGB : DENY_RGB);
 			setAlpha(255);
 			setBorderThickness(3);
@@ -103,7 +105,7 @@ public class CursorView extends BaseView {
 		setFlippedY(false);
 		setRotation(0);
 		setImage(null);
-		setBackgroundColor(null);
+		setBackgroundColor(defaultBackground);
 		setBorderColor(tool.canPlace() ? ALLOW_RGB : DENY_RGB);
 		setVisible(!Manager.leftMouseDown);
 	}
@@ -112,7 +114,7 @@ public class CursorView extends BaseView {
 		MountTool tool = (MountTool) Manager.getSelectedTool();
 
 		setBorderColor(tool.canCreate() ? ALLOW_RGB : DENY_RGB);
-		setBackgroundColor(null);
+		setBackgroundColor(defaultBackground);
 		setAlpha(255);
 		setBorderThickness(2);
 		setRotation(tool.isRotated() ? 90 : 0);
@@ -126,11 +128,14 @@ public class CursorView extends BaseView {
 		setRotation(0);
 		setImage(null);
 
-		setBackgroundColor(null);
-
+		setBackgroundColor(defaultBackground);
 		setBorderThickness(3);
 		setBorderColor(tool.canPlace() ? ALLOW_RGB : DENY_RGB);
 		setAlpha(255);
+	}
+
+	private void handleGibToolAppearance() {
+		handleDefaultPointerAppearance();
 	}
 
 	private void handleDoorAppearance(DoorController door) {
