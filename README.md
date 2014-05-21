@@ -6,7 +6,7 @@ The editor provides a layer of abstraction over the game's files, making the tas
 
 It is a complete rewrite of, and successor to, the original editor ([Superluminal](https://github.com/kartoFlane/Superluminal)).
 
-The project is still a work in progress and is not fully functional yet.
+To download the compiled program, go [here](https://sourceforge.net/projects/superluminal2/files/Superluminal2/)
 
 <a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png" width="145px" height="auto" /></a>
 
