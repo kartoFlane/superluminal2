@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.ui.sidebar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -62,6 +63,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private ArrayList<Button> btnDrones = new ArrayList<Button>();
 	private ArrayList<Button> btnAugments = new ArrayList<Button>();
 	private ArrayList<Button> btnCrewMembers = new ArrayList<Button>();
+	private HashMap<Races, Spinner> spCrewMin = new HashMap<Races, Spinner>();
+	private HashMap<Races, Spinner> spCrewMax = new HashMap<Races, Spinner>();
 	private Spinner spMissiles;
 	private Spinner spWeaponSlots;
 	private Button btnWeaponList;
@@ -99,7 +102,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 		Label lblPropertiesTool = new Label(this, SWT.NONE);
 		lblPropertiesTool.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
-		lblPropertiesTool.setText("Ship Loadout " + Manager.AMPERSAND + " Properties");
+		lblPropertiesTool.setText("Ship Loadout and Properties");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
@@ -378,11 +381,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			public void widgetSelected(SelectionEvent e) {
 				if (ship.isPlayerShip()) {
 					if (spWeaponSlots.getSelection() > 4 && ship.getWeaponSlots() <= 4 && !Manager.shownSlotWarning) {
-						StringBuilder buf = new StringBuilder();
-						buf.append("Giving a ship more than 4 weapon slots will cause ingame UI to break.\n");
-						buf.append("While it's possible for a ship to have any number of weapon slots, this\n");
-						buf.append("option should only be used by experienced modders.");
-						UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, buf.toString());
+						String msg = "Giving a ship more than 4 weapon slots will cause ingame UI to break.\n" +
+								"While it's possible for a ship to have any number of weapon slots, this\n" +
+								"option should only be used by experienced modders.";
+						UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, msg);
 						Manager.shownSlotWarning = true;
 					}
 
@@ -447,11 +449,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			public void widgetSelected(SelectionEvent e) {
 				if (ship.isPlayerShip()) {
 					if (spDroneSlots.getSelection() > 4 && ship.getDroneSlots() <= 4 && !Manager.shownSlotWarning) {
-						StringBuilder buf = new StringBuilder();
-						buf.append("Giving a ship more than 4 drone slots will cause ingame UI to break.\n");
-						buf.append("While it's possible for a ship to have any number of drone slots, this\n");
-						buf.append("option should only be used by experienced modders.");
-						UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, buf.toString());
+						String msg = "Giving a ship more than 4 drone slots will cause ingame UI to break.\n" +
+								"While it's possible for a ship to have any number of drone slots, this\n" +
+								"option should only be used by experienced modders.";
+						UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, msg);
 						Manager.shownSlotWarning = true;
 					}
 
@@ -554,7 +555,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 		compCrew = new Composite(tabFolder, SWT.NONE);
 		tbtmCrew.setControl(compCrew);
-		compCrew.setLayout(new GridLayout(1, false));
+		compCrew.setLayout(new GridLayout(3, false));
 
 		if (ship.isPlayerShip()) {
 			SelectionAdapter listener = new SelectionAdapter() {
@@ -580,19 +581,61 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 				}
 			};
 
+			btnCrewMembers.clear();
 			for (int i = 0; i < 8; i++) {
 				Button btn = new Button(compCrew, SWT.NONE);
-				btn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+				btn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 				btn.setText("<crew slot>");
 				btn.addSelectionListener(listener);
 				btnCrewMembers.add(btn);
 			}
 		} else {
-			// TODO
+			spCrewMin.clear();
+			spCrewMax.clear();
+
+			Label lbl = new Label(compCrew, SWT.NONE);
+			lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+			lbl.setText("Race");
+
+			lbl = new Label(compCrew, SWT.NONE);
+			lbl.setText("Min");
+
+			lbl = new Label(compCrew, SWT.NONE);
+			lbl.setText("Max");
+
+			for (Races race : Races.getRaces()) {
+				final Races r = race;
+				lbl = new Label(compCrew, SWT.NONE);
+				lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+				lbl.setText(race.toString());
+
+				final Spinner spMin = new Spinner(compCrew, SWT.BORDER);
+				spMin.setMaximum(10);
+				spCrewMin.put(race, spMin);
+
+				final Spinner spMax = new Spinner(compCrew, SWT.BORDER);
+				spMax.setMaximum(10);
+				spCrewMax.put(race, spMax);
+
+				spMin.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						ship.setCrewMin(r, spMin.getSelection());
+						if (ship.getCrewMax(r) < ship.getCrewMin(r)) {
+							spMax.setSelection(ship.getCrewMin(r));
+							spMax.notifyListeners(SWT.Selection, null);
+						}
+					}
+				});
+
+				spMax.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						ship.setCrewMax(r, spMax.getSelection());
+					}
+				});
+			}
 		}
-		Label lblNYI = new Label(compCrew, SWT.NONE);
-		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
-		lblNYI.setText("(not yet implemented)");
 
 		pack();
 		updateData();
@@ -681,11 +724,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			count = 0;
 			for (Races race : ship.getCrew()) {
 				btnCrewMembers.get(count).setText(race.toString());
-				btnCrewMembers.get(count).setEnabled(false);
 				count++;
 			}
 		} else {
-			// TODO
+			for (Races race : Races.getRaces()) {
+				spCrewMin.get(race).setSelection(ship.getCrewMin(race));
+				spCrewMax.get(race).setSelection(ship.getCrewMax(race));
+			}
 		}
 	}
 

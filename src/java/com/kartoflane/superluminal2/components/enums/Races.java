@@ -17,7 +17,7 @@ public enum Races {
 	public String toString() {
 		switch (this) {
 			case NO_CREW:
-				return "<crew slot>";
+				return "No Crew";
 			case ENERGY:
 				return "Zoltan";
 			case ANAEROBIC:
@@ -37,6 +37,17 @@ public enum Races {
 				HUMAN, ENGI, ENERGY, ROCK,
 				MANTIS, SLUG, CRYSTAL,
 				ANAEROBIC, GHOST, RANDOM
+		};
+	}
+
+	/**
+	 * @return an array containing all races, sans NO_CREW and RANDOM
+	 */
+	public static Races[] getPlayerRaces() {
+		return new Races[] {
+				HUMAN, ENGI, ENERGY, ROCK,
+				MANTIS, SLUG, CRYSTAL,
+				ANAEROBIC, GHOST
 		};
 	}
 }

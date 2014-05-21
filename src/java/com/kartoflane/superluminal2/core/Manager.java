@@ -51,13 +51,6 @@ public class Manager {
 	 */
 	private static final Pattern FILE_PTRN = Pattern.compile(".+\\.[^/]+");
 
-	/**
-	 * SWT uses the default ampersand char (\u0026) for some platform-specific stuff, resulting
-	 * in the character not appearing in tooltips, etc.
-	 * Using the fullwidth ampersand allows to work around that.
-	 */
-	public static final char AMPERSAND = '\uFF06';
-
 	public static final HashMap<Tools, Tool> TOOL_MAP = new HashMap<Tools, Tool>();
 	public static final LinkedList<Deletable> DELETED_LIST = new LinkedList<Deletable>();
 	public static final HashMap<Hotkeys, Hotkey> HOTKEY_MAP = new HashMap<Hotkeys, Hotkey>();

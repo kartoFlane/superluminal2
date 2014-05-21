@@ -722,7 +722,8 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
-	 * Puts the new race at the specified index in the race list.
+	 * Puts the new race at the specified index in the race list.<br>
+	 * Player ships only.
 	 */
 	public void changeCrew(int index, Races neu) {
 		if (neu == null)
@@ -734,7 +735,8 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
-	 * Removes the first occurence of the old race, and puts the new race in its place.
+	 * Removes the first occurence of the old race, and puts the new race in its place.<br>
+	 * Player ships only.
 	 * 
 	 * @return index at which the new race was placed
 	 */
@@ -751,10 +753,13 @@ public class ShipObject extends GameObject {
 		return i;
 	}
 
-	public int getCrewCount(Races old) {
+	/**
+	 * @return the number of crew members of the given race in the ship.
+	 */
+	public int getCrewCount(Races r) {
 		int result = 0;
 		for (Races race : crewList) {
-			if (race == old)
+			if (race == r)
 				result++;
 		}
 		return result;
@@ -779,8 +784,8 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
-	 * If player ship - the amount of crew members of the given race that the ship starts with<br>
-	 * If enemy ship - the minimum amount of crew members of the given race that the ship can have
+	 * Sets the minimum amount of crew members of the given race that the ship can have.<br>
+	 * Enemy ships only.
 	 */
 	public void setCrewMin(Races race, int amount) {
 		if (race == null)
@@ -791,15 +796,15 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
-	 * @return if player ship -
-	 *         the amount of crew members of the given race that the ship starts with<br>
-	 *         if enemy ship -
-	 *         the minimum amount of crew members of the given race that the ship can have.
+	 * Enemy ships only.
+	 * 
+	 * @return minimum amount of crew members of the given race that the ship can have
 	 */
 	public int getCrewMin(Races race) {
 		if (race == null)
 			throw new IllegalArgumentException("Race must not be null.");
-		return crewMinMap.get(race);
+		Integer result = crewMinMap.get(race);
+		return result == null ? 0 : result;
 	}
 
 	/**
@@ -822,7 +827,8 @@ public class ShipObject extends GameObject {
 	public int getCrewMax(Races race) {
 		if (race == null)
 			throw new IllegalArgumentException("Race must not be null.");
-		return crewMaxMap.get(race);
+		Integer result = crewMaxMap.get(race);
+		return result == null ? 0 : result;
 	}
 
 	/**

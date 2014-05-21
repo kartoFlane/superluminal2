@@ -1,8 +1,6 @@
 package com.kartoflane.superluminal2.ui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -27,15 +25,12 @@ public class CrewMenu {
 		if (instance != null)
 			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
-
 		crewMenu = new Menu(parent);
-		parent.setMenu(crewMenu);
 
 		SelectionAdapter listener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				result = (Races) ((Widget) e.getSource()).getData();
-				dispose();
 			}
 		};
 
@@ -46,23 +41,12 @@ public class CrewMenu {
 
 		new MenuItem(crewMenu, SWT.SEPARATOR);
 
-		for (Races race : Races.getRaces()) {
+		for (Races race : Races.getPlayerRaces()) {
 			MenuItem item = new MenuItem(crewMenu, SWT.NONE);
 			item.setText(race.toString());
 			item.setData(race);
 			item.addSelectionListener(listener);
 		}
-
-		crewMenu.addMenuListener(new MenuListener() {
-			@Override
-			public void menuHidden(MenuEvent e) {
-				dispose();
-			}
-
-			@Override
-			public void menuShown(MenuEvent e) {
-			}
-		});
 	}
 
 	public static CrewMenu getInstance() {
@@ -73,12 +57,12 @@ public class CrewMenu {
 		crewMenu.setVisible(true);
 
 		Display display = Display.getCurrent();
-		while (!crewMenu.isDisposed()) {
+		while (crewMenu.isVisible()) {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
-		System.out.println("Returning " + result);
 
+		dispose();
 		return result;
 	}
 
