@@ -9,10 +9,12 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -54,17 +56,24 @@ public class OverviewWindow {
 	public OverviewWindow(Shell parent) {
 		if (instance != null)
 			throw new IllegalStateException("Previous instance has not been disposed!");
+
 		instance = this;
+		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE);
 		shell.setText(String.format("%s - Ship Overview", Superluminal.APP_NAME));
-		shell.setLayout(new GridLayout(1, false));
+		shell.setLayout(new GridLayout(2, false));
 
 		toolBar = new ToolBar(shell, SWT.FLAT | SWT.RIGHT);
 		toolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
+		Label lblHelp = new Label(shell, SWT.NONE);
+		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblHelp.setImage(helpImage);
+		lblHelp.setToolTipText("Alias is a short name to help you distinguish between objects.");
+
 		tltmAlias = new ToolItem(toolBar, SWT.NONE);
-		tltmAlias.setToolTipText("Set Alias\n\nAlias is a short name to help you distinguish between objects.");
+		tltmAlias.setToolTipText("Set Alias");
 		tltmAlias.setImage(Cache.checkOutImage(this, "cpath:/assets/alias.png"));
 
 		tltmRemove = new ToolItem(toolBar, SWT.NONE);
@@ -72,7 +81,7 @@ public class OverviewWindow {
 		tltmRemove.setImage(Cache.checkOutImage(this, "cpath:/assets/noalias.png"));
 
 		tree = new Tree(shell, SWT.BORDER);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		trtmRooms = new TreeItem(tree, SWT.NONE);
 		trtmRooms.setText("Rooms");
@@ -275,14 +284,12 @@ public class OverviewWindow {
 		} else if (data instanceof MountController) {
 			MountController controller = (MountController) data;
 
-			StringBuilder buf = new StringBuilder();
-			buf.append("Mount " + controller.getId());
-
+			String msg = "Mount " + controller.getId();
 			String alias = controller.getAlias();
 			if (alias != null)
-				buf.append(" - \"" + alias + "\"");
+				msg += " - \"" + alias + "\"";
 
-			item.setText(buf.toString());
+			item.setText(msg);
 
 			if (controller.isSelected())
 				tree.select(item);
@@ -342,6 +349,7 @@ public class OverviewWindow {
 	}
 
 	public void dispose() {
+		Cache.checkInImage(this, "cpath:/assets/help.png");
 		shell.dispose();
 		instance = null;
 	}

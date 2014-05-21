@@ -92,6 +92,8 @@ public class ShipLoaderDialog {
 
 		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
 		tree.setHeaderVisible(true);
+		// remove the horizontal bar so that it doesn't flicker when the tree is resized
+		tree.getHorizontalBar().dispose();
 
 		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
 		trclmnBlueprint.setWidth(defaultBlueTabWidth);
@@ -333,6 +335,8 @@ public class ShipLoaderDialog {
 			@Override
 			public void controlResized(ControlEvent e) {
 				final int BORDER_OFFSET = 5;
+				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
+					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnClass.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
 			}
 		};
@@ -399,12 +403,9 @@ public class ShipLoaderDialog {
 
 	private void handleException(ShipMetadata metadata, Exception ex) {
 		log.warn("An error has occured while loading " + metadata.getBlueprintName() + ": ", ex);
-		StringBuilder buf = new StringBuilder();
-		buf.append(String.format("%s could not be loaded:", metadata.getBlueprintName()));
-		buf.append("\n\n");
-		buf.append(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-		buf.append("\n\nCheck log for details.");
-		UIUtils.showWarningDialog(shell, null, buf.toString());
+		String msg = String.format("%s could not be loaded:%n%n", metadata.getBlueprintName()) +
+				"Check the log for details.";
+		UIUtils.showWarningDialog(shell, null, msg);
 	}
 
 	private void updatePreview() {

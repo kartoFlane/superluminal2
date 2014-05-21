@@ -115,6 +115,10 @@ public class NewShipDialog {
 		return instance;
 	}
 
+	public boolean isActive() {
+		return !shell.isDisposed();
+	}
+
 	public void dispose() {
 		shell.dispose();
 		instance = null;

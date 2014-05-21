@@ -55,11 +55,10 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		Label lblHelp = new Label(this, SWT.NONE);
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
-		StringBuilder buf = new StringBuilder();
-		buf.append("- Left-click on a highlighted object to select it.\n");
-		buf.append("- Left-click on empty space to deselect.\n");
-		buf.append("- Only one object can be selected at a time.");
-		lblHelp.setToolTipText(buf.toString());
+		String msg = "- Left-click on a highlighted object to select it.\n" +
+				"- Left-click on empty space to deselect.\n" +
+				"- Only one object can be selected at a time.";
+		lblHelp.setToolTipText(msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));

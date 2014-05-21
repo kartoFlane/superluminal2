@@ -61,7 +61,7 @@ public class SettingsDialog {
 		btnOverlap.setText("Allow Room Overlap");
 
 		Label lblOverlap = new Label(compBehaviour, SWT.NONE);
-		lblOverlap.setText("Disables room collision, allowing them to overlap.");
+		lblOverlap.setText("Disables room collision when checked, allowing them to overlap.");
 
 		Label separator01 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator01.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -92,7 +92,7 @@ public class SettingsDialog {
 
 		Label lblUpdates = new Label(compConfig, SWT.WRAP);
 		lblUpdates.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblUpdates.setText("If true, the editor will check for available updates each time it is started.");
+		lblUpdates.setText("If checked, the editor will check for available updates each time it is started.");
 
 		Label separator11 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator11.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -102,7 +102,7 @@ public class SettingsDialog {
 
 		Label lblGeometry = new Label(compConfig, SWT.WRAP);
 		lblGeometry.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblGeometry.setText("If true, size of the editor's window will be remembered and restored on startup.");
+		lblGeometry.setText("If checked, size of the editor's window will be remembered and restored on startup.");
 
 		Label separator12 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator12.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -112,7 +112,7 @@ public class SettingsDialog {
 
 		Label lblMaximise = new Label(compConfig, SWT.NONE);
 		lblMaximise.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lblMaximise.setText("If true, the editor window will start maximised.\nOverrides 'Remember Window Size'");
+		lblMaximise.setText("If checked, the editor window will start maximised.\nOverrides 'Remember Window Size'");
 
 		Label separator13 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator13.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -122,7 +122,7 @@ public class SettingsDialog {
 
 		Label lblSidebar = new Label(compConfig, SWT.NONE);
 		lblSidebar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lblSidebar.setText("If true, the sidebar will be located on the right side of the window.");
+		lblSidebar.setText("If checked, the sidebar will be located on the right side of the window.");
 		scConfig.setContent(compConfig);
 		scConfig.setMinSize(compConfig.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 

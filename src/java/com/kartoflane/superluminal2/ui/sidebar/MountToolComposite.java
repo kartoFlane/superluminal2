@@ -45,15 +45,14 @@ public class MountToolComposite extends Composite implements DataComposite {
 		lblHelp = new Label(this, SWT.NONE);
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
-		StringBuilder buf = new StringBuilder();
-		buf.append("- Left-clicking places the mount.\n");
-		buf.append("- The ship can have 8 mounts in total.\n");
-		buf.append("- Right-clicking rotates the mount.\n");
-		buf.append("- Holding down Shift while right-clicking changes\n");
-		buf.append("  the mount's direction.\n");
-		buf.append("- Holding down Alt while right-clicking mirrors\n");
-		buf.append("  the mount along X or Y axis.");
-		lblHelp.setToolTipText(buf.toString());
+		String msg = "- Left-clicking places the mount.\n" +
+				"- The ship can have 8 mounts in total.\n" +
+				"- Right-clicking rotates the mount.\n" +
+				"- Holding down Shift while right-clicking changes\n" +
+				"  the mount's direction.\n" +
+				"- Holding down Alt while right-clicking mirrors\n" +
+				"  the mount along X or Y axis.";
+		lblHelp.setToolTipText(msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));

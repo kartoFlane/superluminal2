@@ -354,7 +354,7 @@ public class EditorWindow {
 		tltmProperties.setImage(Cache.checkOutImage(this, "cpath:/assets/system.png"));
 		tltmProperties.addSelectionListener(toolSelectionAdapter);
 		tltmProperties.setData(Tools.CONFIG);
-		tltmProperties.setToolTipText(String.format("Ship Loadout " + Manager.AMPERSAND + " Properties (%s)", Manager.getHotkey(Hotkeys.PROPERTIES_TOOL)));
+		tltmProperties.setToolTipText(String.format("Ship Loadout and Properties (%s)", Manager.getHotkey(Hotkeys.PROPERTIES_TOOL)));
 		toolItemMap.put(Tools.CONFIG, tltmProperties);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
@@ -763,14 +763,11 @@ public class EditorWindow {
 		mntmAbout.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				StringBuilder buf = new StringBuilder();
-				buf.append(Superluminal.APP_NAME + " - a ship editor for FTL: Faster Than Light");
-				buf.append("\nVersion " + Superluminal.APP_VERSION);
-				buf.append("\n\nCreated by " + Superluminal.APP_AUTHOR);
-				buf.append("\n");
-
+				String msg = Superluminal.APP_NAME + " - a ship editor for FTL: Faster Than Light\n" +
+						"Version " + Superluminal.APP_VERSION + "\n\n" +
+						"Created by " + Superluminal.APP_AUTHOR + "\n";
 				AboutDialog aboutDialog = new AboutDialog(shell);
-				aboutDialog.setMessage(buf.toString());
+				aboutDialog.setMessage(msg);
 				try {
 					aboutDialog.setLink(new URL(Superluminal.APP_FORUM_URL), "Editor's thread at the official FTL forums");
 				} catch (MalformedURLException ex) {
@@ -1040,12 +1037,16 @@ public class EditorWindow {
 				OverviewWindow.getInstance() == null || !OverviewWindow.getInstance().isActive();
 		result &= ShipLoaderDialog.getInstance() == null || !ShipLoaderDialog.getInstance().isActive();
 		result &= SettingsDialog.getInstance() == null || !SettingsDialog.getInstance().isActive();
-		result &= GlowSelectionDialog.getInstance() == null || !GlowSelectionDialog.getInstance().isActive();
-		result &= WeaponSelectionDialog.getInstance() == null || !WeaponSelectionDialog.getInstance().isActive();
-		result &= DroneSelectionDialog.getInstance() == null || !DroneSelectionDialog.getInstance().isActive();
+		result &= NewShipDialog.getInstance() == null || !NewShipDialog.getInstance().isActive();
+		result &= SaveOptionsDialog.getInstance() == null || !SaveOptionsDialog.getInstance().isActive();
 		result &= ModManagementDialog.getInstance() == null || !ModManagementDialog.getInstance().isActive();
 		result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isActive();
 		result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isActive();
+		result &= LoadingDialog.getInstance() == null || !LoadingDialog.getInstance().isActive();
+		result &= GlowSelectionDialog.getInstance() == null || !GlowSelectionDialog.getInstance().isActive();
+		result &= WeaponSelectionDialog.getInstance() == null || !WeaponSelectionDialog.getInstance().isActive();
+		result &= DroneSelectionDialog.getInstance() == null || !DroneSelectionDialog.getInstance().isActive();
+		result &= AugmentSelectionDialog.getInstance() == null || !AugmentSelectionDialog.getInstance().isActive();
 
 		Composite c = (Composite) getSidebarContent();
 		if (c != null && !c.isDisposed())

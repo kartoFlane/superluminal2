@@ -25,10 +25,9 @@ public class DoorToolComposite extends Composite {
 		Label lblHelp = new Label(this, SWT.NONE);
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
-		StringBuilder buf = new StringBuilder();
-		buf.append("- Left-clicking places the door.\n");
-		buf.append("- Doors can only be placed on room walls.");
-		lblHelp.setToolTipText(buf.toString());
+		String msg = "- Left-clicking places the door.\n" +
+				"- Doors can only be placed on room walls.";
+		lblHelp.setToolTipText(msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));

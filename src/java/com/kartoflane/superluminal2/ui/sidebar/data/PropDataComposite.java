@@ -16,17 +16,21 @@ public class PropDataComposite extends Composite implements DataComposite {
 
 	public PropDataComposite(Composite parent, PropController controller) {
 		super(parent, SWT.NONE);
-		setLayout(new GridLayout(3, false));
-
 		this.controller = controller;
+
+		createContents();
+	}
+
+	protected void createContents() {
+		setLayout(new GridLayout(4, false));
 
 		label = new Label(this, SWT.NONE);
 		label.setAlignment(SWT.CENTER);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 		label.setText(controller.getCompositeTitle());
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 	}
 
 	public void updateData() {

@@ -25,13 +25,12 @@ public class RoomToolComposite extends Composite {
 		Label lblHelp = new Label(this, SWT.NONE);
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
-		StringBuilder buf = new StringBuilder();
-		buf.append("- Left-click and drag to start drawing the room.\n");
-		buf.append("- Release left mouse button to confirm and place the room.\n");
-		buf.append("- Right-click to cancel.\n");
-		buf.append("- Rooms cannot be placed on top of each other, or beyond\n");
-		buf.append("  the ship's origin.");
-		lblHelp.setToolTipText(buf.toString());
+		String msg = "- Left-click and drag to start drawing the room.\n" +
+				"- Release left mouse button to confirm and place the room.\n" +
+				"- Right-click to cancel.\n" +
+				"- Rooms cannot be placed on top of each other, or beyond\n" +
+				"  the ship's origin.";
+		lblHelp.setToolTipText(msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));

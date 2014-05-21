@@ -39,12 +39,11 @@ public class StationToolComposite extends Composite {
 		lblHelp = new Label(this, SWT.NONE);
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
-		StringBuilder buf = new StringBuilder();
-		buf.append("When Placement option is selected:\n");
-		buf.append("- Holding down Shift while left-clicking changes\n");
-		buf.append("  the direction of the station.\n");
-		buf.append("- Right-clicking removes the station.");
-		lblHelp.setToolTipText(buf.toString());
+		String msg = "When Placement option is selected:\n" +
+				"- Holding down Shift while left-clicking changes\n" +
+				"  the direction of the station.\n" +
+				"- Right-clicking removes the station.";
+		lblHelp.setToolTipText(msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));

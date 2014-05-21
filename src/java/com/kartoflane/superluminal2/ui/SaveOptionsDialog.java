@@ -5,6 +5,7 @@ import java.io.File;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -18,6 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class SaveOptionsDialog {
@@ -34,11 +36,14 @@ public class SaveOptionsDialog {
 	private Button btnDirectory;
 	private Group grpSaveAs;
 	private Button btnFTL;
+	private Label lblDirectoryHelp;
+	private Label lblArchiveHelp;
 
 	public SaveOptionsDialog(Shell parent) {
 		if (instance != null)
 			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
+		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		shell.setText(Superluminal.APP_NAME + " - Save Options");
@@ -46,15 +51,26 @@ public class SaveOptionsDialog {
 
 		grpSaveAs = new Group(shell, SWT.NONE);
 		grpSaveAs.setText("Save as...");
-		grpSaveAs.setLayout(new GridLayout(1, false));
+		grpSaveAs.setLayout(new GridLayout(2, false));
 		grpSaveAs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		btnDirectory = new Button(grpSaveAs, SWT.RADIO);
 		btnDirectory.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		btnDirectory.setText("Resource folder");
 
+		lblDirectoryHelp = new Label(grpSaveAs, SWT.NONE);
+		lblDirectoryHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblDirectoryHelp.setImage(helpImage);
+		lblDirectoryHelp.setToolTipText("Saves the ship as a series of folders mirroring the internal\n" +
+				"structure of the game's files -- source code for your mod, so to say.");
+
 		btnFTL = new Button(grpSaveAs, SWT.RADIO);
 		btnFTL.setText("FTL file");
+
+		lblArchiveHelp = new Label(grpSaveAs, SWT.NONE);
+		lblArchiveHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblArchiveHelp.setImage(helpImage);
+		lblArchiveHelp.setToolTipText("Saves the ship as a ready-to-install .ftl archive.");
 
 		lblSaveLocation = new Label(shell, SWT.NONE);
 		lblSaveLocation.setText("Save location:");
@@ -171,7 +187,12 @@ public class SaveOptionsDialog {
 		return instance;
 	}
 
+	public boolean isActive() {
+		return !shell.isDisposed();
+	}
+
 	public void dispose() {
+		Cache.checkInImage(this, "cpath:/assets/help.png");
 		shell.dispose();
 		instance = null;
 	}
