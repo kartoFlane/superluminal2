@@ -1,5 +1,13 @@
 Changelog
 
+2.0.0 beta5:
+- Added crew modification
+- Weapon/drone/augment dialogs now remember previous selection
+- Some more tooltips
+- Several minor tweaks, behind-the-scenes changes
+- Added a popup for when the user downloaded a wrong version of the editor for their system
+- Decoupled room and system drawing logic, systems are drawn on separate layer above rooms
+
 2.0.0 beta4a:
 - Fixed a minor oversight that would cause the editor to crash when editing enemy ships
 
