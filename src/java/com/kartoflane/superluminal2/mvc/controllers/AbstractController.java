@@ -118,25 +118,27 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		// bounded to, change the parameters to be as close the border as possible
 		if (isBounded()) {
 			int nx = x, ny = y;
+			int bx = getBoundingAreaX(), by = getBoundingAreaY();
+			int t = 0;
 
-			Rectangle boundingArea = getBoundingArea();
-			if (x < boundingArea.x)
-				nx = boundingArea.x;
-			else if (x > boundingArea.x + boundingArea.width)
-				nx = boundingArea.x + boundingArea.width;
-			if (y < boundingArea.y)
-				ny = boundingArea.y;
-			else if (y > boundingArea.y + boundingArea.height)
-				ny = boundingArea.y + boundingArea.height;
+			if (x < bx)
+				nx = bx;
+			else if (x > (t = bx + getBoundingAreaW()))
+				nx = t;
+			if (y < by)
+				ny = by;
+			else if (y > (t = by + getBoundingAreaH()))
+				ny = t;
 
 			x = nx;
 			y = ny;
 		}
 
-		Rectangle b = new Rectangle(x - getW() / 2, y - getH() / 2, getW(), getH());
-
-		if (isCollidable() && collidesAs(b, this))
-			return false;
+		if (isCollidable()) {
+			Rectangle b = new Rectangle(x - getW() / 2, y - getH() / 2, getW(), getH());
+			if (collidesAs(b, this))
+				return false;
+		}
 
 		model.setLocation(x, y);
 
@@ -180,27 +182,29 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		// bounded to, change the parameters to be as close the border as possible
 		if (isBounded()) {
 			int nx = dx, ny = dy;
+			int bx = getBoundingAreaX(), by = getBoundingAreaY();
+			int t = 0;
 
-			Rectangle boundingArea = getBoundingArea();
-			if (getX() + dx < boundingArea.x)
-				nx = boundingArea.x - getX();
-			else if (getX() + dx > boundingArea.x + boundingArea.width)
-				nx = boundingArea.x + boundingArea.width - getX();
-			if (getY() + dy < boundingArea.y)
-				ny = boundingArea.y - getY();
-			else if (getY() + dy > boundingArea.y + boundingArea.height)
-				ny = boundingArea.y + boundingArea.height - getY();
+			if (getX() + dx < bx)
+				nx = bx - getX();
+			else if (getX() + dx > (t = bx + getBoundingAreaW()))
+				nx = t - getX();
+			if (getY() + dy < by)
+				ny = by - getY();
+			else if (getY() + dy > (t = by + getBoundingAreaH()))
+				ny = t - getY();
 
 			dx = nx;
 			dy = ny;
 		}
 
-		Rectangle b = new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH());
-		b.x += dx;
-		b.y += dy;
-
-		if (isCollidable() && collidesAs(b, this))
-			return false;
+		if (isCollidable()) {
+			Rectangle b = new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH());
+			b.x += dx;
+			b.y += dy;
+			if (collidesAs(b, this))
+				return false;
+		}
 
 		model.translate(dx, dy);
 		if (isFollowActive() && followers != null) { // followers set is lazily instantiated when it's needed
@@ -298,6 +302,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		if (isVisible()) {
 			setVisible(false);
 			setLocation(x, y);
+			updateView();
 			setVisible(true);
 		} else {
 			setLocation(x, y);
@@ -320,6 +325,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		if (isVisible()) {
 			setVisible(false);
 			setSize(w, h);
+			updateView();
 			setVisible(true);
 		} else {
 			setSize(w, h);
@@ -343,7 +349,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void setPresentedLocation(int x, int y) {
-		reposition(x, y);
+		reposition(x * presentedFactor, y * presentedFactor);
 	}
 
 	public void setPresentedLocation(Point p) {
@@ -636,7 +642,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	@Override
 	public void mouseDown(MouseEvent e) {
 		if (Manager.getSelectedToolId() == Tools.POINTER) {
-			boolean contains = getBounds().contains(e.x, e.y);
+			boolean contains = contains(e.x, e.y);
 			if (e.button == 1) {
 				clickOffset.x = e.x - getX();
 				clickOffset.y = e.y - getY();
@@ -652,8 +658,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void mouseUp(MouseEvent e) {
 		if (Manager.getSelectedToolId() == Tools.POINTER) {
 			if (e.button == 1) {
-				Rectangle bounds = getBounds();
-				if (!bounds.contains(e.x, e.y) && !bounds.contains(getX() + clickOffset.x, getY() + clickOffset.y) && selected)
+				if (!contains(e.x, e.y) && !contains(getX() + clickOffset.x, getY() + clickOffset.y) && selected)
 					Manager.setSelected(null);
 				setMoving(false);
 			}
@@ -723,6 +728,22 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	@Override
 	public Rectangle getBoundingArea() {
 		return model.getBoundingArea();
+	}
+
+	public int getBoundingAreaX() {
+		return model.getBoundingAreaX();
+	}
+
+	public int getBoundingAreaY() {
+		return model.getBoundingAreaY();
+	}
+
+	public int getBoundingAreaW() {
+		return model.getBoundingAreaW();
+	}
+
+	public int getBoundingAreaH() {
+		return model.getBoundingAreaH();
 	}
 
 	@Override
