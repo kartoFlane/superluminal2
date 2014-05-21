@@ -39,7 +39,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta4a");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta5");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.google.com/"; // TODO
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -56,10 +56,8 @@ public class Superluminal {
 	 * - hotkey disable doesnt work on linux (focus is messing up?)
 	 * - Window resize doesnt refresh grid on linux (resize event is called before setSize() is called?)
 	 * 
-	 * - Help icons with tooltips explaining stuff
-	 * - tree columns' names -> don't allow them to be resized to the point where they fall outside of the tree
-	 * - weapon selection reportedly clunky -> remember previous selection, + search function?
-	 * - properties: crew tab
+	 * - weapon selection reportedly clunky -> search function?
+	 * 
 	 * - artillery weapon UI idea:
 	 * Additionally, when placing artillery room(s), there should be a separate category under Armaments for Artillery weapons, and the selection of such for each. The best way, in my opinion, is to
 	 * have the categories Weapons, Drones, Artillery, and Augments. Under Artillery, a number of slot selector should be added (with a warning that having more than one artillery weapon will prevent
@@ -69,13 +67,13 @@ public class Superluminal {
 	 * easier.
 	 * 
 	 * - boarding AI selection: invasion / sabotage ??
+	 * - generate floor image feature ??
+	 * - .shp loading / conversion to .ftl
 	 * 
 	 * - add gibs
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
-	 * - changing interior image from 2x2 to 2x1 (for example) leaves unredrawn canvas area
 	 * - dragging reorder to ship overview
 	 * - come up with a way to set which system is first when assigned to the same room?
-	 * - rework interior drawing -> currently drawn on room layer, so higher rooms obscur the image -> bad
 	 * - add reordering to ship overview
 	 * - glow placement modification
 	 * 
@@ -95,12 +93,36 @@ public class Superluminal {
 		log.debug(String.format("%s %s", System.getProperty("os.name"), System.getProperty("os.version")));
 		log.debug(String.format("%s, %s, %s", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("os.arch")));
 		log.debug(String.format("SWT v%s", SWT.getVersion()));
+		System.out.println();
 
-		log.trace("Retrieving display... If the log cuts off after this entry, then wrong version of the editor has been downloaded.");
-		Display display = Display.getCurrent();
+		try {
+			// Try to retrieve the display in order to test whether the correct version of the editor has been downloaded
+			Display.getDefault();
+		} catch (Throwable t) {
+			log.error("Failed to retrieve display - wrong version of the editor has been downloaded.");
+
+			String os = getOS();
+			if (os == null)
+				log.error(String.format("Your system (%s %s) was not recognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model")));
+			else
+				log.error("You should download version for " + os);
+
+			String msg = "";
+			msg += "You have downloaded a wrong version of the editor for your system.\n";
+			msg += "\n";
+			if (os == null) {
+				msg += String.format("Your system (%s %s) was not\nrecognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model"));
+			} else {
+				msg += "You should download version for: " + os;
+			}
+
+			UIUtils.showSwingDialog(APP_NAME + " - Wrong version", msg);
+			System.exit(0);
+		}
+
+		Display display = Display.getDefault();
 		Display.setAppName(APP_NAME);
 		Display.setAppVersion(APP_VERSION.toString());
-		log.trace("Display retrieved successfully!");
 
 		File configFile = new File(CONFIG_FILE);
 
@@ -166,11 +188,10 @@ public class Superluminal {
 		} catch (Exception e) {
 			log.error("Exception occured while creating EditorWindow: ", e);
 
-			StringBuilder buf = new StringBuilder();
-			buf.append("An error has occured while creating the editor's GUI:\n");
-			buf.append(e.getClass().getSimpleName() + ": " + e.getMessage());
-			buf.append("\n\nCheck the log for details.");
-			UIUtils.showErrorDialog(null, null, buf.toString());
+			String msg = "An error has occured while creating the editor's GUI:\n" +
+					e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n" +
+					"Check the log for details.";
+			UIUtils.showErrorDialog(null, null, msg);
 			System.exit(1);
 		}
 
@@ -224,11 +245,10 @@ public class Superluminal {
 			} catch (IOException e) {
 				log.error("An error occured while loading dat archives:", e);
 
-				StringBuilder buf = new StringBuilder();
-				buf.append("An error has occured while loading the game's resources.\n\n");
-				buf.append("Please check editor-log.txt in the editor's directory, and post it\n");
-				buf.append("in the editor's thread on the FTL forums.");
-				UIUtils.showErrorDialog(editorWindow.getShell(), null, buf.toString());
+				String msg = "An error has occured while loading the game's resources.\n\n" +
+						"Please check editor-log.txt in the editor's directory, and post\n" +
+						"it in the editor's thread at the FTL forums.";
+				UIUtils.showErrorDialog(editorWindow.getShell(), null, msg);
 				System.exit(1);
 			}
 		}
@@ -249,11 +269,11 @@ public class Superluminal {
 			}
 		} catch (Throwable t) {
 			log.error("An error has occured and the editor was forced to terminate.", t);
-			StringBuilder buf = new StringBuilder();
-			buf.append(APP_NAME + " has encountered a problem and needs to close.\n\n");
-			buf.append("Please check editor-log.txt in the editor's directory, and post it\n");
-			buf.append("in the editor's thread on the FTL forums.");
-			UIUtils.showErrorDialog(editorWindow.getShell(), null, buf.toString());
+
+			String msg = APP_NAME + " has encountered a problem and needs to close.\n\n" +
+					"Please check editor-log.txt in the editor's directory, and post\n" +
+					"it in the editor's thread at the FTL forums.";
+			UIUtils.showErrorDialog(editorWindow.getShell(), null, msg);
 		}
 
 		log.info("Exiting...");
@@ -272,6 +292,8 @@ public class Superluminal {
 
 		editorWindow.dispose();
 		display.dispose();
+
+		log.info("Bye");
 	}
 
 	/**
@@ -322,11 +344,9 @@ public class Superluminal {
 
 				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(), SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
 				box.setText(APP_NAME + " - Update Available");
-				StringBuilder buf = new StringBuilder();
-				buf.append("A new version of the editor is available: v.");
-				buf.append(remoteVersion[0]);
-				buf.append("\nWould you like to download it now?");
-				box.setMessage(buf.toString());
+				String msg = "A new version of the editor is available: v." + remoteVersion[0].toString() + "\n" +
+						"Would you like to download it now?";
+				box.setMessage(msg);
 
 				if (box.open() == SWT.YES) {
 					URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
@@ -465,5 +485,27 @@ public class Superluminal {
 		} catch (IOException e) {
 			log.warn("An error occured while saving hotkeys file: ", e);
 		}
+	}
+
+	private static String getOS() {
+		String result = "";
+
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("win"))
+			result = "Windows ";
+		else if (os.contains("mac"))
+			result = "Mac ";
+		else if (os.contains("linux") || os.contains("nix"))
+			result = "Linux ";
+		else
+			return null; // Unsupported OS, or not recognized
+
+		String javaArch = System.getProperty("sun.arch.data.model");
+		if (javaArch.contains("64"))
+			result += "64-bit";
+		else
+			result += "32-bit";
+
+		return result;
 	}
 }
