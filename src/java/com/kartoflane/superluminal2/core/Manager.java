@@ -289,7 +289,42 @@ public class Manager {
 		getHotkey(Hotkeys.SHOW_SHIELD).setKey('8');
 	}
 
-	public static InputStream getInputStream(String path) {
+	/**
+	 * Request an InputStream for the given path.<br>
+	 * <br>
+	 * All paths must have a protocol declared at their beginning, like so:
+	 * 
+	 * <pre>
+	 * <tt>file:C:/example/absolute/path.txt</tt>
+	 * </pre>
+	 * 
+	 * If a path is missing its protocol, or if it is mistyped, the image will not be loaded.<br>
+	 * Protocols that this method recognizes:
+	 * 
+	 * <pre>
+	 * <tt>file:    - for use when the resource is located in the OS' filesystem,
+	 *              eg. an absolute or relative path
+	 * cpath:   - for use when the resource is located inside the jar
+	 *              eg. cpath:/assets/image.png
+	 * db:      - for use when the resource is loaded in the database
+	 *              eg. db:img/ship/kestral_base.png</tt>
+	 * zip:     - for use when the resource is located inside an unloaded zip archive
+	 *              eg. zip:/path/to/file.zip/inner/path/image.png
+	 * </pre>
+	 * 
+	 * @param path
+	 *            path to the requested file, preceded by protocol
+	 * @return input stream for the given file, or null if not found
+	 * 
+	 * @throws FileNotFoundException
+	 *             when there was no file under the specified path
+	 * @throws IllegalArgumentException
+	 *             when the path is null, is wrongly formatted, is missing protocol or uses an
+	 *             unknown one, or when zip file path has no inner path
+	 */
+	public static InputStream getInputStream(String path) throws FileNotFoundException, IllegalArgumentException {
+		if (path == null)
+			throw new IllegalArgumentException("Path must not be null.");
 		InputStream result = null;
 		String protocol = IOUtils.getProtocol(path);
 		String loadPath = IOUtils.trimProtocol(path);
@@ -340,6 +375,9 @@ public class Manager {
 		} catch (IOException e) {
 			log.error(String.format("An error has occured while getting input stream for %s: ", loadPath), e);
 		}
+
+		if (result == null)
+			throw new FileNotFoundException("Could not find file: " + path);
 
 		return result;
 	}

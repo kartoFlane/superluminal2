@@ -28,6 +28,11 @@ public class GlowSet implements Comparable<GlowSet>, Identifiable {
 					return "";
 			}
 		}
+
+		@Override
+		public String toString() {
+			return name().toLowerCase();
+		}
 	}
 
 	private final String namespace;

@@ -18,6 +18,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Rectangle;
 import org.jdom2.Comment;
 import org.jdom2.Document;
@@ -48,6 +50,8 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class ShipSaveUtils {
+
+	private static final Logger log = LogManager.getLogger(ShipSaveUtils.class);
 
 	public static void saveShipFTL(File saveFile, ShipContainer container) throws IllegalArgumentException, IOException {
 		if (saveFile == null)
@@ -156,10 +160,17 @@ public class ShipSaveUtils {
 			String path = object.getImagePath();
 
 			if (path != null) {
-				InputStream is = Manager.getInputStream(path);
-				fileName = img.getDatRelativePath(ship) + img.getPrefix() + ship.getImageNamespace() + img.getSuffix() + ".png";
-				fileMap.put(fileName, IOUtils.readStream(is));
-				is.close();
+				InputStream is = null;
+				try {
+					is = Manager.getInputStream(path);
+					fileName = img.getDatRelativePath(ship) + img.getPrefix() + ship.getImageNamespace() + img.getSuffix() + ".png";
+					fileMap.put(fileName, IOUtils.readStream(is));
+				} catch (FileNotFoundException e) {
+					log.warn(String.format("File for %s image could not be found: %s", img, path));
+				} finally {
+					if (is != null)
+						is.close();
+				}
 			}
 		}
 
@@ -168,10 +179,17 @@ public class ShipSaveUtils {
 			String path = object.getInteriorPath();
 
 			if (path != null) {
-				InputStream is = Manager.getInputStream(path);
-				fileName = "img/ship/interior/" + object.getInteriorNamespace() + ".png";
-				fileMap.put(fileName, IOUtils.readStream(is));
-				is.close();
+				InputStream is = null;
+				try {
+					is = Manager.getInputStream(path);
+					fileName = "img/ship/interior/" + object.getInteriorNamespace() + ".png";
+					fileMap.put(fileName, IOUtils.readStream(is));
+				} catch (FileNotFoundException e) {
+					log.warn(String.format("File for %s interior image could not be found: %s", sys, path));
+				} finally {
+					if (is != null)
+						is.close();
+				}
 			}
 		}
 
@@ -181,19 +199,33 @@ public class ShipSaveUtils {
 
 			if (path != null) {
 				SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
-				InputStream is = Manager.getInputStream(path);
-				fileName = "img/ship/interior/" + cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png";
-				fileMap.put(fileName, IOUtils.readStream(is));
-				is.close();
+				InputStream is = null;
+				try {
+					is = Manager.getInputStream(path);
+					fileName = "img/ship/interior/" + cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png";
+					fileMap.put(fileName, IOUtils.readStream(is));
+				} catch (FileNotFoundException e) {
+					log.warn("File for cloaking glow image could not be found: " + path);
+				} finally {
+					if (is != null)
+						is.close();
+				}
 			} else {
 				for (Glows glowId : Glows.getGlows()) {
 					path = set.getImage(glowId);
 
 					if (path != null) {
-						InputStream is = Manager.getInputStream(path);
-						fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
-						fileMap.put(fileName, IOUtils.readStream(is));
-						is.close();
+						InputStream is = null;
+						try {
+							is = Manager.getInputStream(path);
+							fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
+							fileMap.put(fileName, IOUtils.readStream(is));
+						} catch (FileNotFoundException e) {
+							log.warn(String.format("File for %s's %s glow image could not be found: %s", object.getIdentifier(), glowId, path));
+						} finally {
+							if (is != null)
+								is.close();
+						}
 					}
 				}
 			}

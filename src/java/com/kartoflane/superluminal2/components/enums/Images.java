@@ -56,4 +56,9 @@ public enum Images {
 				return "";
 		}
 	}
+
+	@Override
+	public String toString() {
+		return name().toLowerCase();
+	}
 }

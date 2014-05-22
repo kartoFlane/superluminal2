@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.core;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class Cache {
 	 *              eg. an absolute or relative path
 	 * cpath:   - for use when the resource is located inside the jar
 	 *              eg. cpath:/assets/image.png
-	 * db:    - for use when the resource is loaded in the database
+	 * db:      - for use when the resource is loaded in the database
 	 *              eg. db:img/ship/kestral_base.png</tt>
 	 * zip:     - for use when the resource is located inside an unloaded zip archive
 	 *              eg. zip:/path/to/file.zip/inner/path/image.png
@@ -91,9 +92,11 @@ public class Cache {
 
 				customers.add(customer);
 			} catch (SWTException e) {
-				log.warn(String.format("%s - resource contains invalid data.", path));
+				log.warn(String.format("%s - resource contains invalid data: %s", path, e.getClass().getSimpleName() + ": " + e.getMessage()));
 			} catch (IllegalArgumentException e) {
-				log.warn("", e);
+				log.warn(String.format("Could not load %s: %s", path, e.getClass().getSimpleName() + ": " + e.getMessage()));
+			} catch (FileNotFoundException e) {
+				log.warn("Could not find file: " + path);
 			}
 		}
 

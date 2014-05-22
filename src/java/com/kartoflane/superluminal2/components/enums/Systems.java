@@ -122,6 +122,5 @@ public enum Systems {
 
 	public String getSmallIcon() {
 		return "cpath:/assets/smallsystem/" + toString().toLowerCase() + ".png";
-
 	}
 }
