@@ -120,9 +120,7 @@ public class Database {
 	public Database(FTLPack data, FTLPack resource) throws FileNotFoundException, IOException {
 		this();
 
-		DatabaseEntry core = new DatabaseEntry(data, resource);
-		core.store(DEFAULT_ANIM_OBJ);
-		dataEntries.add(core);
+		loadCore(data, resource);
 	}
 
 	public static Database getInstance() {
@@ -131,6 +129,12 @@ public class Database {
 
 	public DatabaseEntry getCore() {
 		return dataEntries.size() > 0 ? dataEntries.get(0) : null;
+	}
+
+	public void loadCore(FTLPack data, FTLPack resource) {
+		DatabaseEntry core = new DatabaseEntry(data, resource);
+		core.store(DEFAULT_ANIM_OBJ);
+		dataEntries.add(core);
 	}
 
 	public DatabaseEntry[] getEntries() {

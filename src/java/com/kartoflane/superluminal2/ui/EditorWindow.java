@@ -1,10 +1,13 @@
 package com.kartoflane.superluminal2.ui;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import net.vhati.ftldat.FTLDat.FTLPack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -608,10 +611,34 @@ public class EditorWindow {
 				UIUtils.showLoadDialog(shell, null, null, new LoadTask() {
 					public void execute() {
 						log.debug("Reloading Database...");
-						Database db = Database.getInstance();
-						for (DatabaseEntry de : db.getEntries())
-							de.reload();
-						db.cacheAnimations();
+						try {
+							Database db = Database.getInstance();
+							db.removeEntry(db.getCore());
+
+							DatabaseEntry[] entries = db.getEntries();
+
+							for (DatabaseEntry de : db.getEntries())
+								db.removeEntry(de);
+
+							File datsDir = new File(Manager.resourcePath);
+							File dataFile = new File(datsDir + "/data.dat");
+							File resourceFile = new File(datsDir + "/resource.dat");
+							FTLPack data = new FTLPack(dataFile, "r");
+							FTLPack resource = new FTLPack(resourceFile, "r");
+							db.loadCore(data, resource);
+							db.getCore().load();
+
+							for (DatabaseEntry de : entries)
+								db.addEntry(de);
+
+							db.cacheAnimations();
+						} catch (IOException e) {
+							log.error("An error has occured while reloading the database.", e);
+							String msg = "An error has occured while reloading the Database:\n" +
+									e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n" +
+									"Check the log for details.";
+							UIUtils.showErrorDialog(shell, null, msg);
+						}
 					}
 				});
 			}
