@@ -139,7 +139,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 		if (ship.isPlayerShip()) {
 			lblBlueprint.setText("Replaced Ship:");
-			lblBlueprintHelp.setToolTipText("This determines which ship your ship is going to replace.\nCurrently, there is no way to add new player ships, so you\nhave to replace one that already exists.");
+			String msg = "This determines which ship your ship is going to replace.\n" +
+					"Currently, there is no way to add new player ships, so you\n" +
+					"have to replace one that already exists.";
+			UIUtils.addTooltip(lblBlueprintHelp, "", msg);
 
 			cmbShips = new Combo(compGeneral, SWT.READ_ONLY);
 			cmbShips.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -169,7 +172,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			});
 		} else {
 			lblBlueprint.setText("Blueprint Name:");
-			lblBlueprintHelp.setToolTipText("This determines your ship's blueprint name.\nBlueprint name is a unique identifier of the\nship, that the game uses internally.");
+			String msg = "This determines your ship's blueprint name.\n" +
+					"Blueprint name is a unique identifier of the\n" +
+					"ship, that the game uses internally.";
+			UIUtils.addTooltip(lblBlueprintHelp, "", msg);
 
 			txtBlueprint = new Text(compGeneral, SWT.BORDER);
 			txtBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -221,7 +227,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblLayoutInfo = new Label(compGeneral, SWT.NONE);
 		lblLayoutInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1));
 		lblLayoutInfo.setImage(helpImage);
-		lblLayoutInfo.setToolTipText("This field specifies the name of the ship's layout files,\nlike kestral.txt and kestral.xml");
+		String msg = "This field specifies the name of the ship's layout files,\n" +
+				"like kestral.txt and kestral.xml";
+		UIUtils.addTooltip(lblLayoutInfo, "", msg);
 
 		txtLayout = new Text(compGeneral, SWT.BORDER);
 		txtLayout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -239,7 +247,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblImageHelp = new Label(compGeneral, SWT.NONE);
 		lblImageHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1));
 		lblImageHelp.setImage(helpImage);
-		lblImageHelp.setToolTipText("This field specifies the name of the ship's image files,\nlike kestral_base.png");
+		msg = "This field specifies the name of the ship's image files,\n" +
+				"like kestral_base.png";
+		UIUtils.addTooltip(lblImageHelp, "", msg);
 
 		txtImage = new Text(compGeneral, SWT.BORDER);
 		txtImage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -271,7 +281,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblHullHelp = new Label(compGeneral, SWT.NONE);
 		lblHullHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHullHelp.setImage(helpImage);
-		lblHullHelp.setToolTipText("This defines the amount of health your ship starts with.\nThe default is 30 for a player ship.");
+		msg = "This defines the amount of health your ship starts with.\n" +
+				"The default is 30 for a player ship.";
+		UIUtils.addTooltip(lblHullHelp, "", msg);
 
 		Label lblReactor = new Label(compGeneral, SWT.NONE);
 		lblReactor.setText("Reactor Power:");
@@ -293,7 +305,11 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblReactorInfo = new Label(compGeneral, SWT.NONE);
 		lblReactorInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblReactorInfo.setImage(helpImage);
-		lblReactorInfo.setToolTipText("This sets the amount of power the ship starts with.\nThe reactor can only be upgraded to level 25 ingame,\nbut can be set to a higher value when creating your\nship in this editor.");
+		msg = "This sets the amount of power the ship starts with.\n" +
+				"The reactor can only be upgraded to level 25 ingame,\n" +
+				"but can be set to a higher value when creating your\n" +
+				"ship in this editor.";
+		UIUtils.addTooltip(lblReactorInfo, "", msg);
 
 		if (!ship.isPlayerShip()) {
 			Label lblMinSector = new Label(compGeneral, SWT.NONE);
@@ -316,7 +332,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 			Label lblMinSecInfo = new Label(compGeneral, SWT.NONE);
 			lblMinSecInfo.setImage(helpImage);
-			lblMinSecInfo.setToolTipText("This determines the minimum sector in which the enemy can be encountered.");
+			msg = "This determines the minimum sector in which the enemy can be encountered.";
+			UIUtils.addTooltip(lblMinSecInfo, "", msg);
 
 			Label lblMaxSector = new Label(compGeneral, SWT.NONE);
 			lblMaxSector.setText("Max Sector:");
@@ -338,7 +355,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 			Label lblMaxSecInfo = new Label(compGeneral, SWT.NONE);
 			lblMaxSecInfo.setImage(helpImage);
-			lblMaxSecInfo.setToolTipText("This determines the maximum sector in which the enemy can be encountered.");
+			msg = "This determines the maximum sector in which the enemy can be encountered.";
+			UIUtils.addTooltip(lblMaxSecInfo, "", msg);
 		}
 
 		/*

@@ -61,8 +61,9 @@ public class SaveOptionsDialog {
 		lblDirectoryHelp = new Label(grpSaveAs, SWT.NONE);
 		lblDirectoryHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblDirectoryHelp.setImage(helpImage);
-		lblDirectoryHelp.setToolTipText("Saves the ship as a series of folders mirroring the internal\n" +
-				"structure of the game's files -- source code for your mod, so to say.");
+		String msg = "Saves the ship as a series of folders mirroring the internal\n" +
+				"structure of the game's files -- source code for your mod, so to say.";
+		UIUtils.addTooltip(lblDirectoryHelp, "", msg);
 
 		btnFTL = new Button(grpSaveAs, SWT.RADIO);
 		btnFTL.setText("FTL file");
@@ -70,7 +71,8 @@ public class SaveOptionsDialog {
 		lblArchiveHelp = new Label(grpSaveAs, SWT.NONE);
 		lblArchiveHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblArchiveHelp.setImage(helpImage);
-		lblArchiveHelp.setToolTipText("Saves the ship as a ready-to-install .ftl archive.");
+		msg = "Saves the ship as a ready-to-install .ftl archive.";
+		UIUtils.addTooltip(lblArchiveHelp, "", msg);
 
 		lblSaveLocation = new Label(shell, SWT.NONE);
 		lblSaveLocation.setText("Save location:");

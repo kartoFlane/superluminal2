@@ -22,6 +22,7 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class ManipulationToolComposite extends Composite implements DataComposite {
 	private Button btnPinned;
@@ -58,7 +59,7 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		String msg = "- Left-click on a highlighted object to select it.\n" +
 				"- Left-click on empty space to deselect.\n" +
 				"- Only one object can be selected at a time.";
-		lblHelp.setToolTipText(msg);
+		UIUtils.addTooltip(lblHelp, "", msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
@@ -115,7 +116,7 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		gd_spNudge.widthHint = 20;
 		spNudge.setLayoutData(gd_spNudge);
 		spNudge.setMinimum(1);
-		spNudge.setToolTipText("This determines how much the selected object\nwill move when you press the arrows.");
+		UIUtils.addTooltip(spNudge, "", "This determines how much the selected object\nwill move when you press the arrows.");
 
 		btnRight = new Button(boundsContainer, SWT.NONE);
 		btnRight.setImage(Cache.checkOutImage(this, "cpath:/assets/right.png"));

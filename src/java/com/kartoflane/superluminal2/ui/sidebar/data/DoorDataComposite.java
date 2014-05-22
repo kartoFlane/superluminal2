@@ -16,6 +16,7 @@ import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class DoorDataComposite extends Composite implements DataComposite {
 
@@ -69,7 +70,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		gd_btnSelectLeft.widthHint = 30;
 		btnSelectLeft.setLayoutData(gd_btnSelectLeft);
 		btnSelectLeft.setText(">");
-		btnSelectLeft.setToolTipText("Select the linked room");
+		UIUtils.addTooltip(btnSelectLeft, "", "Select the linked room");
 
 		lblIdRight = new Label(this, SWT.NONE);
 		lblIdRight.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -84,7 +85,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		gd_btnSelectRight.widthHint = 30;
 		btnSelectRight.setLayoutData(gd_btnSelectRight);
 		btnSelectRight.setText(">");
-		btnSelectRight.setToolTipText("Select the linked room");
+		UIUtils.addTooltip(btnSelectRight, "", "Select the linked room");
 
 		btnHorizontal.addSelectionListener(new SelectionAdapter() {
 			@Override

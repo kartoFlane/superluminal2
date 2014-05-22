@@ -73,16 +73,16 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		Label lblHelp = new Label(this, SWT.NONE);
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
-		String msg = "- Click on the system button to open system assignment menu\n";
-		msg += "- Alternatively, right-click on the room to open the menu\n";
-		msg += "- When a system is assigned, it'll be visible in the assignment\n";
-		msg += "  menu, under 'Assign' - this menu contains more options\n";
-		msg += "- Multiple systems can be assigned to a single room (should\n";
-		msg += "  only be used for Clonebay/Medbay)\n";
-		msg += "- The editor only shows one system at a time -- you can bring\n";
-		msg += "  one of the other systems into focus by clicking on 'Select'\n";
-		msg += "  in the system's submenu.";
-		lblHelp.setToolTipText(msg);
+		String msg = "- Click on the system button to open system assignment menu\n" +
+				"- Alternatively, right-click on the room to open the menu\n" +
+				"- When a system is assigned, it'll be visible in the assignment\n" +
+				"  menu, under 'Assign' - this menu contains more options\n" +
+				"- Multiple systems can be assigned to a single room (should\n" +
+				"  only be used for Clonebay/Medbay)\n" +
+				"- The editor only shows one system at a time -- you can bring\n" +
+				"  one of the other systems into focus by clicking on 'Select'\n" +
+				"  in the system's submenu.";
+		UIUtils.addTooltip(lblHelp, "", msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -104,7 +104,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		lblStartHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblStartHelp.setImage(helpImage);
 		msg = "This determines whether the ship starts with this system already installed.";
-		lblStartHelp.setToolTipText(msg);
+		UIUtils.addTooltip(lblStartHelp, "", msg);
 
 		lblSysLevel = new Label(this, SWT.NONE);
 		lblSysLevel.setText("Starting Level:");

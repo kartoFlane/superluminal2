@@ -18,6 +18,7 @@ import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class MountDataComposite extends Composite implements DataComposite {
 
@@ -56,7 +57,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblRotHelp = new Label(this, SWT.NONE);
 		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 		lblRotHelp.setImage(helpImage);
-		lblRotHelp.setToolTipText("This determines the direction the weapon is going to face,\nand in which it's going to shoot.");
+		String msg = "This determines the direction the weapon is going to face,\n" +
+				"and in which it's going to shoot.";
+		UIUtils.addTooltip(lblRotHelp, "", msg);
 
 		btnMirrored = new Button(this, SWT.CHECK);
 		btnMirrored.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
@@ -65,7 +68,8 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblMirHelp = new Label(this, SWT.NONE);
 		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 		lblMirHelp.setImage(helpImage);
-		lblMirHelp.setToolTipText("Flips the weapon along X or Y axis, depending on rotation.");
+		msg = "Flips the weapon along X or Y axis, depending on rotation.";
+		UIUtils.addTooltip(lblMirHelp, "", msg);
 
 		Label lblDirection = new Label(this, SWT.NONE);
 		lblDirection.setText("Power-up Direction:");
@@ -73,7 +77,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblDirHelp = new Label(this, SWT.NONE);
 		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 		lblDirHelp.setImage(helpImage);
-		lblDirHelp.setToolTipText("This determines the direction in which the weapon\nwill 'slide' when it is powered up.");
+		msg = "This determines the direction in which the weapon\n" +
+				"will 'slide' when it is powered up.";
+		UIUtils.addTooltip(lblDirHelp, "", msg);
 
 		cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, true);
 		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
@@ -87,7 +93,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblWeaponInfo = new Label(this, SWT.NONE);
 		lblWeaponInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 		lblWeaponInfo.setImage(helpImage);
-		lblWeaponInfo.setToolTipText("This setting is only cosmetic, and allows\nyou to view how a given weapon would\nlook,were it placed on this mount.");
+		msg = "This setting is only cosmetic, and allows\n" +
+				"you to view how a given weapon would look,\n" +
+				"were it placed on this mount.";
+		UIUtils.addTooltip(lblWeaponInfo, "", msg);
 
 		btnWeapon = new Button(this, SWT.NONE);
 		btnWeapon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));

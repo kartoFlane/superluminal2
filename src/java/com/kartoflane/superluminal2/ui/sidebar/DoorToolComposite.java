@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class DoorToolComposite extends Composite {
 
@@ -27,7 +28,7 @@ public class DoorToolComposite extends Composite {
 		lblHelp.setImage(helpImage);
 		String msg = "- Left-clicking places the door.\n" +
 				"- Doors can only be placed on room walls.";
-		lblHelp.setToolTipText(msg);
+		UIUtils.addTooltip(lblHelp, "", msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));

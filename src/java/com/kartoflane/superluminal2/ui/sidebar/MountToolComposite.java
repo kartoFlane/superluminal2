@@ -16,6 +16,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.tools.MountTool;
 import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class MountToolComposite extends Composite implements DataComposite {
 
@@ -52,7 +53,7 @@ public class MountToolComposite extends Composite implements DataComposite {
 				"  the mount's direction.\n" +
 				"- Holding down Alt while right-clicking mirrors\n" +
 				"  the mount along X or Y axis.";
-		lblHelp.setToolTipText(msg);
+		UIUtils.addTooltip(lblHelp, "", msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
@@ -65,7 +66,9 @@ public class MountToolComposite extends Composite implements DataComposite {
 		lblRotHelp = new Label(this, SWT.NONE);
 		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblRotHelp.setImage(helpImage);
-		lblRotHelp.setToolTipText("This determines the direction the weapon is going to face,\nand in which it's going to shoot.");
+		msg = "This determines the direction the weapon is going to face,\n" +
+				"and in which it's going to shoot.";
+		UIUtils.addTooltip(lblRotHelp, "", msg);
 
 		btnRotated.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -82,7 +85,8 @@ public class MountToolComposite extends Composite implements DataComposite {
 		lblMirHelp = new Label(this, SWT.NONE);
 		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblMirHelp.setImage(helpImage);
-		lblMirHelp.setToolTipText("Flips the weapon along X or Y axis, depending on rotation.");
+		msg = "Flips the weapon along X or Y axis, depending on rotation.";
+		UIUtils.addTooltip(lblMirHelp, "", msg);
 
 		btnMirrored.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -97,7 +101,9 @@ public class MountToolComposite extends Composite implements DataComposite {
 		lblDirHelp = new Label(this, SWT.NONE);
 		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblDirHelp.setImage(helpImage);
-		lblDirHelp.setToolTipText("This determines the direction in which the weapon\nwill 'slide' when it is powered up.");
+		msg = "This determines the direction in which the weapon\n" +
+				"will 'slide' when it is powered up.";
+		UIUtils.addTooltip(lblDirHelp, "", msg);
 
 		cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, true);
 		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);

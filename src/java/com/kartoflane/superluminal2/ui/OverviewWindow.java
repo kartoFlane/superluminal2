@@ -34,6 +34,7 @@ import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class OverviewWindow {
 
@@ -70,7 +71,8 @@ public class OverviewWindow {
 		Label lblHelp = new Label(shell, SWT.NONE);
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
-		lblHelp.setToolTipText("Alias is a short name to help you distinguish between objects.");
+		String msg = "Alias is a short name to help you distinguish between objects.";
+		UIUtils.addTooltip(lblHelp, "", msg);
 
 		tltmAlias = new ToolItem(toolBar, SWT.NONE);
 		tltmAlias.setToolTipText("Set Alias");

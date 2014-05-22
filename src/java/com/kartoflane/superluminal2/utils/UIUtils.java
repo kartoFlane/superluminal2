@@ -7,11 +7,16 @@ import javax.swing.JOptionPane;
 import net.vhati.modmanager.core.FTLUtilities;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolTip;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.ui.LoadingDialog;
@@ -285,6 +290,27 @@ public class UIUtils {
 		};
 		loadThread.start();
 		dialog.open();
+	}
+
+	public static void addTooltip(final Control c, String tooltipText, String tooltipMessage) {
+		final ToolTip tip = new ToolTip(c.getShell(), SWT.NONE);
+		tip.setText(tooltipText);
+		tip.setMessage(tooltipMessage);
+		tip.setAutoHide(false);
+
+		c.addListener(SWT.MouseHover, new Listener() {
+			public void handleEvent(Event e) {
+				Point p = c.toDisplay(e.x, e.y);
+				tip.setLocation(p.x, p.y + 15);
+				tip.setVisible(true);
+			}
+		});
+
+		c.addListener(SWT.MouseExit, new Listener() {
+			public void handleEvent(Event e) {
+				tip.setVisible(false);
+			}
+		});
 	}
 
 	public interface LoadTask {
