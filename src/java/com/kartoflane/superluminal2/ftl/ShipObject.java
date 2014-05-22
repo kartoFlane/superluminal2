@@ -728,7 +728,7 @@ public class ShipObject extends GameObject {
 	public void changeCrew(int index, Races neu) {
 		if (neu == null)
 			throw new IllegalArgumentException("New augment must not be null.");
-		if (index < 0 || index > 3)
+		if (index < 0 || index > 7)
 			throw new IllegalArgumentException("Index is out of bounds: " + index);
 		crewList.set(index, neu);
 		coalesceCrew();
@@ -844,7 +844,7 @@ public class ShipObject extends GameObject {
 	 * Puts the new augment at the specified index in the augment list.
 	 */
 	public void changeAugment(int index, AugmentObject neu) {
-		if (index < 0 || index > 3)
+		if (index < 0 || index > 2)
 			throw new IllegalArgumentException("Index is out of bounds: " + index);
 		if (neu == null)
 			throw new IllegalArgumentException("New augment must not be null.");
