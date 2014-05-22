@@ -5,6 +5,7 @@ import java.io.File;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -16,6 +17,7 @@ import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.SystemObject;
@@ -58,14 +60,29 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(3, false));
 
-		this.roomC = control;
+		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
+		roomC = control;
 		container = Manager.getCurrentShip();
 		final ShipController shipC = container.getShipController();
 
 		label = new Label(this, SWT.NONE);
 		label.setAlignment(SWT.CENTER);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		label.setText("Room");
+
+		Label lblHelp = new Label(this, SWT.NONE);
+		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblHelp.setImage(helpImage);
+		String msg = "- Click on the system button to open system assignment menu\n";
+		msg += "- Alternatively, right-click on the room to open the menu\n";
+		msg += "- When a system is assigned, it'll be visible in the assignment\n";
+		msg += "  menu, under 'Assign' - this menu contains more options\n";
+		msg += "- Multiple systems can be assigned to a single room (should\n";
+		msg += "  only be used for Clonebay/Medbay)\n";
+		msg += "- The editor only shows one system at a time -- you can bring\n";
+		msg += "  one of the other systems into focus by clicking on 'Select'\n";
+		msg += "  in the system's submenu.";
+		lblHelp.setToolTipText(msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -80,8 +97,14 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnSystem.setText("");
 
 		btnAvailable = new Button(this, SWT.CHECK);
-		btnAvailable.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
+		btnAvailable.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
 		btnAvailable.setText("Available At Start");
+
+		Label lblStartHelp = new Label(this, SWT.NONE);
+		lblStartHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblStartHelp.setImage(helpImage);
+		msg = "This determines whether the ship starts with this system already installed.";
+		lblStartHelp.setToolTipText(msg);
 
 		lblSysLevel = new Label(this, SWT.NONE);
 		lblSysLevel.setText("Starting Level:");
@@ -352,6 +375,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 				txtInterior.setText("");
 				btnGlow.setText("None");
+				btnGlow.setEnabled(false);
 			} else {
 				scaleMaxLevel.setMaximum(2);
 				scaleMaxLevel.setSelection(1);
