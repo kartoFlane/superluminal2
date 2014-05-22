@@ -11,7 +11,6 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.MountView;
-import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.MountDataComposite;
@@ -56,7 +55,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 	@Override
 	public void redraw() {
 		super.redraw();
-		EditorWindow.getInstance().canvasRedraw(getView().getDirectionArrowBounds());
+		container.getParent().canvasRedraw(getView().getDirectionArrowBounds());
 	}
 
 	protected MountView getView() {
@@ -112,7 +111,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 		getGameObject().setDirection(direction);
 		updateView();
 		redraw();
-		EditorWindow.getInstance().canvasRedraw(oldBounds);
+		container.getParent().canvasRedraw(oldBounds);
 	}
 
 	public Directions getDirection() {

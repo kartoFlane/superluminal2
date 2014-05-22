@@ -109,14 +109,15 @@ public class Manager {
 	}
 
 	public static void createNewShip(boolean playerShip) {
+		EditorWindow window = EditorWindow.getInstance();
 		closeShip();
 
-		currentShip = new ShipContainer(new ShipObject(playerShip));
+		currentShip = new ShipContainer(window, new ShipObject(playerShip));
 		currentShip.getShipController().reposition(3 * ShipContainer.CELL_SIZE, 3 * ShipContainer.CELL_SIZE);
 
-		EditorWindow.getInstance().enableTools(true);
-		EditorWindow.getInstance().enableOptions(true);
-		EditorWindow.getInstance().setVisibilityOptions(true);
+		window.enableTools(true);
+		window.enableOptions(true);
+		window.setVisibilityOptions(true);
 
 		// select the manipulation tool by default
 		selectTool(Tools.IMAGES);
@@ -124,9 +125,10 @@ public class Manager {
 	}
 
 	public static void loadShip(ShipObject ship) {
+		EditorWindow window = EditorWindow.getInstance();
 		closeShip();
 
-		currentShip = new ShipContainer(ship);
+		currentShip = new ShipContainer(window, ship);
 		ShipController sc = currentShip.getShipController();
 		// Selecting the anchor makes children non-collidable
 		// Prevents rooms and doors from bugging out when repositioning
@@ -137,9 +139,9 @@ public class Manager {
 		currentShip.updateBoundingArea();
 		currentShip.updateChildBoundingAreas();
 
-		EditorWindow.getInstance().enableTools(true);
-		EditorWindow.getInstance().enableOptions(true);
-		EditorWindow.getInstance().setVisibilityOptions(true);
+		window.enableTools(true);
+		window.enableOptions(true);
+		window.setVisibilityOptions(true);
 
 		// select the manipulation tool by default
 		selectTool(Tools.IMAGES);
@@ -159,6 +161,7 @@ public class Manager {
 	}
 
 	public static void closeShipForce() {
+		EditorWindow window = EditorWindow.getInstance();
 		setSelected(null);
 
 		if (currentShip != null)
@@ -166,9 +169,9 @@ public class Manager {
 
 		currentShip = null;
 
-		EditorWindow.getInstance().enableTools(false);
-		EditorWindow.getInstance().enableOptions(false);
-		EditorWindow.getInstance().canvasRedraw();
+		window.enableTools(false);
+		window.enableOptions(false);
+		window.canvasRedraw();
 		selectTool(null);
 		OverviewWindow.staticUpdate();
 	}
@@ -186,18 +189,20 @@ public class Manager {
 		if (selectedTool != null && selectedTool == tool)
 			return;
 
+		EditorWindow window = EditorWindow.getInstance();
+
 		if (selectedTool != null)
 			TOOL_MAP.get(selectedTool).deselect();
 
 		selectedTool = tool;
 		if (tool != null) {
 			MouseInputDispatcher.getInstance().setCurrentTool(TOOL_MAP.get(tool));
-			EditorWindow.getInstance().selectTool(tool);
+			window.selectTool(tool);
 			TOOL_MAP.get(tool).select();
 		} else {
 			MouseInputDispatcher.getInstance().setCurrentTool(null);
-			EditorWindow.getInstance().selectTool(null);
-			EditorWindow.getInstance().disposeSidebarContent();
+			window.selectTool(null);
+			window.disposeSidebarContent();
 		}
 	}
 

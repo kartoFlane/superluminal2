@@ -73,6 +73,8 @@ public class ShipContainer implements Disposable {
 
 	private ShipController shipController = null;
 
+	private EditorWindow window = null;
+
 	private ShipContainer() {
 		roomControllers = new ArrayList<RoomController>();
 		doorControllers = new ArrayList<DoorController>();
@@ -85,8 +87,9 @@ public class ShipContainer implements Disposable {
 		activeSystemMap = new HashMap<RoomObject, Systems>();
 	}
 
-	public ShipContainer(ShipObject ship) {
+	public ShipContainer(EditorWindow window, ShipObject ship) {
 		this();
+		this.window = window;
 
 		shipController = ShipController.newInstance(this, ship);
 		Manager.addModifierListener(shipController);
@@ -162,6 +165,10 @@ public class ShipContainer implements Disposable {
 
 		updateBoundingArea();
 		updateChildBoundingAreas();
+	}
+
+	public EditorWindow getParent() {
+		return window;
 	}
 
 	/**
@@ -324,8 +331,8 @@ public class ShipContainer implements Disposable {
 		Point size = findShipSize();
 
 		if (shipController.isPlayerShip()) {
-			int hangarWidth = 235;
-			int hangarHeight = 180;
+			int hangarWidth = 259;
+			int hangarHeight = 177;
 
 			int horizontalSpace = hangarWidth - size.x / 2;
 			int verticalSpace = hangarHeight - size.y / 2;
@@ -349,8 +356,8 @@ public class ShipContainer implements Disposable {
 		Point size = findShipSize();
 
 		if (shipController.isPlayerShip()) {
-			int hangarWidth = 235;
-			int hangarHeight = 180;
+			int hangarWidth = 259;
+			int hangarHeight = 177;
 
 			int horizontalSpace = hangarWidth - size.x / 2;
 			int verticalSpace = hangarHeight - size.y / 2;
@@ -667,6 +674,8 @@ public class ShipContainer implements Disposable {
 			mc.updateBoundingArea();
 		for (GibController gc : gibControllers)
 			gc.updateBoundingArea();
+		for (ImageController ic : imageControllerMap.values())
+			ic.updateBoundingArea();
 	}
 
 	public void updateBoundingArea() {
@@ -724,6 +733,7 @@ public class ShipContainer implements Disposable {
 
 		imageControllerMap.put(Images.SHIELD, shield);
 		add(shield);
+		shield.setBounded(true);
 
 		if (!ship.isPlayerShip()) {
 			// Shield resize prop
@@ -763,6 +773,7 @@ public class ShipContainer implements Disposable {
 
 		imageControllerMap.put(Images.HULL, hull);
 		add(hull);
+		hull.setBounded(true);
 
 		// Load cloak
 		imgObject = ship.getImage(Images.CLOAK);
@@ -779,6 +790,7 @@ public class ShipContainer implements Disposable {
 		imageControllerMap.put(Images.CLOAK, cloak);
 		add(cloak);
 		cloak.setVisible(false); // Cloak is only displayed when View Cloak is enabled
+		cloak.setBounded(true);
 
 		// Load floor
 		imgObject = ship.getImage(Images.FLOOR);
@@ -794,6 +806,7 @@ public class ShipContainer implements Disposable {
 
 		imageControllerMap.put(Images.FLOOR, floor);
 		add(floor);
+		floor.setBounded(true);
 
 		// Load thumbnail
 		imgObject = ship.getImage(Images.THUMBNAIL);

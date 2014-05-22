@@ -80,8 +80,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				"- Multiple systems can be assigned to a single room (should\n" +
 				"  only be used for Clonebay/Medbay)\n" +
 				"- The editor only shows one system at a time -- you can bring\n" +
-				"  one of the other systems into focus by clicking on 'Select'\n" +
-				"  in the system's submenu.";
+				"  one of the other assigned systems into focus by clicking on\n" +
+				"  'Select' in the system's submenu.";
 		UIUtils.addTooltip(lblHelp, "", msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);

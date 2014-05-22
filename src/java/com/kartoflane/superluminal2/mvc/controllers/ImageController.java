@@ -1,8 +1,10 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.ImageObject;
@@ -73,5 +75,11 @@ public class ImageController extends ObjectController {
 
 	public int getAlpha() {
 		return view.getAlpha();
+	}
+
+	@Override
+	public void updateBoundingArea() {
+		Point gridSize = Grid.getInstance().getSize();
+		setBoundingPoints(0, 0, gridSize.x, gridSize.y);
 	}
 }

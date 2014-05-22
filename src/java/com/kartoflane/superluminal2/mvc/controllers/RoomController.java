@@ -18,7 +18,6 @@ import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.RoomView;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
-import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
@@ -230,7 +229,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 						setLocation(resLoc);
 
 						setFollowOffset(getX() - getParent().getX(), getY() - getParent().getY());
-						((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+						((ManipulationToolComposite) container.getParent().getSidebarContent()).updateData();
 
 						container.updateBoundingArea();
 						setVisible(true);
@@ -286,7 +285,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 						updateView();
 						updateFollowOffset();
 
-						((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+						((ManipulationToolComposite) container.getParent().getSidebarContent()).updateData();
 						container.updateBoundingArea();
 					}
 				}

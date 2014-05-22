@@ -61,7 +61,7 @@ public class SystemView extends BaseView {
 	@Override
 	public void updateView() {
 		setInteriorImage(getController().getInteriorPath());
-		setBackgroundColor(getController().isAvailableAtStart() ? null : DENY_RGB);
+		setBackgroundColor(getController().isAvailableAtStart() ? defaultBackground : DENY_RGB);
 		setVisible(getController().isAssigned());
 	}
 
