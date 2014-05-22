@@ -1,5 +1,14 @@
 Changelog
 
+2.0.0 beta6a:
+- Added verification to image browsers to make sure that the selected file actually exists
+- Improved error handling in ship-saving code
+- Fixed a minor bug with crew UI that would cause a crash
+- Added tooltips to rooms' sidebar
+- Changed tooltips to stay until dismissed by the user
+- Fixed drone parts and missile amount changes not being applied to the ship
+- Fixed 'File > Reload Database' function
+
 2.0.0 beta5:
 - Added crew modification
 - Weapon/drone/augment dialogs now remember previous selection
