@@ -386,6 +386,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		gd_spMissiles.widthHint = 25;
 		spMissiles.setLayoutData(gd_spMissiles);
 
+		spMissiles.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ship.setMissilesAmount(spMissiles.getSelection());
+			}
+		});
+
 		Label lblWeaponSlots = new Label(grpWeapons, SWT.NONE);
 		lblWeaponSlots.setText("Slots");
 
@@ -453,6 +460,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		GridData gd_spDrones = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
 		gd_spDrones.widthHint = 25;
 		spDrones.setLayoutData(gd_spDrones);
+
+		spDrones.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ship.setDronePartsAmount(spDrones.getSelection());
+			}
+		});
 
 		Label lblDroneSlots = new Label(grpDrones, SWT.NONE);
 		lblDroneSlots.setText("Slots");
