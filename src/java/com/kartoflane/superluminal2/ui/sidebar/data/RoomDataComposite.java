@@ -1,5 +1,7 @@
 package com.kartoflane.superluminal2.ui.sidebar.data;
 
+import java.io.File;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -28,6 +30,7 @@ import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
 import com.kartoflane.superluminal2.utils.IOUtils;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class RoomDataComposite extends Composite implements DataComposite {
 
@@ -200,16 +203,28 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				public void widgetSelected(SelectionEvent e) {
 					Systems sys = container.getActiveSystem(roomC.getGameObject());
 					SystemController system = container.getSystemController(sys);
-					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
+					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
 					dialog.setFilterExtensions(new String[] { "*.png" });
-					String path = dialog.open();
 
-					// path == null only when user cancels
-					if (path != null) {
-						system.setVisible(false);
-						system.setInteriorPath("file:" + path);
-						updateData();
-						system.setVisible(true);
+					boolean exit = false;
+					while (!exit) {
+						String path = dialog.open();
+
+						// path == null only when user cancels
+						if (path != null) {
+							File temp = new File(path);
+							if (temp.exists()) {
+								system.setVisible(false);
+								system.setInteriorPath("file:" + path);
+								updateData();
+								system.setVisible(true);
+								exit = true;
+							} else {
+								UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
+							}
+						} else {
+							exit = true;
+						}
 					}
 				}
 			};

@@ -539,6 +539,7 @@ public class ShipContainer implements Disposable {
 		} else {
 			image.setVisible(false);
 			image.setImage(path);
+			image.updateView();
 			image.setVisible(path != null);
 		}
 	}

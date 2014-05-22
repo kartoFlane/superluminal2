@@ -26,6 +26,7 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class GlowSetDialog {
 
@@ -258,10 +259,8 @@ public class GlowSetDialog {
 		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(shell);
+				FileDialog dialog = new FileDialog(shell, SWT.OPEN);
 				dialog.setFilterExtensions(new String[] { "*.png" });
-				String path = dialog.open();
-
 				Text widget = null;
 
 				if (e.getSource() == btnBrowseBlue) {
@@ -272,13 +271,26 @@ public class GlowSetDialog {
 					widget = txtYellow;
 				}
 
-				// path == null only when user cancels
-				if (path != null) {
-					widget.setText("file:" + path);
-					widget.selectAll();
-					widget.clearSelection();
-					updateWidgets();
-					checkConfirm();
+				boolean exit = false;
+				while (!exit) {
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path != null) {
+						File temp = new File(path);
+						if (temp.exists()) {
+							widget.setText("file:" + path);
+							widget.selectAll();
+							widget.clearSelection();
+							updateWidgets();
+							checkConfirm();
+							exit = true;
+						} else {
+							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
+						}
+					} else {
+						exit = true;
+					}
 				}
 			}
 		};

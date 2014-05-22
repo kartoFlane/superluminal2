@@ -1,5 +1,7 @@
 package com.kartoflane.superluminal2.ui.sidebar;
 
+import java.io.File;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -20,6 +22,7 @@ import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.IOUtils;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class ImagesToolComposite extends Composite implements DataComposite {
 	private ShipContainer container;
@@ -85,10 +88,8 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell());
+				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
 				dialog.setFilterExtensions(new String[] { "*.png" });
-				String path = dialog.open();
-
 				Images type = null;
 				if (e.getSource() == btnHullBrowse)
 					type = Images.HULL;
@@ -101,10 +102,23 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 				else if (e.getSource() == btnMiniBrowse)
 					type = Images.THUMBNAIL;
 
-				// path == null only when user cancels
-				if (path != null) {
-					container.setImage(type, "file:" + path);
-					updateData();
+				boolean exit = false;
+				while (!exit) {
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path != null) {
+						File temp = new File(path);
+						if (temp.exists()) {
+							container.setImage(type, "file:" + path);
+							updateData();
+							exit = true;
+						} else {
+							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
+						}
+					} else {
+						exit = true;
+					}
 				}
 			}
 		};
