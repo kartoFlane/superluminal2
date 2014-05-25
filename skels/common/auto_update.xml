@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.0.0 beta6a" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.0 beta7" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.0.0 beta7">
+			<change>Fixed some Linux-specific bugs</change>
+			<change>Disabled station editing on enemy ships</change>
+		</version>
 		<version id="2.0.0 beta6a">
 			<change>Fixed several bugs and crashes</change>
 			<change>Changed tooltips to stay until dismissed by the user</change>
