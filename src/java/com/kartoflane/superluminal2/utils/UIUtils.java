@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolTip;
@@ -311,6 +312,20 @@ public class UIUtils {
 				tip.setVisible(false);
 			}
 		});
+	}
+
+	public static void addHotkeyText(MenuItem mntm, String hotkeyText) {
+		// Bug with SWT-GTK: MenuItem.setText() changes the widget's accelerator,
+		// contrary to the Javadoc. The accelerator consumes the key event that triggers
+		// it, therefore the application is never informed about the event.
+		// (Text after \t is the accelerator text)
+		// Fix is to use brackets instead of \t (ugly workaround)
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("linux") || os.contains("nix")) {
+			mntm.setText(String.format("%s [%s]", mntm.getText(), hotkeyText));
+		} else {
+			mntm.setText(mntm.getText() + "\t" + hotkeyText);
+		}
 	}
 
 	public interface LoadTask {

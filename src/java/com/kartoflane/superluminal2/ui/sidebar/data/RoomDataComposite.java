@@ -127,8 +127,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		scaleSysLevel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getActiveSystem(roomC.getGameObject());
-				SystemController system = container.getSystemController(sys);
+				SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+				SystemController system = (SystemController) container.getController(sys);
 				system.setLevel(scaleSysLevel.getSelection());
 				txtSysLevel.setText("" + scaleSysLevel.getSelection());
 			}
@@ -156,8 +156,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			scaleMaxLevel.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Systems sys = container.getActiveSystem(roomC.getGameObject());
-					SystemController system = container.getSystemController(sys);
+					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+					SystemController system = (SystemController) container.getController(sys);
 					system.setLevelMax(scaleMaxLevel.getSelection());
 					txtMaxLevel.setText("" + scaleMaxLevel.getSelection());
 					if (!shipC.isPlayerShip()) {
@@ -210,8 +210,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			SelectionAdapter imageViewListener = new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Systems sys = container.getActiveSystem(roomC.getGameObject());
-					SystemController system = container.getSystemController(sys);
+					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+					SystemController system = (SystemController) container.getController(sys);
 					String path = system.getInteriorPath();
 					if (path != null) {
 						ImageViewerDialog dialog = new ImageViewerDialog(EditorWindow.getInstance().getShell());
@@ -224,8 +224,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Systems sys = container.getActiveSystem(roomC.getGameObject());
-					SystemController system = container.getSystemController(sys);
+					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+					SystemController system = (SystemController) container.getController(sys);
 					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
 					dialog.setFilterExtensions(new String[] { "*.png" });
 
@@ -256,8 +256,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			SelectionAdapter imageClearListener = new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Systems sys = container.getActiveSystem(roomC.getGameObject());
-					SystemController system = container.getSystemController(sys);
+					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+					SystemController system = (SystemController) container.getController(sys);
 
 					system.setInteriorPath(null);
 					updateData();
@@ -268,8 +268,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			btnGlow.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Systems sys = container.getActiveSystem(roomC.getGameObject());
-					SystemObject systemObject = container.getSystemController(sys).getGameObject();
+					SystemObject systemObject = container.getActiveSystem(roomC.getGameObject());
 
 					GlowSelectionDialog dialog = new GlowSelectionDialog(EditorWindow.getInstance().getShell());
 					GlowSet glowSet = dialog.open(systemObject);
@@ -286,7 +285,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Point p = btnSystem.getLocation();
-				SystemsMenu sysMenu = SystemsMenu.getInstance();
+				SystemsMenu sysMenu = new SystemsMenu(container.getParent().getShell(), roomC);
 				sysMenu.setLocation(toDisplay(p.x, p.y + btnSystem.getSize().y));
 				sysMenu.open();
 			}
@@ -295,8 +294,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnAvailable.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Systems sys = container.getActiveSystem(roomC.getGameObject());
-				SystemController system = container.getSystemController(sys);
+				SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+				SystemController system = (SystemController) container.getController(sys);
 				system.setAvailableAtStart(btnAvailable.getSelection());
 				roomC.redraw();
 			}
@@ -311,20 +310,16 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		if (roomC == null)
 			return;
 
-		SystemsMenu sysMenu = SystemsMenu.getInstance();
-		sysMenu.setController(roomC);
-		sysMenu.disposeSystemSubmenus();
-		sysMenu.createSystemSubmenus();
-
-		Systems sys = container.getActiveSystem(roomC.getGameObject());
-		SystemController system = container.getSystemController(sys);
+		SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+		SystemController system = (SystemController) container.getController(sys);
 		ShipController shipController = container.getShipController();
 		boolean playerShip = shipController.isPlayerShip();
 
 		String alias = roomC.getAlias();
-		label.setText("Room " + roomC.getId() + (alias == null || alias.equals("") ? "" : " (" + alias + ")"));
+		label.setText("Room " + roomC.getId() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
 
-		btnSystem.setText(system.toString());
+		alias = sys.getAlias();
+		btnSystem.setText(sys.toString() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
 
 		btnAvailable.setEnabled(system.getSystemId() != Systems.EMPTY);
 		scaleSysLevel.setEnabled(system.getSystemId() != Systems.EMPTY);

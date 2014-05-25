@@ -146,7 +146,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 	@Override
 	public void updateData() {
 		String alias = controller.getAlias();
-		label.setText("Mount " + controller.getId() + (alias == null || alias.equals("") ? "" : " (" + alias + ")"));
+		label.setText("Mount " + controller.getId() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
 
 		btnRotated.setSelection(controller.isRotated());
 		btnMirrored.setSelection(controller.isMirrored());

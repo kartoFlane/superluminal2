@@ -33,6 +33,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
@@ -142,7 +144,6 @@ public class EditorWindow {
 		// Instantiate quasi-singletons
 		new MouseInputDispatcher();
 		CursorController.newInstance();
-		new SystemsMenu(shell);
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
@@ -166,15 +167,18 @@ public class EditorWindow {
 		mntmFile.setMenu(menuFile);
 
 		mntmNewShip = new MenuItem(menuFile, SWT.NONE);
-		mntmNewShip.setText("New Ship\t" + Manager.getHotkey(Hotkeys.NEW_SHIP));
+		mntmNewShip.setText("New Ship");
+		UIUtils.addHotkeyText(mntmNewShip, Manager.getHotkey(Hotkeys.NEW_SHIP).toString());
 
 		mntmLoadShip = new MenuItem(menuFile, SWT.NONE);
-		mntmLoadShip.setText("Load Ship\t" + Manager.getHotkey(Hotkeys.LOAD_SHIP));
+		mntmLoadShip.setText("Load Ship");
+		UIUtils.addHotkeyText(mntmLoadShip, Manager.getHotkey(Hotkeys.LOAD_SHIP).toString());
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmSaveShip = new MenuItem(menuFile, SWT.NONE);
-		mntmSaveShip.setText("Save Ship\t" + Manager.getHotkey(Hotkeys.SAVE_SHIP));
+		mntmSaveShip.setText("Save Ship");
+		UIUtils.addHotkeyText(mntmSaveShip, Manager.getHotkey(Hotkeys.SAVE_SHIP).toString());
 
 		mntmSaveShipAs = new MenuItem(menuFile, SWT.NONE);
 		mntmSaveShipAs.setText("Save Ship As...");
@@ -182,7 +186,8 @@ public class EditorWindow {
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmModMan = new MenuItem(menuFile, SWT.NONE);
-		mntmModMan.setText("Mod Management\t" + Manager.getHotkey(Hotkeys.MANAGE_MOD));
+		mntmModMan.setText("Mod Management");
+		UIUtils.addHotkeyText(mntmModMan, Manager.getHotkey(Hotkeys.MANAGE_MOD).toString());
 
 		mntmReloadDb = new MenuItem(menuFile, SWT.NONE);
 		mntmReloadDb.setText("Reload Database");
@@ -190,7 +195,8 @@ public class EditorWindow {
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmCloseShip = new MenuItem(menuFile, SWT.NONE);
-		mntmCloseShip.setText("Close Ship\t" + Manager.getHotkey(Hotkeys.CLOSE_SHIP));
+		mntmCloseShip.setText("Close Ship");
+		UIUtils.addHotkeyText(mntmCloseShip, Manager.getHotkey(Hotkeys.CLOSE_SHIP).toString());
 
 		// Edit menu
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
@@ -200,10 +206,12 @@ public class EditorWindow {
 		mntmEdit.setMenu(menuEdit);
 
 		mntmUndo = new MenuItem(menuEdit, SWT.NONE);
-		mntmUndo.setText("Undo\t" + Manager.getHotkey(Hotkeys.UNDO));
+		mntmUndo.setText("Undo");
+		UIUtils.addHotkeyText(mntmUndo, Manager.getHotkey(Hotkeys.UNDO).toString());
 
 		mntmRedo = new MenuItem(menuEdit, SWT.NONE);
-		mntmRedo.setText("Redo\t" + Manager.getHotkey(Hotkeys.REDO));
+		mntmRedo.setText("Redo");
+		UIUtils.addHotkeyText(mntmRedo, Manager.getHotkey(Hotkeys.REDO).toString());
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
@@ -216,12 +224,14 @@ public class EditorWindow {
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
 		mntmDelete = new MenuItem(menuEdit, SWT.NONE);
-		mntmDelete.setText("Delete\t" + Manager.getHotkey(Hotkeys.DELETE));
+		mntmDelete.setText("Delete");
+		UIUtils.addHotkeyText(mntmDelete, Manager.getHotkey(Hotkeys.DELETE).toString());
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
 		mntmSettings = new MenuItem(menuEdit, SWT.NONE);
-		mntmSettings.setText("Settings\t" + Manager.getHotkey(Hotkeys.SETTINGS));
+		mntmSettings.setText("Settings");
+		UIUtils.addHotkeyText(mntmSettings, Manager.getHotkey(Hotkeys.SETTINGS).toString());
 
 		// View menu
 		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
@@ -231,11 +241,13 @@ public class EditorWindow {
 		mntmView.setMenu(menuView);
 
 		mntmGrid = new MenuItem(menuView, SWT.CHECK);
-		mntmGrid.setText("Show Grid\t" + Manager.getHotkey(Hotkeys.TOGGLE_GRID));
+		mntmGrid.setText("Show Grid");
+		UIUtils.addHotkeyText(mntmGrid, Manager.getHotkey(Hotkeys.TOGGLE_GRID).toString());
 		mntmGrid.setSelection(true);
 
 		mntmHangar = new MenuItem(menuView, SWT.CHECK);
-		mntmHangar.setText("Show Hangar\t" + Manager.getHotkey(Hotkeys.TOGGLE_HANGAR));
+		mntmHangar.setText("Show Hangar");
+		UIUtils.addHotkeyText(mntmHangar, Manager.getHotkey(Hotkeys.TOGGLE_HANGAR).toString());
 
 		new MenuItem(menuView, SWT.SEPARATOR);
 
@@ -247,22 +259,27 @@ public class EditorWindow {
 
 		mntmShowAnchor = new MenuItem(menuViewShip, SWT.CHECK);
 		mntmShowAnchor.setSelection(true);
-		mntmShowAnchor.setText("Show Ship Origin\t" + Manager.getHotkey(Hotkeys.SHOW_ANCHOR));
+		mntmShowAnchor.setText("Show Ship Origin");
+		UIUtils.addHotkeyText(mntmShowAnchor, Manager.getHotkey(Hotkeys.SHOW_ANCHOR).toString());
 
 		mntmShowMounts = new MenuItem(menuViewShip, SWT.CHECK);
 		mntmShowMounts.setSelection(true);
-		mntmShowMounts.setText("Show Mounts\t" + Manager.getHotkey(Hotkeys.SHOW_MOUNTS));
+		mntmShowMounts.setText("Show Mounts");
+		UIUtils.addHotkeyText(mntmShowMounts, Manager.getHotkey(Hotkeys.SHOW_MOUNTS).toString());
 
 		mntmShowRooms = new MenuItem(menuViewShip, SWT.CHECK);
 		mntmShowRooms.setSelection(true);
-		mntmShowRooms.setText("Show Rooms\t" + Manager.getHotkey(Hotkeys.SHOW_ROOMS));
+		mntmShowRooms.setText("Show Rooms");
+		UIUtils.addHotkeyText(mntmShowRooms, Manager.getHotkey(Hotkeys.SHOW_ROOMS).toString());
 
 		mntmShowDoors = new MenuItem(menuViewShip, SWT.CHECK);
-		mntmShowDoors.setText("Show Doors\t" + Manager.getHotkey(Hotkeys.SHOW_DOORS));
+		mntmShowDoors.setText("Show Doors");
+		UIUtils.addHotkeyText(mntmShowDoors, Manager.getHotkey(Hotkeys.SHOW_DOORS).toString());
 		mntmShowDoors.setSelection(true);
 
 		mntmShowStations = new MenuItem(menuViewShip, SWT.CHECK);
-		mntmShowStations.setText("Show Stations\t" + Manager.getHotkey(Hotkeys.SHOW_STATIONS));
+		mntmShowStations.setText("Show Stations");
+		UIUtils.addHotkeyText(mntmShowStations, Manager.getHotkey(Hotkeys.SHOW_STATIONS).toString());
 		mntmShowStations.setSelection(true);
 
 		MenuItem mntmShipImages = new MenuItem(menuView, SWT.CASCADE);
@@ -272,15 +289,18 @@ public class EditorWindow {
 		mntmShipImages.setMenu(menuViewImages);
 
 		mntmShowHull = new MenuItem(menuViewImages, SWT.CHECK);
-		mntmShowHull.setText("Show Hull\t" + Manager.getHotkey(Hotkeys.SHOW_HULL));
+		mntmShowHull.setText("Show Hull");
+		UIUtils.addHotkeyText(mntmShowHull, Manager.getHotkey(Hotkeys.SHOW_HULL).toString());
 		mntmShowHull.setSelection(true);
 
 		mntmShowFloor = new MenuItem(menuViewImages, SWT.CHECK);
-		mntmShowFloor.setText("Show Floor\t" + Manager.getHotkey(Hotkeys.SHOW_FLOOR));
+		mntmShowFloor.setText("Show Floor");
+		UIUtils.addHotkeyText(mntmShowFloor, Manager.getHotkey(Hotkeys.SHOW_FLOOR).toString());
 		mntmShowFloor.setSelection(true);
 
 		mntmShowShield = new MenuItem(menuViewImages, SWT.CHECK);
-		mntmShowShield.setText("Show Shield\t" + Manager.getHotkey(Hotkeys.SHOW_SHIELD));
+		mntmShowShield.setText("Show Shield");
+		UIUtils.addHotkeyText(mntmShowShield, Manager.getHotkey(Hotkeys.SHOW_SHIELD).toString());
 		mntmShowShield.setSelection(true);
 
 		// Help menu
@@ -422,7 +442,7 @@ public class EditorWindow {
 			editorContainer.setWeights(new int[] { SIDEBAR_MIN_WIDTH, displaySize.width - SIDEBAR_MIN_WIDTH });
 		}
 
-		shell.getDisplay().addFilter(SWT.KeyDown, new Listener() {
+		display.addFilter(SWT.KeyDown, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
 				// display filter is notified every time a key is pressed, regardless of focus
@@ -451,7 +471,7 @@ public class EditorWindow {
 			}
 		});
 
-		shell.getDisplay().addFilter(SWT.KeyUp, new Listener() {
+		display.addFilter(SWT.KeyUp, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
 				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT) {
@@ -475,7 +495,7 @@ public class EditorWindow {
 			}
 		});
 
-		shell.getDisplay().addFilter(SWT.MouseEnter, new Listener() {
+		display.addFilter(SWT.MouseEnter, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
 				shellResizing = false;
@@ -504,17 +524,6 @@ public class EditorWindow {
 			public void handleEvent(Event e) {
 				shellResizing = true;
 
-				Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
-
-				ShipContainer ship = Manager.getCurrentShip();
-				if (ship != null) {
-					ship.updateBoundingArea();
-					ship.updateChildBoundingAreas();
-					ship.getShipController().updateView();
-					ship.getShipController().updateProps();
-					ship.getShipController().redraw();
-				}
-
 				int width = shell.getClientArea().width;
 				int[] weights = editorContainer.getWeights();
 
@@ -531,6 +540,18 @@ public class EditorWindow {
 				if (!shell.getMaximized()) {
 					Manager.windowSize.x = shell.getSize().x;
 					Manager.windowSize.y = shell.getSize().y;
+				}
+
+				shell.layout();
+				Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
+
+				ShipContainer ship = Manager.getCurrentShip();
+				if (ship != null) {
+					ship.updateBoundingArea();
+					ship.updateChildBoundingAreas();
+					ship.getShipController().updateView();
+					ship.getShipController().updateProps();
+					ship.getShipController().redraw();
 				}
 			}
 		});
@@ -1007,7 +1028,7 @@ public class EditorWindow {
 		mntmUndo.setEnabled(false); // TODO
 		mntmRedo.setEnabled(false); // TODO
 		mntmResetLinks.setEnabled(enable);
-		mntmOptimalOffset.setEnabled(enable); // TODO
+		mntmOptimalOffset.setEnabled(enable);
 		mntmDelete.setEnabled(enable);
 
 		// View
@@ -1060,24 +1081,30 @@ public class EditorWindow {
 	 * @return true if the editor window controls the focus and should execute hotkey actions.
 	 */
 	public boolean isFocusControl() {
-		boolean result =
-				OverviewWindow.getInstance() == null || !OverviewWindow.getInstance().isActive();
-		result &= ShipLoaderDialog.getInstance() == null || !ShipLoaderDialog.getInstance().isActive();
-		result &= SettingsDialog.getInstance() == null || !SettingsDialog.getInstance().isActive();
-		result &= NewShipDialog.getInstance() == null || !NewShipDialog.getInstance().isActive();
-		result &= SaveOptionsDialog.getInstance() == null || !SaveOptionsDialog.getInstance().isActive();
-		result &= ModManagementDialog.getInstance() == null || !ModManagementDialog.getInstance().isActive();
-		result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isActive();
-		result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isActive();
-		result &= LoadingDialog.getInstance() == null || !LoadingDialog.getInstance().isActive();
-		result &= GlowSelectionDialog.getInstance() == null || !GlowSelectionDialog.getInstance().isActive();
-		result &= WeaponSelectionDialog.getInstance() == null || !WeaponSelectionDialog.getInstance().isActive();
-		result &= DroneSelectionDialog.getInstance() == null || !DroneSelectionDialog.getInstance().isActive();
-		result &= AugmentSelectionDialog.getInstance() == null || !AugmentSelectionDialog.getInstance().isActive();
+		Display d = Display.getCurrent(); // Can sometimes return null
+		if (d == null)
+			Display.getDefault();
 
-		Composite c = (Composite) getSidebarContent();
-		if (c != null && !c.isDisposed())
-			result &= !c.isFocusControl();
+		Control c = d.getFocusControl();
+
+		boolean result = c == null || !(c.isEnabled() && (c instanceof Spinner ||
+				(c instanceof Text && ((Text) c).getEditable())));
+
+		if (result) {
+			result &= OverviewWindow.getInstance() == null || !OverviewWindow.getInstance().isActive();
+			result &= ShipLoaderDialog.getInstance() == null || !ShipLoaderDialog.getInstance().isActive();
+			result &= SettingsDialog.getInstance() == null || !SettingsDialog.getInstance().isActive();
+			result &= NewShipDialog.getInstance() == null || !NewShipDialog.getInstance().isActive();
+			result &= SaveOptionsDialog.getInstance() == null || !SaveOptionsDialog.getInstance().isActive();
+			result &= ModManagementDialog.getInstance() == null || !ModManagementDialog.getInstance().isActive();
+			result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isActive();
+			result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isActive();
+			result &= LoadingDialog.getInstance() == null || !LoadingDialog.getInstance().isActive();
+			result &= GlowSelectionDialog.getInstance() == null || !GlowSelectionDialog.getInstance().isActive();
+			result &= WeaponSelectionDialog.getInstance() == null || !WeaponSelectionDialog.getInstance().isActive();
+			result &= DroneSelectionDialog.getInstance() == null || !DroneSelectionDialog.getInstance().isActive();
+			result &= AugmentSelectionDialog.getInstance() == null || !AugmentSelectionDialog.getInstance().isActive();
+		}
 
 		return result;
 	}

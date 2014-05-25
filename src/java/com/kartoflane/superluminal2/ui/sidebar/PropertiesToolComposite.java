@@ -14,6 +14,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
@@ -856,16 +858,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 	@Override
 	public boolean isFocusControl() {
-		boolean result = false;
-		result |= txtClass.isFocusControl() || spHealth.isFocusControl() || spPower.isFocusControl() ||
-				spMissiles.isFocusControl() || spWeaponSlots.isFocusControl() ||
-				spDrones.isFocusControl() || spDroneSlots.isFocusControl() ||
-				txtLayout.isFocusControl() || txtImage.isFocusControl();
+		Control c = Display.getCurrent().getFocusControl();
+		boolean result = c == txtClass || c == spHealth || c == spPower || c == spMissiles || c == spWeaponSlots ||
+				c == spDrones || c == spDroneSlots || c == txtLayout || c == txtImage;
 		if (container.getShipController().isPlayerShip()) {
-			result |= txtName.isFocusControl() || txtDesc.isFocusControl();
+			result |= c == txtName || c == txtDesc;
 		} else {
-			result |= spMinSec.isFocusControl() || spMaxSec.isFocusControl() ||
-					txtBlueprint.isFocusControl();
+			result |= c == spMinSec || c == spMaxSec || c == txtBlueprint;
 		}
 		return result;
 	}

@@ -155,7 +155,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 
 		RoomObject linkedRoom = null;
 		String alias = controller.getAlias();
-		label.setText("Door" + (alias == null || alias.equals("") ? "" : " (" + alias + ")"));
+		label.setText("Door" + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
 
 		btnHorizontal.setSelection(controller.isHorizontal());
 

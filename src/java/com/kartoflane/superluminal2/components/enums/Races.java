@@ -17,7 +17,7 @@ public enum Races {
 	public String toString() {
 		switch (this) {
 			case NO_CREW:
-				return "No Crew";
+				return "<No Crew>";
 			case ENERGY:
 				return "Zoltan";
 			case ANAEROBIC:
