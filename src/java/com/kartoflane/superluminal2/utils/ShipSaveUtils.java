@@ -175,20 +175,21 @@ public class ShipSaveUtils {
 		}
 
 		for (Systems sys : Systems.getSystems()) {
-			SystemObject object = ship.getSystem(sys);
-			String path = object.getInteriorPath();
+			for (SystemObject object : ship.getSystems(sys)) {
+				String path = object.getInteriorPath();
 
-			if (path != null) {
-				InputStream is = null;
-				try {
-					is = Manager.getInputStream(path);
-					fileName = "img/ship/interior/" + object.getInteriorNamespace() + ".png";
-					fileMap.put(fileName, IOUtils.readStream(is));
-				} catch (FileNotFoundException e) {
-					log.warn(String.format("File for %s interior image could not be found: %s", sys, path));
-				} finally {
-					if (is != null)
-						is.close();
+				if (path != null) {
+					InputStream is = null;
+					try {
+						is = Manager.getInputStream(path);
+						fileName = "img/ship/interior/" + object.getInteriorNamespace() + ".png";
+						fileMap.put(fileName, IOUtils.readStream(is));
+					} catch (FileNotFoundException e) {
+						log.warn(String.format("File for %s interior image could not be found: %s", sys, path));
+					} finally {
+						if (is != null)
+							is.close();
+					}
 				}
 			}
 		}
@@ -316,48 +317,48 @@ public class ShipSaveUtils {
 
 		Element systemList = new Element("systemList");
 		for (Systems sys : Systems.getSystems()) {
-			SystemObject system = ship.getSystem(sys);
+			for (SystemObject system : ship.getSystems(sys)) {
+				if (system.isAssigned()) {
+					Element sysEl = new Element(sys.toString().toLowerCase());
 
-			if (system.isAssigned()) {
-				Element sysEl = new Element(sys.toString().toLowerCase());
+					sysEl.setAttribute("power", "" + system.getLevelStart());
 
-				sysEl.setAttribute("power", "" + system.getLevelStart());
+					// Enemy ships' system have a 'max' attribute which determines the max level of the system
+					if (!ship.isPlayerShip())
+						sysEl.setAttribute("max", "" + system.getLevelMax());
 
-				// Enemy ships' system have a 'max' attribute which determines the max level of the system
-				if (!ship.isPlayerShip())
-					sysEl.setAttribute("max", "" + system.getLevelMax());
+					sysEl.setAttribute("room", "" + system.getRoom().getId());
 
-				sysEl.setAttribute("room", "" + system.getRoom().getId());
+					sysEl.setAttribute("start", "" + system.isAvailable());
 
-				sysEl.setAttribute("start", "" + system.isAvailable());
+					// Artillery has a special 'weapon' attribute to determine which weapon is used as artillery weapon
+					if (sys == Systems.ARTILLERY)
+						sysEl.setAttribute("weapon", "ARTILLERY_FED"); // TODO artillery weapon, for now default to ARTILLERY_FED
 
-				// Artillery has a special 'weapon' attribute to determine which weapon is used as artillery weapon
-				if (sys == Systems.ARTILLERY)
-					sysEl.setAttribute("weapon", "ARTILLERY_FED"); // TODO artillery weapon, for now default to ARTILLERY_FED
+					if (system.canContainInterior() && ship.isPlayerShip() && system.getInteriorNamespace() != null)
+						sysEl.setAttribute("img", system.getInteriorNamespace());
 
-				if (system.canContainInterior() && ship.isPlayerShip() && system.getInteriorNamespace() != null)
-					sysEl.setAttribute("img", system.getInteriorNamespace());
+					StationObject station = system.getStation();
 
-				StationObject station = system.getStation();
+					if (sys.canContainStation() && ship.isPlayerShip()) {
+						Element slotEl = new Element("slot");
 
-				if (sys.canContainStation()) {
-					Element slotEl = new Element("slot");
+						// Medbay and Clonebay slots don't have a direction - they're always NONE
+						if (sys != Systems.MEDBAY && sys != Systems.CLONEBAY) {
+							e = new Element("direction");
+							e.setText(station.getSlotDirection().toString());
+							slotEl.addContent(e); // Add <direction> to <slot>
+						}
 
-					// Medbay and Clonebay slots don't have a direction - they're always NONE
-					if (sys != Systems.MEDBAY && sys != Systems.CLONEBAY) {
-						e = new Element("direction");
-						e.setText(station.getSlotDirection().toString());
-						slotEl.addContent(e); // Add <direction> to <slot>
+						e = new Element("number");
+						e.setText("" + station.getSlotId());
+						slotEl.addContent(e); // Add <number> to <slot>
+
+						sysEl.addContent(slotEl);
 					}
 
-					e = new Element("number");
-					e.setText("" + station.getSlotId());
-					slotEl.addContent(e); // Add <number> to <slot>
-
-					sysEl.addContent(slotEl);
+					systemList.addContent(sysEl);
 				}
-
-				systemList.addContent(sysEl);
 			}
 		}
 		shipBlueprint.addContent(systemList);

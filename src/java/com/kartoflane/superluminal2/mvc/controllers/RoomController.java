@@ -245,7 +245,7 @@ public class RoomController extends ObjectController implements Comparable<RoomC
 					setMoving(false);
 				} else if (selected && getBounds().contains(e.x, e.y)) {
 					// Open system popup menu
-					SystemsMenu sysMenu = SystemsMenu.getInstance();
+					SystemsMenu sysMenu = new SystemsMenu(container.getParent().getShell(), this);
 					sysMenu.open();
 				}
 			}

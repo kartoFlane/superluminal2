@@ -1,18 +1,23 @@
 package com.kartoflane.superluminal2.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Widget;
 
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
@@ -26,31 +31,20 @@ public class SystemsMenu {
 	private RoomController controller = null;
 	private ManipulationToolComposite mtc = null;
 
+	private HashMap<SystemObject, MenuItem> systemItemMap = new HashMap<SystemObject, MenuItem>();
+
 	private Menu systemMenu;
 	private Menu menuAssign;
 	private MenuItem mntmAssign;
 	private MenuItem mntmEmpty;
-	private MenuItem mntmEngines;
-	private MenuItem mntmMedbay;
-	private MenuItem mntmOxygen;
-	private MenuItem mntmShields;
-	private MenuItem mntmWeapons;
-	private MenuItem mntmArtillery;
-	private MenuItem mntmCloaking;
-	private MenuItem mntmDrones;
-	private MenuItem mntmTeleporter;
-	private MenuItem mntmDoors;
-	private MenuItem mntmPilot;
-	private MenuItem mntmSensors;
-	private MenuItem mntmClonebay;
-	private MenuItem mntmBattery;
-	private MenuItem mntmHacking;
-	private MenuItem mntmMind;
+	private ArrayList<MenuItem> mntmArtilleries = new ArrayList<MenuItem>();
 
-	public SystemsMenu(Control parent) {
+	public SystemsMenu(Control parent, RoomController controller) {
 		if (instance != null)
 			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
+		container = Manager.getCurrentShip();
+		this.controller = controller;
 		createContent(parent);
 	}
 
@@ -58,40 +52,47 @@ public class SystemsMenu {
 		return instance;
 	}
 
-	public void setController(RoomController controller) {
-		this.controller = controller;
-	}
-
 	public void open() {
 		if (Manager.getSelectedToolId() != Tools.POINTER)
 			throw new IllegalStateException("Manipulation tool is not selected.");
 		if (Manager.getSelected() == null)
-			throw new IllegalStateException("The select controller is null.");
+			throw new IllegalStateException("The selected controller is null.");
 		if (Manager.getSelected() instanceof RoomController == false)
 			throw new IllegalStateException("The selected controller is not a RoomController.");
 
 		mtc = (ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent();
 		container = Manager.getCurrentShip();
 
-		Systems sys = container.getActiveSystem(controller.getGameObject());
-		SystemController roomSystem = container.getSystemController(sys);
+		SystemObject sys = container.getActiveSystem(controller.getGameObject());
+		SystemController roomSystem = (SystemController) container.getController(sys);
 
 		mntmEmpty.setSelection(roomSystem.getSystemId() == Systems.EMPTY);
 
 		for (Systems systemId : Systems.getSystems()) {
-			MenuItem item = getSystemItem(systemId);
-			item.setSelection(roomSystem.getSystemId() == systemId);
+			for (SystemObject system : container.getShipController().getGameObject().getSystems(systemId)) {
+				MenuItem item = getItem(system);
 
-			if (container.isAssigned(systemId)) {
-				Cache.checkInImage(item, systemId.getSmallIcon());
-				item.setImage(Cache.checkOutImage(item, "cpath:/assets/tick.png"));
-			} else {
-				Cache.checkInImage(item, "cpath:/assets/tick.png");
-				item.setImage(Cache.checkOutImage(item, systemId.getSmallIcon()));
+				item.setSelection(roomSystem.getSystemId() == systemId);
+
+				if (system.isAssigned()) {
+					Cache.checkInImage(item, systemId.getSmallIcon());
+					item.setImage(Cache.checkOutImage(item, "cpath:/assets/tick.png"));
+				} else {
+					Cache.checkInImage(item, "cpath:/assets/tick.png");
+					item.setImage(Cache.checkOutImage(item, systemId.getSmallIcon()));
+				}
 			}
 		}
 
 		systemMenu.setVisible(true);
+
+		Display display = Display.getCurrent();
+		while (systemMenu.isVisible()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
+
+		dispose();
 	}
 
 	public void setLocation(int x, int y) {
@@ -102,25 +103,8 @@ public class SystemsMenu {
 		systemMenu.setLocation(p.x, p.y);
 	}
 
-	public void disposeSystemSubmenus() {
-		for (MenuItem item : systemMenu.getItems()) {
-			if (item != mntmAssign)
-				item.dispose();
-		}
-	}
-
-	public void createSystemSubmenus() {
-		container = Manager.getCurrentShip();
-		ArrayList<Systems> assignedSystems = container.getAllAssignedSystems(controller.getGameObject());
-		if (assignedSystems.size() > 0) {
-			new MenuItem(systemMenu, SWT.SEPARATOR);
-
-			for (Systems sys : assignedSystems)
-				createSystemSubmenu(sys);
-		}
-	}
-
 	public void dispose() {
+		systemItemMap.clear();
 		systemMenu.dispose();
 		instance = null;
 	}
@@ -130,6 +114,9 @@ public class SystemsMenu {
 	}
 
 	private void createContent(Control parent) {
+		ShipObject ship = container.getShipController().getGameObject();
+		Systems[] systems = null;
+
 		systemMenu = new Menu(parent);
 
 		mntmAssign = new MenuItem(systemMenu, SWT.CASCADE);
@@ -140,6 +127,7 @@ public class SystemsMenu {
 
 		mntmEmpty = new MenuItem(menuAssign, SWT.NONE);
 		mntmEmpty.setText("Empty");
+		mntmEmpty.setData(ship.getSystem(Systems.EMPTY));
 
 		final MenuItem mntmSystem = new MenuItem(menuAssign, SWT.CASCADE);
 		mntmSystem.setText("Systems");
@@ -147,23 +135,19 @@ public class SystemsMenu {
 		final Menu menuSystems = new Menu(mntmSystem);
 		mntmSystem.setMenu(menuSystems);
 
-		mntmEngines = new MenuItem(menuSystems, SWT.NONE);
-		mntmEngines.setText("Engines");
-
-		mntmMedbay = new MenuItem(menuSystems, SWT.NONE);
-		mntmMedbay.setText("Medbay");
-
-		mntmClonebay = new MenuItem(menuSystems, SWT.NONE);
-		mntmClonebay.setText("Clonebay");
-
-		mntmOxygen = new MenuItem(menuSystems, SWT.NONE);
-		mntmOxygen.setText("Oxygen");
-
-		mntmShields = new MenuItem(menuSystems, SWT.NONE);
-		mntmShields.setText("Shields");
-
-		mntmWeapons = new MenuItem(menuSystems, SWT.NONE);
-		mntmWeapons.setText("Weapons");
+		systems = new Systems[] { Systems.ENGINES, Systems.MEDBAY,
+				Systems.CLONEBAY, Systems.OXYGEN, Systems.SHIELDS, Systems.WEAPONS
+		};
+		for (Systems sys : systems) {
+			for (SystemObject system : ship.getSystems(sys)) {
+				SystemController sysC = (SystemController) container.getController(system);
+				String alias = sysC.getAlias();
+				MenuItem mntm = new MenuItem(menuSystems, SWT.NONE);
+				mntm.setText(sys.toString() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
+				mntm.setData(system);
+				systemItemMap.put(system, mntm);
+			}
+		}
 
 		final MenuItem mntmSubsystem = new MenuItem(menuAssign, SWT.CASCADE);
 		mntmSubsystem.setText("Subsystems");
@@ -171,17 +155,17 @@ public class SystemsMenu {
 		final Menu menuSubsystems = new Menu(mntmSubsystem);
 		mntmSubsystem.setMenu(menuSubsystems);
 
-		mntmBattery = new MenuItem(menuSubsystems, SWT.NONE);
-		mntmBattery.setText("Battery");
-
-		mntmDoors = new MenuItem(menuSubsystems, SWT.NONE);
-		mntmDoors.setText("Doors");
-
-		mntmPilot = new MenuItem(menuSubsystems, SWT.NONE);
-		mntmPilot.setText("Pilot");
-
-		mntmSensors = new MenuItem(menuSubsystems, SWT.NONE);
-		mntmSensors.setText("Sensors");
+		systems = new Systems[] { Systems.BATTERY, Systems.DOORS, Systems.PILOT, Systems.SENSORS };
+		for (Systems sys : systems) {
+			for (SystemObject system : ship.getSystems(sys)) {
+				SystemController sysC = (SystemController) container.getController(system);
+				String alias = sysC.getAlias();
+				MenuItem mntm = new MenuItem(menuSubsystems, SWT.NONE);
+				mntm.setText(sys.toString() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
+				mntm.setData(system);
+				systemItemMap.put(system, mntm);
+			}
+		}
 
 		final MenuItem mntmSpecial = new MenuItem(menuAssign, SWT.CASCADE);
 		mntmSpecial.setText("Special");
@@ -189,66 +173,47 @@ public class SystemsMenu {
 		final Menu menuSpecial = new Menu(mntmSpecial);
 		mntmSpecial.setMenu(menuSpecial);
 
-		mntmArtillery = new MenuItem(menuSpecial, SWT.NONE);
+		systems = new Systems[] { Systems.CLOAKING, Systems.DRONES,
+				Systems.HACKING, Systems.MIND, Systems.TELEPORTER
+		};
+		for (Systems sys : systems) {
+			for (SystemObject system : ship.getSystems(sys)) {
+				SystemController sysC = (SystemController) container.getController(system);
+				String alias = sysC.getAlias();
+				MenuItem mntm = new MenuItem(menuSpecial, SWT.NONE);
+				mntm.setText(sys.toString() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
+				mntm.setData(system);
+				systemItemMap.put(system, mntm);
+			}
+		}
+
+		final MenuItem mntmArtillery = new MenuItem(menuAssign, SWT.CASCADE);
 		mntmArtillery.setText("Artillery");
 
-		mntmCloaking = new MenuItem(menuSpecial, SWT.NONE);
-		mntmCloaking.setText("Cloaking");
+		final Menu menuArtillery = new Menu(mntmArtillery);
+		mntmArtillery.setMenu(menuArtillery);
 
-		mntmDrones = new MenuItem(menuSpecial, SWT.NONE);
-		mntmDrones.setText("Drone Control");
-
-		mntmHacking = new MenuItem(menuSpecial, SWT.NONE);
-		mntmHacking.setText("Hacking");
-
-		mntmMind = new MenuItem(menuSpecial, SWT.NONE);
-		mntmMind.setText("Mind Control");
-
-		mntmTeleporter = new MenuItem(menuSpecial, SWT.NONE);
-		mntmTeleporter.setText("Teleporter");
+		for (SystemObject sys : ship.getSystems(Systems.ARTILLERY)) {
+			SystemController sysC = (SystemController) container.getController(sys);
+			String alias = sysC.getAlias();
+			MenuItem mntm = new MenuItem(menuArtillery, SWT.NONE);
+			mntm.setText(sys.toString() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
+			mntm.setData(sys);
+			systemItemMap.put(sys, mntm);
+			mntmArtilleries.add(mntm);
+		}
 
 		SelectionAdapter systemListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (e.getSource() == mntmEmpty) {
-					for (Systems sys : container.getAllAssignedSystems(controller.getGameObject()))
-						container.unassign(sys);
+				Widget w = (Widget) e.getSource();
 
-					container.assign(Systems.EMPTY, controller);
-				} else if (e.getSource() == mntmEngines) {
-					container.assign(Systems.ENGINES, controller);
-				} else if (e.getSource() == mntmMedbay) {
-					container.assign(Systems.MEDBAY, controller);
-				} else if (e.getSource() == mntmOxygen) {
-					container.assign(Systems.OXYGEN, controller);
-				} else if (e.getSource() == mntmShields) {
-					container.assign(Systems.SHIELDS, controller);
-				} else if (e.getSource() == mntmWeapons) {
-					container.assign(Systems.WEAPONS, controller);
-				} else if (e.getSource() == mntmArtillery) {
-					container.assign(Systems.ARTILLERY, controller);
-				} else if (e.getSource() == mntmCloaking) {
-					container.assign(Systems.CLOAKING, controller);
-				} else if (e.getSource() == mntmDrones) {
-					container.assign(Systems.DRONES, controller);
-				} else if (e.getSource() == mntmTeleporter) {
-					container.assign(Systems.TELEPORTER, controller);
-				} else if (e.getSource() == mntmDoors) {
-					container.assign(Systems.DOORS, controller);
-				} else if (e.getSource() == mntmPilot) {
-					container.assign(Systems.PILOT, controller);
-				} else if (e.getSource() == mntmSensors) {
-					container.assign(Systems.SENSORS, controller);
-
-					// AE contenet:
-				} else if (e.getSource() == mntmClonebay) {
-					container.assign(Systems.CLONEBAY, controller);
-				} else if (e.getSource() == mntmHacking) {
-					container.assign(Systems.HACKING, controller);
-				} else if (e.getSource() == mntmMind) {
-					container.assign(Systems.MIND, controller);
-				} else if (e.getSource() == mntmBattery) {
-					container.assign(Systems.BATTERY, controller);
+				if (w == mntmEmpty) {
+					for (SystemObject system : container.getAllAssignedSystems(controller.getGameObject())) {
+						container.unassign(system);
+					}
+				} else {
+					container.assign((SystemObject) w.getData(), controller);
 				}
 
 				mtc.updateData();
@@ -258,27 +223,23 @@ public class SystemsMenu {
 		};
 
 		mntmEmpty.addSelectionListener(systemListener);
-		mntmArtillery.addSelectionListener(systemListener);
-		mntmCloaking.addSelectionListener(systemListener);
-		mntmDrones.addSelectionListener(systemListener);
-		mntmTeleporter.addSelectionListener(systemListener);
-		mntmHacking.addSelectionListener(systemListener);
-		mntmMind.addSelectionListener(systemListener);
-		mntmDoors.addSelectionListener(systemListener);
-		mntmPilot.addSelectionListener(systemListener);
-		mntmSensors.addSelectionListener(systemListener);
-		mntmBattery.addSelectionListener(systemListener);
-		mntmEngines.addSelectionListener(systemListener);
-		mntmMedbay.addSelectionListener(systemListener);
-		mntmOxygen.addSelectionListener(systemListener);
-		mntmShields.addSelectionListener(systemListener);
-		mntmWeapons.addSelectionListener(systemListener);
-		mntmClonebay.addSelectionListener(systemListener);
+		for (MenuItem mntm : systemItemMap.values()) {
+			mntm.addSelectionListener(systemListener);
+		}
+
+		ArrayList<SystemObject> assignedSystems = container.getAllAssignedSystems(controller.getGameObject());
+		if (assignedSystems.size() > 0) {
+			new MenuItem(systemMenu, SWT.SEPARATOR);
+
+			for (SystemObject sys : assignedSystems)
+				createSystemSubmenu(sys);
+		}
 	}
 
-	private MenuItem createSystemSubmenu(final Systems sys) {
+	private MenuItem createSystemSubmenu(final SystemObject sys) {
 		MenuItem mntmSystem = new MenuItem(systemMenu, SWT.CASCADE);
-		mntmSystem.setText(sys.toString());
+		String alias = sys.getAlias();
+		mntmSystem.setText(sys.toString() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
 
 		final Menu menuOptions = new Menu(mntmSystem);
 		mntmSystem.setMenu(menuOptions);
@@ -308,42 +269,7 @@ public class SystemsMenu {
 		return mntmSystem;
 	}
 
-	private MenuItem getSystemItem(Systems systemId) {
-		switch (systemId) {
-			case ENGINES:
-				return mntmEngines;
-			case MEDBAY:
-				return mntmMedbay;
-			case OXYGEN:
-				return mntmOxygen;
-			case SHIELDS:
-				return mntmShields;
-			case WEAPONS:
-				return mntmWeapons;
-			case ARTILLERY:
-				return mntmArtillery;
-			case CLOAKING:
-				return mntmCloaking;
-			case DRONES:
-				return mntmDrones;
-			case TELEPORTER:
-				return mntmTeleporter;
-			case DOORS:
-				return mntmDoors;
-			case PILOT:
-				return mntmPilot;
-			case SENSORS:
-				return mntmSensors;
-			case CLONEBAY:
-				return mntmClonebay;
-			case BATTERY:
-				return mntmBattery;
-			case HACKING:
-				return mntmHacking;
-			case MIND:
-				return mntmMind;
-			default:
-				return null;
-		}
+	private MenuItem getItem(SystemObject sys) {
+		return systemItemMap.get(sys);
 	}
 }

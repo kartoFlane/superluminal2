@@ -2,11 +2,10 @@ package com.kartoflane.superluminal2.ftl;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.core.Database;
 
-public class SystemObject extends GameObject {
-
-	private static final long serialVersionUID = -4784249566049070706L;
+public class SystemObject extends GameObject implements Alias {
 
 	private final Systems id;
 
@@ -21,8 +20,9 @@ public class SystemObject extends GameObject {
 
 	private String interiorNamespace = null;
 	private String interiorPath = null;
+	private String alias = "";
 
-	public SystemObject(Systems systemId) {
+	public SystemObject(Systems systemId, ShipObject ship) {
 		if (systemId == null)
 			throw new NullPointerException("System id must not be null.");
 		id = systemId;
@@ -52,7 +52,11 @@ public class SystemObject extends GameObject {
 			case WEAPONS:
 			case ENGINES:
 			case DRONES:
-				levelCap = 8;
+				if (ship.isPlayerShip()) {
+					levelCap = 8;
+				} else {
+					levelCap = 10;
+				}
 				break;
 			default:
 				levelCap = 0;
@@ -190,5 +194,15 @@ public class SystemObject extends GameObject {
 
 	public static String getDefaultInteriorNamespace(Systems systemId) {
 		return systemId.getDefaultInteriorNamespace();
+	}
+
+	@Override
+	public String getAlias() {
+		return alias;
+	}
+
+	@Override
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 }

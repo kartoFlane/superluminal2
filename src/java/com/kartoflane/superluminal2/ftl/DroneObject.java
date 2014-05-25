@@ -8,8 +8,6 @@ import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable {
 
-	private static final long serialVersionUID = -4645066316142355841L;
-
 	private final String blueprintName;
 	private DroneTypes droneType;
 	private String title = "";

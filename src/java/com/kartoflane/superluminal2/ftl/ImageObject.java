@@ -4,8 +4,6 @@ import com.kartoflane.superluminal2.components.interfaces.Alias;
 
 public class ImageObject extends GameObject implements Alias {
 
-	private static final long serialVersionUID = 5829085341187861553L;
-
 	private String imagePath = null;
 	private String alias = null;
 

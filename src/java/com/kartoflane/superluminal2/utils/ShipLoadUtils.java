@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -37,14 +38,23 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 public class ShipLoadUtils {
 
 	/**
-	 * ------------------------------------------------------ TODO documentation
+	 * Interprets the XML element as a shipBlueprint tag, loading its contents
+	 * and creating a ShipObject to store the data.
 	 * 
 	 * @param e
-	 * @return
+	 *            the XML element for the shipBlueprint tag
+	 * @return ShipObject instance representing the ship
+	 * 
 	 * @throws IllegalArgumentException
+	 *             when the argument is null, or when a tag or attribute is missing
+	 * @throws NumberFormatException
+	 *             when a tag or attribute has incorrect value
 	 * @throws FileNotFoundException
+	 *             when one of the files referenced by the ship's blueprint doesn't exist in the game's files
 	 * @throws IOException
+	 *             when an error occurs while loading the XML element
 	 * @throws JDOMParseException
+	 *             when the XML element is wrongly formatted, or a parser error occurs
 	 */
 	public static ShipObject loadShipXML(Element e)
 			throws IllegalArgumentException, FileNotFoundException, IOException, NumberFormatException, JDOMParseException {
@@ -159,10 +169,25 @@ public class ShipLoadUtils {
 			throw new IllegalArgumentException("Missing <systemList> tag.");
 
 		for (Systems sys : Systems.getSystems()) {
-			Element sysEl = child.getChild(sys.name().toLowerCase());
+			int count = 0;
+			for (Element sysEl : child.getChildren(sys.name().toLowerCase())) {
+				SystemObject system = null;
+				ArrayList<SystemObject> systems = ship.getSystems(sys);
+				if (count >= systems.size()) {
+					if (sys == Systems.ARTILLERY) {
+						system = new SystemObject(Systems.ARTILLERY, ship);
+						ship.add(system);
+						count++;
+					} else {
+						throw new IllegalArgumentException("Multiple entries for system " + sys.toString());
+					}
+				} else {
+					system = systems.get(count);
+					count++;
+				}
 
-			if (sysEl != null) {
-				SystemObject system = ship.getSystem(sys);
+				if (sys == Systems.ARTILLERY)
+					system.setAlias("" + count);
 
 				// Get the min level the system can have, or the starting level of the system
 				attr = sysEl.getAttributeValue("power");
@@ -426,9 +451,13 @@ public class ShipLoadUtils {
 				ship.setCrewMin(race, Integer.valueOf(attr));
 
 				attr = crew.getAttributeValue("max");
-				if (attr == null)
-					throw new IllegalArgumentException("<crewCount> tag is missing 'max' attribute.");
-				ship.setCrewMax(race, Integer.valueOf(attr));
+				if (attr == null) {
+					// Some ships are missing the 'max' attribute
+					// Guess-default to 'amount' value.
+					ship.setCrewMax(race, ship.getCrewMin(race));
+				} else {
+					ship.setCrewMax(race, Integer.valueOf(attr));
+				}
 			}
 		}
 

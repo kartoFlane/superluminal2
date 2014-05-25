@@ -17,8 +17,6 @@ import com.kartoflane.superluminal2.core.Database;
  */
 public class WeaponObject extends GameObject implements Comparable<WeaponObject>, Identifiable {
 
-	private static final long serialVersionUID = 7968532944693929010L;
-
 	private final String blueprintName;
 	private WeaponTypes weaponType;
 	private String title = "";

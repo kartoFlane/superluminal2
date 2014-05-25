@@ -37,6 +37,8 @@ import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
+import com.kartoflane.superluminal2.tools.CreationTool;
+import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.utils.Utils;
 
 /**
@@ -61,7 +63,7 @@ public class ShipContainer implements Disposable {
 
 	private HashMap<GameObject, AbstractController> objectControllerMap;
 	private HashMap<Images, ImageController> imageControllerMap;
-	private HashMap<RoomObject, Systems> activeSystemMap;
+	private HashMap<RoomObject, SystemObject> activeSystemMap;
 
 	private boolean anchorVisible = true;
 	private boolean mountsVisible = true;
@@ -84,7 +86,7 @@ public class ShipContainer implements Disposable {
 
 		objectControllerMap = new HashMap<GameObject, AbstractController>();
 		imageControllerMap = new HashMap<Images, ImageController>();
-		activeSystemMap = new HashMap<RoomObject, Systems>();
+		activeSystemMap = new HashMap<RoomObject, SystemObject>();
 	}
 
 	public ShipContainer(EditorWindow window, ShipObject ship) {
@@ -93,6 +95,7 @@ public class ShipContainer implements Disposable {
 
 		shipController = ShipController.newInstance(this, ship);
 		Manager.addModifierListener(shipController);
+		((CreationTool) Manager.getTool(Tools.CREATOR)).setEnabled(Tools.STATION, ship.isPlayerShip());
 
 		Grid grid = Grid.getInstance();
 
@@ -141,20 +144,22 @@ public class ShipContainer implements Disposable {
 
 		// Instantiate first, assign later
 		for (Systems sys : Systems.values()) {
-			SystemObject system = ship.getSystem(sys);
-			SystemController systemC = SystemController.newInstance(this, system);
+			for (SystemObject system : ship.getSystems(sys)) {
+				SystemController systemC = SystemController.newInstance(this, system);
 
-			add(systemC);
-			if (sys.canContainStation())
-				add(StationController.newInstance(this, systemC, system.getStation()));
+				add(systemC);
+				if (sys.canContainStation())
+					add(StationController.newInstance(this, systemC, system.getStation()));
+			}
 		}
 
 		for (Systems sys : Systems.getSystems()) {
-			SystemObject system = ship.getSystem(sys);
-			RoomController room = (RoomController) getController(system.getRoom());
+			for (SystemObject system : ship.getSystems(sys)) {
+				RoomController room = (RoomController) getController(system.getRoom());
 
-			if (room != null)
-				assign(sys, room);
+				if (room != null)
+					assign(system, room);
+			}
 		}
 
 		createImageControllers();
@@ -259,14 +264,6 @@ public class ShipContainer implements Disposable {
 
 	public SystemController[] getSystemControllers() {
 		return systemControllers.toArray(new SystemController[0]);
-	}
-
-	public SystemController getSystemController(Systems systemId) {
-		for (SystemController sys : systemControllers) {
-			if (sys.getSystemId() == systemId)
-				return sys;
-		}
-		throw new IllegalArgumentException("Controller for the specified system id was not found: " + systemId);
 	}
 
 	public StationController getStationController(Systems systemId) {
@@ -421,14 +418,14 @@ public class ShipContainer implements Disposable {
 		ship.setVertical(y);
 	}
 
-	public void assign(Systems sys, RoomController room) {
+	public void assign(SystemObject sys, RoomController room) {
 		if (sys == null)
 			throw new NullPointerException("System id must not be null.");
 		if (room == null)
 			throw new NullPointerException("Room controller is null. Use unassign() instead.");
 
-		SystemController system = getSystemController(sys);
-		StationController station = getStationController(sys);
+		SystemController system = (SystemController) getController(sys);
+		StationController station = (StationController) getController(sys.getStation());
 
 		unassign(sys);
 		system.assignTo(room.getGameObject());
@@ -441,6 +438,9 @@ public class ShipContainer implements Disposable {
 		system.notifySizeChanged(room.getW(), room.getH());
 
 		if (sys.canContainStation()) {
+			if (!shipController.isPlayerShip()) {
+				station.setSlotId(-2);
+			}
 			room.addSizeListener(station);
 			station.updateFollowOffset();
 			station.updateFollower();
@@ -448,35 +448,40 @@ public class ShipContainer implements Disposable {
 		}
 	}
 
-	public void unassign(Systems sys) {
-		if (sys == null)
-			throw new NullPointerException("System id must not be null.");
+	public void unassign(SystemObject system) {
+		if (system == null)
+			throw new NullPointerException("System must not be null.");
 
-		SystemController system = getSystemController(sys);
-		StationController station = getStationController(sys);
-		RoomController room = (RoomController) getController(system.getGameObject().getRoom());
+		SystemController systemC = (SystemController) getController(system);
+		StationController stationC = (StationController) getController(system.getStation());
+		RoomController roomC = (RoomController) getController(system.getRoom());
 
-		if (sys.canContainStation())
-			station.setVisible(false);
-		system.unassign();
+		if (system.canContainStation())
+			stationC.setVisible(false);
+		systemC.unassign();
 
-		if (room != null) {
-			room.removeSizeListener(system);
-			room.removeSizeListener(station);
-			room.redraw();
+		if (roomC != null) {
+			roomC.removeSizeListener(systemC);
+			roomC.removeSizeListener(stationC);
+			roomC.redraw();
 
-			if (activeSystemMap.get(room.getGameObject()) == sys) {
-				ArrayList<Systems> systems = getAllAssignedSystems(room.getGameObject());
+			if (activeSystemMap.get(roomC.getGameObject()) == system) {
+				ArrayList<SystemObject> systems = getAllAssignedSystems(roomC.getGameObject());
 				if (systems.size() > 0)
-					setActiveSystem(room.getGameObject(), systems.get(0));
+					setActiveSystem(roomC.getGameObject(), systems.get(0));
 				else
-					activeSystemMap.remove(room.getGameObject());
+					activeSystemMap.remove(roomC.getGameObject());
 			}
 		}
 	}
 
 	public boolean isAssigned(Systems sys) {
-		return getSystemController(sys).isAssigned();
+		ShipObject ship = shipController.getGameObject();
+		for (SystemObject system : ship.getSystems(sys)) {
+			if (system.isAssigned())
+				return true;
+		}
+		return false;
 	}
 
 	public void add(AbstractController controller) {
@@ -605,7 +610,7 @@ public class ShipContainer implements Disposable {
 
 		if (controller instanceof RoomController) {
 			RoomController rc = (RoomController) controller;
-			for (Systems sys : getAllAssignedSystems(rc.getGameObject())) {
+			for (SystemObject sys : getAllAssignedSystems(rc.getGameObject())) {
 				unassign(sys);
 			}
 		}
@@ -879,45 +884,46 @@ public class ShipContainer implements Disposable {
 		for (SystemController s : systemControllers) {
 			if (s.isAssigned() && s.canContainStation()) {
 				StationController st = (StationController) getController(s.getGameObject().getStation());
-				st.setVisible(vis && st.getSlotId() != -2 && getActiveSystem(s.getGameObject().getRoom()) == s.getSystemId());
+				st.setVisible(vis && st.getSlotId() != -2 && getActiveSystem(s.getGameObject().getRoom()) == s.getGameObject());
 			}
 		}
 	}
 
-	public void setActiveSystem(RoomObject room, Systems sys) {
+	public void setActiveSystem(RoomObject room, SystemObject sys) {
 		if (room == null)
 			throw new IllegalArgumentException("Room must not be null.");
 		if (sys == null)
 			throw new IllegalArgumentException("System must not be null.");
 
-		Systems prevSystem = getActiveSystem(room);
-		SystemController prevSystemC = getSystemController(prevSystem);
+		SystemObject prevSystem = getActiveSystem(room);
+		SystemController prevSystemC = (SystemController) getController(prevSystem);
 		prevSystemC.setVisible(false);
 
 		activeSystemMap.put(room, sys);
 
 		if (prevSystem != null && prevSystem.canContainStation())
-			getStationController(prevSystem).updateView();
+			getController(prevSystem.getStation()).updateView();
 
-		getSystemController(sys).setVisible(true);
+		getController(sys).setVisible(true);
 		if (sys.canContainStation())
-			getStationController(sys).updateView();
+			getController(sys.getStation()).updateView();
 		getController(room).redraw();
 	}
 
-	public Systems getActiveSystem(RoomObject room) {
+	public SystemObject getActiveSystem(RoomObject room) {
 		if (activeSystemMap.containsKey(room))
 			return activeSystemMap.get(room);
-		return Systems.EMPTY;
+		return shipController.getGameObject().getSystem(Systems.EMPTY);
 	}
 
-	public ArrayList<Systems> getAllAssignedSystems(RoomObject room) {
-		ArrayList<Systems> systems = new ArrayList<Systems>();
+	public ArrayList<SystemObject> getAllAssignedSystems(RoomObject room) {
+		ArrayList<SystemObject> systems = new ArrayList<SystemObject>();
 
 		for (Systems sys : Systems.getSystems()) {
-			SystemObject system = shipController.getGameObject().getSystem(sys);
-			if (system.getRoom() == room)
-				systems.add(sys);
+			for (SystemObject system : shipController.getGameObject().getSystems(sys)) {
+				if (system.getRoom() == room)
+					systems.add(system);
+			}
 		}
 		return systems;
 	}

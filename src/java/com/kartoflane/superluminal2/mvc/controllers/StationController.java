@@ -6,6 +6,7 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.ftl.StationObject;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -15,7 +16,7 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 public class StationController extends ObjectController implements Controller {
 
 	private final ShipContainer container;
-	private final Systems id;
+	private final SystemObject system;
 
 	private StationController(ShipContainer container, SystemController system, ObjectModel model, StationView view) {
 		super();
@@ -23,7 +24,7 @@ public class StationController extends ObjectController implements Controller {
 		setView(view);
 
 		this.container = container;
-		this.id = system.getSystemId();
+		this.system = system.getGameObject();
 
 		setSelectable(false);
 		setLocModifiable(false);
@@ -87,7 +88,8 @@ public class StationController extends ObjectController implements Controller {
 	 * If setting both direction and slot id, change the direction first.
 	 */
 	public void setSlotDirection(Directions dir) {
-		if (id == Systems.MEDBAY || id == Systems.CLONEBAY) // medbay and clonebay have no direction
+		// Medbay and Clonebay have no direction
+		if (system.getSystemId() == Systems.MEDBAY || system.getSystemId() == Systems.CLONEBAY)
 			dir = Directions.NONE;
 
 		getGameObject().setSlotDirection(dir);
@@ -123,14 +125,13 @@ public class StationController extends ObjectController implements Controller {
 		updateView();
 	}
 
-	public Systems getSystemId() {
-		return id;
+	public SystemObject getSystem() {
+		return system;
 	}
 
 	@Override
 	public void updateFollowOffset() {
 		super.updateFollowOffset();
-		SystemController system = container.getSystemController(id);
 		if (system.isAssigned()) {
 			RoomController room = (RoomController) container.getController(system.getRoom());
 			Point slotLoc = room.getSlotLocation(getSlotId());
@@ -141,11 +142,10 @@ public class StationController extends ObjectController implements Controller {
 
 	@Override
 	public void updateView() {
-		SystemController system = container.getSystemController(id);
 		if (system.isAssigned()) {
 			RoomController room = (RoomController) container.getController(system.getRoom());
 			// hide the station if the room cannot contain the slot, or the system is not active
-			setVisible(room.canContainSlotId(getSlotId()) && container.getActiveSystem(system.getRoom()) == id);
+			setVisible(room.canContainSlotId(getSlotId()) && container.getActiveSystem(system.getRoom()) == system);
 		} else {
 			setVisible(false);
 		}

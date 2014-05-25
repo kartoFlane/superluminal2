@@ -20,8 +20,6 @@ import com.kartoflane.superluminal2.utils.Utils;
 
 public class ShipObject extends GameObject {
 
-	private static final long serialVersionUID = 5820228601368854867L;
-
 	private boolean isPlayer = false;
 	private String blueprintName = PlayerShipBlueprints.HARD.toString();
 	private String layout = "myship";
@@ -36,7 +34,7 @@ public class ShipObject extends GameObject {
 	private TreeSet<MountObject> mounts;
 	private HashSet<GibObject> gibs;
 
-	private HashMap<Systems, SystemObject> systemMap;
+	private HashMap<Systems, ArrayList<SystemObject>> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
 	private ArrayList<Races> crewList;
 	private HashMap<Races, Integer> crewMinMap;
@@ -76,7 +74,7 @@ public class ShipObject extends GameObject {
 		doors = new HashSet<DoorObject>();
 		mounts = new TreeSet<MountObject>();
 		gibs = new HashSet<GibObject>();
-		systemMap = new HashMap<Systems, SystemObject>();
+		systemMap = new HashMap<Systems, ArrayList<SystemObject>>();
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
 		crewList = new ArrayList<Races>();
@@ -95,8 +93,11 @@ public class ShipObject extends GameObject {
 			augments.add(Database.DEFAULT_AUGMENT_OBJ);
 		}
 
-		for (Systems system : Systems.values())
-			systemMap.put(system, new SystemObject(system));
+		for (Systems system : Systems.values()) {
+			ArrayList<SystemObject> list = new ArrayList<SystemObject>();
+			systemMap.put(system, list);
+			add(new SystemObject(system, this));
+		}
 		for (Images image : Images.values()) {
 			ImageObject object = new ImageObject();
 			object.setAlias(image.name().toLowerCase());
@@ -442,11 +443,18 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
-	 * @return system object associated with the given system type.
+	 * @return the first system object associated with the given system type.
 	 */
 	public SystemObject getSystem(Systems sys) {
 		if (sys == null)
 			throw new IllegalArgumentException("System type must not be null.");
+		return systemMap.get(sys).get(0);
+	}
+
+	public ArrayList<SystemObject> getSystems(Systems sys) {
+		if (sys == null)
+			throw new IllegalArgumentException("System type must not be null.");
+
 		return systemMap.get(sys);
 	}
 
@@ -976,18 +984,22 @@ public class ShipObject extends GameObject {
 		if (object == null)
 			throw new IllegalArgumentException("Object must not be null.");
 
-		if (object instanceof RoomObject)
+		if (object instanceof RoomObject) {
 			rooms.add((RoomObject) object);
-		else if (object instanceof DoorObject)
+		} else if (object instanceof DoorObject) {
 			doors.add((DoorObject) object);
-		else if (object instanceof MountObject)
+		} else if (object instanceof MountObject) {
 			mounts.add((MountObject) object);
-		else if (object instanceof GibObject)
+		} else if (object instanceof GibObject) {
 			gibs.add((GibObject) object);
-		else if (object instanceof AugmentObject)
+		} else if (object instanceof AugmentObject) {
 			augments.add((AugmentObject) object);
-		else
+		} else if (object instanceof SystemObject) {
+			SystemObject system = (SystemObject) object;
+			systemMap.get(system.getSystemId()).add(system);
+		} else {
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
+		}
 	}
 
 	/**
@@ -1000,18 +1012,22 @@ public class ShipObject extends GameObject {
 	 *            object that is to be removed
 	 */
 	public void remove(GameObject object) {
-		if (object instanceof RoomObject)
+		if (object instanceof RoomObject) {
 			rooms.remove(object);
-		else if (object instanceof DoorObject)
+		} else if (object instanceof DoorObject) {
 			doors.remove(object);
-		else if (object instanceof MountObject)
+		} else if (object instanceof MountObject) {
 			mounts.remove(object);
-		else if (object instanceof GibObject)
+		} else if (object instanceof GibObject) {
 			gibs.remove(object);
-		else if (object instanceof AugmentObject)
+		} else if (object instanceof AugmentObject) {
 			augments.remove(object);
-		else
+		} else if (object instanceof SystemObject) {
+			SystemObject system = (SystemObject) object;
+			systemMap.get(system.getSystemId()).remove(system);
+		} else {
 			throw new IllegalArgumentException("Game object was of unexpected type: " + object.getClass().getSimpleName());
+		}
 	}
 
 	/**
@@ -1099,7 +1115,7 @@ public class ShipObject extends GameObject {
 		ArrayList<GlowObject> glows = new ArrayList<GlowObject>();
 
 		for (Systems sys : systemMap.keySet()) {
-			SystemObject system = systemMap.get(sys);
+			SystemObject system = getSystem(sys);
 			String namespace = system.getInteriorNamespace();
 			if (sys.canContainStation() && sys.canContainGlow() &&
 					namespace != null && system.getGlowSet() == Database.DEFAULT_GLOW_SET) {

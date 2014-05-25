@@ -4,8 +4,6 @@ import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 public class AugmentObject extends GameObject implements Comparable<AugmentObject>, Identifiable {
 
-	private static final long serialVersionUID = 7946331800522010830L;
-
 	private final String blueprintName;
 	private String title = "";
 	private String description = "";

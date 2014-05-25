@@ -11,6 +11,7 @@ import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
@@ -114,8 +115,8 @@ public class StationTool extends Tool {
 					ShipContainer container = Manager.getCurrentShip();
 					RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
-						Systems sys = container.getActiveSystem(roomC.getGameObject());
-						SystemController system = container.getSystemController(sys);
+						SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+						SystemController system = (SystemController) container.getController(sys);
 						if (system.canContainStation()) {
 							StationController station = (StationController) container.getController(system.getGameObject().getStation());
 							Directions dir = station.getSlotDirection();
@@ -128,8 +129,8 @@ public class StationTool extends Tool {
 					ShipContainer container = Manager.getCurrentShip();
 					RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(e.x, e.y, Layers.ROOM);
 					if (roomC != null) {
-						Systems sys = container.getActiveSystem(roomC.getGameObject());
-						SystemController system = container.getSystemController(sys);
+						SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+						SystemController system = (SystemController) container.getController(sys);
 						if (system.canContainStation()) {
 							StationController station = (StationController) container.getController(system.getGameObject().getStation());
 							int id = roomC.getSlotId(cursor.getX(), cursor.getY());
@@ -172,8 +173,8 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			Systems sys = container.getActiveSystem(roomC.getGameObject());
-			SystemController system = container.getSystemController(sys);
+			SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+			SystemController system = (SystemController) container.getController(sys);
 			if (system.canContainStation()) {
 				StationController station = (StationController) container.getController(system.getGameObject().getStation());
 				station.setSlotId(-2);
@@ -187,8 +188,8 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			Systems sys = container.getActiveSystem(roomC.getGameObject());
-			SystemController system = container.getSystemController(sys);
+			SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+			SystemController system = (SystemController) container.getController(sys);
 			if (system.canContainStation()) {
 				StationController station = (StationController) container.getController(system.getGameObject().getStation());
 				station.setSlotDirection(dir);
@@ -248,11 +249,12 @@ public class StationTool extends Tool {
 		ShipContainer container = Manager.getCurrentShip();
 		RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(x, y, Layers.ROOM);
 		if (roomC != null) {
-			Systems id = container.getActiveSystem(roomC.getGameObject());
-			SystemController system = container.getSystemController(id);
+			SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+			SystemController system = (SystemController) container.getController(sys);
 			result = container.isStationsVisible() && container.isRoomsVisible();
 			result &= system.canContainStation() && roomC.getDimensions().contains(x, y);
-			result &= !(isStateDirection() && (id == Systems.MEDBAY || id == Systems.CLONEBAY));
+			result &= !(isStateDirection() && (sys.getSystemId() == Systems.MEDBAY ||
+					sys.getSystemId() == Systems.CLONEBAY));
 		} else
 			result = false;
 

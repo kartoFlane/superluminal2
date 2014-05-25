@@ -4,8 +4,6 @@ import org.eclipse.swt.graphics.Point;
 
 public class GibObject extends GameObject implements Comparable<GibObject> {
 
-	private static final long serialVersionUID = -3100645582205851970L;
-
 	private int id = -1;
 	private int locX = 0;
 	private int locY = 0;

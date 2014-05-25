@@ -12,8 +12,6 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class MountObject extends GameObject implements Alias, Movable, Comparable<MountObject> {
 
-	private static final long serialVersionUID = 2647004106297814245L;
-
 	private int locX = 0;
 	private int locY = 0;
 

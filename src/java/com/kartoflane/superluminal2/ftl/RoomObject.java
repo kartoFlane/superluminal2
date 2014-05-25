@@ -15,8 +15,6 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 
 public class RoomObject extends GameObject implements Alias, Movable, Resizable, Comparable<RoomObject> {
 
-	private static final long serialVersionUID = -3093852547910315659L;
-
 	private int id = -1;
 	private int locX = 0;
 	private int locY = 0;
@@ -204,7 +202,7 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 			return "-1: Airlock";
 		}
 
-		ArrayList<Systems> systems = Manager.getCurrentShip().getAllAssignedSystems(this);
+		ArrayList<SystemObject> systems = Manager.getCurrentShip().getAllAssignedSystems(this);
 		String result = getId() + ": ";
 		if (systems.size() == 0) {
 			result += Systems.EMPTY.toString();

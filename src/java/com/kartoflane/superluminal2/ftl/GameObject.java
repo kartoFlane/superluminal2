@@ -1,13 +1,9 @@
 package com.kartoflane.superluminal2.ftl;
 
-import java.io.Serializable;
-
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 
-public abstract class GameObject implements Deletable, Serializable {
-
-	private static final long serialVersionUID = 5090191534360114085L;
+public abstract class GameObject implements Deletable {
 
 	protected ObjectModel model = null;
 	protected boolean deletable = true;

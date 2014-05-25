@@ -98,6 +98,15 @@ public class CreationToolComposite extends Composite implements DataComposite {
 
 	public void updateData() {
 		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+		tltmRoom.setEnabled(ctool.isEnabled(Tools.ROOM));
+		tltmDoor.setEnabled(ctool.isEnabled(Tools.DOOR));
+		tltmMount.setEnabled(ctool.isEnabled(Tools.WEAPON));
+		tltmStation.setEnabled(ctool.isEnabled(Tools.STATION));
+		String msg = "Station Placement";
+		if (!tltmStation.isEnabled())
+			msg += " (disabled for enemy ships)";
+		tltmStation.setToolTipText(msg);
+
 		selectSubtool(ctool.getSelectedSubtool());
 		for (Control c : dataContainer.getChildren()) {
 			if (c instanceof DataComposite) {

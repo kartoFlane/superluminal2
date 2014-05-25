@@ -4,8 +4,6 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 
 public class StationObject extends GameObject {
 
-	private static final long serialVersionUID = 6671265790779853629L;
-
 	/**
 	 * Id of the tile on which the station will be located.<br>
 	 * -2 = use default value<br>
