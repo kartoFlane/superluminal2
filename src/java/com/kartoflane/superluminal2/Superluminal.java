@@ -39,7 +39,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta6a");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta7");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -53,11 +53,7 @@ public class Superluminal {
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - hotkey disable doesnt work on linux (focus is messing up?)
-	 * - Window resize doesnt refresh grid on linux (resize event is called before setSize() is called?)
-	 * 
 	 * - weapon selection reportedly clunky -> search function?
-	 * - system max levels -> allow higher caps for enemies? see Sleeper's PM
 	 * 
 	 * - artillery weapon UI idea:
 	 * Additionally, when placing artillery room(s), there should be a separate category under Armaments for Artillery weapons, and the selection of such for each. The best way, in my opinion, is to

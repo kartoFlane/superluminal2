@@ -1,5 +1,17 @@
 Changelog
 
+2.0.0 beta7:
+- Some of the previously unloadable ships can now be loaded (missing 'max' attribute on
+  <crewCount> tag)
+- Fixed a bug that would cause systems to be exported evem when the room they've beem
+  assigned to has been deleted
+- Stations are no longer saved for enemy ships, since they apparently don't affect them anymore
+- Station Tool is now disabled for enemy ships
+- Some of enemy ships' systems' level caps have been raised to 10
+- Reworked the way the editor handles systems to allow multiple artilleries
+- Improvied resize detection on Linux environments -- grid should fit the window most of the time now
+- Fixed issues with keybinds on Linux -- temporary workaround
+
 2.0.0 beta6a:
 - Added verification to image browsers to make sure that the selected file actually exists
 - Improved error handling in ship-saving code
