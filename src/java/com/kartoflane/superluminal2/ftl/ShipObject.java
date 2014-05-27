@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
@@ -45,6 +46,7 @@ public class ShipObject extends GameObject {
 	private ArrayList<DroneObject> drones;
 	private WeaponList weaponList = Database.DEFAULT_WEAPON_LIST;
 	private DroneList droneList = Database.DEFAULT_DRONE_LIST;
+	private BoardingStrategies boardingAI = BoardingStrategies.SABOTAGE;
 
 	private int xOffset = 0;
 	private int yOffset = 0;
@@ -698,7 +700,8 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
-	 * Sets the minimum sector in which the ship can appear, inclusive (?)
+	 * Sets the minimum sector in which the ship can appear, inclusive (?)<br>
+	 * Enemy ships only.
 	 */
 	public void setMinSector(int min) {
 		if (min < 1 || min > 8)
@@ -707,6 +710,8 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
+	 * Enemy ships only.
+	 * 
 	 * @return the minimum sector in which the ship can appear, inclusive (?)
 	 */
 	public int getMinSector() {
@@ -714,7 +719,8 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
-	 * Sets the maximum sector in which the ship can appear, inclusive (?)
+	 * Sets the maximum sector in which the ship can appear, inclusive (?)<br>
+	 * Enemy ships only.
 	 */
 	public void setMaxSector(int max) {
 		if (max < 1 || max > 8)
@@ -723,10 +729,31 @@ public class ShipObject extends GameObject {
 	}
 
 	/**
+	 * Enemy ships only.
+	 * 
 	 * @return the maximum sector in which the ship can appear, inclusive (?)
 	 */
 	public int getMaxSector() {
 		return maxSector;
+	}
+
+	/**
+	 * Sets the boarding strategy that the ship's crew is going to use when boarding.<br>
+	 * Enemy ships only.
+	 */
+	public void setBoardingAI(BoardingStrategies ai) {
+		if (ai == null)
+			throw new IllegalArgumentException("Boarding AI must not be null.");
+		boardingAI = ai;
+	}
+
+	/**
+	 * Enemy ships only.
+	 * 
+	 * @return the boarding strategy that the ship's crew is going to use when boarding.
+	 */
+	public BoardingStrategies getBoardingAI() {
+		return boardingAI;
 	}
 
 	/**

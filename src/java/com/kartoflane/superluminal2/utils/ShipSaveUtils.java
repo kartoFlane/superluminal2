@@ -454,12 +454,12 @@ public class ShipSaveUtils {
 				if (amount > 0 && (ship.isPlayerShip() || max > 0))
 					shipBlueprint.addContent(e);
 			}
-		}
 
-		// <boardingAI> tag, enemy exclusive and not modifiable in the editor, since it only has a single value
-		e = new Element("boardingAI");
-		e.setText("sabotage");
-		shipBlueprint.addContent(e);
+			// <boardingAI> tag, enemy exclusive
+			e = new Element("boardingAI");
+			e.setText(ship.getBoardingAI().toString().toLowerCase());
+			shipBlueprint.addContent(e);
+		}
 
 		for (AugmentObject aug : ship.getAugments()) {
 			if (aug == Database.DEFAULT_AUGMENT_OBJ)

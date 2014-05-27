@@ -15,6 +15,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
+import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
@@ -137,6 +138,11 @@ public class ShipLoadUtils {
 
 		is = db.getInputStream(ship.getLayoutXML());
 		loadLayoutXML(ship, is, ship.getLayoutXML());
+
+		// Load gib images
+		for (GibObject gib : ship.getGibs()) {
+			gib.setImagePath(firstExisting(prefixes, String.format("%s_gib%s.png", ship.getImageNamespace(), gib.getId()), db));
+		}
 
 		// Get the class of the ship
 		child = e.getChild("class");
@@ -424,6 +430,14 @@ public class ShipLoadUtils {
 			else {
 				attr = child.getValue();
 				ship.setMaxSector(Integer.valueOf(attr));
+			}
+
+			child = e.getChild("boardingAI");
+			if (child == null) {
+				ship.setBoardingAI(BoardingStrategies.SABOTAGE); // Default
+			} else {
+				attr = child.getValue();
+				ship.setBoardingAI(BoardingStrategies.valueOf(attr.toUpperCase()));
 			}
 		}
 
@@ -801,8 +815,13 @@ public class ShipLoadUtils {
 			}
 
 			// Link mounts to gibs
-			for (MountObject mount : gibMap.keySet())
-				mount.setGib(ship.getGibById(gibMap.get(mount)));
+			for (MountObject mount : gibMap.keySet()) {
+				GibObject gib = ship.getGibById(gibMap.get(mount));
+				if (gib == null)
+					mount.setGib(Database.DEFAULT_GIB_OBJ);
+				else
+					mount.setGib(gib);
+			}
 
 			gibMap.clear();
 		} finally {
