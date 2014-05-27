@@ -2,7 +2,7 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
-public class GibObject extends GameObject implements Comparable<GibObject> {
+public class GibObject extends ImageObject implements Comparable<GibObject> {
 
 	private int id = -1;
 	private int locX = 0;
