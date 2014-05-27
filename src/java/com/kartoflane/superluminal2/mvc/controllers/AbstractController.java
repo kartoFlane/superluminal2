@@ -81,7 +81,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void setView(View view) {
 		if (view == null)
 			throw new IllegalArgumentException("Argument must not be null.");
-		if (this.view != null)
+		if (this.view != null && this.view != view)
 			this.view.dispose();
 		this.view = (BaseView) view;
 
@@ -594,8 +594,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void setVisible(boolean vis) {
 		view.setVisible(vis);
 		if (props != null) {
-			for (PropController prop : props)
-				prop.setVisible(vis);
+			for (PropController prop : props) {
+				if (prop.isInheritVisibility())
+					prop.setVisible(vis);
+			}
 		}
 		redraw();
 	}
@@ -805,8 +807,12 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	@Override
 	public void delete() {
 		deleted = true;
-		setVisible(false);
 		view.removeFromPainter();
+		setVisible(false);
+		for (PropController prop : props) {
+			prop.removeFromPainter();
+			prop.redraw();
+		}
 	}
 
 	@Override
@@ -814,6 +820,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		deleted = false;
 		setView(view);
 		setVisible(true);
+		for (PropController prop : props) {
+			prop.setView(prop.getView());
+			prop.redraw();
+		}
 	}
 
 	public boolean isDeleted() {

@@ -18,6 +18,7 @@ public class PropController extends AbstractController implements Identifiable {
 	protected Shapes shape;
 	protected Polygon polygon;
 	protected String compositeTitle = "Prop";
+	protected boolean inheritVisibility = false;
 
 	private PropController(AbstractController parent, BaseModel model, PropView view, String id) {
 		super();
@@ -104,6 +105,20 @@ public class PropController extends AbstractController implements Identifiable {
 
 	public int getBorderThickness() {
 		return view.getBorderThickness();
+	}
+
+	/**
+	 * Determines whether the prop should inherit visibility from its owner.
+	 */
+	public void setInheritVisibility(boolean vis) {
+		inheritVisibility = vis;
+	}
+
+	/**
+	 * @return whether or not the prop inherits visibility from its owner.
+	 */
+	public boolean isInheritVisibility() {
+		return inheritVisibility;
 	}
 
 	public void setImage(String path) {
