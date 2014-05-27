@@ -312,6 +312,14 @@ public class UIUtils {
 				tip.setVisible(false);
 			}
 		});
+
+		c.addListener(SWT.Dispose, new Listener() {
+			public void handleEvent(Event e) {
+				if (!tip.isDisposed())
+					tip.setVisible(false);
+				tip.dispose();
+			}
+		});
 	}
 
 	public static void addHotkeyText(MenuItem mntm, String hotkeyText) {
