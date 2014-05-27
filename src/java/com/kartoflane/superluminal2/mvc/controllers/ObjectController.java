@@ -43,15 +43,13 @@ public abstract class ObjectController extends AbstractController implements Ali
 	@Override
 	public void delete() {
 		getGameObject().delete();
-		setVisible(false);
-		view.removeFromPainter();
+		super.delete();
 	}
 
 	@Override
 	public void restore() {
 		getGameObject().restore();
-		setView(view);
-		setVisible(true);
+		super.restore();
 	}
 
 	public boolean isDeleted() {

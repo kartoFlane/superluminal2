@@ -394,6 +394,7 @@ public class DroneSelectionDialog {
 		if (selection != null) {
 			treeItemMap.get(result.getType()).setExpanded(true);
 			tree.select(selection);
+			tree.setTopItem(selection);
 		} else {
 			tree.select(tree.getItem(0));
 		}
@@ -405,7 +406,7 @@ public class DroneSelectionDialog {
 
 		TreeItem trtm = new TreeItem(tree, SWT.NONE);
 		trtm.setText("No Drone List");
-		trtm.setData(Database.DEFAULT_WEAPON_LIST);
+		trtm.setData(Database.DEFAULT_DRONE_LIST);
 
 		TreeItem selection = null;
 
@@ -427,7 +428,12 @@ public class DroneSelectionDialog {
 
 		tree.layout();
 
-		tree.select(selection == null ? tree.getItem(0) : selection);
+		if (selection != null) {
+			tree.select(selection);
+			tree.setTopItem(selection);
+		} else {
+			tree.select(tree.getItem(0));
+		}
 	}
 
 	private void updateData() {

@@ -5,14 +5,17 @@ import org.eclipse.swt.graphics.Point;
 
 public class ImageView extends BaseView {
 
-	private int w = -1;
-	private int h = -1;
+	/** Width of the drawn image. Actual image is resized to fit this. */
+	protected int w = -1;
+	/** Height of the drawn image. Actual image is resized to fit this. */
+	protected int h = -1;
 
 	@Override
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
-			int tw = w == -1 ? cachedImageBounds.width : w;
-			int th = h == -1 ? cachedImageBounds.height : h;
+			// Can't have negative values, so default to cached size if that's the case
+			int tw = w < 0 ? cachedImageBounds.width : w;
+			int th = h < 0 ? cachedImageBounds.height : h;
 			paintImageResize(e, image, cachedImageBounds, controller.getX() - tw / 2, controller.getY() - th / 2,
 					tw, th, alpha);
 			paintBorderSquare(e, borderColor, borderThickness, 255);

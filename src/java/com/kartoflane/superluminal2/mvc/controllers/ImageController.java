@@ -17,7 +17,7 @@ import com.kartoflane.superluminal2.ui.sidebar.data.ImageDataComposite;
 
 public class ImageController extends ObjectController {
 
-	private ImageController(AbstractController parent, BaseModel model, ImageView view) {
+	protected ImageController(AbstractController parent, BaseModel model, ImageView view) {
 		super();
 		setModel(model);
 		setView(view);

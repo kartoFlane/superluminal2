@@ -292,23 +292,25 @@ public class AugmentSelectionDialog {
 
 		AugmentIterator it = new AugmentIterator(Database.getInstance().getAugments(), sortByBlueprint);
 		for (it.first(); it.hasNext(); it.next()) {
-			AugmentObject Augment = it.current();
+			AugmentObject augment = it.current();
 
 			trtm = new TreeItem(tree, SWT.NONE);
-			trtm.setText(0, Augment.getBlueprintName());
-			trtm.setText(1, Augment.getTitle());
-			trtm.setData(Augment);
+			trtm.setText(0, augment.getBlueprintName());
+			trtm.setText(1, augment.getTitle());
+			trtm.setData(augment);
 
-			if (result == Augment)
+			if (result == augment)
 				selection = trtm;
 		}
 
 		tree.layout();
 
-		if (selection != null)
+		if (selection != null) {
 			tree.select(selection);
-		else
+			tree.setTopItem(selection);
+		} else {
 			tree.select(tree.getItem(0));
+		}
 	}
 
 	private void updateData() {
@@ -341,9 +343,9 @@ public class AugmentSelectionDialog {
 
 		private AugmentObject getSmallestElement() {
 			AugmentObject result = null;
-			for (AugmentObject Augment : list) {
-				if (result == null || comparator.compare(Augment, result) < 0)
-					result = Augment;
+			for (AugmentObject augment : list) {
+				if (result == null || comparator.compare(augment, result) < 0)
+					result = augment;
 			}
 
 			return result;

@@ -26,12 +26,12 @@ import com.kartoflane.superluminal2.ui.sidebar.data.ShipDataComposite;
 
 public class ShipController extends ObjectController {
 
-	private static final String LINE_V_PROP_ID = "LineVertical";
-	private static final String LINE_H_PROP_ID = "LineHorizontal";
-	private static final String OFFSET_X_PROP_ID = "OffsetX";
-	private static final String OFFSET_Y_PROP_ID = "OffsetY";
-	private static final String OFFSET_FINE_X_PROP_ID = "OffsetHorizontal";
-	private static final String OFFSET_FINE_Y_PROP_ID = "OffsetVertical";
+	public static final String LINE_V_PROP_ID = "LineVertical";
+	public static final String LINE_H_PROP_ID = "LineHorizontal";
+	public static final String OFFSET_X_PROP_ID = "OffsetX";
+	public static final String OFFSET_Y_PROP_ID = "OffsetY";
+	public static final String OFFSET_FINE_X_PROP_ID = "OffsetHorizontal";
+	public static final String OFFSET_FINE_Y_PROP_ID = "OffsetVertical";
 
 	protected ShipContainer container = null;
 	protected ArrayList<Collidable> collidables = new ArrayList<Collidable>();
@@ -159,6 +159,7 @@ public class ShipController extends ObjectController {
 		addProp(opc);
 
 		PropController prop = new PropController(this, LINE_H_PROP_ID);
+		prop.setInheritVisibility(true);
 		prop.setDefaultBackgroundColor(255, 0, 0);
 		prop.setImage(null);
 		prop.setBorderThickness(1);
@@ -167,6 +168,7 @@ public class ShipController extends ObjectController {
 		addProp(prop);
 
 		prop = new PropController(this, LINE_V_PROP_ID);
+		prop.setInheritVisibility(true);
 		prop.setDefaultBackgroundColor(0, 255, 0);
 		prop.setImage(null);
 		prop.setBorderThickness(1);
@@ -337,6 +339,7 @@ public class ShipController extends ObjectController {
 		public OffsetPropController(AbstractController parent, String id) {
 			super(parent, id);
 
+			setInheritVisibility(true);
 			setBounded(true);
 			setSelectable(true);
 

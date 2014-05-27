@@ -23,8 +23,9 @@ public class NewShipDialog {
 
 	private Shell shell;
 	private Button btnPlayerShip;
-	private Button btnEnemycontrolledShip;
+	private Button btnEnemyShip;
 	private Button btnCancel;
+	private Button btnConfirm;
 
 	public NewShipDialog(Shell parentShell) {
 		if (instance != null)
@@ -44,11 +45,11 @@ public class NewShipDialog {
 		btnPlayerShip.setSelection(true);
 		btnPlayerShip.setText("Player-Controlled Ship");
 
-		btnEnemycontrolledShip = new Button(shell, SWT.RADIO);
-		btnEnemycontrolledShip.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		btnEnemycontrolledShip.setText("Enemy-Controlled Ship");
+		btnEnemyShip = new Button(shell, SWT.RADIO);
+		btnEnemyShip.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		btnEnemyShip.setText("Enemy-Controlled Ship");
 
-		Button btnConfirm = new Button(shell, SWT.NONE);
+		btnConfirm = new Button(shell, SWT.NONE);
 		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
 		gd_btnConfirm.widthHint = 80;
 		btnConfirm.setLayoutData(gd_btnConfirm);
