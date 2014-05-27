@@ -31,6 +31,7 @@ public class MountTool extends Tool {
 			MountObject object = new MountObject();
 			toolMount = MountController.newInstance(Manager.getCurrentShip(), object);
 			toolMount.setSelectable(false);
+			toolMount.getProp(MountController.ARROW_PROP_ID).setInheritVisibility(true);
 		}
 
 		cursor.setSnapMode(Snapmodes.FREE);

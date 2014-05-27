@@ -19,6 +19,9 @@ import com.kartoflane.superluminal2.utils.Utils;
 public class MountController extends ObjectController implements Comparable<MountController> {
 	public static final int DEFAULT_WIDTH = 16;
 	public static final int DEFAULT_HEIGHT = 50;
+	public static final String ARROW_PROP_ID = "DirectionArrow";
+
+	private static final int ARROW_HEIGHT = 45;
 
 	protected ShipContainer container = null;
 
@@ -33,6 +36,8 @@ public class MountController extends ObjectController implements Comparable<Moun
 		setBounded(false);
 		setCollidable(false);
 		setParent(container.getShipController());
+
+		createProps();
 	}
 
 	public static MountController newInstance(ShipContainer container, MountObject object) {
@@ -41,6 +46,7 @@ public class MountController extends ObjectController implements Comparable<Moun
 		MountController controller = new MountController(container, model, view);
 
 		controller.setWeapon(object.getWeapon());
+		controller.setDirection(object.getDirection());
 
 		return controller;
 	}
@@ -50,12 +56,6 @@ public class MountController extends ObjectController implements Comparable<Moun
 		boolean result = super.setLocation(x, y);
 		updateView();
 		return result;
-	}
-
-	@Override
-	public void redraw() {
-		super.redraw();
-		container.getParent().canvasRedraw(getView().getDirectionArrowBounds());
 	}
 
 	protected MountView getView() {
@@ -106,12 +106,14 @@ public class MountController extends ObjectController implements Comparable<Moun
 		return getGameObject().isMirrored();
 	}
 
-	public void setDirection(Directions direction) {
-		Rectangle oldBounds = getView().getDirectionArrowBounds();
-		getGameObject().setDirection(direction);
-		updateView();
-		redraw();
-		container.getParent().canvasRedraw(oldBounds);
+	public void setDirection(Directions dir) {
+		PropController arrowProp = getProp(ARROW_PROP_ID);
+		arrowProp.setVisible(false);
+		arrowProp.setRotation(dir.getAngleDeg());
+		arrowProp.setFollowOffset(dir.getVectorX() * ARROW_HEIGHT / 2, dir.getVectorY() * ARROW_HEIGHT / 2);
+		arrowProp.updateFollower();
+		arrowProp.setVisible(dir != Directions.NONE);
+		getGameObject().setDirection(dir);
 	}
 
 	public Directions getDirection() {
@@ -161,6 +163,14 @@ public class MountController extends ObjectController implements Comparable<Moun
 
 	@Override
 	public boolean intersects(Rectangle rect) {
-		return getBounds().intersects(rect) || getView().getDirectionArrowBounds().intersects(rect);
+		return getBounds().intersects(rect);
+	}
+
+	private void createProps() {
+		PropController prop = new PropController(this, ARROW_PROP_ID);
+		prop.setImage("cpath:/assets/arrow.png");
+		prop.setAlpha(255);
+		prop.addToPainter(Layers.MOUNT);
+		addProp(prop);
 	}
 }
