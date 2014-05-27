@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.core.Cache;
@@ -91,6 +92,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private Label lblLayoutInfo;
 	private Label lblImageHelp;
 	private Label lblBlueprintHelp;
+	private Combo cmbBoardingAI;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -359,6 +361,28 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			lblMaxSecInfo.setImage(helpImage);
 			msg = "This determines the maximum sector in which the enemy can be encountered.";
 			UIUtils.addTooltip(lblMaxSecInfo, "", msg);
+
+			Label lblBoardingAI = new Label(compGeneral, SWT.NONE);
+			lblBoardingAI.setText("Boarding AI:");
+
+			cmbBoardingAI = new Combo(compGeneral, SWT.READ_ONLY);
+			cmbBoardingAI.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			for (BoardingStrategies ai : BoardingStrategies.values()) {
+				cmbBoardingAI.add(ai.toString());
+			}
+
+			cmbBoardingAI.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ship.setBoardingAI(BoardingStrategies.values()[cmbBoardingAI.getSelectionIndex()]);
+				}
+			});
+
+			Label lblBoardingAIInfo = new Label(compGeneral, SWT.NONE);
+			lblBoardingAIInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			lblBoardingAIInfo.setImage(helpImage);
+			msg = "This determines the strategy that the ship's crew is going to use when boarding.";
+			UIUtils.addTooltip(lblBoardingAIInfo, "", msg);
 		}
 
 		/*
@@ -711,8 +735,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 			spMinSec.setSelection(ship.getMinSector());
 			spMaxSec.setSelection(ship.getMaxSector());
-			spMinSec.setEnabled(!ship.isPlayerShip());
-			spMaxSec.setEnabled(!ship.isPlayerShip());
+			cmbBoardingAI.select(ship.getBoardingAI().ordinal());
 		}
 
 		// Armaments tab
