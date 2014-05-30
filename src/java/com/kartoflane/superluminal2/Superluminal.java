@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
@@ -39,7 +40,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta7");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.0 beta8");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -54,6 +55,9 @@ public class Superluminal {
 	 * 
 	 * TODO:
 	 * - weapon selection reportedly clunky -> search function?
+	 * - add gibs
+	 * - dragging reorder to ship overview
+	 * - change fine optimal offset calculation to use hull image size instead??
 	 * 
 	 * - artillery weapon UI idea:
 	 * Additionally, when placing artillery room(s), there should be a separate category under Armaments for Artillery weapons, and the selection of such for each. The best way, in my opinion, is to
@@ -63,15 +67,11 @@ public class Superluminal {
 	 * be exceeded? If so, add it. :P) should be added to the right of each Artillery weapon choice, so that way it will make adding multiple-artillery setups to AI (or human-controlled) ships much
 	 * easier.
 	 * 
-	 * - boarding AI selection: invasion / sabotage ??
 	 * - generate floor image feature ??
 	 * - .shp loading / conversion to .ftl
 	 * 
-	 * - add gibs
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
-	 * - dragging reorder to ship overview
 	 * - come up with a way to set which system is first when assigned to the same room?
-	 * - add reordering to ship overview
 	 * - glow placement modification
 	 * 
 	 * - entity deletion --> add (to) undo
@@ -303,6 +303,8 @@ public class Superluminal {
 
 		final String[] downloadLink = new String[1];
 		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
+		final ArrayList<String> changes = new ArrayList<String>();
+
 		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new LoadTask() {
 			public void execute() {
 				InputStream is = null;
@@ -317,6 +319,16 @@ public class Superluminal {
 
 					downloadLink[0] = latest.getAttributeValue("url");
 					remoteVersion[0] = new ComparableVersion(id);
+
+					Element changelog = root.getChild("changelog");
+					for (Element version : changelog.getChildren("version")) {
+						ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
+						if (vId.compareTo(APP_VERSION) > 0) {
+							for (Element change : version.getChildren("change")) {
+								changes.add(change.getValue());
+							}
+						}
+					}
 				} catch (UnknownHostException e) {
 					log.warn("Update check failed -- connection to the repository could not be estabilished.");
 				} catch (JDOMException e) {
@@ -341,9 +353,31 @@ public class Superluminal {
 
 				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(), SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
 				box.setText(APP_NAME + " - Update Available");
-				String msg = "A new version of the editor is available: v." + remoteVersion[0].toString() + "\n" +
-						"Would you like to download it now?";
-				box.setMessage(msg);
+
+				StringBuilder buf = new StringBuilder();
+				buf.append("A new version of the editor is available: v.");
+				buf.append(remoteVersion[0].toString());
+				buf.append("\n\n");
+				if (changes.size() > 0) {
+					int count = 0;
+					for (String change : changes) {
+						if (count < 5) {
+							buf.append(" - ");
+							buf.append(change);
+							buf.append("\n");
+							count++;
+						} else {
+							buf.append("...and ");
+							buf.append(changes.size() - count);
+							buf.append(" more - check changelog for details.\n");
+							break;
+						}
+					}
+					buf.append("\n");
+				}
+
+				buf.append("Would you like to download it now?");
+				box.setMessage(buf.toString());
 
 				if (box.open() == SWT.YES) {
 					URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
