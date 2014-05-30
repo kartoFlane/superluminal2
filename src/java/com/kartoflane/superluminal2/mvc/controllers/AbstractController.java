@@ -37,7 +37,6 @@ import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
-import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.Utils;
 
@@ -593,11 +592,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	public void setVisible(boolean vis) {
 		view.setVisible(vis);
-		if (props != null) {
-			for (PropController prop : props) {
-				if (prop.isInheritVisibility())
-					prop.setVisible(vis);
-			}
+		for (PropController prop : getProps()) {
+			if (prop.isInheritVisibility())
+				prop.setVisible(vis);
 		}
 		redraw();
 	}
@@ -676,7 +673,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 					reposition(p.x, p.y);
 					updateFollowOffset();
 
-					((ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+					((DataComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
 				}
 			}
 		}
@@ -809,7 +806,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		deleted = true;
 		view.removeFromPainter();
 		setVisible(false);
-		for (PropController prop : props) {
+		for (PropController prop : getProps()) {
 			prop.removeFromPainter();
 			prop.redraw();
 		}
@@ -820,7 +817,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		deleted = false;
 		setView(view);
 		setVisible(true);
-		for (PropController prop : props) {
+		for (PropController prop : getProps()) {
 			prop.setView(prop.getView());
 			prop.redraw();
 		}
