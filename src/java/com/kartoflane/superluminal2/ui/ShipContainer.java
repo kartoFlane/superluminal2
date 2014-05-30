@@ -10,6 +10,7 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.NotDeletableException;
+import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
@@ -134,12 +135,23 @@ public class ShipContainer implements Disposable {
 
 			add(mc);
 		}
-		for (GibObject gib : ship.getGibs()) {
+		// Gibs are not always listed in their order of appearance... Get by id instead
+		// of iterating over array.
+		GibObject gib = null;
+		int i = ship.getGibs().length;
+		// Gibs need to be added in reverse order for correct layering
+		while ((gib = ship.getGibById(i)) != null) {
 			GibController gc = GibController.newInstance(this, gib);
 
-			// TODO
+			Point offset = ship.getHullOffset();
+			offset.x += ship.getXOffset() * CELL_SIZE + gc.getSize().x / 2 + gib.getOffsetX();
+			offset.y += ship.getYOffset() * CELL_SIZE + gc.getSize().y / 2 + gib.getOffsetY();
+			gc.setFollowOffset(offset);
+			gc.updateFollower();
 
 			add(gc);
+			gc.setVisible(false);
+			i--;
 		}
 
 		// Instantiate first, assign later
@@ -157,8 +169,9 @@ public class ShipContainer implements Disposable {
 			for (SystemObject system : ship.getSystems(sys)) {
 				RoomController room = (RoomController) getController(system.getRoom());
 
-				if (room != null)
+				if (room != null) {
 					assign(system, room);
+				}
 			}
 		}
 
@@ -264,6 +277,10 @@ public class ShipContainer implements Disposable {
 
 	public SystemController[] getSystemControllers() {
 		return systemControllers.toArray(new SystemController[0]);
+	}
+
+	public GibController[] getGibControllers() {
+		return gibControllers.toArray(new GibController[0]);
 	}
 
 	public StationController getStationController(Systems systemId) {
@@ -744,6 +761,7 @@ public class ShipContainer implements Disposable {
 			// Shield resize prop
 			PropController prop = new PropController(shield, SHIELD_RESIZE_PROP_ID);
 			prop.setSelectable(true);
+			prop.setInheritVisibility(true);
 			prop.setDefaultBackgroundColor(128, 128, 255);
 			prop.setDefaultBorderColor(0, 0, 0);
 			prop.setBorderThickness(3);
@@ -844,6 +862,10 @@ public class ShipContainer implements Disposable {
 		roomsVisible = vis;
 		for (RoomController r : roomControllers)
 			r.setVisible(vis);
+		for (SystemController s : systemControllers) {
+			SystemObject sys = s.getGameObject();
+			s.setVisible(vis && s.isAssigned() && getActiveSystem(sys.getRoom()) == sys);
+		}
 		applyStationVisibility(vis && stationsVisible);
 	}
 
@@ -863,8 +885,10 @@ public class ShipContainer implements Disposable {
 
 	public void setMountsVisible(boolean vis) {
 		mountsVisible = vis;
-		for (MountController m : mountControllers)
+		for (MountController m : mountControllers) {
 			m.setVisible(vis);
+			m.getProp(MountController.ARROW_PROP_ID).setVisible(vis && m.getDirection() != Directions.NONE);
+		}
 	}
 
 	public boolean isMountsVisible() {

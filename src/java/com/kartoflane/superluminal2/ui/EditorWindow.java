@@ -1244,7 +1244,7 @@ public class EditorWindow {
 
 		// ====== Tool-specific hotkeys
 
-		else if (Manager.getSelectedToolId() == Tools.POINTER) {
+		else if (Manager.getSelectedToolId() == Tools.POINTER || Manager.getSelectedToolId() == Tools.GIB) {
 			// Arrow keys movement
 			if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
 					e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {

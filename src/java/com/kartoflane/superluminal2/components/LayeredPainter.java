@@ -28,6 +28,7 @@ public class LayeredPainter implements PaintListener {
 	public enum Layers {
 		BACKGROUND,
 		MOUNT,
+		GIBS,
 		IMAGES,
 		GRID,
 		ROOM,
@@ -43,9 +44,9 @@ public class LayeredPainter implements PaintListener {
 	private static final LayeredPainter instance = new LayeredPainter();
 
 	/** Specifies the layer order for selection and highlighting purposes. */
-	private static final Layers[] selectionOrder = { Layers.BACKGROUND, Layers.GRID, Layers.IMAGES,
-			Layers.MOUNT, Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.STATION, Layers.DOOR,
-			Layers.OVERLAY, Layers.SHIP_ORIGIN, Layers.CURSOR };
+	private static final Layers[] selectionOrder = { Layers.BACKGROUND, Layers.GRID, Layers.GIBS,
+			Layers.IMAGES, Layers.MOUNT, Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.STATION,
+			Layers.DOOR, Layers.OVERLAY, Layers.SHIP_ORIGIN, Layers.CURSOR };
 
 	/** Specifies the order in which the layers are drawn. */
 	protected TreeMap<Layers, ArrayList<AbstractController>> layerMap = new TreeMap<Layers, ArrayList<AbstractController>>();
