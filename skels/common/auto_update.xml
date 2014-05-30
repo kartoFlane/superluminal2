@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.0.0 beta7" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.0 beta8" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.0.0 beta8">
+			<change>Numerous bug fixes</change>
+			<change>Added boarding AI modification</change>
+		</version>
 		<version id="2.0.0 beta7">
 			<change>Fixed some Linux-specific bugs</change>
 			<change>Disabled station editing on enemy ships</change>
