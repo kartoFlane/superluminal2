@@ -1,5 +1,17 @@
 Changelog
 
+2.0.0 beta8:
+- The update dialog now displays a brief list of changes that have been made since the version
+  you're using
+- Fixed a bug with ship loading that would not link mounts to gibs correctly, causing problems
+  when you tried to save the ship
+- Weapon/drone/augment selection dialogs now will also scroll to show the last selected item
+- Added the ability to change enemy ships' boarding AI, now only gets exported for enemy ships
+- Fixed a bug that would not allow to confirm "No Drone List" in drone selection dialog
+- Fixed systems not disappearing when hiding rooms
+- Done some preliminary work on gibs - can be viewed and moved around with Gib Tool (you have to hide
+  all the other elements first - keys 1 through 8 by default). Gibs are not exported yet.
+
 2.0.0 beta7:
 - Some of the previously unloadable ships can now be loaded (missing 'max' attribute on
   <crewCount> tag)
