@@ -56,6 +56,8 @@ public class ShipLoaderDialog {
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultClassTabWidth + 5;
 	private static final int defaultMetadataWidth = 250;
 
+	private static ShipMetadata selection = null;
+
 	private HashMap<ShipMetadata, TreeItem> dataTreeMap = new HashMap<ShipMetadata, TreeItem>();
 	private HashMap<String, TreeItem> blueprintTreeMap = new HashMap<String, TreeItem>();
 
@@ -203,9 +205,9 @@ public class ShipLoaderDialog {
 			public void widgetSelected(SelectionEvent e) {
 				if (tree.getSelectionCount() != 0) {
 					TreeItem selectedItem = tree.getSelection()[0];
-					ShipMetadata metadata = (ShipMetadata) selectedItem.getData();
+					selection = (ShipMetadata) selectedItem.getData();
 
-					if (metadata == null) {
+					if (selection == null) {
 						btnLoad.setEnabled(false);
 						txtBlueprint.setText("");
 						txtClass.setText("");
@@ -216,17 +218,17 @@ public class ShipLoaderDialog {
 						canvas.redraw();
 					} else {
 						btnLoad.setEnabled(true);
-						txtBlueprint.setText(metadata.getBlueprintName());
-						txtClass.setText(metadata.getShipClass());
-						if (metadata.isPlayerShip()) {
-							txtName.setText(metadata.getShipName());
-							txtDescription.setText(metadata.getShipDescription());
+						txtBlueprint.setText(selection.getBlueprintName());
+						txtClass.setText(selection.getShipClass());
+						if (selection.isPlayerShip()) {
+							txtName.setText(selection.getShipName());
+							txtDescription.setText(selection.getShipDescription());
 						} else {
 							txtName.setText("N/A");
 							txtDescription.setText("N/A");
 						}
 
-						String path = metadata.getHullImagePath();
+						String path = selection.getHullImagePath();
 						preview.setImage(path == null ? "db:img/nullResource.png" : path);
 						updatePreview();
 						canvas.redraw();
@@ -420,6 +422,13 @@ public class ShipLoaderDialog {
 	}
 
 	public void open() {
+		TreeItem item = dataTreeMap.get(selection);
+		if (item != null) {
+			tree.select(item);
+			tree.setTopItem(item);
+			tree.notifyListeners(SWT.Selection, null);
+		}
+
 		shell.open();
 	}
 
