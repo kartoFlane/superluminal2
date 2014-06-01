@@ -25,7 +25,7 @@ public enum Images {
 				if (ship.isPlayerShip())
 					return "img/ship/";
 				else
-					return "img/ships_noglow/";
+					return "img/ships_glow/";
 			case THUMBNAIL:
 				return "img/customizeUI/";
 			default:

@@ -351,6 +351,22 @@ public class ShipObject extends GameObject {
 		return Utils.copy(ellipse);
 	}
 
+	public int getEllipseX() {
+		return ellipse.x;
+	}
+
+	public int getEllipseY() {
+		return ellipse.y;
+	}
+
+	public int getEllipseWidth() {
+		return ellipse.width;
+	}
+
+	public int getEllipseHeight() {
+		return ellipse.height;
+	}
+
 	/**
 	 * Sets the dimensions of the hull image.
 	 * 
