@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter;
@@ -21,15 +22,14 @@ import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Followable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
-import com.kartoflane.superluminal2.components.interfaces.LocationListener;
-import com.kartoflane.superluminal2.components.interfaces.ModifierListener;
 import com.kartoflane.superluminal2.components.interfaces.MouseInputListener;
 import com.kartoflane.superluminal2.components.interfaces.Pinnable;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
-import com.kartoflane.superluminal2.components.interfaces.SizeListener;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
@@ -41,14 +41,13 @@ import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public abstract class AbstractController implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
-		MouseInputListener, Collidable, Boundable, Follower, Followable, SizeListener, LocationListener, ModifierListener {
+		MouseInputListener, Collidable, Boundable, Follower, Followable, SLListener {
 
 	protected Followable parent = null;
 	protected Point followOffset = null;
 	protected HashSet<Follower> followers = null;
 
-	protected HashSet<LocationListener> locListeners = null;
-	protected HashSet<SizeListener> sizeListeners = null;
+	protected EventHandler eventHandler = null;
 	protected HashSet<PropController> props = null;
 
 	protected BaseModel model = null;
@@ -145,11 +144,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			for (Follower fol : followers)
 				fol.updateFollower();
 		}
-		if (locListeners != null) {
-			for (LocationListener listener : locListeners) {
-				listener.notifyLocationChanged(getX(), getY());
-			}
-		}
+
+		if (eventHandler != null && eventHandler.hooks(SLEvent.MOVE))
+			eventHandler.sendEvent(new SLEvent(SLEvent.MOVE, this, getLocation()));
 		return true;
 	}
 
@@ -210,11 +207,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			for (Follower fol : followers)
 				fol.updateFollower();
 		}
-		if (locListeners != null) {
-			for (LocationListener listener : locListeners) {
-				listener.notifyLocationChanged(getX(), getY());
-			}
-		}
+
+		if (eventHandler != null && eventHandler.hooks(SLEvent.MOVE))
+			eventHandler.sendEvent(new SLEvent(SLEvent.MOVE, this, getLocation()));
 		return true;
 	}
 
@@ -232,11 +227,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public boolean setSize(int w, int h) {
 		model.setSize(w, h);
 
-		if (sizeListeners != null) {
-			for (SizeListener listener : sizeListeners) {
-				listener.notifySizeChanged(w, h);
-			}
-		}
+		if (eventHandler != null && eventHandler.hooks(SLEvent.RESIZE))
+			eventHandler.sendEvent(new SLEvent(SLEvent.RESIZE, this, getSize()));
 		return true;
 	}
 
@@ -448,6 +440,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		selected = selectable;
 		updateView();
 		redraw();
+
+		if (eventHandler != null && eventHandler.hooks(SLEvent.SELECT))
+			eventHandler.sendEvent(new SLEvent(SLEvent.SELECT, this, this));
 	}
 
 	/**
@@ -461,6 +456,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		setMoving(false);
 		updateView();
 		redraw();
+
+		if (eventHandler != null && eventHandler.hooks(SLEvent.DESELECT))
+			eventHandler.sendEvent(new SLEvent(SLEvent.DESELECT, this, this));
 	}
 
 	@Override
@@ -592,11 +590,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	public void setVisible(boolean vis) {
 		view.setVisible(vis);
-		for (PropController prop : getProps()) {
-			if (prop.isInheritVisibility())
-				prop.setVisible(vis);
-		}
 		redraw();
+
+		if (eventHandler != null)
+			eventHandler.sendEvent(new SLEvent(SLEvent.VISIBLE, this, vis));
 	}
 
 	public boolean isVisible() {
@@ -775,12 +772,18 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void dispose() {
 		if (model.isDisposed())
 			return;
+		if (eventHandler != null)
+			eventHandler.sendEvent(new SLEvent(SLEvent.DISPOSE, this, this));
+
 		model.dispose();
 		view.dispose();
 
 		for (PropController prop : getProps()) {
 			prop.dispose();
 		}
+
+		if (eventHandler != null)
+			eventHandler.dispose();
 	}
 
 	@Override
@@ -806,6 +809,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		deleted = true;
 		view.removeFromPainter();
 		setVisible(false);
+
+		if (eventHandler != null && eventHandler.hooks(SLEvent.DELETE))
+			eventHandler.sendEvent(new SLEvent(SLEvent.DELETE, this, this));
+
 		for (PropController prop : getProps()) {
 			prop.removeFromPainter();
 			prop.redraw();
@@ -817,6 +824,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		deleted = false;
 		setView(view);
 		setVisible(true);
+
+		if (eventHandler != null && eventHandler.hooks(SLEvent.RESTORE))
+			eventHandler.sendEvent(new SLEvent(SLEvent.RESTORE, this, this));
+
 		for (PropController prop : getProps()) {
 			prop.setView(prop.getView());
 			prop.redraw();
@@ -847,44 +858,37 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return model.getTolerance();
 	}
 
-	public void addLocationListener(LocationListener listener) {
-		if (locListeners == null)
-			locListeners = new HashSet<LocationListener>();
-		locListeners.add(listener);
+	public void addListener(int eventType, SLListener listener) {
+		if (eventHandler == null)
+			eventHandler = new EventHandler();
+		eventHandler.hook(eventType, listener);
 	}
 
-	public void removeLocationListener(LocationListener listener) {
-		if (locListeners == null)
-			locListeners = new HashSet<LocationListener>();
-		locListeners.remove(listener);
+	public void removeListener(int eventType, SLListener listener) {
+		if (eventHandler == null)
+			eventHandler = new EventHandler();
+		eventHandler.unhook(eventType, listener);
+	}
+
+	public void handleEvent(SLEvent e) {
+		if (e.type == SLEvent.MOVE) {
+			Point p = (Point) e.data;
+			notifyLocationChanged(p.x, p.y);
+		} else if (e.type == SLEvent.RESIZE) {
+			Point p = (Point) e.data;
+			notifySizeChanged(p.x, p.y);
+		} else if (e.type == SLEvent.DISPOSE) {
+			if (eventHandler != null && e.data != null && e.data instanceof SLListener) {
+				eventHandler.unhook((SLListener) e.data);
+			}
+		}
 	}
 
 	public void notifyLocationChanged(int x, int y) {
 	}
 
-	public void addSizeListener(SizeListener listener) {
-		if (sizeListeners == null)
-			sizeListeners = new HashSet<SizeListener>();
-		sizeListeners.add(listener);
-	}
-
-	public void removeSizeListener(SizeListener listener) {
-		if (sizeListeners == null)
-			sizeListeners = new HashSet<SizeListener>();
-		sizeListeners.remove(listener);
-	}
-
 	public void notifySizeChanged(int w, int h) {
 		resize(w, h);
-	}
-
-	public void notifyModShift(boolean pressed) {
-	}
-
-	public void notifyModControl(boolean pressed) {
-	}
-
-	public void notifyModAlt(boolean pressed) {
 	}
 
 	public void addProp(PropController prop) {
@@ -893,12 +897,14 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		if (getProp(prop.getIdentifier()) != null)
 			throw new IllegalArgumentException(String.format("This object already owns a prop named '%s'", prop.getIdentifier()));
 		props.add(prop);
+		addListener(SLEvent.VISIBLE, prop);
 	}
 
 	public void removeProp(PropController prop) {
 		if (props == null)
 			props = new HashSet<PropController>();
 		props.remove(prop);
+		removeListener(SLEvent.VISIBLE, prop);
 	}
 
 	public PropController[] getProps() {

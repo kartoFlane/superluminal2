@@ -13,8 +13,9 @@ import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.Shapes;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
-import com.kartoflane.superluminal2.components.interfaces.LocationListener;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -72,11 +73,14 @@ public class ShipController extends ObjectController {
 				ShipContainer.CELL_SIZE / 2, 0,
 				ShipContainer.CELL_SIZE / 4, 2 * ShipContainer.CELL_SIZE / 3
 		}));
-		opc.addLocationListener(new LocationListener() {
+		opc.addListener(SLEvent.MOVE, new SLListener() {
 			@Override
-			public void notifyLocationChanged(int x, int y) {
-				ShipObject ship = getGameObject();
-				container.setShipFineOffset(x - getX(), ship.getVertical());
+			public void handleEvent(SLEvent e) {
+				if (isPlayerShip()) {
+					Point p = (Point) e.data;
+					ShipObject ship = getGameObject();
+					container.setShipFineOffset(p.x - getX(), ship.getVertical());
+				}
 			}
 		});
 		opc.setLocModifiable(true);
@@ -84,6 +88,8 @@ public class ShipController extends ObjectController {
 		opc.setDefaultBorderColor(0, 0, 0);
 		opc.addToPainter(Layers.SHIP_ORIGIN);
 		opc.setCompositeTitle("Horizontal Offset");
+		opc.setInheritVisibility(isPlayerShip());
+		opc.setVisible(isPlayerShip());
 		addProp(opc);
 
 		opc = new OffsetPropController(this, OFFSET_FINE_Y_PROP_ID);
@@ -92,11 +98,12 @@ public class ShipController extends ObjectController {
 				0, ShipContainer.CELL_SIZE / 2,
 				2 * ShipContainer.CELL_SIZE / 3, ShipContainer.CELL_SIZE / 4
 		}));
-		opc.addLocationListener(new LocationListener() {
+		opc.addListener(SLEvent.MOVE, new SLListener() {
 			@Override
-			public void notifyLocationChanged(int x, int y) {
+			public void handleEvent(SLEvent e) {
+				Point p = (Point) e.data;
 				ShipObject ship = getGameObject();
-				container.setShipFineOffset(ship.getHorizontal(), y - getY());
+				container.setShipFineOffset(ship.getHorizontal(), p.y - getY());
 			}
 		});
 		opc.setLocModifiable(true);
@@ -112,14 +119,15 @@ public class ShipController extends ObjectController {
 				ShipContainer.CELL_SIZE / 2, 0,
 				ShipContainer.CELL_SIZE / 4, ShipContainer.CELL_SIZE / 2
 		}));
-		opc.addLocationListener(new LocationListener() {
+		opc.addListener(SLEvent.MOVE, new SLListener() {
 			@Override
-			public void notifyLocationChanged(int x, int y) {
+			public void handleEvent(SLEvent e) {
+				Point p = (Point) e.data;
 				ShipObject ship = getGameObject();
-				x = (x - getX()) / ShipContainer.CELL_SIZE;
-				if (!isSelected() && ship.getXOffset() != x) {
+				p.x = (p.x - getX()) / ShipContainer.CELL_SIZE;
+				if (!isSelected() && ship.getXOffset() != p.x) {
 					saveCollidables();
-					container.setShipOffset(x, ship.getYOffset());
+					container.setShipOffset(p.x, ship.getYOffset());
 					restoreCollidables();
 				}
 			}
@@ -138,14 +146,15 @@ public class ShipController extends ObjectController {
 				0, ShipContainer.CELL_SIZE / 2,
 				ShipContainer.CELL_SIZE / 2, ShipContainer.CELL_SIZE / 4
 		}));
-		opc.addLocationListener(new LocationListener() {
+		opc.addListener(SLEvent.MOVE, new SLListener() {
 			@Override
-			public void notifyLocationChanged(int x, int y) {
+			public void handleEvent(SLEvent e) {
+				Point p = (Point) e.data;
 				ShipObject ship = getGameObject();
-				y = (y - getY()) / ShipContainer.CELL_SIZE;
-				if (!isSelected() && ship.getYOffset() != y) {
+				p.y = (p.y - getY()) / ShipContainer.CELL_SIZE;
+				if (!isSelected() && ship.getYOffset() != p.y) {
 					saveCollidables();
-					container.setShipOffset(ship.getXOffset(), y);
+					container.setShipOffset(ship.getXOffset(), p.y);
 					restoreCollidables();
 				}
 			}
@@ -260,26 +269,29 @@ public class ShipController extends ObjectController {
 		Point[] bounds = getBoundingPoints();
 		Point gridSize = Grid.getInstance().getSize();
 
-		OffsetPropController xOff = (OffsetPropController) getProp(OFFSET_X_PROP_ID);
-		OffsetPropController yOff = (OffsetPropController) getProp(OFFSET_Y_PROP_ID);
-		OffsetPropController hOff = (OffsetPropController) getProp(OFFSET_FINE_X_PROP_ID);
-		OffsetPropController vOff = (OffsetPropController) getProp(OFFSET_FINE_Y_PROP_ID);
-		xOff.setBoundingPoints(getX(), getY() - cs / 2,
+		PropController prop = getProp(OFFSET_X_PROP_ID);
+		prop.setBoundingPoints(getX(), getY() - cs / 2,
 				bounds[1].x + ship.getXOffset() * cs, getY() - cs / 2);
-		yOff.setBoundingPoints(getX() - cs / 2, getY(),
+		prop.setFollowOffset(cs * ship.getXOffset(), -cs / 2);
+		prop.updateFollower();
+
+		prop = getProp(OFFSET_Y_PROP_ID);
+		prop.setBoundingPoints(getX() - cs / 2, getY(),
 				getX() - cs / 2, bounds[1].y + ship.getYOffset() * cs);
-		hOff.setBoundingPoints(0, getY() - 2 * cs / 3,
+		prop.setFollowOffset(-cs / 2, cs * ship.getYOffset());
+		prop.updateFollower();
+
+		prop = getProp(OFFSET_FINE_X_PROP_ID);
+		prop.setBoundingPoints(0, getY() - 2 * cs / 3,
 				gridSize.x, getY() - 2 * cs / 3);
-		vOff.setBoundingPoints(getX() - 2 * cs / 3, 0,
+		prop.setFollowOffset(ship.getHorizontal(), -2 * cs / 3);
+		prop.updateFollower();
+
+		prop = getProp(OFFSET_FINE_Y_PROP_ID);
+		prop.setBoundingPoints(getX() - 2 * cs / 3, 0,
 				getX() - 2 * cs / 3, gridSize.y);
-		xOff.setFollowOffset(cs * ship.getXOffset(), -cs / 2);
-		yOff.setFollowOffset(-cs / 2, cs * ship.getYOffset());
-		hOff.setFollowOffset(ship.getHorizontal(), -2 * cs / 3);
-		vOff.setFollowOffset(-2 * cs / 3, ship.getVertical());
-		xOff.updateFollower();
-		yOff.updateFollower();
-		hOff.updateFollower();
-		vOff.updateFollower();
+		prop.setFollowOffset(-2 * cs / 3, ship.getVertical());
+		prop.updateFollower();
 	}
 
 	@Override
@@ -307,19 +319,24 @@ public class ShipController extends ObjectController {
 	}
 
 	@Override
-	public void notifyModShift(boolean pressed) {
-		setFollowActive(!pressed);
-		if (pressed) {
-			ShipObject ship = getGameObject();
-			setBoundingPoints(0, 0,
-					getX() + ship.getXOffset() * ShipContainer.CELL_SIZE,
-					getY() + ship.getYOffset() * ShipContainer.CELL_SIZE);
+	public void handleEvent(SLEvent e) {
+		if (e.type == SLEvent.MOD_SHIFT) {
+			boolean pressed = (Boolean) e.data;
+			setFollowActive(!pressed);
+			if (pressed) {
+				ShipObject ship = getGameObject();
+				setBoundingPoints(0, 0,
+						getX() + ship.getXOffset() * ShipContainer.CELL_SIZE,
+						getY() + ship.getYOffset() * ShipContainer.CELL_SIZE);
+			} else {
+				Point offset = container.findShipOffset();
+				offset.x /= ShipContainer.CELL_SIZE;
+				offset.y /= ShipContainer.CELL_SIZE;
+				container.setShipOffset(offset.x, offset.y);
+				container.updateBoundingArea();
+			}
 		} else {
-			Point offset = container.findShipOffset();
-			offset.x /= ShipContainer.CELL_SIZE;
-			offset.y /= ShipContainer.CELL_SIZE;
-			container.setShipOffset(offset.x, offset.y);
-			container.updateBoundingArea();
+			super.handleEvent(e);
 		}
 	}
 

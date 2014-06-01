@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.Shapes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.PropView;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
@@ -115,10 +116,19 @@ public class PropController extends AbstractController implements Identifiable {
 	}
 
 	/**
-	 * @return whether or not the prop inherits visibility from its owner.
+	 * @return whether the prop inherits visibility from its owner.
 	 */
 	public boolean isInheritVisibility() {
 		return inheritVisibility;
+	}
+
+	public void handleEvent(SLEvent e) {
+		if (e.type == SLEvent.VISIBLE) {
+			if (inheritVisibility)
+				setVisible((Boolean) e.data);
+		} else {
+			super.handleEvent(e);
+		}
 	}
 
 	public void setImage(String path) {

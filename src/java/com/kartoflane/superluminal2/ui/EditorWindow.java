@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
@@ -39,17 +38,19 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
-import com.kartoflane.superluminal2.components.interfaces.ModifierListener;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
+import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
@@ -79,13 +80,11 @@ public class EditorWindow {
 	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<Tools, ToolItem>();
 	private final RGB canvasRGB = new RGB(164, 164, 164);
 
-	private ArrayList<ModifierListener> modListeners = new ArrayList<ModifierListener>();
-
 	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
 	private Color canvasColor = null;
 	private boolean shellResizing = false;
 
-	private File saveDestination = null;
+	private EventHandler eventHandler = new EventHandler();
 
 	// UI widgets' variables
 	private Shell shell;
@@ -453,18 +452,15 @@ public class EditorWindow {
 				// update modifier states for use in other places in the application
 				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT) {
 					Manager.modShift = true;
-					for (ModifierListener ml : modListeners)
-						ml.notifyModShift(true);
+					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_SHIFT, EditorWindow.this, true));
 				}
 				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT) {
 					Manager.modAlt = true;
-					for (ModifierListener ml : modListeners)
-						ml.notifyModAlt(true);
+					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_ALT, EditorWindow.this, true));
 				}
 				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL) {
 					Manager.modCtrl = true;
-					for (ModifierListener ml : modListeners)
-						ml.notifyModControl(true);
+					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_CTRL, EditorWindow.this, true));
 				}
 
 				handleHotkeys(e);
@@ -476,18 +472,15 @@ public class EditorWindow {
 			public void handleEvent(Event e) {
 				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT) {
 					Manager.modShift = false;
-					for (ModifierListener ml : modListeners)
-						ml.notifyModShift(false);
+					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_SHIFT, EditorWindow.this, false));
 				}
 				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT) {
 					Manager.modAlt = false;
-					for (ModifierListener ml : modListeners)
-						ml.notifyModAlt(false);
+					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_ALT, EditorWindow.this, false));
 				}
 				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL) {
 					Manager.modCtrl = false;
-					for (ModifierListener ml : modListeners)
-						ml.notifyModControl(false);
+					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_CTRL, EditorWindow.this, false));
 				}
 
 				if (e.keyCode == SWT.SPACE && Manager.getSelected() != null)
@@ -584,15 +577,15 @@ public class EditorWindow {
 					return;
 				}
 
-				File temp = saveDestination;
+				File temp = container.getSaveDestination();
 				// Only prompt for save directory if the user hasn't chosen any yet
-				if (saveDestination == null) {
+				if (temp == null) {
 					SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
 					temp = dialog.open();
 				}
 
 				if (temp != null) { // User could've aborted selection, which returns null.
-					saveDestination = temp;
+					container.setSaveDestination(temp);
 					saveShip(container);
 				} else {
 					log.trace("User exited save dialog, ship was not saved.");
@@ -610,7 +603,7 @@ public class EditorWindow {
 				File temp = dialog.open();
 
 				if (temp != null) { // User could've aborted selection, which returns null.
-					saveDestination = temp;
+					container.setSaveDestination(temp);
 					saveShip(container);
 				} else {
 					log.trace("User exited save dialog, ship was not saved.");
@@ -859,6 +852,8 @@ public class EditorWindow {
 	}
 
 	private void saveShip(ShipContainer container) {
+		File saveDestination = container.getSaveDestination();
+
 		if (saveDestination == null)
 			throw new IllegalStateException("Save destination must not be null.");
 
@@ -1113,19 +1108,20 @@ public class EditorWindow {
 		return canvas.forceFocus();
 	}
 
-	public void addModifierListener(ModifierListener ml) {
-		modListeners.add(ml);
-	}
-
-	public void removeModifierListener(ModifierListener ml) {
-		modListeners.remove(ml);
-	}
-
 	public void dispose() {
 		Cache.checkInColor(this, canvasRGB);
 		Grid.getInstance().dispose();
 		Cache.dispose();
 		shell.dispose();
+		eventHandler.dispose();
+	}
+
+	public void addListener(int eventType, SLListener listener) {
+		eventHandler.hook(eventType, listener);
+	}
+
+	public void removeListener(int eventType, SLListener listener) {
+		eventHandler.unhook(eventType, listener);
 	}
 
 	/**

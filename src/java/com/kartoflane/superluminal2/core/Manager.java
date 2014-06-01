@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.Point;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
-import com.kartoflane.superluminal2.components.interfaces.ModifierListener;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
@@ -385,13 +384,5 @@ public class Manager {
 			throw new FileNotFoundException("Could not find file: " + path);
 
 		return result;
-	}
-
-	public static void addModifierListener(ModifierListener ml) {
-		EditorWindow.getInstance().addModifierListener(ml);
-	}
-
-	public static void removeModifierListener(ModifierListener ml) {
-		EditorWindow.getInstance().removeModifierListener(ml);
 	}
 }

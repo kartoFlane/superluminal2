@@ -1,11 +1,13 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
@@ -15,9 +17,10 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
-import com.kartoflane.superluminal2.components.interfaces.LocationListener;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -49,11 +52,12 @@ import com.kartoflane.superluminal2.utils.Utils;
  * @author kartoFlane
  * 
  */
-public class ShipContainer implements Disposable {
+public class ShipContainer implements Disposable, SLListener {
 
 	/** The size of a single cell. Both width and height are equal to this value. */
 	public static final int CELL_SIZE = 35;
-	public static final String HANGAR_IMG_PATH = "db:img/customizeUI/custom_main.png";
+	public static final String HANGAR_IMG_PATH = "cpath:/assets/hangar.png";
+	public static final String ENEMY_IMG_PATH = "cpath:/assets/enemy.png";
 	public static final String SHIELD_RESIZE_PROP_ID = "ShieldResizeHandle";
 
 	private ArrayList<RoomController> roomControllers;
@@ -73,10 +77,13 @@ public class ShipContainer implements Disposable {
 	private boolean stationsVisible = true;
 
 	private boolean shipSaved = false;
+	private File saveDestination = null;
 
 	private ShipController shipController = null;
-
+	private EventHandler eventHandler = null;
 	private EditorWindow window = null;
+
+	private SLListener hangarListener = null;
 
 	private ShipContainer() {
 		roomControllers = new ArrayList<RoomController>();
@@ -88,6 +95,17 @@ public class ShipContainer implements Disposable {
 		objectControllerMap = new HashMap<GameObject, AbstractController>();
 		imageControllerMap = new HashMap<Images, ImageController>();
 		activeSystemMap = new HashMap<RoomObject, SystemObject>();
+
+		eventHandler = new EventHandler();
+		hangarListener = new SLListener() {
+			public void handleEvent(SLEvent e) {
+				if (!shipController.isPlayerShip() && e.source instanceof RoomController) {
+					ImageController hangar = getImageController(Images.HANGAR);
+					Point size = findShipSize();
+					hangar.setFollowOffset(size.x / 2, hangar.getFollowOffset().y);
+				}
+			}
+		};
 	}
 
 	public ShipContainer(EditorWindow window, ShipObject ship) {
@@ -95,7 +113,9 @@ public class ShipContainer implements Disposable {
 		this.window = window;
 
 		shipController = ShipController.newInstance(this, ship);
-		Manager.addModifierListener(shipController);
+		window.addListener(SLEvent.MOD_SHIFT, this);
+		addListener(SLEvent.MOD_SHIFT, shipController);
+
 		((CreationTool) Manager.getTool(Tools.CREATOR)).setEnabled(Tools.STATION, ship.isPlayerShip());
 
 		Grid grid = Grid.getInstance();
@@ -259,6 +279,14 @@ public class ShipContainer implements Disposable {
 		return shipSaved;
 	}
 
+	public void setSaveDestination(File f) {
+		saveDestination = f;
+	}
+
+	public File getSaveDestination() {
+		return saveDestination;
+	}
+
 	public ShipController getShipController() {
 		return shipController;
 	}
@@ -379,14 +407,16 @@ public class ShipContainer implements Disposable {
 			result.x = horizontalSpace % CELL_SIZE;
 			result.y = verticalSpace % CELL_SIZE;
 		} else {
-			// Enemy window is 376 x 504, 55px top margin
-			// final int enemyWindowWidth = 376;
 			// All enemy ships have to have fine horizontal offset equal to 0, that way they're centered
-			int enemyWindowHeight = 504;
-			int topMargin = 55;
+			// Actualy viewable area of the enemy window is 376 x 504
+			// Select midpoint in relation to which the ship's offset will be calculated
+			int enemyWindowMidpoint = 249;
+			// The amount of space taken up by the "target" text, and hull and shield indicators
+			int topMargin = 77;
 
-			shipController.getGameObject().setHorizontal(0);
-			shipController.getGameObject().setVertical((enemyWindowHeight - size.y) / 2 - 3 * topMargin / 2);
+			// Horizontal doesn't affect enemy ships, so 0.
+			result.x = 0;
+			result.y = enemyWindowMidpoint - size.y / 2 - topMargin;
 		}
 
 		return result;
@@ -451,14 +481,14 @@ public class ShipContainer implements Disposable {
 
 		setActiveSystem(room.getGameObject(), sys);
 
-		room.addSizeListener(system);
+		room.addListener(SLEvent.RESIZE, system);
 		system.notifySizeChanged(room.getW(), room.getH());
 
 		if (sys.canContainStation()) {
 			if (!shipController.isPlayerShip()) {
 				station.setSlotId(-2);
 			}
-			room.addSizeListener(station);
+			room.addListener(SLEvent.RESIZE, station);
 			station.updateFollowOffset();
 			station.updateFollower();
 			station.updateView();
@@ -478,8 +508,8 @@ public class ShipContainer implements Disposable {
 		systemC.unassign();
 
 		if (roomC != null) {
-			roomC.removeSizeListener(systemC);
-			roomC.removeSizeListener(stationC);
+			roomC.removeListener(SLEvent.RESIZE, systemC);
+			roomC.removeListener(SLEvent.RESIZE, stationC);
 			roomC.redraw();
 
 			if (activeSystemMap.get(roomC.getGameObject()) == system) {
@@ -508,6 +538,11 @@ public class ShipContainer implements Disposable {
 				room.setId(getNextRoomId());
 			roomControllers.add(room);
 			shipController.getGameObject().add(room.getGameObject());
+
+			room.addListener(SLEvent.MOVE, hangarListener);
+			room.addListener(SLEvent.RESIZE, hangarListener);
+			room.addListener(SLEvent.DELETE, hangarListener);
+			room.addListener(SLEvent.RESTORE, hangarListener);
 		} else if (controller instanceof DoorController) {
 			DoorController door = (DoorController) controller;
 			doorControllers.add(door);
@@ -528,8 +563,11 @@ public class ShipContainer implements Disposable {
 			systemControllers.add(system);
 		}
 
-		if (controller instanceof ObjectController)
+		if (controller instanceof ObjectController) {
 			objectControllerMap.put(((ObjectController) controller).getGameObject(), controller);
+
+			eventHandler.sendEvent(new SLEvent(SLEvent.ADD_OBJECT, this, controller));
+		}
 	}
 
 	public void remove(AbstractController controller) {
@@ -555,8 +593,11 @@ public class ShipContainer implements Disposable {
 			systemControllers.remove(system);
 		}
 
-		if (controller instanceof ObjectController)
+		if (controller instanceof ObjectController) {
 			objectControllerMap.remove(((ObjectController) controller).getGameObject());
+
+			eventHandler.sendEvent(new SLEvent(SLEvent.REM_OBJECT, this, controller));
+		}
 	}
 
 	public void setImage(Images imageType, String path) {
@@ -669,8 +710,9 @@ public class ShipContainer implements Disposable {
 		}
 
 		AbstractController[] objectControllers = objectControllerMap.values().toArray(new AbstractController[0]);
-		for (AbstractController ac : objectControllers)
+		for (AbstractController ac : objectControllers) {
 			ac.dispose();
+		}
 
 		roomControllers.clear();
 		doorControllers.clear();
@@ -680,9 +722,11 @@ public class ShipContainer implements Disposable {
 		imageControllerMap.clear();
 		objectControllerMap.clear();
 
-		Manager.removeModifierListener(shipController);
+		window.removeListener(SLEvent.MOD_SHIFT, this);
 		shipController.dispose();
 		shipController = null;
+
+		eventHandler.dispose();
 
 		System.gc();
 	}
@@ -716,7 +760,7 @@ public class ShipContainer implements Disposable {
 
 	private void createImageControllers() {
 		// Instantiation order is important for proper layering
-		ShipObject ship = shipController.getGameObject();
+		final ShipObject ship = shipController.getGameObject();
 		ImageObject imgObject = null;
 		Point offset = null;
 		Point center = null;
@@ -724,17 +768,35 @@ public class ShipContainer implements Disposable {
 		// Load hangar image
 		imgObject = new ImageObject();
 		imgObject.setAlias("hangar");
-		imgObject.setImagePath(HANGAR_IMG_PATH);
-		ImageController hangar = ImageController.newInstance(shipController, imgObject);
+		imgObject.setImagePath(ship.isPlayerShip() ? HANGAR_IMG_PATH : ENEMY_IMG_PATH);
+		final ImageController hangar = ImageController.newInstance(shipController, imgObject);
 		hangar.setSelectable(false);
 		hangar.removeFromPainter();
 		hangar.addToPainter(Layers.BACKGROUND);
 		hangar.setImage(imgObject.getImagePath());
 		offset = hangar.getSize();
-		hangar.setFollowOffset(offset.x / 2 - 365, offset.y / 2 - 30);
+		// For FTL hangar image: 365, 30
+		// For SL2 hangar image: 94, 56
+		// For enemy window image: 193, 239
+		if (ship.isPlayerShip()) {
+			hangar.setFollowOffset(offset.x / 2 - 94, offset.y / 2 - 56);
+		} else {
+			// Not entirely clear correction; perhaps related to the difference between in-game enemy
+			// window, and the image SL2 uses, which is 26 pixels smaller. 26 * 2 = 52, so kinda related...
+			// Either way, adding this value causes all enemy ships to become correctly aligned
+			int correction = 53;
+			hangar.setFollowOffset(offset.x / 2 - 193, offset.y / 2 - 239 + Database.ENEMY_SHIELD_Y_OFFSET + correction);
+		}
 		hangar.updateFollower();
 		hangar.updateView();
 		imageControllerMap.put(Images.HANGAR, hangar);
+
+		// Enemy ships don't use HORIZONTAL offset; the game automatically centers them in the enemy window
+		// Have the hangar image listen to events when the ship's width changes, so that it can modify its own
+		// location as needed
+		addListener(SLEvent.ADD_OBJECT, hangarListener);
+		addListener(SLEvent.REM_OBJECT, hangarListener);
+		addListener(SLEvent.MOVE, hangarListener);
 
 		// Load shield
 		imgObject = ship.getImage(Images.SHIELD);
@@ -746,10 +808,9 @@ public class ShipContainer implements Disposable {
 		center.x = offset.x + center.x / 2;
 		center.y = offset.y + center.y / 2;
 
-		shield.setFollowOffset(center.x + ship.getEllipse().x, center.y + ship.getEllipse().y);
+		shield.setFollowOffset(center.x + ship.getEllipseX(), center.y + ship.getEllipseY());
 		if (!ship.isPlayerShip()) {
-			Rectangle ellipse = ship.getEllipse();
-			shield.setSize(ellipse.width * 2, ellipse.height * 2);
+			shield.setSize(ship.getEllipseWidth() * 2, ship.getEllipseHeight() * 2);
 		}
 		shield.updateView();
 
@@ -772,11 +833,12 @@ public class ShipContainer implements Disposable {
 			prop.addToPainter(Layers.SHIP_ORIGIN);
 			prop.updateView();
 			shield.addProp(prop);
-			prop.addLocationListener(new LocationListener() {
+			prop.addListener(SLEvent.MOVE, new SLListener() {
 				@Override
-				public void notifyLocationChanged(int x, int y) {
+				public void handleEvent(SLEvent e) {
+					Point p = (Point) e.data;
 					ImageController shieldC = getImageController(Images.SHIELD);
-					shieldC.resize(Math.abs(x - shieldC.getX()) * 2, Math.abs(y - shieldC.getY()) * 2);
+					shieldC.resize(Math.abs(p.x - shieldC.getX()) * 2, Math.abs(p.y - shieldC.getY()) * 2);
 				}
 			});
 		}
@@ -950,5 +1012,19 @@ public class ShipContainer implements Disposable {
 			}
 		}
 		return systems;
+	}
+
+	public void addListener(int eventType, SLListener listener) {
+		eventHandler.hook(eventType, listener);
+	}
+
+	public void removeListener(int eventType, SLListener listener) {
+		eventHandler.unhook(eventType, listener);
+	}
+
+	@Override
+	public void handleEvent(SLEvent e) {
+		// Send the event over to controllers
+		eventHandler.sendEvent(e);
 	}
 }
