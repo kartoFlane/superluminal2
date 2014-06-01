@@ -21,11 +21,11 @@ public class PropController extends AbstractController implements Identifiable {
 	protected String compositeTitle = "Prop";
 	protected boolean inheritVisibility = false;
 
-	private PropController(AbstractController parent, BaseModel model, PropView view, String id) {
+	protected PropController(AbstractController parent, BaseModel model, PropView view, String id) {
 		super();
 		setModel(model);
 		setView(view);
-		setShape(Shapes.SQUARE);
+		setShape(Shapes.RECTANGLE);
 
 		identifier = id;
 
