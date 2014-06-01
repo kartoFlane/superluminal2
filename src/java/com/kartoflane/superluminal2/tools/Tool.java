@@ -49,7 +49,7 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 
 		if (selectableLayerIds == null) {
 			Layers[] allLayerIds = LayeredPainter.getInstance().getSelectionOrder();
-			Layers[] ignoredLayers = { Layers.CURSOR, Layers.GRID, Layers.OVERLAY, Layers.SYSTEM, Layers.STATION };
+			Layers[] ignoredLayers = { Layers.CURSOR, Layers.GRID, Layers.SYSTEM, Layers.STATION };
 			selectableLayerIds = new Layers[allLayerIds.length];
 
 			for (int i = 0; i < allLayerIds.length; i++) {
