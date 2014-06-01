@@ -447,6 +447,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 					container.updateMounts();
 
 					EditorWindow.getInstance().updateSidebarScroll();
+				} else {
+					ship.setWeaponSlots(spWeaponSlots.getSelection());
+					updateData();
 				}
 			}
 		});
@@ -521,6 +524,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 					updateData();
 
 					EditorWindow.getInstance().updateSidebarScroll();
+				} else {
+					ship.setDroneSlots(spDroneSlots.getSelection());
+					updateData();
 				}
 			}
 		});
