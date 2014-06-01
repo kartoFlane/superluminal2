@@ -41,4 +41,7 @@ public class PropDataComposite extends Composite implements DataComposite {
 	public void setController(AbstractController controller) {
 		this.controller = (PropController) controller;
 	}
+
+	public void reloadController() {
+	}
 }

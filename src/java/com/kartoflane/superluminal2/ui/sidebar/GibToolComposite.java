@@ -7,7 +7,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 
@@ -42,6 +41,10 @@ public class GibToolComposite extends Composite implements DataComposite {
 	}
 
 	public void setController(AbstractController c) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void reloadController() {
 	}
 
 	@Override

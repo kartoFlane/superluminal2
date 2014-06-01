@@ -309,4 +309,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 	public void setController(AbstractController c) {
 		throw new UnsupportedOperationException();
 	}
+
+	public void reloadController() {
+	}
 }

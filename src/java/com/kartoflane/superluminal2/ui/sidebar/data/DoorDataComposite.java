@@ -182,4 +182,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 	public void setController(AbstractController controller) {
 		this.controller = (DoorController) controller;
 	}
+
+	public void reloadController() {
+	}
 }

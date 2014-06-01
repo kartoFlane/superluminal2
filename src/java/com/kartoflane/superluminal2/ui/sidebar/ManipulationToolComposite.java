@@ -141,7 +141,7 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				controller.setPinned(btnPinned.getSelection());
-				updateData();
+				setController(controller);
 				EditorWindow.getInstance().forceFocus();
 			}
 		});
@@ -222,20 +222,7 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 	public void setController(AbstractController controller) {
 		dataLoad = true;
 
-		if (controller == null) {
-			btnPinned.setSelection(false);
-
-			Composite c = (Composite) getDataComposite();
-			if (c != null)
-				c.dispose();
-
-			spX.setSelection(0);
-			spY.setSelection(0);
-			spNudge.setSelection(1);
-			setEnabled(false);
-		} else {
-			setEnabled(true);
-
+		if (controller != null) {
 			if (this.controller != null && this.controller.getClass().equals(controller.getClass())) {
 				// If the previously selected object is of the same type as the newly
 				// selected one, don't dispose the composite -- just update it with new data
@@ -260,6 +247,41 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		dataLoad = false;
 
 		this.controller = controller;
+		reloadController();
+	}
+
+	public void reloadController() {
+		dataLoad = true;
+
+		if (controller == null) {
+			btnPinned.setSelection(false);
+
+			Composite c = (Composite) getDataComposite();
+			if (c != null)
+				c.dispose();
+
+			spX.setSelection(0);
+			spY.setSelection(0);
+			spNudge.setSelection(1);
+			setEnabled(false);
+		} else {
+			setEnabled(true);
+
+			btnPinned.setSelection(controller.isPinned());
+			spX.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+			spY.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+			btnUp.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+			btnLeft.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+			btnDown.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+			btnRight.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+			spNudge.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+
+			DataComposite dc = getDataComposite();
+			dc.setController(controller);
+			dc.updateData();
+		}
+
+		dataLoad = false;
 		updateData();
 		EditorWindow.getInstance().updateSidebarScroll();
 	}
@@ -280,15 +302,6 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		Point p = controller.getPresentedLocation();
 		spX.setSelection(p.x);
 		spY.setSelection(p.y);
-
-		btnPinned.setSelection(controller.isPinned());
-		spX.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-		spY.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-		btnUp.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-		btnLeft.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-		btnDown.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-		btnRight.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-		spNudge.setEnabled(!controller.isPinned() && controller.isLocModifiable());
 
 		if (getDataComposite() != null)
 			getDataComposite().updateData();

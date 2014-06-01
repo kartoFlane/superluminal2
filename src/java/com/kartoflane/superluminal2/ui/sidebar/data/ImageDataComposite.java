@@ -40,4 +40,7 @@ public class ImageDataComposite extends Composite implements DataComposite {
 	public void setController(AbstractController controller) {
 		this.controller = (ImageController) controller;
 	}
+
+	public void reloadController() {
+	}
 }

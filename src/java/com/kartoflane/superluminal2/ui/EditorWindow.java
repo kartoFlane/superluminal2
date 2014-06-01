@@ -922,6 +922,7 @@ public class EditorWindow {
 		Control c = sideContainer.getContent();
 		if (c != null) {
 			if (c instanceof DataComposite) {
+				((DataComposite) c).reloadController();
 				((DataComposite) c).updateData();
 			}
 		}

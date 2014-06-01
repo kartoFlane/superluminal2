@@ -384,4 +384,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	public void setController(AbstractController roomC) {
 		this.roomC = (RoomController) roomC;
 	}
+
+	public void reloadController() {
+	}
 }

@@ -17,4 +17,6 @@ public interface DataComposite {
 	 * calls the updateData() method.
 	 */
 	public void setController(AbstractController controller);
+
+	public void reloadController();
 }

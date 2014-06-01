@@ -131,6 +131,9 @@ public class MountToolComposite extends Composite implements DataComposite {
 		throw new UnsupportedOperationException();
 	}
 
+	public void reloadController() {
+	}
+
 	@Override
 	public void dispose() {
 		super.dispose();

@@ -40,4 +40,7 @@ public class GibDataComposite extends Composite implements DataComposite {
 	public void setController(AbstractController controller) {
 		this.controller = (GibController) controller;
 	}
+
+	public void reloadController() {
+	}
 }

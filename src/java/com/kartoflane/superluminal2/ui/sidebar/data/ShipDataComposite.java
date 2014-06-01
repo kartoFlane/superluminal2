@@ -34,4 +34,7 @@ public class ShipDataComposite extends Composite implements DataComposite {
 	public void setController(AbstractController controller) {
 		this.controller = (ShipController) controller;
 	}
+
+	public void reloadController() {
+	}
 }

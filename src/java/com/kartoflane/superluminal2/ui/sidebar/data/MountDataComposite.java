@@ -162,6 +162,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 		this.controller = (MountController) controller;
 	}
 
+	public void reloadController() {
+	}
+
 	@Override
 	public void dispose() {
 		super.dispose();
