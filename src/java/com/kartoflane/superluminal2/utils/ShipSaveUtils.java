@@ -175,14 +175,14 @@ public class ShipSaveUtils {
 		}
 
 		for (Systems sys : Systems.getSystems()) {
-			for (SystemObject object : ship.getSystems(sys)) {
-				String path = object.getInteriorPath();
+			for (SystemObject system : ship.getSystems(sys)) {
+				String path = system.getInteriorPath();
 
-				if (path != null) {
+				if (path != null && system.isAssigned()) {
 					InputStream is = null;
 					try {
 						is = Manager.getInputStream(path);
-						fileName = "img/ship/interior/" + object.getInteriorNamespace() + ".png";
+						fileName = "img/ship/interior/" + system.getInteriorNamespace() + ".png";
 						fileMap.put(fileName, IOUtils.readStream(is));
 					} catch (FileNotFoundException e) {
 						log.warn(String.format("File for %s interior image could not be found: %s", sys, path));

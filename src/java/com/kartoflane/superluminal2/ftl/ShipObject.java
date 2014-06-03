@@ -1160,7 +1160,7 @@ public class ShipObject extends GameObject {
 		for (Systems sys : systemMap.keySet()) {
 			SystemObject system = getSystem(sys);
 			String namespace = system.getInteriorNamespace();
-			if (sys.canContainStation() && sys.canContainGlow() &&
+			if (system.isAssigned() && sys.canContainStation() && sys.canContainGlow() &&
 					namespace != null && system.getGlowSet() == Database.DEFAULT_GLOW_SET) {
 				RoomObject room = system.getRoom();
 				StationObject station = system.getStation();
