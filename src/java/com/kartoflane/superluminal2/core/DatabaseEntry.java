@@ -100,6 +100,10 @@ public class DatabaseEntry {
 		return file == null ? "" : file.getName();
 	}
 
+	public File getFile() {
+		return file;
+	}
+
 	/**
 	 * @return true if the entry contains the innerPath, false otherwise
 	 */

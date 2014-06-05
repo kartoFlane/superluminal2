@@ -642,8 +642,10 @@ public class EditorWindow {
 							db.loadCore(data, resource);
 							db.getCore().load();
 
-							for (DatabaseEntry de : entries)
-								db.addEntry(de);
+							for (DatabaseEntry de : entries) {
+								// Need to reopen the entries, since they were closed during removal
+								db.addEntry(new DatabaseEntry(de.getFile()));
+							}
 
 							db.cacheAnimations();
 						} catch (IOException e) {
