@@ -1,7 +1,5 @@
 package com.kartoflane.superluminal2.mvc.models;
 
-import java.io.Serializable;
-
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
@@ -16,9 +14,7 @@ import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public class BaseModel implements Model, Movable, Resizable, Disposable, Deletable,
-		Collidable, Boundable, Pinnable, Serializable {
-
-	private static final long serialVersionUID = 4410723942852766462L;
+		Collidable, Boundable, Pinnable {
 
 	protected Rectangle bounds = null;
 	protected Point position = null;
@@ -197,7 +193,6 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 			boundingArea = new Rectangle(0, 0, 0, 0);
 	}
 
-	@Override
 	public Rectangle getBoundingArea() {
 		if (boundingArea == null)
 			boundingArea = new Rectangle(0, 0, 0, 0);
@@ -220,7 +215,6 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 		return boundingArea == null ? 0 : boundingArea.height;
 	}
 
-	@Override
 	public void setBoundingArea(int x, int y, int w, int h) {
 		if (boundingArea == null)
 			boundingArea = new Rectangle(0, 0, 0, 0);
@@ -236,6 +230,29 @@ public class BaseModel implements Model, Movable, Resizable, Disposable, Deletab
 
 	public void setBoundingArea(Point start, Point end) {
 		setBoundingArea(start.x, start.y, end.x - start.x, end.y - start.y);
+	}
+
+	@Override
+	public boolean isWithinBoundingArea(int x, int y) {
+		return x >= boundingArea.x && x <= boundingArea.x + boundingArea.width &&
+				y >= boundingArea.y && y <= boundingArea.y + boundingArea.height;
+	}
+
+	@Override
+	public Point limitToBoundingArea(int x, int y) {
+		Point p = new Point(x, y);
+		int t = 0;
+
+		if (x < boundingArea.x)
+			p.x = boundingArea.x;
+		else if (x > (t = boundingArea.x + boundingArea.width))
+			p.x = t;
+		if (y < boundingArea.y)
+			p.y = boundingArea.y;
+		else if (y > (t = boundingArea.y + boundingArea.height))
+			p.y = t;
+
+		return p;
 	}
 
 	@Override

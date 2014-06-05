@@ -1,6 +1,6 @@
 package com.kartoflane.superluminal2.components.interfaces;
 
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Point;
 
 /**
  * Classes implementing this interface can be bounded to an area,
@@ -24,25 +24,7 @@ public interface Boundable {
 	 */
 	public void setBounded(boolean bound);
 
-	/**
-	 * @return the area to which the object is bound.
-	 */
-	public Rectangle getBoundingArea();
+	public boolean isWithinBoundingArea(int x, int y);
 
-	/**
-	 * Specify the area to which this object will be bounded.<br>
-	 * The object cannot be moved to a location that falls outside
-	 * of the bounding area, however parts of the object <b>can</b>
-	 * fall outside of it, if it is large enough.
-	 * 
-	 * @param x
-	 *            starting point of the bounding area
-	 * @param y
-	 *            starting point of the bounding area
-	 * @param w
-	 *            width of the bounding area
-	 * @param h
-	 *            height of the bounding area
-	 */
-	public void setBoundingArea(int x, int y, int w, int h);
+	public Point limitToBoundingArea(int x, int y);
 }

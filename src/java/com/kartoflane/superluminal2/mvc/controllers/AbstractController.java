@@ -33,6 +33,7 @@ import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
@@ -114,22 +115,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public boolean setLocation(int x, int y) {
 		// if the new location falls outside of the area the object is
 		// bounded to, change the parameters to be as close the border as possible
-		if (isBounded()) {
-			int nx = x, ny = y;
-			int bx = getBoundingAreaX(), by = getBoundingAreaY();
-			int t = 0;
-
-			if (x < bx)
-				nx = bx;
-			else if (x > (t = bx + getBoundingAreaW()))
-				nx = t;
-			if (y < by)
-				ny = by;
-			else if (y > (t = by + getBoundingAreaH()))
-				ny = t;
-
-			x = nx;
-			y = ny;
+		if (isBounded() && !isWithinBoundingArea(x, y)) {
+			Point p = limitToBoundingArea(x, y);
+			x = p.x;
+			y = p.y;
 		}
 
 		if (isCollidable()) {
@@ -176,22 +165,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public boolean translate(int dx, int dy) {
 		// if the new location falls outside of the area the object is
 		// bounded to, change the parameters to be as close the border as possible
-		if (isBounded()) {
-			int nx = dx, ny = dy;
-			int bx = getBoundingAreaX(), by = getBoundingAreaY();
-			int t = 0;
-
-			if (getX() + dx < bx)
-				nx = bx - getX();
-			else if (getX() + dx > (t = bx + getBoundingAreaW()))
-				nx = t - getX();
-			if (getY() + dy < by)
-				ny = by - getY();
-			else if (getY() + dy > (t = by + getBoundingAreaH()))
-				ny = t - getY();
-
-			dx = nx;
-			dy = ny;
+		if (isBounded() && !isWithinBoundingArea(getX() + dx, getY() + dy)) {
+			Point p = limitToBoundingArea(getX() + dx, getY() + dy);
+			dx = p.x - getX();
+			dy = p.y - getY();
 		}
 
 		if (isCollidable()) {
@@ -721,7 +698,14 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		model.setBounded(bound);
 	}
 
-	@Override
+	public boolean isWithinBoundingArea(int x, int y) {
+		return model.isWithinBoundingArea(x, y);
+	}
+
+	public Point limitToBoundingArea(int x, int y) {
+		return model.limitToBoundingArea(x, y);
+	}
+
 	public Rectangle getBoundingArea() {
 		return model.getBoundingArea();
 	}
@@ -742,7 +726,6 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return model.getBoundingAreaH();
 	}
 
-	@Override
 	public void setBoundingArea(int x, int y, int w, int h) {
 		model.setBoundingArea(x, y, w, h);
 	}

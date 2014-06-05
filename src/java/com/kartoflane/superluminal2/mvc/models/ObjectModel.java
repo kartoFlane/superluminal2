@@ -3,7 +3,6 @@ package com.kartoflane.superluminal2.mvc.models;
 import com.kartoflane.superluminal2.ftl.GameObject;
 
 public class ObjectModel extends BaseModel {
-	private static final long serialVersionUID = -3183152886974835014L;
 
 	protected GameObject gameObject = null;
 
