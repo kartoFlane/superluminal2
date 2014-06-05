@@ -9,7 +9,6 @@ import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.GibToolComposite;
@@ -29,22 +28,12 @@ public class GibTool extends Tool {
 		GibToolComposite gibC = getToolComposite(window.getSidebarWidget());
 		window.setSidebarContent(gibC);
 
-		ShipContainer container = Manager.getCurrentShip();
-		for (GibController gc : container.getGibControllers()) {
-			gc.setVisible(true);
-		}
-
 		cursor.setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
 		cursor.setVisible(false);
 	}
 
 	@Override
 	public void deselect() {
-		ShipContainer container = Manager.getCurrentShip();
-		for (GibController gc : container.getGibControllers()) {
-			gc.setVisible(false);
-		}
-
 		cursor.setVisible(false);
 	}
 

@@ -270,8 +270,10 @@ public class UIUtils {
 	 * @param task
 	 *            the task that is to be performed in the background, or null to make the method return immediately.
 	 * 
+	 * @throws IllegalArgumentException
+	 *             when the parent shell is null.
 	 */
-	public static void showLoadDialog(Shell parentShell, String title, String message, final LoadTask task) {
+	public static void showLoadDialog(Shell parentShell, String title, String message, final LoadTask task) throws IllegalArgumentException {
 		if (task == null)
 			return;
 
