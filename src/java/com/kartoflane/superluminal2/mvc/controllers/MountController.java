@@ -9,6 +9,7 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
+import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.MountView;
 import com.kartoflane.superluminal2.ui.ShipContainer;

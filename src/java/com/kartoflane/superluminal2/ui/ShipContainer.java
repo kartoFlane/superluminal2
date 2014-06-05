@@ -36,11 +36,11 @@ import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.mvc.controllers.ImageController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
-import com.kartoflane.superluminal2.mvc.controllers.PropController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.StationController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
+import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -170,7 +170,6 @@ public class ShipContainer implements Disposable, SLListener {
 			gc.updateFollower();
 
 			add(gc);
-			gc.setVisible(false);
 			i--;
 		}
 

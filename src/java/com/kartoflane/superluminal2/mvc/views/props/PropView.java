@@ -1,9 +1,10 @@
-package com.kartoflane.superluminal2.mvc.views;
+package com.kartoflane.superluminal2.mvc.views.props;
 
 import org.eclipse.swt.events.PaintEvent;
 
 import com.kartoflane.superluminal2.components.enums.Shapes;
-import com.kartoflane.superluminal2.mvc.controllers.PropController;
+import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
+import com.kartoflane.superluminal2.mvc.views.BaseView;
 
 public class PropView extends BaseView {
 
@@ -13,7 +14,7 @@ public class PropView extends BaseView {
 		super();
 	}
 
-	private PropController getController() {
+	protected PropController getController() {
 		return (PropController) controller;
 	}
 

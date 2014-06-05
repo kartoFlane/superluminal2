@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.mvc.controllers;
+package com.kartoflane.superluminal2.mvc.controllers.props;
 
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
@@ -8,8 +8,9 @@ import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.Shapes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
-import com.kartoflane.superluminal2.mvc.views.PropView;
+import com.kartoflane.superluminal2.mvc.views.props.PropView;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.PropDataComposite;
 

@@ -7,7 +7,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.PropController;
+import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 
 public class PropDataComposite extends Composite implements DataComposite {
 
