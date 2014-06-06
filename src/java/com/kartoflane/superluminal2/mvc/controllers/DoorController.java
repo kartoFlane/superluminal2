@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.mvc.controllers;
 
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -7,12 +8,14 @@ import org.eclipse.swt.widgets.Composite;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.mvc.views.DoorView;
+import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DoorDataComposite;
@@ -167,6 +170,19 @@ public class DoorController extends ObjectController {
 		super.deselect();
 		setMoving(false);
 		updateSelectionAppearance();
+	}
+
+	@Override
+	public void mouseMove(MouseEvent e) {
+		int oldX = getX(), oldY = getY();
+
+		super.mouseMove(e);
+
+		if (Manager.resetDoorLinksOnMove && (oldX != getX() || oldY != getY())) {
+			setLeftRoom(null);
+			setRightRoom(null);
+			((DataComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+		}
 	}
 
 	@Override

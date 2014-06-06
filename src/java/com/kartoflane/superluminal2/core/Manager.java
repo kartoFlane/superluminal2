@@ -63,6 +63,7 @@ public class Manager {
 	public static Point windowSize = null;
 	public static String resourcePath = "";
 	public static boolean allowRoomOverlap = false;
+	public static boolean resetDoorLinksOnMove = false;
 	public static boolean shownSlotWarning = false;
 
 	// Runtime variables

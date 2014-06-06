@@ -22,6 +22,7 @@ public class SuperluminalConfig {
 	public static final String GEOMETRY = "geometry";
 	public static final String CHECK_UPDATES = "checkUpdatesOnStartup";
 	public static final String ALLOW_OVERLAP = "allowRoomOverlap";
+	public static final String RESET_LINKS = "resetDoorLinksOnMove";
 	public static final String SLOT_WARNING = "shownSlotWarning";
 
 	public SuperluminalConfig(Properties config, File configFile) {
@@ -92,6 +93,7 @@ public class SuperluminalConfig {
 		config.setProperty(GEOMETRY, "");
 		config.setProperty(CHECK_UPDATES, "true");
 		config.setProperty(ALLOW_OVERLAP, "false");
+		config.setProperty(RESET_LINKS, "false");
 		config.setProperty(SLOT_WARNING, "false");
 	}
 
@@ -99,16 +101,17 @@ public class SuperluminalConfig {
 	 * Updates the config properties with the current runtime values.
 	 */
 	public void setCurrent() {
-		config.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
-		config.setProperty(SuperluminalConfig.SAVE_GEOMETRY, "" + Manager.rememberGeometry);
-		config.setProperty(SuperluminalConfig.START_MAX, "" + Manager.startMaximised);
-		config.setProperty(SuperluminalConfig.SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
-		config.setProperty(SuperluminalConfig.CHECK_UPDATES, "" + Manager.checkUpdates);
-		config.setProperty(SuperluminalConfig.CLOSE_LOADER, "" + Manager.closeLoader);
-		config.setProperty(SuperluminalConfig.ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
-		config.setProperty(SuperluminalConfig.SLOT_WARNING, "" + Manager.shownSlotWarning);
+		config.setProperty(FTL_RESOURCE, Manager.resourcePath);
+		config.setProperty(SAVE_GEOMETRY, "" + Manager.rememberGeometry);
+		config.setProperty(START_MAX, "" + Manager.startMaximised);
+		config.setProperty(SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
+		config.setProperty(CHECK_UPDATES, "" + Manager.checkUpdates);
+		config.setProperty(CLOSE_LOADER, "" + Manager.closeLoader);
+		config.setProperty(ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
+		config.setProperty(RESET_LINKS, "" + Manager.resetDoorLinksOnMove);
+		config.setProperty(SLOT_WARNING, "" + Manager.shownSlotWarning);
 		if (Manager.rememberGeometry && !Manager.startMaximised)
-			config.setProperty(SuperluminalConfig.GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
+			config.setProperty(GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 	}
 
 	public void writeConfig() throws IOException {

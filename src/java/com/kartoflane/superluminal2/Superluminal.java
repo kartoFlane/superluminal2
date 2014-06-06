@@ -156,6 +156,7 @@ public class Superluminal {
 		Manager.startMaximised = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.START_MAX));
 		Manager.closeLoader = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CLOSE_LOADER));
 		Manager.allowRoomOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP));
+		Manager.resetDoorLinksOnMove = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.RESET_LINKS));
 		Manager.shownSlotWarning = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SLOT_WARNING));
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
