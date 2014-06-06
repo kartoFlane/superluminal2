@@ -33,7 +33,7 @@ public class ShipObject extends GameObject {
 	private TreeSet<RoomObject> rooms;
 	private HashSet<DoorObject> doors;
 	private TreeSet<MountObject> mounts;
-	private HashSet<GibObject> gibs;
+	private TreeSet<GibObject> gibs;
 
 	private HashMap<Systems, ArrayList<SystemObject>> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
@@ -75,7 +75,7 @@ public class ShipObject extends GameObject {
 		rooms = new TreeSet<RoomObject>();
 		doors = new HashSet<DoorObject>();
 		mounts = new TreeSet<MountObject>();
-		gibs = new HashSet<GibObject>();
+		gibs = new TreeSet<GibObject>();
 		systemMap = new HashMap<Systems, ArrayList<SystemObject>>();
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
