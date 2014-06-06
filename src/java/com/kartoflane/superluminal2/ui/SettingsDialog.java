@@ -2,9 +2,12 @@ package com.kartoflane.superluminal2.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,6 +35,7 @@ public class SettingsDialog {
 	private Button btnMaximise;
 	private Button btnSidebar;
 	private Button btnCancel;
+	private Button btnResetLinks;
 
 	public SettingsDialog(Shell parent) {
 		if (instance != null)
@@ -45,6 +49,12 @@ public class SettingsDialog {
 		final TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
+		/*
+		 * ====================
+		 * Behaviour tab
+		 * ====================
+		 */
+
 		TabItem tbtmBehaviour = new TabItem(tabFolder, SWT.NONE);
 		tbtmBehaviour.setText("Behaviour");
 
@@ -54,40 +64,60 @@ public class SettingsDialog {
 		scBehaviour.setExpandHorizontal(true);
 		scBehaviour.setExpandVertical(true);
 
-		Composite compBehaviour = new Composite(scBehaviour, SWT.NONE);
+		final Composite compBehaviour = new Composite(scBehaviour, SWT.NONE);
 		compBehaviour.setLayout(new GridLayout(1, false));
 
 		btnOverlap = new Button(compBehaviour, SWT.CHECK);
+		btnOverlap.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnOverlap.setText("Allow Room Overlap");
 
-		Label lblOverlap = new Label(compBehaviour, SWT.NONE);
+		Label lblOverlap = new Label(compBehaviour, SWT.WRAP);
+		lblOverlap.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		lblOverlap.setText("Disables room collision when checked, allowing them to overlap.");
 
 		Label separator01 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator01.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		separator01.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 
 		btnLoader = new Button(compBehaviour, SWT.CHECK);
+		btnLoader.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnLoader.setText("Close Ship Loader After Loading");
 
-		Label lblLoader = new Label(compBehaviour, SWT.NONE);
-		lblLoader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		Label lblLoader = new Label(compBehaviour, SWT.WRAP);
+		lblLoader.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		lblLoader.setText("Closes the ship loader when a ship is successfully loaded.");
+
+		Label separator02 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator02.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+
+		btnResetLinks = new Button(compBehaviour, SWT.CHECK);
+		btnResetLinks.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		btnResetLinks.setText("Reset Door Links When Door Is Moved");
+
+		Label lblResetLinks = new Label(compBehaviour, SWT.WRAP);
+		lblResetLinks.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		lblResetLinks.setText("Resets the door links when a door is moved, so that no accidental connections will be made.");
 		scBehaviour.setContent(compBehaviour);
-		scBehaviour.setMinSize(compBehaviour.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		/*
+		 * ====================
+		 * Config tab
+		 * ====================
+		 */
 
 		TabItem tbtmConfig = new TabItem(tabFolder, SWT.NONE);
 		tbtmConfig.setText("Config");
 
 		final ScrolledComposite scConfig = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
-		scConfig.setAlwaysShowScrollBars(true);
-		tbtmConfig.setControl(scConfig);
 		scConfig.setExpandHorizontal(true);
 		scConfig.setExpandVertical(true);
+		scConfig.setAlwaysShowScrollBars(true);
+		tbtmConfig.setControl(scConfig);
 
-		Composite compConfig = new Composite(scConfig, SWT.NONE);
+		final Composite compConfig = new Composite(scConfig, SWT.NONE);
 		compConfig.setLayout(new GridLayout(1, false));
 
 		btnUpdates = new Button(compConfig, SWT.CHECK);
+		btnUpdates.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnUpdates.setText("Check for Updates on Startup");
 
 		Label lblUpdates = new Label(compConfig, SWT.WRAP);
@@ -95,9 +125,10 @@ public class SettingsDialog {
 		lblUpdates.setText("If checked, the editor will check for available updates each time it is started.");
 
 		Label separator11 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator11.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		separator11.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
 		btnGeometry = new Button(compConfig, SWT.CHECK);
+		btnGeometry.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnGeometry.setText("Remember Window Size");
 
 		Label lblGeometry = new Label(compConfig, SWT.WRAP);
@@ -105,26 +136,33 @@ public class SettingsDialog {
 		lblGeometry.setText("If checked, size of the editor's window will be remembered and restored on startup.");
 
 		Label separator12 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator12.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		separator12.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
 		btnMaximise = new Button(compConfig, SWT.CHECK);
+		btnMaximise.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnMaximise.setText("Start Maximised");
 
-		Label lblMaximise = new Label(compConfig, SWT.NONE);
-		lblMaximise.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lblMaximise.setText("If checked, the editor window will start maximised.\nOverrides 'Remember Window Size'");
+		Label lblMaximise = new Label(compConfig, SWT.WRAP);
+		lblMaximise.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		lblMaximise.setText("If checked, the editor window will start maximised. Overrides 'Remember Window Size'");
 
 		Label separator13 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator13.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		separator13.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
 		btnSidebar = new Button(compConfig, SWT.CHECK);
+		btnSidebar.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnSidebar.setText("Sidebar on Right Side");
 
-		Label lblSidebar = new Label(compConfig, SWT.NONE);
-		lblSidebar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		Label lblSidebar = new Label(compConfig, SWT.WRAP);
+		lblSidebar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		lblSidebar.setText("If checked, the sidebar will be located on the right side of the window.");
 		scConfig.setContent(compConfig);
-		scConfig.setMinSize(compConfig.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		/*
+		 * ====================
+		 * Keybinds tab
+		 * ====================
+		 */
 
 		TabItem tbtmKeybinds = new TabItem(tabFolder, SWT.NONE);
 		tbtmKeybinds.setText("Keybinds");
@@ -135,14 +173,19 @@ public class SettingsDialog {
 		scKeybinds.setExpandHorizontal(true);
 		scKeybinds.setExpandVertical(true);
 
-		Composite compKeybinds = new Composite(scKeybinds, SWT.NONE);
+		final Composite compKeybinds = new Composite(scKeybinds, SWT.NONE);
 		compKeybinds.setLayout(new GridLayout(1, false));
 
 		Label lblNYI = new Label(compKeybinds, SWT.NONE);
-		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
+		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
 		lblNYI.setText("(UI not yet implemented - can be edited by hand in hotkeys.xml.\nEditor must not be running, or the changes will not be applied)");
 		scKeybinds.setContent(compKeybinds);
-		scKeybinds.setMinSize(compKeybinds.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		/*
+		 * ====================
+		 * Buttons
+		 * ====================
+		 */
 
 		Button btnConfirm = new Button(shell, SWT.NONE);
 		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false, 1, 1);
@@ -162,6 +205,7 @@ public class SettingsDialog {
 				// Behaviour
 				Manager.allowRoomOverlap = btnOverlap.getSelection();
 				Manager.closeLoader = btnLoader.getSelection();
+				Manager.resetDoorLinksOnMove = btnResetLinks.getSelection();
 
 				// Config
 				Manager.checkUpdates = btnUpdates.getSelection();
@@ -217,6 +261,29 @@ public class SettingsDialog {
 			}
 		});
 
+		scKeybinds.addControlListener(new ControlAdapter() {
+			public void controlResized(ControlEvent e) {
+				// Recalculate height in case the resize makes texts
+				// wrap or things happen that require it
+				Rectangle r = scKeybinds.getClientArea();
+				scKeybinds.setMinHeight(compKeybinds.computeSize(r.width, SWT.DEFAULT).y);
+			}
+		});
+
+		scConfig.addControlListener(new ControlAdapter() {
+			public void controlResized(ControlEvent e) {
+				Rectangle r = scConfig.getClientArea();
+				scConfig.setMinHeight(compConfig.computeSize(r.width, SWT.DEFAULT, true).y);
+			}
+		});
+
+		scBehaviour.addControlListener(new ControlAdapter() {
+			public void controlResized(ControlEvent e) {
+				Rectangle r = scBehaviour.getClientArea();
+				scBehaviour.setMinHeight(compBehaviour.computeSize(r.width, SWT.DEFAULT).y);
+			}
+		});
+
 		shell.setMinimumSize(400, 300);
 		shell.pack();
 
@@ -224,12 +291,16 @@ public class SettingsDialog {
 		Point parSize = parent.getSize();
 		Point parLoc = parent.getLocation();
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+
+		tabFolder.notifyListeners(SWT.Selection, null);
 	}
 
 	public void open() {
+
 		// Behaviour
 		btnOverlap.setSelection(Manager.allowRoomOverlap);
 		btnLoader.setSelection(Manager.closeLoader);
+		btnResetLinks.setSelection(Manager.resetDoorLinksOnMove);
 
 		// Config
 		btnGeometry.setSelection(Manager.rememberGeometry);
