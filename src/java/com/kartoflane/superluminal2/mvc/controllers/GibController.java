@@ -77,35 +77,35 @@ public class GibController extends ImageController {
 		return getGameObject().getDirectionMax();
 	}
 
-	public void setLinearVelocityMin(float vel) {
-		getGameObject().setVelocityMin(vel);
+	public void setLinearVelocityMin(double d) {
+		getGameObject().setVelocityMin(d);
 	}
 
-	public float getLinearVelocityMin() {
+	public double getLinearVelocityMin() {
 		return getGameObject().getVelocityMin();
 	}
 
-	public void setLinearVelocityMax(float vel) {
+	public void setLinearVelocityMax(double vel) {
 		getGameObject().setVelocityMax(vel);
 	}
 
-	public float getLinearVelocityMax() {
+	public double getLinearVelocityMax() {
 		return getGameObject().getVelocityMax();
 	}
 
-	public void setAngularVelocityMin(float vel) {
+	public void setAngularVelocityMin(double vel) {
 		getGameObject().setAngularMin(vel);
 	}
 
-	public float getAngularVelocityMin() {
+	public double getAngularVelocityMin() {
 		return getGameObject().getAngularMin();
 	}
 
-	public void setAngularVelocityMax(float vel) {
+	public void setAngularVelocityMax(double vel) {
 		getGameObject().setAngularMax(vel);
 	}
 
-	public float getAngularVelocityMax() {
+	public double getAngularVelocityMax() {
 		return getGameObject().getAngularMax();
 	}
 

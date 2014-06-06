@@ -775,12 +775,12 @@ public class ShipLoadUtils {
 					attr = child.getAttributeValue("min");
 					if (attr == null)
 						throw new IllegalArgumentException("Velocity missing 'min' attribute");
-					gib.setVelocityMin(Float.valueOf(attr));
+					gib.setVelocityMin(Double.valueOf(attr));
 
 					attr = child.getAttributeValue("max");
 					if (attr == null)
 						throw new IllegalArgumentException("Velocity missing 'max' attribute");
-					gib.setVelocityMax(Float.valueOf(attr));
+					gib.setVelocityMax(Double.valueOf(attr));
 
 					child = gibEl.getChild("direction");
 					if (child == null)
@@ -796,19 +796,19 @@ public class ShipLoadUtils {
 						throw new IllegalArgumentException("Direction missing 'max' attribute");
 					gib.setDirectionMax(Integer.valueOf(attr));
 
-					child = gibEl.getChild("velocity");
+					child = gibEl.getChild("angular");
 					if (child == null)
 						throw new IllegalArgumentException("Missing <angular> tag");
 
 					attr = child.getAttributeValue("min");
 					if (attr == null)
 						throw new IllegalArgumentException("Angular missing 'min' attribute");
-					gib.setAngularMin(Float.valueOf(attr));
+					gib.setAngularMin(Double.valueOf(attr));
 
 					attr = child.getAttributeValue("max");
 					if (attr == null)
 						throw new IllegalArgumentException("Angular missing 'max' attribute");
-					gib.setAngularMax(Float.valueOf(attr));
+					gib.setAngularMax(Double.valueOf(attr));
 
 					ship.add(gib);
 				}

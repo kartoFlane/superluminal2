@@ -603,22 +603,22 @@ public class ShipSaveUtils {
 			e.setAttribute("max", "" + decimal.format(gibs[i].getVelocityMax()));
 			gib.addContent(e);
 
-			e = new Element("angular");
-			e.setAttribute("min", "" + decimal.format(gibs[i].getAngularMin()));
-			e.setAttribute("max", "" + decimal.format(gibs[i].getAngularMax()));
-			gib.addContent(e);
-
 			e = new Element("direction");
 			e.setAttribute("min", "" + gibs[i].getDirectionMin());
 			e.setAttribute("max", "" + gibs[i].getDirectionMax());
 			gib.addContent(e);
 
+			e = new Element("angular");
+			e.setAttribute("min", "" + decimal.format(gibs[i].getAngularMin()));
+			e.setAttribute("max", "" + decimal.format(gibs[i].getAngularMax()));
+			gib.addContent(e);
+
 			e = new Element("x");
-			e.setText("" + gibs[i].getX());
+			e.setText("" + gibs[i].getOffsetX());
 			gib.addContent(e);
 
 			e = new Element("y");
-			e.setText("" + gibs[i].getY());
+			e.setText("" + gibs[i].getOffsetY());
 			gib.addContent(e);
 
 			explosion.addContent(gib);

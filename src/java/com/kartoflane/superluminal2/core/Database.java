@@ -48,9 +48,16 @@ public class Database {
 	public static final int ENEMY_SHIELD_Y_OFFSET = 110;
 
 	/**
-	 * The amount of time it takes for the ship explosion animation to complete, in seconds.
+	 * The amount of time it takes for the ship explosion animation to complete before the
+	 * score screen appears, in seconds.<br>
+	 * The death time in hangar is 6 seconds.
 	 */
-	public static final int GIB_EXPLO_TIME = 6; // TODO verify
+	public static final int GIB_DEATH_ANIM_TIME = 4;
+
+	/**
+	 * Amount of pixels a gib moves in 1 second with linear velocity of 1.
+	 */
+	public static final int GIB_LINEAR_SPEED = 30;
 
 	private static Database instance;
 

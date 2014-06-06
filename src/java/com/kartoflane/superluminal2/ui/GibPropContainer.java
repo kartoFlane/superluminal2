@@ -23,7 +23,14 @@ public class GibPropContainer {
 
 		@Override
 		public String toString() {
-			return name().substring(0, 1) + name().substring(1).toLowerCase();
+			switch (this) {
+				case LINEAR:
+					return "Linear Velocity";
+				case ANGULAR:
+					return "Angular Velocity";
+				default:
+					return name().substring(0, 1) + name().substring(1).toLowerCase();
+			}
 		}
 	}
 
@@ -34,7 +41,8 @@ public class GibPropContainer {
 	private static final String ANG_MAX_PROP_ID = "AngularMax";
 	private static final String LIN_MIN_PROP_ID = "LinearMin";
 	private static final String LIN_MAX_PROP_ID = "LinearMax";
-	private static final String LIN_LIN_PROP_ID = "LinearLine";
+	private static final String LIN_MIN_RANGE_PROP_ID = "LinearRangeMin";
+	private static final String LIN_MAX_RANGE_PROP_ID = "LinearRangeMax";
 
 	private GibController currentController = null;
 
@@ -60,7 +68,7 @@ public class GibPropContainer {
 					PropController minProp = getProp(LIN_MIN_PROP_ID);
 					PropController maxProp = getProp(LIN_MAX_PROP_ID);
 
-					String[] propIds = { LIN_MIN_PROP_ID, LIN_MAX_PROP_ID, LIN_LIN_PROP_ID };
+					String[] propIds = { LIN_MIN_PROP_ID, LIN_MAX_PROP_ID, LIN_MIN_RANGE_PROP_ID, LIN_MAX_RANGE_PROP_ID };
 					for (String id : propIds) {
 						PropController prop = getProp(id);
 						prop.setVisible(currentController.isSelected() || minProp.isSelected() || maxProp.isSelected());
@@ -94,6 +102,8 @@ public class GibPropContainer {
 	}
 
 	public void setCurrentController(GibController controller) {
+		dataLoad = true;
+
 		if (currentController != null) {
 			currentController.removeListener(SLEvent.SELECT, selectionListener);
 			currentController.removeListener(SLEvent.DESELECT, selectionListener);
@@ -112,8 +122,11 @@ public class GibPropContainer {
 		for (PropController prop : props)
 			prop.setParent(currentController);
 		updateData();
+		dataLoad = true;
 		for (PropController prop : props)
 			prop.updateFollower();
+
+		dataLoad = false;
 	}
 
 	public GibController getCurrentController() {
@@ -135,7 +148,7 @@ public class GibPropContainer {
 			prop.setVisible(control == PropControls.DIRECTION);
 		}
 
-		String[] linPropIds = { LIN_MIN_PROP_ID, LIN_MAX_PROP_ID, LIN_LIN_PROP_ID };
+		String[] linPropIds = { LIN_MIN_PROP_ID, LIN_MAX_PROP_ID, LIN_MIN_RANGE_PROP_ID, LIN_MAX_RANGE_PROP_ID };
 		for (String id : linPropIds) {
 			PropController prop = getProp(id);
 			prop.setVisible(control == PropControls.LINEAR);
@@ -168,23 +181,21 @@ public class GibPropContainer {
 		PropController prop;
 		prop = getProp(LIN_MIN_PROP_ID);
 		prop.setBounded(false);
-		float velocity = currentController.getLinearVelocityMin();
-		velocity *= Database.GIB_EXPLO_TIME * 10;
-		prop.setFollowOffset(Math.round(velocity), prop.getFollowOffsetY());
+		double velocity = currentController.getLinearVelocityMin();
+		velocity *= Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED;
+		prop.setFollowOffset((int) Math.round(velocity), prop.getFollowOffsetY());
 		prop.updateFollower();
 		prop.setBounded(!currentController.isSelected());
 
 		prop = getProp(LIN_MAX_PROP_ID);
 		prop.setBounded(false);
 		velocity = currentController.getLinearVelocityMax();
-		velocity *= Database.GIB_EXPLO_TIME * 10;
-		prop.setFollowOffset(Math.round(velocity), prop.getFollowOffsetY());
+		velocity *= Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED;
+		prop.setFollowOffset((int) Math.round(velocity), prop.getFollowOffsetY());
 		prop.updateFollower();
 		prop.setBounded(!currentController.isSelected());
 
 		dataLoad = false;
-
-		opc.setLocation(opc.getX(), opc.getY()); // Trigger SLEvent.MOVE
 	}
 
 	private void addProp(PropController prop) {
@@ -232,31 +243,41 @@ public class GibPropContainer {
 	private void createDirectionProps() {
 		SLListener arcListener = new SLListener() {
 			public void handleEvent(SLEvent e) {
-				if (dataLoad || currentlyShownControls != PropControls.DIRECTION)
+				if (currentlyShownControls != PropControls.DIRECTION)
 					return;
 
 				ArcPropController arcProp = (ArcPropController) getProp(DIR_ARC_PROP_ID);
 				PropController minProp = getProp(DIR_MIN_PROP_ID);
 				PropController maxProp = getProp(DIR_MAX_PROP_ID);
 
-				float minAngle = (float) Utils.angle(arcProp.getLocation(), minProp.getLocation());
-				float maxAngle = (float) Utils.angle(arcProp.getLocation(), maxProp.getLocation());
+				double minAngle = Utils.angle(arcProp.getLocation(), minProp.getLocation());
+				double maxAngle = Utils.angle(arcProp.getLocation(), maxProp.getLocation());
 
-				if (minAngle < maxAngle) {
-					arcProp.setStartAngle(Math.round(minAngle) + 90);
-					arcProp.setArcSpan(Math.round(maxAngle - minAngle));
-
-					currentController.setDirectionMin((int) minAngle);
-					currentController.setDirectionMax((int) maxAngle);
-				} else if (minAngle > maxAngle) {
-					arcProp.setStartAngle(Math.round(maxAngle) + 90);
-					arcProp.setArcSpan(Math.round(minAngle - maxAngle - 360));
-
-					currentController.setDirectionMin((int) (minAngle - 360));
-					currentController.setDirectionMax((int) maxAngle);
-				} else {
+				if (Math.abs(minAngle - maxAngle) <= 1) {
+					// If min and max angles are within 1 degree, consider them to be equal
 					arcProp.setStartAngle(0);
 					arcProp.setArcSpan(360);
+
+					if (!dataLoad) {
+						currentController.setDirectionMin(0);
+						currentController.setDirectionMax(360);
+					}
+				} else if (minAngle < maxAngle) {
+					arcProp.setStartAngle((int) Math.round(minAngle) + 90);
+					arcProp.setArcSpan((int) Math.round(maxAngle - minAngle));
+
+					if (!dataLoad) {
+						currentController.setDirectionMin((int) Math.round(minAngle));
+						currentController.setDirectionMax((int) Math.round(maxAngle));
+					}
+				} else if (minAngle > maxAngle) {
+					arcProp.setStartAngle((int) Math.round(maxAngle) + 90);
+					arcProp.setArcSpan((int) Math.round(minAngle - maxAngle - 360));
+
+					if (!dataLoad) {
+						currentController.setDirectionMin((int) Math.round(minAngle - 360));
+						currentController.setDirectionMax((int) Math.round(maxAngle));
+					}
 				}
 				arcProp.redraw();
 			}
@@ -313,28 +334,27 @@ public class GibPropContainer {
 	 * Creates the prop controllers responsible for linear velocity modification.
 	 */
 	public void createLinearVelocityProps() {
-		SLListener lineListener = new SLListener() {
-			public void handleEvent(SLEvent e) {
-				if (dataLoad || currentlyShownControls != PropControls.LINEAR)
-					return;
+		ArcPropController apc = new ArcPropController(null, LIN_MAX_RANGE_PROP_ID);
+		apc.setInheritVisibility(false);
+		apc.setVisible(false);
+		apc.setDefaultBackgroundColor(255, 32, 32);
+		apc.setAlpha(128);
+		apc.setStartAngle(0);
+		apc.setArcSpan(360);
+		apc.addToPainter(Layers.PROP);
+		apc.updateView();
+		addProp(apc);
 
-				PropController line = getProp(LIN_LIN_PROP_ID);
-				OffsetPropController max = (OffsetPropController) getProp(LIN_MAX_PROP_ID);
-				int diff = max.getX() - line.getParent().getX();
-				line.resize(Math.abs(diff), 1);
-				line.setFollowOffset(diff / 2, 0);
-				line.updateFollower();
-			}
-		};
-
-		PropController prop = new PropController(null, LIN_LIN_PROP_ID);
-		prop.setInheritVisibility(true);
-		prop.setDefaultBackgroundColor(255, 0, 0);
-		prop.setImage(null);
-		prop.setBorderThickness(1);
-		prop.setAlpha(255);
-		prop.addToPainterBottom(Layers.PROP);
-		addProp(prop);
+		apc = new ArcPropController(null, LIN_MIN_RANGE_PROP_ID);
+		apc.setInheritVisibility(false);
+		apc.setVisible(false);
+		apc.setDefaultBackgroundColor(128, 196, 196);
+		apc.setAlpha(128);
+		apc.setStartAngle(0);
+		apc.setArcSpan(360);
+		apc.addToPainter(Layers.PROP);
+		apc.updateView();
+		addProp(apc);
 
 		OffsetPropController opc = new OffsetPropController(null, LIN_MIN_PROP_ID);
 		opc.setPolygon(new Polygon(new int[] {
@@ -345,9 +365,19 @@ public class GibPropContainer {
 		opc.addListener(SLEvent.MOVE, new SLListener() {
 			@Override
 			public void handleEvent(SLEvent e) {
-				// TODO set min
+				if (currentlyShownControls != PropControls.LINEAR)
+					return;
+
+				ArcPropController arc = (ArcPropController) getProp(LIN_MIN_RANGE_PROP_ID);
+				OffsetPropController opc = (OffsetPropController) getProp(LIN_MIN_PROP_ID);
+				int dist = opc.getX() - arc.getParent().getX();
+				arc.resize(Math.abs(dist * 2), Math.abs(dist * 2));
+
+				if (!dataLoad)
+					currentController.setLinearVelocityMin(((double) dist) / (Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED));
 			}
 		});
+		opc.setFollowOffset(0, -ShipContainer.CELL_SIZE / 2);
 		opc.setDefaultBackgroundColor(255, 0, 0);
 		opc.setDefaultBorderColor(0, 0, 0);
 		opc.addToPainter(Layers.PROP);
@@ -365,17 +395,25 @@ public class GibPropContainer {
 		opc.addListener(SLEvent.MOVE, new SLListener() {
 			@Override
 			public void handleEvent(SLEvent e) {
+				if (currentlyShownControls != PropControls.LINEAR)
+					return;
 
-				// TODO set max
+				ArcPropController arc = (ArcPropController) getProp(LIN_MAX_RANGE_PROP_ID);
+				OffsetPropController opc = (OffsetPropController) getProp(LIN_MAX_PROP_ID);
+				int dist = opc.getX() - arc.getParent().getX();
+				arc.resize(Math.abs(dist * 2), Math.abs(dist * 2));
+
+				if (!dataLoad)
+					currentController.setLinearVelocityMax(((double) dist) / (Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED));
 			}
 		});
+		opc.setFollowOffset(0, -2 * ShipContainer.CELL_SIZE / 3);
 		opc.setDefaultBackgroundColor(255, 0, 0);
 		opc.setDefaultBorderColor(0, 0, 0);
 		opc.addToPainter(Layers.PROP);
 		opc.setCompositeTitle("Maximum Linear Velocity");
 		opc.addListener(SLEvent.SELECT, selectionListener);
 		opc.addListener(SLEvent.DESELECT, selectionListener);
-		opc.addListener(SLEvent.MOVE, lineListener);
 		addProp(opc);
 	}
 

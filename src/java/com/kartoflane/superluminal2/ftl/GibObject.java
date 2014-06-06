@@ -2,18 +2,20 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.ui.ShipContainer;
+
 public class GibObject extends ImageObject implements Comparable<GibObject> {
 
 	private int id = -1;
-	private int locX = 0;
-	private int locY = 0;
 
 	private int directionMin = 0;
 	private int directionMax = 0;
-	private float velocityMin = 0;
-	private float velocityMax = 0;
-	private float angularMin = 0;
-	private float angularMax = 0;
+	private double velocityMin = 0;
+	private double velocityMax = 0;
+	private double angularMin = 0;
+	private double angularMax = 0;
 
 	private int offsetX = 0;
 	private int offsetY = 0;
@@ -26,7 +28,15 @@ public class GibObject extends ImageObject implements Comparable<GibObject> {
 	}
 
 	public void update() {
-		// TODO
+		if (model == null)
+			throw new IllegalArgumentException("Model must not be null.");
+
+		ShipController shipC = Manager.getCurrentShip().getShipController();
+		ShipObject ship = shipC.getGameObject();
+
+		Point hullOffset = ship.getHullOffset();
+		offsetX = model.getX() - shipC.getX() - hullOffset.x - (ship.getXOffset() * ShipContainer.CELL_SIZE) - model.getW() / 2;
+		offsetY = model.getY() - shipC.getY() - hullOffset.y - (ship.getYOffset() * ShipContainer.CELL_SIZE) - model.getH() / 2;
 	}
 
 	public void setId(int id) {
@@ -35,28 +45,6 @@ public class GibObject extends ImageObject implements Comparable<GibObject> {
 
 	public int getId() {
 		return id;
-	}
-
-	/**
-	 * Location of the gib in the editor.<br>
-	 * Also used to position the gib during animation.
-	 */
-	public void setLocation(int x, int y) {
-		locX = x;
-		locY = y;
-	}
-
-	/** @return location of the gib in the editor */
-	public Point getLocation() {
-		return new Point(locX, locY);
-	}
-
-	public int getX() {
-		return locX;
-	}
-
-	public int getY() {
-		return locY;
 	}
 
 	/**
@@ -98,35 +86,35 @@ public class GibObject extends ImageObject implements Comparable<GibObject> {
 		return directionMax;
 	}
 
-	public void setVelocityMin(float min) {
+	public void setVelocityMin(double min) {
 		velocityMin = min;
 	}
 
-	public float getVelocityMin() {
+	public double getVelocityMin() {
 		return velocityMin;
 	}
 
-	public void setVelocityMax(float max) {
+	public void setVelocityMax(double max) {
 		velocityMax = max;
 	}
 
-	public float getVelocityMax() {
+	public double getVelocityMax() {
 		return velocityMax;
 	}
 
-	public void setAngularMin(float min) {
+	public void setAngularMin(double min) {
 		angularMin = min;
 	}
 
-	public float getAngularMin() {
+	public double getAngularMin() {
 		return angularMin;
 	}
 
-	public void setAngularMax(float max) {
+	public void setAngularMax(double max) {
 		angularMax = max;
 	}
 
-	public float getAngularMax() {
+	public double getAngularMax() {
 		return angularMax;
 	}
 
