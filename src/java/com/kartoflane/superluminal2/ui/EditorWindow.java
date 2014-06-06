@@ -1097,7 +1097,7 @@ public class EditorWindow {
 			result &= ModManagementDialog.getInstance() == null || !ModManagementDialog.getInstance().isActive();
 			result &= AboutDialog.getInstance() == null || !AboutDialog.getInstance().isActive();
 			result &= AliasDialog.getInstance() == null || !AliasDialog.getInstance().isActive();
-			result &= LoadingDialog.getInstance() == null || !LoadingDialog.getInstance().isActive();
+			result &= !LoadingDialog.isActive();
 			result &= GlowSelectionDialog.getInstance() == null || !GlowSelectionDialog.getInstance().isActive();
 			result &= WeaponSelectionDialog.getInstance() == null || !WeaponSelectionDialog.getInstance().isActive();
 			result &= DroneSelectionDialog.getInstance() == null || !DroneSelectionDialog.getInstance().isActive();

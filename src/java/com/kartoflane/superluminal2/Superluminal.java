@@ -303,118 +303,111 @@ public class Superluminal {
 	 *            if true, an information dialog will pop up even if the program is up to date
 	 */
 	public static void checkForUpdates(boolean manual) {
-		try {
-			log.info("Checking for updates...");
+		log.info("Checking for updates...");
 
-			final String[] downloadLink = new String[1];
-			final ComparableVersion[] remoteVersion = new ComparableVersion[1];
-			final ArrayList<String> changes = new ArrayList<String>();
+		final String[] downloadLink = new String[1];
+		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
+		final ArrayList<String> changes = new ArrayList<String>();
 
-			UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new LoadTask() {
-				public void execute() {
-					InputStream is = null;
-					try {
-						URL url = new URL(APP_UPDATE_FETCH_URL);
-						is = url.openStream();
-
-						Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
-						Element root = updateDoc.getRootElement();
-						Element latest = root.getChild("latest");
-						String id = latest.getAttributeValue("id");
-
-						downloadLink[0] = latest.getAttributeValue("url");
-						remoteVersion[0] = new ComparableVersion(id);
-
-						Element changelog = root.getChild("changelog");
-						for (Element version : changelog.getChildren("version")) {
-							ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
-							if (vId.compareTo(APP_VERSION) > 0) {
-								for (Element change : version.getChildren("change")) {
-									changes.add(change.getValue());
-								}
-							}
-						}
-					} catch (UnknownHostException e) {
-						log.warn("Update check failed -- connection to the repository could not be estabilished.");
-					} catch (JDOMException e) {
-						log.warn("Udpate check failed -- an error has occured while parsing update file.", e);
-					} catch (Exception e) {
-						log.warn("An error occured while checking updates.", e);
-					} finally {
-						try {
-							if (is != null)
-								is.close();
-						} catch (IOException e) {
-						}
-					}
-				}
-			});
-
-			if (remoteVersion[0] == null) {
-				// Version check failed, already logged by previous catches
-			} else if (APP_VERSION.compareTo(remoteVersion[0]) < 0) {
+		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new LoadTask() {
+			public void execute() {
+				InputStream is = null;
 				try {
-					log.info("Update is available, user version: " + APP_VERSION + ", remote version: " + remoteVersion[0]);
+					URL url = new URL(APP_UPDATE_FETCH_URL);
+					is = url.openStream();
 
-					MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(), SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
-					box.setText(APP_NAME + " - Update Available");
+					Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
+					Element root = updateDoc.getRootElement();
+					Element latest = root.getChild("latest");
+					String id = latest.getAttributeValue("id");
 
-					StringBuilder buf = new StringBuilder();
-					buf.append("A new version of the editor is available: v.");
-					buf.append(remoteVersion[0].toString());
-					buf.append("\n\n");
-					if (changes.size() > 0) {
-						int count = 0;
-						for (String change : changes) {
-							if (count < 5) {
-								buf.append(" - ");
-								buf.append(change);
-								buf.append("\n");
-								count++;
-							} else {
-								buf.append("...and ");
-								buf.append(changes.size() - count);
-								buf.append(" more - check changelog for details.\n");
-								break;
-							}
-						}
-						buf.append("\n");
-					}
+					downloadLink[0] = latest.getAttributeValue("url");
+					remoteVersion[0] = new ComparableVersion(id);
 
-					buf.append("Would you like to download it now?");
-					box.setMessage(buf.toString());
-
-					if (box.open() == SWT.YES) {
-						URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
-
-						Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-						if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-							try {
-								desktop.browse(url.toURI());
-							} catch (Exception e) {
-								log.error("An error has occured while opening web browser.", e);
+					Element changelog = root.getChild("changelog");
+					for (Element version : changelog.getChildren("version")) {
+						ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
+						if (vId.compareTo(APP_VERSION) > 0) {
+							for (Element change : version.getChildren("change")) {
+								changes.add(change.getValue());
 							}
 						}
 					}
+				} catch (UnknownHostException e) {
+					log.warn("Update check failed -- connection to the repository could not be estabilished.");
+				} catch (JDOMException e) {
+					log.warn("Udpate check failed -- an error has occured while parsing update file.", e);
 				} catch (Exception e) {
-					log.warn("An error has occured while displaying update result.", e);
-				}
-			} else {
-				if (APP_VERSION.compareTo(remoteVersion[0]) == 0) {
-					log.info("Program is up to date.");
-				} else {
-					log.info("Program is up to date. (actually ahead)");
-				}
-				if (manual) {
-					// The user manually initiated the version check, so probably expects some kind of response in either case.
-					UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, APP_NAME + " is up to date.");
+					log.warn("An error occured while checking updates.", e);
+				} finally {
+					try {
+						if (is != null)
+							is.close();
+					} catch (IOException e) {
+					}
 				}
 			}
-		} catch (Exception e) {
-			log.error("An unexpected exception has occured while checking for updates.", e);
-			String msg = "An unexpected error has occured while checking for updates:\n\n";
-			msg += e.getClass().getSimpleName() + ": " + e.getMessage();
-			UIUtils.showWarningDialog(null, null, msg);
+		});
+
+		if (remoteVersion[0] == null) {
+			// Version check failed, already logged by previous catches
+		} else if (APP_VERSION.compareTo(remoteVersion[0]) < 0) {
+			try {
+				log.info("Update is available, user version: " + APP_VERSION + ", remote version: " + remoteVersion[0]);
+
+				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(), SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+				box.setText(APP_NAME + " - Update Available");
+
+				StringBuilder buf = new StringBuilder();
+				buf.append("A new version of the editor is available: v.");
+				buf.append(remoteVersion[0].toString());
+				buf.append("\n\n");
+				if (changes.size() > 0) {
+					int count = 0;
+					for (String change : changes) {
+						if (count < 5) {
+							buf.append(" - ");
+							buf.append(change);
+							buf.append("\n");
+							count++;
+						} else {
+							buf.append("...and ");
+							buf.append(changes.size() - count);
+							buf.append(" more - check changelog for details.\n");
+							break;
+						}
+					}
+					buf.append("\n");
+				}
+
+				buf.append("Would you like to download it now?");
+				box.setMessage(buf.toString());
+
+				if (box.open() == SWT.YES) {
+					URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
+
+					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+						try {
+							desktop.browse(url.toURI());
+						} catch (Exception e) {
+							log.error("An error has occured while opening web browser.", e);
+						}
+					}
+				}
+			} catch (Exception e) {
+				log.warn("An error has occured while displaying update result.", e);
+			}
+		} else {
+			if (APP_VERSION.compareTo(remoteVersion[0]) == 0) {
+				log.info("Program is up to date.");
+			} else {
+				log.info("Program is up to date. (actually ahead)");
+			}
+			if (manual) {
+				// The user manually initiated the version check, so probably expects some kind of response in either case.
+				UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, APP_NAME + " is up to date.");
+			}
 		}
 	}
 

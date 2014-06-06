@@ -15,7 +15,7 @@ import com.kartoflane.superluminal2.Superluminal;
 
 public class LoadingDialog {
 
-	private static LoadingDialog instance = null;
+	private static volatile int instances = 0;
 
 	private volatile boolean exit = false;
 
@@ -23,9 +23,8 @@ public class LoadingDialog {
 	private Display display = null;
 
 	public LoadingDialog(Shell parentShell, String title, String message) {
-		if (instance != null)
-			throw new IllegalStateException("Previous instance has not been disposed!");
-		instance = this;
+		instances++;
+
 		display = Display.getCurrent();
 
 		if (title == null)
@@ -61,6 +60,10 @@ public class LoadingDialog {
 		shell.setLocation(parLoc.x + parSize.x / 2 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 	}
 
+	public static boolean isActive() {
+		return instances != 0;
+	}
+
 	public void open() {
 		shell.open();
 
@@ -72,19 +75,11 @@ public class LoadingDialog {
 		shell.dispose();
 	}
 
-	public static LoadingDialog getInstance() {
-		return instance;
-	}
-
-	public boolean isActive() {
-		return !shell.isDisposed() && shell.isVisible();
-	}
-
 	public void dispose() {
+		instances--;
 		exit = true;
 		// Wakes the display from sleep
 		// Without this call, the dialog would wait for user input, and then disappear.
 		display.asyncExec(null);
-		instance = null;
 	}
 }
