@@ -80,6 +80,7 @@ public class ShipContainer implements Disposable, SLListener {
 	private File saveDestination = null;
 
 	private ShipController shipController = null;
+	private GibPropContainer gibContainer = null;
 	private EventHandler eventHandler = null;
 	private EditorWindow window = null;
 
@@ -113,6 +114,7 @@ public class ShipContainer implements Disposable, SLListener {
 		this.window = window;
 
 		shipController = ShipController.newInstance(this, ship);
+		gibContainer = new GibPropContainer();
 		window.addListener(SLEvent.MOD_SHIFT, this);
 		addListener(SLEvent.MOD_SHIFT, shipController);
 
@@ -206,6 +208,10 @@ public class ShipContainer implements Disposable, SLListener {
 
 	public EditorWindow getParent() {
 		return window;
+	}
+
+	public GibPropContainer getGibContainer() {
+		return gibContainer;
 	}
 
 	/**
@@ -722,6 +728,7 @@ public class ShipContainer implements Disposable, SLListener {
 		objectControllerMap.clear();
 
 		window.removeListener(SLEvent.MOD_SHIFT, this);
+		gibContainer.dispose();
 		shipController.dispose();
 		shipController = null;
 

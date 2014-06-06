@@ -47,6 +47,11 @@ public class Database {
 	 */
 	public static final int ENEMY_SHIELD_Y_OFFSET = 110;
 
+	/**
+	 * The amount of time it takes for the ship explosion animation to complete, in seconds.
+	 */
+	public static final int GIB_EXPLO_TIME = 6; // TODO verify
+
 	private static Database instance;
 
 	// Constant
