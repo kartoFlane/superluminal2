@@ -483,6 +483,18 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return Utils.copy(followOffset);
 	}
 
+	public int getFollowOffsetX() {
+		if (followOffset == null)
+			return 0;
+		return followOffset.x;
+	}
+
+	public int getFollowOffsetY() {
+		if (followOffset == null)
+			return 0;
+		return followOffset.y;
+	}
+
 	@Override
 	public void setFollowOffset(int x, int y) {
 		if (followOffset == null)
@@ -755,6 +767,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void dispose() {
 		if (model.isDisposed())
 			return;
+
 		if (eventHandler != null)
 			eventHandler.sendEvent(new SLEvent(SLEvent.DISPOSE, this, this));
 
@@ -875,6 +888,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void addProp(PropController prop) {
+		if (prop == null)
+			throw new IllegalArgumentException("Argument must not be null.");
 		if (props == null)
 			props = new HashSet<PropController>();
 		if (getProp(prop.getIdentifier()) != null)
@@ -884,6 +899,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void removeProp(PropController prop) {
+		if (prop == null)
+			throw new IllegalArgumentException("Argument must not be null.");
 		if (props == null)
 			props = new HashSet<PropController>();
 		props.remove(prop);
@@ -902,6 +919,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * @return prop with the given identifier, or null if not found
 	 */
 	public PropController getProp(String id) {
+		if (id == null)
+			throw new IllegalArgumentException("Argument must not be null.");
 		if (props == null) {
 			return null;
 		} else {

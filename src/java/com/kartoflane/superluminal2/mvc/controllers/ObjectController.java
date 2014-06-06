@@ -19,6 +19,9 @@ public abstract class ObjectController extends AbstractController implements Ali
 
 	public String getAlias() {
 		GameObject object = getGameObject();
+		if (object == null)
+			return null;
+
 		if (object instanceof Alias) {
 			return ((Alias) object).getAlias();
 		} else

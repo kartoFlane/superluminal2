@@ -7,9 +7,7 @@ public enum Systems {
 
 	@Override
 	public String toString() {
-		String result = super.toString().toLowerCase();
-		result = result.substring(0, 1).toUpperCase() + result.substring(1);
-		return result;
+		return name().substring(0, 1) + name().substring(1).toLowerCase();
 	}
 
 	/** @return array of all systems, excluding {@link #EMPTY} */

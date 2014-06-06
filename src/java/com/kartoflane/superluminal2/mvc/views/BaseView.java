@@ -590,6 +590,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	@Override
 	public void dispose() {
 		removeFromPainter();
+		setVisible(false);
 
 		if (borderColor != null)
 			Cache.checkInColor(this, borderColor.getRGB());

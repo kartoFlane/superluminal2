@@ -45,7 +45,10 @@ public class Utils {
 		return Math.min(a, Math.min(b, c));
 	}
 
-	/** Computes angle between the two points. */
+	/**
+	 * Computes angle between the two points.<br>
+	 * 0 means north, increases counter-clockwise.
+	 */
 	public static double angle(Point p1, Point p2) {
 		double theta = Math.atan2(p1.x - p2.x, p1.y - p2.y);
 		// theta += Math.PI / 2.0;
