@@ -58,8 +58,6 @@ public class CursorView extends BaseView {
 			handleMountToolAppearance();
 		else if (toolId == Tools.STATION)
 			handleStationToolAppearance();
-		else if (toolId == Tools.GIB)
-			handleGibToolAppearance();
 		else
 			;// TODO
 	}
@@ -132,10 +130,6 @@ public class CursorView extends BaseView {
 		setBorderThickness(3);
 		setBorderColor(tool.canPlace() ? ALLOW_RGB : DENY_RGB);
 		setAlpha(255);
-	}
-
-	private void handleGibToolAppearance() {
-		handleDefaultPointerAppearance();
 	}
 
 	private void handleDoorAppearance(DoorController door) {

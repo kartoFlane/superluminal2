@@ -335,6 +335,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 		cloakC.setVisible(cloak);
 		hullC.setAlpha(cloak ? 255 / 3 : 255);
+		hullC.redraw();
 	}
 
 	/**
@@ -612,10 +613,11 @@ public class ShipContainer implements Disposable, SLListener {
 			ImageObject object = image.getGameObject();
 			object.setImagePath(path);
 		} else {
+			boolean vis = image.isVisible();
 			image.setVisible(false);
 			image.setImage(path);
 			image.updateView();
-			image.setVisible(path != null);
+			image.setVisible(path != null && vis);
 		}
 	}
 

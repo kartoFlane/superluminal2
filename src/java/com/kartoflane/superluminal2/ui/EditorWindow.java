@@ -56,7 +56,6 @@ import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.DoorTool;
-import com.kartoflane.superluminal2.tools.GibTool;
 import com.kartoflane.superluminal2.tools.ImagesTool;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.tools.MountTool;
@@ -93,7 +92,6 @@ public class EditorWindow {
 
 	private ToolItem tltmPointer;
 	private ToolItem tltmCreation;
-	private ToolItem tltmGib;
 	private ToolItem tltmProperties;
 	private ToolItem tltmImages;
 	private ToolItem tltmManager;
@@ -146,7 +144,6 @@ public class EditorWindow {
 
 		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
 		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
-		Manager.TOOL_MAP.put(Tools.GIB, new GibTool(this));
 		Manager.TOOL_MAP.put(Tools.IMAGES, new ImagesTool(this));
 		Manager.TOOL_MAP.put(Tools.CONFIG, new PropertyTool(this));
 		Manager.TOOL_MAP.put(Tools.ROOM, new RoomTool(this));
@@ -354,14 +351,6 @@ public class EditorWindow {
 		tltmCreation.setData(Tools.CREATOR);
 		tltmCreation.setToolTipText(String.format("Layout Creation Tool (%s)", Manager.getHotkey(Hotkeys.CREATE_TOOL)));
 		toolItemMap.put(Tools.CREATOR, tltmCreation);
-
-		// Gib tool
-		tltmGib = new ToolItem(toolBar, SWT.RADIO);
-		tltmGib.setImage(Cache.checkOutImage(this, "cpath:/assets/gib.png"));
-		tltmGib.addSelectionListener(toolSelectionAdapter);
-		tltmGib.setData(Tools.GIB);
-		tltmGib.setToolTipText(String.format("Gib Tool (%s)", Manager.getHotkey(Hotkeys.GIB_TOOL)));
-		toolItemMap.put(Tools.GIB, tltmGib);
 
 		// Images button
 		tltmImages = new ToolItem(toolBar, SWT.RADIO);
@@ -1001,7 +990,6 @@ public class EditorWindow {
 	public void enableTools(boolean enable) {
 		tltmPointer.setEnabled(enable);
 		tltmCreation.setEnabled(enable);
-		tltmGib.setEnabled(enable);
 		tltmImages.setEnabled(enable);
 		tltmProperties.setEnabled(enable);
 		tltmManager.setEnabled(enable);
@@ -1206,8 +1194,6 @@ public class EditorWindow {
 			tltmPointer.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.CREATE_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
 			tltmCreation.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.GIB_TOOL).passes(e.keyCode) && tltmGib.isEnabled()) {
-			tltmGib.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.IMAGES_TOOL).passes(e.keyCode) && tltmImages.isEnabled()) {
 			tltmImages.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).passes(e.keyCode) && tltmProperties.isEnabled()) {
@@ -1243,7 +1229,7 @@ public class EditorWindow {
 
 		// ====== Tool-specific hotkeys
 
-		else if (Manager.getSelectedToolId() == Tools.POINTER || Manager.getSelectedToolId() == Tools.GIB) {
+		else if (Manager.getSelectedToolId() == Tools.POINTER) {
 			// Arrow keys movement
 			if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
 					e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {

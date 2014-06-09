@@ -23,6 +23,8 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 public class ImagesToolComposite extends Composite implements DataComposite {
 	private ShipContainer container;
@@ -47,6 +49,11 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 	private Button btnMiniBrowse;
 	private Button btnMiniClear;
 	private Button btnMiniView;
+	private TabFolder tabFolder;
+	private TabItem tbtmImages;
+	private TabItem tbtmGibs;
+	private Composite compImages;
+	private Composite compGibs;
 
 	public ImagesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -142,127 +149,145 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 			}
 		};
 
+		tabFolder = new TabFolder(this, SWT.NONE);
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+
+		/*
+		 * ===============================================
+		 * IMAGES TAB
+		 * ===============================================
+		 */
+
+		tbtmImages = new TabItem(tabFolder, SWT.NONE);
+		tbtmImages.setText("Images");
+
+		compImages = new Composite(tabFolder, SWT.NONE);
+		tbtmImages.setControl(compImages);
+		compImages.setLayout(new GridLayout(4, false));
+
 		// Hull widgets
-		Label lblHull = new Label(this, SWT.NONE);
-		lblHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		Label lblHull = new Label(compImages, SWT.NONE);
+		lblHull.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		lblHull.setText("Hull");
 
-		btnHullView = new Button(this, SWT.NONE);
+		btnHullView = new Button(compImages, SWT.NONE);
 		btnHullView.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnHullView.setEnabled(false);
 		btnHullView.setText("View");
-
 		btnHullView.addSelectionListener(imageViewListener);
 
-		btnHullBrowse = new Button(this, SWT.NONE);
-		btnHullBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		btnHullBrowse = new Button(compImages, SWT.NONE);
 		btnHullBrowse.setText("Browse");
-
 		btnHullBrowse.addSelectionListener(imageBrowseListener);
 
-		btnHullClear = new Button(this, SWT.NONE);
-		btnHullClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		btnHullClear = new Button(compImages, SWT.NONE);
 		btnHullClear.setText("Clear");
-
 		btnHullClear.addSelectionListener(imageClearListener);
 
-		txtHull = new Text(this, SWT.BORDER | SWT.READ_ONLY);
+		txtHull = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
 		txtHull.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
 		if (ship.isPlayerShip()) {
 			// Floor widgets
-			Label lblFloor = new Label(this, SWT.NONE);
-			lblFloor.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			Label lblFloor = new Label(compImages, SWT.NONE);
+			lblFloor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 			lblFloor.setText("Floor");
 
-			btnFloorView = new Button(this, SWT.NONE);
+			btnFloorView = new Button(compImages, SWT.NONE);
 			btnFloorView.setEnabled(false);
 			btnFloorView.setText("View");
+			btnFloorView.addSelectionListener(imageViewListener);
 
-			btnFloorBrowse = new Button(this, SWT.NONE);
-			btnFloorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			btnFloorBrowse = new Button(compImages, SWT.NONE);
 			btnFloorBrowse.setText("Browse");
+			btnFloorBrowse.addSelectionListener(imageBrowseListener);
 
-			btnFloorClear = new Button(this, SWT.NONE);
+			btnFloorClear = new Button(compImages, SWT.NONE);
 			btnFloorClear.setText("Clear");
+			btnFloorClear.addSelectionListener(imageClearListener);
 
-			txtFloor = new Text(this, SWT.BORDER | SWT.READ_ONLY);
+			txtFloor = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
 			txtFloor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 		}
 
 		// Cloak widgets
-		Label lblCloak = new Label(this, SWT.NONE);
-		lblCloak.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		Label lblCloak = new Label(compImages, SWT.NONE);
+		lblCloak.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		lblCloak.setText("Cloak");
 
-		btnCloakView = new Button(this, SWT.NONE);
+		btnCloakView = new Button(compImages, SWT.NONE);
 		btnCloakView.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnCloakView.setEnabled(false);
 		btnCloakView.setText("View");
 		btnCloakView.addSelectionListener(imageViewListener);
 
-		btnCloakBrowse = new Button(this, SWT.NONE);
-		btnCloakBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		btnCloakBrowse = new Button(compImages, SWT.NONE);
 		btnCloakBrowse.setText("Browse");
 		btnCloakBrowse.addSelectionListener(imageBrowseListener);
 
-		btnCloakClear = new Button(this, SWT.NONE);
+		btnCloakClear = new Button(compImages, SWT.NONE);
 		btnCloakClear.setText("Clear");
-		btnCloakClear.addSelectionListener(imageClearListener);
 
-		txtCloak = new Text(this, SWT.BORDER | SWT.READ_ONLY);
+		txtCloak = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
 		txtCloak.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
+		btnCloakClear.addSelectionListener(imageClearListener);
 
 		if (ship.isPlayerShip()) {
 			// Shield widgets
-			Label lblShield = new Label(this, SWT.NONE);
-			lblShield.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			Label lblShield = new Label(compImages, SWT.NONE);
+			lblShield.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 			lblShield.setText("Shield");
 
-			btnShieldView = new Button(this, SWT.NONE);
+			btnShieldView = new Button(compImages, SWT.NONE);
 			btnShieldView.setEnabled(false);
 			btnShieldView.setText("View");
+			btnShieldView.addSelectionListener(imageViewListener);
 
-			btnShieldBrowse = new Button(this, SWT.NONE);
-			btnShieldBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+			btnShieldBrowse = new Button(compImages, SWT.NONE);
 			btnShieldBrowse.setText("Browse");
+			btnShieldBrowse.addSelectionListener(imageBrowseListener);
 
-			btnShieldClear = new Button(this, SWT.NONE);
+			btnShieldClear = new Button(compImages, SWT.NONE);
 			btnShieldClear.setText("Clear");
+			btnShieldClear.addSelectionListener(imageClearListener);
 
-			txtShield = new Text(this, SWT.BORDER | SWT.READ_ONLY);
+			txtShield = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
 			txtShield.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
 			// Thumbnail widgets
-			Label lblMini = new Label(this, SWT.NONE);
-			lblMini.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			Label lblMini = new Label(compImages, SWT.NONE);
+			lblMini.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 			lblMini.setText("Thumbnail");
 
-			btnMiniView = new Button(this, SWT.NONE);
+			btnMiniView = new Button(compImages, SWT.NONE);
 			btnMiniView.setEnabled(false);
 			btnMiniView.setText("View");
-
-			btnMiniBrowse = new Button(this, SWT.NONE);
-			btnMiniBrowse.setText("Browse");
-
-			btnMiniClear = new Button(this, SWT.NONE);
-			btnMiniClear.setText("Clear");
-
-			txtMini = new Text(this, SWT.BORDER | SWT.READ_ONLY);
-			txtMini.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
-
-			btnFloorView.addSelectionListener(imageViewListener);
-			btnShieldView.addSelectionListener(imageViewListener);
 			btnMiniView.addSelectionListener(imageViewListener);
 
-			btnFloorBrowse.addSelectionListener(imageBrowseListener);
-			btnShieldBrowse.addSelectionListener(imageBrowseListener);
+			btnMiniBrowse = new Button(compImages, SWT.NONE);
+			btnMiniBrowse.setText("Browse");
 			btnMiniBrowse.addSelectionListener(imageBrowseListener);
 
-			btnFloorClear.addSelectionListener(imageClearListener);
-			btnShieldClear.addSelectionListener(imageClearListener);
+			btnMiniClear = new Button(compImages, SWT.NONE);
+			btnMiniClear.setText("Clear");
 			btnMiniClear.addSelectionListener(imageClearListener);
+
+			txtMini = new Text(compImages, SWT.BORDER | SWT.READ_ONLY);
+			txtMini.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 		}
+
+		/*
+		 * ===============================================
+		 * GIBS TAB
+		 * ===============================================
+		 */
+
+		tbtmGibs = new TabItem(tabFolder, SWT.NONE);
+		tbtmGibs.setText("Gibs");
+
+		compGibs = new Composite(tabFolder, SWT.NONE);
+		tbtmGibs.setControl(compGibs);
+		compGibs.setLayout(new GridLayout(1, false));
 
 		pack();
 		updateData();

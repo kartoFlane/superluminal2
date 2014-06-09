@@ -4,7 +4,6 @@ public enum Hotkeys {
 	// Tools
 	POINTER_TOOL,
 	CREATE_TOOL,
-	GIB_TOOL,
 	PROPERTIES_TOOL,
 	IMAGES_TOOL,
 	OVERVIEW_TOOL,

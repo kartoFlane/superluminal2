@@ -27,7 +27,6 @@ public abstract class Tool implements MouseListener, MouseMoveListener, MouseTra
 	public enum Tools {
 		POINTER,
 		CREATOR,
-		GIB,
 		CONFIG,
 		IMAGES,
 		ROOM,

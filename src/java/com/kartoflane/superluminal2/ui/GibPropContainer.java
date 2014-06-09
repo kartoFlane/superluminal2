@@ -377,6 +377,7 @@ public class GibPropContainer {
 					currentController.setLinearVelocityMin(((double) dist) / (Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED));
 			}
 		});
+		opc.setVisible(false);
 		opc.setFollowOffset(0, -ShipContainer.CELL_SIZE / 2);
 		opc.setDefaultBackgroundColor(255, 0, 0);
 		opc.setDefaultBorderColor(0, 0, 0);
@@ -407,6 +408,7 @@ public class GibPropContainer {
 					currentController.setLinearVelocityMax(((double) dist) / (Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED));
 			}
 		});
+		opc.setVisible(false);
 		opc.setFollowOffset(0, -2 * ShipContainer.CELL_SIZE / 3);
 		opc.setDefaultBackgroundColor(255, 0, 0);
 		opc.setDefaultBorderColor(0, 0, 0);

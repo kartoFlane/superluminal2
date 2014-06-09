@@ -229,9 +229,8 @@ public class Manager {
 		// Tool hotkeys
 		getHotkey(Hotkeys.POINTER_TOOL).setKey('q');
 		getHotkey(Hotkeys.CREATE_TOOL).setKey('w');
-		getHotkey(Hotkeys.GIB_TOOL).setKey('e');
-		getHotkey(Hotkeys.IMAGES_TOOL).setKey('r');
-		getHotkey(Hotkeys.PROPERTIES_TOOL).setKey('t');
+		getHotkey(Hotkeys.IMAGES_TOOL).setKey('e');
+		getHotkey(Hotkeys.PROPERTIES_TOOL).setKey('r');
 		getHotkey(Hotkeys.ROOM_TOOL).setKey('a');
 		getHotkey(Hotkeys.DOOR_TOOL).setKey('s');
 		getHotkey(Hotkeys.MOUNT_TOOL).setKey('d');
