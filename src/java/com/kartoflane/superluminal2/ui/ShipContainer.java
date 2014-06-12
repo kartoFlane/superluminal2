@@ -75,6 +75,7 @@ public class ShipContainer implements Disposable, SLListener {
 	private boolean roomsVisible = true;
 	private boolean doorsVisible = true;
 	private boolean stationsVisible = true;
+	private boolean gibsVisible = true;
 
 	private boolean shipSaved = false;
 	private File saveDestination = null;
@@ -981,6 +982,18 @@ public class ShipContainer implements Disposable, SLListener {
 				st.setVisible(vis && st.getSlotId() != -2 && getActiveSystem(s.getGameObject().getRoom()) == s.getGameObject());
 			}
 		}
+	}
+
+	public void setGibsVisible(boolean vis) {
+		gibsVisible = vis;
+		for (GibController gc : getGibControllers()) {
+			gc.setVisible(vis);
+		}
+		gibContainer.showControls(gibContainer.getShownControls());
+	}
+
+	public boolean isGibsVisible() {
+		return gibsVisible;
 	}
 
 	public void setActiveSystem(RoomObject room, SystemObject sys) {

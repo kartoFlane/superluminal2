@@ -291,6 +291,7 @@ public class Manager {
 		getHotkey(Hotkeys.SHOW_HULL).setKey('6');
 		getHotkey(Hotkeys.SHOW_FLOOR).setKey('7');
 		getHotkey(Hotkeys.SHOW_SHIELD).setKey('8');
+		getHotkey(Hotkeys.SHOW_GIBS).setKey('9');
 	}
 
 	/**

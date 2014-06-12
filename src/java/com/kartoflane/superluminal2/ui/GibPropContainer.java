@@ -55,6 +55,9 @@ public class GibPropContainer {
 	public GibPropContainer() {
 		selectionListener = new SLListener() {
 			public void handleEvent(SLEvent e) {
+				if (currentController != null && !currentController.isSelected() && !currentController.isVisible())
+					setCurrentController(null);
+
 				if (currentlyShownControls == PropControls.DIRECTION) {
 					PropController minProp = getProp(DIR_MIN_PROP_ID);
 					PropController maxProp = getProp(DIR_MAX_PROP_ID);
@@ -62,7 +65,8 @@ public class GibPropContainer {
 					String[] propIds = { DIR_MIN_PROP_ID, DIR_MAX_PROP_ID, DIR_ARC_PROP_ID };
 					for (String id : propIds) {
 						PropController prop = getProp(id);
-						prop.setVisible(currentController.isSelected() || minProp.isSelected() || maxProp.isSelected());
+						prop.setVisible(currentController != null && currentController.isVisible() &&
+								(currentController.isSelected() || minProp.isSelected() || maxProp.isSelected()));
 					}
 				} else if (currentlyShownControls == PropControls.LINEAR) {
 					PropController minProp = getProp(LIN_MIN_PROP_ID);
@@ -71,28 +75,31 @@ public class GibPropContainer {
 					String[] propIds = { LIN_MIN_PROP_ID, LIN_MAX_PROP_ID, LIN_MIN_RANGE_PROP_ID, LIN_MAX_RANGE_PROP_ID };
 					for (String id : propIds) {
 						PropController prop = getProp(id);
-						prop.setVisible(currentController.isSelected() || minProp.isSelected() || maxProp.isSelected());
+						prop.setVisible(currentController != null && currentController.isVisible() &&
+								(currentController.isSelected() || minProp.isSelected() || maxProp.isSelected()));
 					}
 
-					minProp.setBounded(!currentController.isSelected());
-					maxProp.setBounded(!currentController.isSelected());
+					if (currentController != null) {
+						minProp.setBounded(!currentController.isSelected());
+						maxProp.setBounded(!currentController.isSelected());
 
-					dataLoad = true;
+						dataLoad = true;
 
-					int cs = ShipContainer.CELL_SIZE;
-					int gridW = Grid.getInstance().getSize().x;
+						int cs = ShipContainer.CELL_SIZE;
+						int gridW = Grid.getInstance().getSize().x;
 
-					minProp.setBoundingPoints(currentController.getX(), currentController.getY() - cs / 2,
-							maxProp.getX(), currentController.getY() - cs / 2);
-					minProp.setFollowOffset(minProp.getFollowOffsetX(), -cs / 2);
-					minProp.updateFollower();
+						minProp.setBoundingPoints(currentController.getX(), currentController.getY() - cs / 2,
+								maxProp.getX(), currentController.getY() - cs / 2);
+						minProp.setFollowOffset(minProp.getFollowOffsetX(), -cs / 2);
+						minProp.updateFollower();
 
-					maxProp.setBoundingPoints(minProp.getX(), currentController.getY() - 2 * cs / 3,
-							gridW, currentController.getY() - 2 * cs / 3);
-					maxProp.setFollowOffset(maxProp.getFollowOffsetX(), -2 * cs / 3);
-					maxProp.updateFollower();
+						maxProp.setBoundingPoints(minProp.getX(), currentController.getY() - 2 * cs / 3,
+								gridW, currentController.getY() - 2 * cs / 3);
+						maxProp.setFollowOffset(maxProp.getFollowOffsetX(), -2 * cs / 3);
+						maxProp.updateFollower();
 
-					dataLoad = false;
+						dataLoad = false;
+					}
 				} else if (currentlyShownControls == PropControls.ANGULAR) {
 				}
 			}
@@ -122,11 +129,15 @@ public class GibPropContainer {
 		for (PropController prop : props)
 			prop.setParent(currentController);
 		updateData();
-		dataLoad = true;
-		for (PropController prop : props)
-			prop.updateFollower();
 
-		dataLoad = false;
+		if (currentController != null) {
+			dataLoad = true;
+			for (PropController prop : props)
+				prop.updateFollower();
+			dataLoad = false;
+		} else {
+			selectionListener.handleEvent(null);
+		}
 	}
 
 	public GibController getCurrentController() {
@@ -145,13 +156,13 @@ public class GibPropContainer {
 		String[] dirPropIds = { DIR_MIN_PROP_ID, DIR_MAX_PROP_ID, DIR_ARC_PROP_ID };
 		for (String id : dirPropIds) {
 			PropController prop = getProp(id);
-			prop.setVisible(control == PropControls.DIRECTION);
+			prop.setVisible(control == PropControls.DIRECTION && currentController != null && currentController.isVisible());
 		}
 
 		String[] linPropIds = { LIN_MIN_PROP_ID, LIN_MAX_PROP_ID, LIN_MIN_RANGE_PROP_ID, LIN_MAX_RANGE_PROP_ID };
 		for (String id : linPropIds) {
 			PropController prop = getProp(id);
-			prop.setVisible(control == PropControls.LINEAR);
+			prop.setVisible(control == PropControls.LINEAR && currentController != null && currentController.isVisible());
 		}
 
 		// TODO other controls

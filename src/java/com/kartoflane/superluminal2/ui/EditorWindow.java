@@ -108,6 +108,7 @@ public class EditorWindow {
 	private MenuItem mntmShowHull;
 	private MenuItem mntmShowFloor;
 	private MenuItem mntmShowShield;
+	private MenuItem mntmShowGibs;
 	private MenuItem mntmNewShip;
 	private MenuItem mntmLoadShip;
 	private MenuItem mntmSettings;
@@ -298,6 +299,11 @@ public class EditorWindow {
 		mntmShowShield.setText("Show Shield");
 		UIUtils.addHotkeyText(mntmShowShield, Manager.getHotkey(Hotkeys.SHOW_SHIELD).toString());
 		mntmShowShield.setSelection(true);
+
+		mntmShowGibs = new MenuItem(menuViewImages, SWT.CHECK);
+		mntmShowGibs.setText("Show Gibs");
+		UIUtils.addHotkeyText(mntmShowGibs, Manager.getHotkey(Hotkeys.SHOW_GIBS).toString());
+		mntmShowGibs.setSelection(true);
 
 		// Help menu
 		MenuItem mntmHelp = new MenuItem(menu, SWT.CASCADE);
@@ -792,6 +798,13 @@ public class EditorWindow {
 			}
 		});
 
+		mntmShowGibs.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.getCurrentShip().setGibsVisible(mntmShowGibs.getSelection());
+			}
+		});
+
 		mntmAbout.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1027,6 +1040,7 @@ public class EditorWindow {
 		mntmShowHull.setEnabled(enable);
 		mntmShowFloor.setEnabled(enable);
 		mntmShowShield.setEnabled(enable);
+		mntmShowGibs.setEnabled(enable);
 
 		// Disable mod management, only available when a ship is not loaded
 		mntmModMan.setEnabled(!enable);
@@ -1052,6 +1066,7 @@ public class EditorWindow {
 		mntmShowHull.setSelection(set);
 		mntmShowFloor.setSelection(set);
 		mntmShowShield.setSelection(set);
+		mntmShowGibs.setSelection(set);
 
 		if (container != null) {
 			container.setHangarVisible(false);
@@ -1187,6 +1202,9 @@ public class EditorWindow {
 		} else if (Manager.getHotkey(Hotkeys.SHOW_SHIELD).passes(e.keyCode) && mntmShowShield.isEnabled()) {
 			mntmShowShield.setSelection(!mntmShowShield.getSelection());
 			mntmShowShield.notifyListeners(SWT.Selection, null);
+		} else if (Manager.getHotkey(Hotkeys.SHOW_GIBS).passes(e.keyCode) && mntmShowGibs.isEnabled()) {
+			mntmShowGibs.setSelection(!mntmShowGibs.getSelection());
+			mntmShowGibs.notifyListeners(SWT.Selection, null);
 		}
 
 		// ====== Tool hotkeys
