@@ -18,7 +18,7 @@ public enum Systems {
 		};
 	}
 
-	/** Returns true if the system can have a station, false otherwise. */
+	/** @return true if the system can have a station, false otherwise. */
 	public boolean canContainStation() {
 		return this == Systems.SHIELDS || this == Systems.ENGINES ||
 				this == Systems.WEAPONS || this == Systems.MEDBAY ||
@@ -26,12 +26,12 @@ public enum Systems {
 				this == Systems.SENSORS || this == Systems.CLONEBAY;
 	}
 
-	/** Returns true if the system can have a interior image, false otherwise */
+	/** @return true if the system can have a interior image, false otherwise */
 	public boolean canContainInterior() {
 		return this != Systems.EMPTY && this != Systems.CLONEBAY && this != Systems.TELEPORTER;
 	}
 
-	/** Returns true if the system can have a glow image, false otherwise. */
+	/** @return true if the system can have a glow image, false otherwise. */
 	public boolean canContainGlow() {
 		return this == Systems.SHIELDS || this == Systems.ENGINES ||
 				this == Systems.WEAPONS || this == Systems.PILOT ||

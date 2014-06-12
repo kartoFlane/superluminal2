@@ -332,8 +332,16 @@ public class ShipSaveUtils {
 					sysEl.setAttribute("start", "" + system.isAvailable());
 
 					// Artillery has a special 'weapon' attribute to determine which weapon is used as artillery weapon
-					if (sys == Systems.ARTILLERY)
-						sysEl.setAttribute("weapon", "ARTILLERY_FED"); // TODO artillery weapon, for now default to ARTILLERY_FED
+					if (sys == Systems.ARTILLERY) {
+						WeaponObject weapon = system.getWeapon();
+
+						// If none set, default to ARTILLERY_FED
+						if (weapon == null) {
+							sysEl.setAttribute("weapon", "ARTILLERY_FED");
+						} else {
+							sysEl.setAttribute("weapon", weapon.getBlueprintName());
+						}
+					}
 
 					if (system.canContainInterior() && ship.isPlayerShip() && system.getInteriorNamespace() != null)
 						sysEl.setAttribute("img", system.getInteriorNamespace());

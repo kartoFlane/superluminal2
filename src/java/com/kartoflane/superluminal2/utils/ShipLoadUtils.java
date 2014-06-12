@@ -267,8 +267,12 @@ public class ShipLoadUtils {
 					attr = sysEl.getAttributeValue("weapon");
 					if (attr == null)
 						throw new IllegalArgumentException("Artillery is missing 'weapon' attribute.");
-					String artilleryWeapon = attr;
-					// TODO ??????
+
+					WeaponObject weapon = db.getWeapon(attr);
+					if (weapon == null)
+						throw new IllegalArgumentException(String.format("%s - WeaponBlueprint not found: %s", system.toString(), attr));
+
+					system.setWeapon(weapon);
 				}
 
 				// Load station position and direction for this system

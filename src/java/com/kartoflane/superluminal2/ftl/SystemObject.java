@@ -15,8 +15,12 @@ public class SystemObject extends GameObject implements Alias {
 	private boolean availableAtStart = true;
 
 	private RoomObject room;
+	/** Only used by systems with a mannable station */
 	private StationObject station;
+	/** Only used by systems with a mannable station */
 	private GlowSet glowSet;
+	/** Only used by artillery systems */
+	private WeaponObject weapon;
 
 	private String interiorNamespace = null;
 	private String interiorPath = null;
@@ -92,16 +96,50 @@ public class SystemObject extends GameObject implements Alias {
 		return room;
 	}
 
+	/**
+	 * Sets the weapon associated with this system.<br>
+	 * 
+	 * Only used by {@link Systems#ARTILLERY artillery} systems.
+	 */
+	public void setWeapon(WeaponObject newWeapon) {
+		weapon = newWeapon;
+	}
+
+	/**
+	 * Only used by {@link Systems#ARTILLERY artillery} systems.
+	 * 
+	 * @return the weapon associated with this system.
+	 */
+	public WeaponObject getWeapon() {
+		return weapon;
+	}
+
+	/**
+	 * Only used by {@link Systems#canContainStation() mannable} systems.
+	 * 
+	 * @return the station associated with this system
+	 */
 	public StationObject getStation() {
 		return station;
 	}
 
+	/**
+	 * Sets the glow image associated with this system. Glow images appear when the station is manned.<br>
+	 * 
+	 * Only used by {@link Systems#canContainStation() mannable} systems.
+	 * 
+	 */
 	public void setGlowSet(GlowSet set) {
 		if (set == null)
 			throw new IllegalArgumentException("Glow set must not be null.");
 		glowSet = set;
 	}
 
+	/**
+	 * Only used by {@link Systems#canContainStation() mannable} systems.
+	 * 
+	 * @return the glow image associated with this system. Glow images appear when the station is manned.
+	 */
 	public GlowSet getGlowSet() {
 		return glowSet;
 	}
