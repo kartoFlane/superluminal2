@@ -780,21 +780,30 @@ public class EditorWindow {
 		mntmShowHull.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Manager.getCurrentShip().getImageController(Images.HULL).setVisible(mntmShowHull.getSelection());
+				AbstractController ac = Manager.getCurrentShip().getImageController(Images.HULL);
+				if (ac.isSelected())
+					Manager.setSelected(null);
+				ac.setVisible(mntmShowHull.getSelection());
 			}
 		});
 
 		mntmShowFloor.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Manager.getCurrentShip().getImageController(Images.FLOOR).setVisible(mntmShowFloor.getSelection());
+				AbstractController ac = Manager.getCurrentShip().getImageController(Images.FLOOR);
+				if (ac.isSelected())
+					Manager.setSelected(null);
+				ac.setVisible(mntmShowFloor.getSelection());
 			}
 		});
 
 		mntmShowShield.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Manager.getCurrentShip().getImageController(Images.SHIELD).setVisible(mntmShowShield.getSelection());
+				AbstractController ac = Manager.getCurrentShip().getImageController(Images.SHIELD);
+				if (ac.isSelected())
+					Manager.setSelected(null);
+				ac.setVisible(mntmShowShield.getSelection());
 			}
 		});
 

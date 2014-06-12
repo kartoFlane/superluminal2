@@ -917,6 +917,8 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	public void setAnchorVisible(boolean vis) {
+		if (shipController.isSelected())
+			Manager.setSelected(null);
 		anchorVisible = vis;
 		shipController.setVisible(vis);
 	}
@@ -926,6 +928,8 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	public void setRoomsVisible(boolean vis) {
+		if (Manager.getSelected() != null && Manager.getSelected() instanceof RoomController)
+			Manager.setSelected(null);
 		LayeredPainter painter = LayeredPainter.getInstance();
 		painter.setLayerDrawn(Layers.ROOM, vis);
 		painter.setLayerDrawn(Layers.SYSTEM, vis);
@@ -938,6 +942,8 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	public void setDoorsVisible(boolean vis) {
+		if (Manager.getSelected() != null && Manager.getSelected() instanceof DoorController)
+			Manager.setSelected(null);
 		LayeredPainter.getInstance().setLayerDrawn(Layers.DOOR, vis);
 		window.canvasRedraw();
 	}
@@ -947,6 +953,8 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	public void setMountsVisible(boolean vis) {
+		if (Manager.getSelected() != null && Manager.getSelected() instanceof MountController)
+			Manager.setSelected(null);
 		LayeredPainter.getInstance().setLayerDrawn(Layers.MOUNT, vis);
 		window.canvasRedraw();
 	}
@@ -966,8 +974,9 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	public void setGibsVisible(boolean vis) {
+		if (Manager.getSelected() != null && Manager.getSelected() instanceof GibController)
+			Manager.setSelected(null);
 		LayeredPainter.getInstance().setLayerDrawn(Layers.GIBS, vis);
-		gibContainer.showControls(gibContainer.getShownControls());
 		window.canvasRedraw();
 	}
 
