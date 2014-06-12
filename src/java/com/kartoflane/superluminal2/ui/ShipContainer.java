@@ -10,9 +10,9 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
+import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.NotDeletableException;
-import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
@@ -71,11 +71,7 @@ public class ShipContainer implements Disposable, SLListener {
 	private HashMap<RoomObject, SystemObject> activeSystemMap;
 
 	private boolean anchorVisible = true;
-	private boolean mountsVisible = true;
-	private boolean roomsVisible = true;
-	private boolean doorsVisible = true;
 	private boolean stationsVisible = true;
-	private boolean gibsVisible = true;
 
 	private boolean shipSaved = false;
 	private File saveDestination = null;
@@ -930,70 +926,53 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	public void setRoomsVisible(boolean vis) {
-		roomsVisible = vis;
-		for (RoomController r : roomControllers)
-			r.setVisible(vis);
-		for (SystemController s : systemControllers) {
-			SystemObject sys = s.getGameObject();
-			s.setVisible(vis && s.isAssigned() && getActiveSystem(sys.getRoom()) == sys);
-		}
-		applyStationVisibility(vis && stationsVisible);
+		LayeredPainter painter = LayeredPainter.getInstance();
+		painter.setLayerDrawn(Layers.ROOM, vis);
+		painter.setLayerDrawn(Layers.SYSTEM, vis);
+		painter.setLayerDrawn(Layers.STATION, vis && isStationsVisible());
+		window.canvasRedraw();
 	}
 
 	public boolean isRoomsVisible() {
-		return roomsVisible;
+		return LayeredPainter.getInstance().isLayerDrawn(Layers.ROOM);
 	}
 
 	public void setDoorsVisible(boolean vis) {
-		doorsVisible = vis;
-		for (DoorController d : doorControllers)
-			d.setVisible(vis);
+		LayeredPainter.getInstance().setLayerDrawn(Layers.DOOR, vis);
+		window.canvasRedraw();
 	}
 
 	public boolean isDoorsVisible() {
-		return doorsVisible;
+		return LayeredPainter.getInstance().isLayerDrawn(Layers.DOOR);
 	}
 
 	public void setMountsVisible(boolean vis) {
-		mountsVisible = vis;
-		for (MountController m : mountControllers) {
-			m.setVisible(vis);
-			m.getProp(MountController.ARROW_PROP_ID).setVisible(vis && m.getDirection() != Directions.NONE);
-		}
+		LayeredPainter.getInstance().setLayerDrawn(Layers.MOUNT, vis);
+		window.canvasRedraw();
 	}
 
 	public boolean isMountsVisible() {
-		return mountsVisible;
+		return LayeredPainter.getInstance().isLayerDrawn(Layers.MOUNT);
 	}
 
 	public void setStationsVisible(boolean vis) {
 		stationsVisible = vis;
-		applyStationVisibility(vis && roomsVisible);
+		LayeredPainter.getInstance().setLayerDrawn(Layers.STATION, vis && isRoomsVisible());
+		window.canvasRedraw();
 	}
 
 	public boolean isStationsVisible() {
 		return stationsVisible;
 	}
 
-	private void applyStationVisibility(boolean vis) {
-		for (SystemController s : systemControllers) {
-			if (s.isAssigned() && s.canContainStation()) {
-				StationController st = (StationController) getController(s.getGameObject().getStation());
-				st.setVisible(vis && st.getSlotId() != -2 && getActiveSystem(s.getGameObject().getRoom()) == s.getGameObject());
-			}
-		}
-	}
-
 	public void setGibsVisible(boolean vis) {
-		gibsVisible = vis;
-		for (GibController gc : getGibControllers()) {
-			gc.setVisible(vis);
-		}
+		LayeredPainter.getInstance().setLayerDrawn(Layers.GIBS, vis);
 		gibContainer.showControls(gibContainer.getShownControls());
+		window.canvasRedraw();
 	}
 
 	public boolean isGibsVisible() {
-		return gibsVisible;
+		return LayeredPainter.getInstance().isLayerDrawn(Layers.GIBS);
 	}
 
 	public void setActiveSystem(RoomObject room, SystemObject sys) {

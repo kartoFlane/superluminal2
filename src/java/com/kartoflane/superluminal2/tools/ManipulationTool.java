@@ -303,15 +303,6 @@ public class ManipulationTool extends Tool {
 		}
 	}
 
-	private AbstractController getTopmostSelectableController(int x, int y) {
-		AbstractController controller = null;
-		for (int i = selectableLayerIds.length - 1; i >= 0 && controller == null; i--) {
-			if (selectableLayerIds[i] != null)
-				controller = LayeredPainter.getInstance().getSelectableControllerAt(x, y, selectableLayerIds[i]);
-		}
-		return controller;
-	}
-
 	@Override
 	public void mouseEnter(MouseEvent e) {
 		cursor.setVisible(!Manager.leftMouseDown);
@@ -331,5 +322,14 @@ public class ManipulationTool extends Tool {
 
 	@Override
 	public void mouseHover(MouseEvent e) {
+	}
+
+	private AbstractController getTopmostSelectableController(int x, int y) {
+		AbstractController controller = null;
+		for (int i = selectableLayerIds.length - 1; i >= 0 && controller == null; i--) {
+			if (selectableLayerIds[i] != null)
+				controller = LayeredPainter.getInstance().getSelectableControllerAt(x, y, selectableLayerIds[i]);
+		}
+		return controller;
 	}
 }

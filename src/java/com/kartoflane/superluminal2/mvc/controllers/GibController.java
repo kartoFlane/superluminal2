@@ -52,7 +52,8 @@ public class GibController extends ImageController {
 	@Override
 	public void setView(View view) {
 		super.setView(view);
-		this.view.addToPainter(Layers.GIBS);
+		removeFromPainter();
+		addToPainter(Layers.GIBS);
 		updateView();
 	}
 
