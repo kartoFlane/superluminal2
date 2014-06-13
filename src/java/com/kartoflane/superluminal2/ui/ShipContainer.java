@@ -497,7 +497,6 @@ public class ShipContainer implements Disposable, SLListener {
 
 		setActiveSystem(room.getGameObject(), sys);
 
-		room.addListener(SLEvent.VISIBLE, system);
 		room.addListener(SLEvent.RESIZE, system);
 		system.notifySizeChanged(room.getW(), room.getH());
 
@@ -525,7 +524,6 @@ public class ShipContainer implements Disposable, SLListener {
 		systemC.unassign();
 
 		if (roomC != null) {
-			roomC.removeListener(SLEvent.VISIBLE, systemC);
 			roomC.removeListener(SLEvent.RESIZE, systemC);
 			roomC.removeListener(SLEvent.RESIZE, stationC);
 			roomC.redraw();
@@ -1005,19 +1003,25 @@ public class ShipContainer implements Disposable, SLListener {
 		if (sys == null)
 			throw new IllegalArgumentException("System must not be null.");
 
+		RoomController roomC = (RoomController) getController(room);
+		SystemController currSystemC = (SystemController) getController(sys);
+
 		SystemObject prevSystem = getActiveSystem(room);
 		SystemController prevSystemC = (SystemController) getController(prevSystem);
+
 		prevSystemC.setVisible(false);
+		roomC.removeListener(SLEvent.VISIBLE, prevSystemC);
+		roomC.addListener(SLEvent.VISIBLE, currSystemC);
 
 		activeSystemMap.put(room, sys);
 
 		if (prevSystem != null && prevSystem.canContainStation())
 			getController(prevSystem.getStation()).updateView();
 
-		getController(sys).setVisible(true);
+		currSystemC.setVisible(true);
 		if (sys.canContainStation())
 			getController(sys.getStation()).updateView();
-		getController(room).redraw();
+		roomC.redraw();
 	}
 
 	public SystemObject getActiveSystem(RoomObject room) {
