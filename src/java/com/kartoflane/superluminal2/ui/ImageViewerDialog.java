@@ -79,10 +79,10 @@ public class ImageViewerDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String path = preview.getImagePath();
-				if (path != null)
+				if (path == null)
 					return;
 
-				File file = new File(path);
+				File file = new File(IOUtils.trimProtocol(path));
 				if (file.exists()) {
 					if (Desktop.isDesktopSupported()) {
 						Desktop desktop = Desktop.getDesktop();
@@ -95,6 +95,8 @@ public class ImageViewerDialog {
 					} else {
 						Superluminal.log.error("Unable to open file location - AWT Desktop not supported.");
 					}
+				} else {
+					Superluminal.log.error(String.format("Unable to open file location - file could not be found: '%s'", path));
 				}
 			}
 		});
