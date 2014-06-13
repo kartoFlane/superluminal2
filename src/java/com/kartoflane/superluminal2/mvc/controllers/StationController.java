@@ -5,6 +5,7 @@ import org.eclipse.swt.graphics.Point;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -35,6 +36,7 @@ public class StationController extends ObjectController implements Controller {
 		setSlotId(getGameObject().getSlotId());
 
 		setParent(system);
+		system.addListener(SLEvent.VISIBLE, this);
 	}
 
 	/**

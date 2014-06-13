@@ -497,6 +497,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 		setActiveSystem(room.getGameObject(), sys);
 
+		room.addListener(SLEvent.VISIBLE, system);
 		room.addListener(SLEvent.RESIZE, system);
 		system.notifySizeChanged(room.getW(), room.getH());
 
@@ -524,6 +525,7 @@ public class ShipContainer implements Disposable, SLListener {
 		systemC.unassign();
 
 		if (roomC != null) {
+			roomC.removeListener(SLEvent.VISIBLE, systemC);
 			roomC.removeListener(SLEvent.RESIZE, systemC);
 			roomC.removeListener(SLEvent.RESIZE, stationC);
 			roomC.redraw();

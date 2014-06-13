@@ -371,7 +371,8 @@ public class ModManagementDialog {
 
 	public void dispose() {
 		if (disabledColor != null)
-			disabledColor.dispose();
+			Cache.checkInColor(this, disabledColor.getRGB());
+		disabledColor = null;
 		shell.dispose();
 		instance = null;
 	}

@@ -877,6 +877,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			if (eventHandler != null && e.data != null && e.data instanceof SLListener) {
 				eventHandler.unhook((SLListener) e.data);
 			}
+		} else if (e.type == SLEvent.VISIBLE) {
+			if (e.source == getParent())
+				setVisible((Boolean) e.data);
 		}
 	}
 

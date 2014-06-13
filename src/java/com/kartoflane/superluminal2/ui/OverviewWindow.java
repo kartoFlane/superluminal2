@@ -13,8 +13,10 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Event;
@@ -49,6 +51,8 @@ public class OverviewWindow {
 	private ShipContainer ship;
 	private ObjectController highlightedController = null;
 	private HashMap<AbstractController, TreeItem> controllerMap = new HashMap<AbstractController, TreeItem>();
+
+	private Color disabledColor = null;
 
 	private Shell shell;
 	private TreeItem trtmRooms;
@@ -100,6 +104,12 @@ public class OverviewWindow {
 		tree.setLinesVisible(true);
 		tree.setHeaderVisible(true);
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		RGB rgb = tree.getBackground().getRGB();
+		rgb.red = (int) (0.85 * rgb.red);
+		rgb.green = (int) (0.85 * rgb.green);
+		rgb.blue = (int) (0.85 * rgb.blue);
+		disabledColor = Cache.checkOutColor(this, rgb);
 
 		trclmnName = new TreeColumn(tree, SWT.NONE);
 		trclmnName.setWidth(175);
@@ -184,6 +194,17 @@ public class OverviewWindow {
 			}
 		});
 
+		tree.addListener(SWT.MouseExit, new Listener() {
+			@Override
+			public void handleEvent(Event e) {
+				if (Manager.getSelectedToolId() == Tools.POINTER) {
+					if (highlightedController != null)
+						highlightedController.setHighlighted(false);
+					highlightedController = null;
+				}
+			}
+		});
+
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -199,6 +220,7 @@ public class OverviewWindow {
 
 				tltmAlias.setEnabled(controller != null);
 				tltmRemove.setEnabled(controller != null && controller.getAlias() != null && !controller.getAlias().equals(""));
+				tltmToggleVis.setEnabled(controller != null);
 			}
 		});
 
@@ -255,6 +277,19 @@ public class OverviewWindow {
 		};
 		mntmRemoveAlias.addSelectionListener(removeAliasListener);
 		tltmRemove.addSelectionListener(removeAliasListener);
+
+		tltmToggleVis.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (tree.getSelectionCount() != 0) {
+					AbstractController ac = (AbstractController) tree.getSelection()[0].getData();
+					if (ac != null) {
+						ac.setVisible(!ac.isVisible());
+						tree.getSelection()[0].setBackground(ac.isVisible() ? null : disabledColor);
+					}
+				}
+			}
+		});
 
 		shell.setSize(300, 600);
 		Point size = shell.getSize();
@@ -316,6 +351,7 @@ public class OverviewWindow {
 			alias = ((Alias) prevSelection).getAlias();
 		tltmAlias.setEnabled(prevSelection != null);
 		tltmRemove.setEnabled(prevSelection != null && alias != null && !alias.equals(""));
+		tltmToggleVis.setEnabled(prevSelection != null);
 	}
 
 	public void update(ObjectController controller) {
@@ -355,11 +391,14 @@ public class OverviewWindow {
 		String alias = oc.getAlias();
 		item.setText(1, alias == null ? "" : alias);
 
+		item.setBackground(oc.isVisible() ? null : disabledColor);
+
 		if (oc.isSelected())
 			tree.select(item);
 
 		tltmAlias.setEnabled(oc != null);
 		tltmRemove.setEnabled(oc != null && oc.getAlias() != null && !oc.getAlias().equals(""));
+		tltmToggleVis.setEnabled(oc != null);
 	}
 
 	/**
@@ -425,6 +464,8 @@ public class OverviewWindow {
 	}
 
 	public void dispose() {
+		Cache.checkInColor(this, disabledColor.getRGB());
+		disabledColor = null;
 		Cache.checkInImage(this, "cpath:/assets/help.png");
 		Cache.checkInImage(this, "cpath:/assets/alias.png");
 		Cache.checkInImage(this, "cpath:/assets/noalias.png");
