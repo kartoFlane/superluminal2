@@ -36,6 +36,8 @@ import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class RoomDataComposite extends Composite implements DataComposite {
 
+	private static String prevInteriorPath = System.getProperty("user.home");
+
 	private RoomController roomC = null;
 	private ShipContainer container = null;
 
@@ -228,6 +230,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					SystemController system = (SystemController) container.getController(sys);
 					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
 					dialog.setFilterExtensions(new String[] { "*.png" });
+					dialog.setFilterPath(prevInteriorPath);
+					dialog.setFileName(prevInteriorPath);
 
 					boolean exit = false;
 					while (!exit) {
@@ -235,6 +239,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 						// path == null only when user cancels
 						if (path != null) {
+							prevInteriorPath = path;
 							File temp = new File(path);
 							if (temp.exists()) {
 								system.setVisible(false);

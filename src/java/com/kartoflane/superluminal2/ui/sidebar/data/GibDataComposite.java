@@ -40,7 +40,15 @@ public class GibDataComposite extends Composite implements DataComposite {
 
 		label = new Label(this, SWT.NONE);
 		label.setAlignment(SWT.CENTER);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+		Label lblHelp = new Label(this, SWT.NONE);
+		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblHelp.setImage(helpImage);
+		String msg = "- Click on the controls button to open controls selection menu\n" +
+				"- Alternatively, right-click on the gib to open the menu\n" +
+				"- You can drag the controls around to modify the selected property";
+		UIUtils.addTooltip(lblHelp, "", msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -50,15 +58,9 @@ public class GibDataComposite extends Composite implements DataComposite {
 		lblShowControls.setText("Show Controls:");
 
 		btnControls = new Button(this, SWT.NONE);
-		GridData gd_btnControls = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		GridData gd_btnControls = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
 		gd_btnControls.widthHint = 100;
 		btnControls.setLayoutData(gd_btnControls);
-
-		Label lblControlsHelp = new Label(this, SWT.NONE);
-		lblControlsHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblControlsHelp.setImage(helpImage);
-		String msg = ""; // TODO
-		UIUtils.addTooltip(lblControlsHelp, "", msg);
 
 		btnControls.addSelectionListener(new SelectionAdapter() {
 			@Override

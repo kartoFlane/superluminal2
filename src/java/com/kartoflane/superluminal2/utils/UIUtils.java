@@ -140,9 +140,10 @@ public class UIUtils {
 			parentShell.dispose();
 	}
 
-	public static File promptForDirectory(Shell parentShell, String title, String message) {
+	public static File promptForDirectory(Shell parentShell, String title, String message, String defaultPath) {
 		File result = null;
 		DirectoryDialog dialog = new DirectoryDialog(parentShell);
+		dialog.setFilterPath(defaultPath);
 		dialog.setText(title);
 		dialog.setMessage(message);
 
@@ -157,10 +158,12 @@ public class UIUtils {
 		return result;
 	}
 
-	public static File promptForSaveFile(Shell parentShell, String title, String[] extensions) {
+	public static File promptForSaveFile(Shell parentShell, String title, String defaultPath, String[] extensions) {
 		File result = null;
 		FileDialog dialog = new FileDialog(parentShell, SWT.SAVE);
 		dialog.setFilterExtensions(extensions);
+		dialog.setFilterPath(defaultPath);
+		dialog.setFileName(defaultPath);
 		dialog.setText(title);
 		dialog.setOverwrite(true);
 
@@ -175,10 +178,12 @@ public class UIUtils {
 		return result;
 	}
 
-	public static File promptForLoadFile(Shell parentShell, String title, String[] extensions) {
+	public static File promptForLoadFile(Shell parentShell, String title, String defaultPath, String[] extensions) {
 		File result = null;
 		FileDialog dialog = new FileDialog(parentShell, SWT.OPEN);
 		dialog.setFilterExtensions(extensions);
+		dialog.setFilterPath(defaultPath);
+		dialog.setFileName(defaultPath);
 		dialog.setText(title);
 
 		String path = dialog.open();

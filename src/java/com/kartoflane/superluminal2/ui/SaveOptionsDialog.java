@@ -24,6 +24,7 @@ import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class SaveOptionsDialog {
 	private static SaveOptionsDialog instance = null;
+	private static String prevPath = System.getProperty("user.home");
 
 	private File result = null;
 
@@ -125,13 +126,14 @@ public class SaveOptionsDialog {
 			public void widgetSelected(SelectionEvent e) {
 				File temp = null;
 				if (btnDirectory.getSelection()) {
-					temp = UIUtils.promptForDirectory(shell, "Save Ship as Directory", "Please select the directory to which the ship will be exported.");
+					temp = UIUtils.promptForDirectory(shell, "Save Ship as Directory", "Please select the directory to which the ship will be exported.", prevPath);
 				} else {
-					temp = UIUtils.promptForSaveFile(shell, "Save Ship as FTL", new String[] { "*.ftl", "*.zip" });
+					temp = UIUtils.promptForSaveFile(shell, "Save Ship as FTL", prevPath, new String[] { "*.ftl", "*.zip" });
 				}
 
 				// User could've aborted selection, which returns null.
 				if (temp != null) {
+					prevPath = temp.getAbsolutePath();
 					result = temp;
 					txtDestination.setText(temp.getAbsolutePath());
 				}

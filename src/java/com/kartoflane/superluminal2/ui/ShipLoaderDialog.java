@@ -13,9 +13,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -179,7 +178,7 @@ public class ShipLoaderDialog {
 		btnCancel.setLayoutData(gd_btnCancel);
 		btnCancel.setText("Close");
 
-		tree.addMouseListener(new MouseListener() {
+		tree.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 				if (e.button == 1 && tree.getSelectionCount() != 0) {
@@ -189,14 +188,6 @@ public class ShipLoaderDialog {
 					else if (selectedItem.getBounds().contains(e.x, e.y))
 						selectedItem.setExpanded(!selectedItem.getExpanded());
 				}
-			}
-
-			@Override
-			public void mouseDown(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseUp(MouseEvent e) {
 			}
 		});
 
@@ -321,11 +312,7 @@ public class ShipLoaderDialog {
 			}
 		});
 
-		canvas.addControlListener(new ControlListener() {
-			@Override
-			public void controlMoved(ControlEvent e) {
-			}
-
+		canvas.addControlListener(new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
 				updatePreview();

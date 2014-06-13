@@ -31,6 +31,8 @@ import com.kartoflane.superluminal2.utils.UIUtils;
 public class GlowSetDialog {
 
 	private static GlowSetDialog instance = null;
+	private static String prevPath = System.getProperty("user.home");
+
 	private boolean typeCloak = false;
 	private GlowSet result = null;
 
@@ -261,6 +263,9 @@ public class GlowSetDialog {
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(shell, SWT.OPEN);
 				dialog.setFilterExtensions(new String[] { "*.png" });
+				dialog.setFilterPath(prevPath);
+				dialog.setFileName(prevPath);
+
 				Text widget = null;
 
 				if (e.getSource() == btnBrowseBlue) {
@@ -277,6 +282,7 @@ public class GlowSetDialog {
 
 					// path == null only when user cancels
 					if (path != null) {
+						prevPath = path;
 						File temp = new File(path);
 						if (temp.exists()) {
 							widget.setText("file:" + path);
