@@ -155,7 +155,10 @@ public class ShipSaveUtils {
 		}
 
 		// Copy images
-		for (Images img : Images.values()) {
+		for (Images img : Images.getShipImages()) {
+			if (!img.shouldSave(ship))
+				continue;
+
 			ImageObject object = ship.getImage(img);
 			String path = object.getImagePath();
 
@@ -174,55 +177,19 @@ public class ShipSaveUtils {
 			}
 		}
 
-		for (Systems sys : Systems.getSystems()) {
-			for (SystemObject system : ship.getSystems(sys)) {
-				String path = system.getInteriorPath();
+		if (ship.isPlayerShip()) {
+			for (Systems sys : Systems.getSystems()) {
+				for (SystemObject system : ship.getSystems(sys)) {
+					String path = system.getInteriorPath();
 
-				if (path != null && system.isAssigned()) {
-					InputStream is = null;
-					try {
-						is = Manager.getInputStream(path);
-						fileName = "img/ship/interior/" + system.getInteriorNamespace() + ".png";
-						fileMap.put(fileName, IOUtils.readStream(is));
-					} catch (FileNotFoundException e) {
-						log.warn(String.format("File for %s interior image could not be found: %s", sys, path));
-					} finally {
-						if (is != null)
-							is.close();
-					}
-				}
-			}
-		}
-
-		for (GlowObject object : newGlows) {
-			GlowSet set = object.getGlowSet();
-			String path = set.getImage(Glows.CLOAK);
-
-			if (path != null) {
-				SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
-				InputStream is = null;
-				try {
-					is = Manager.getInputStream(path);
-					fileName = "img/ship/interior/" + cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png";
-					fileMap.put(fileName, IOUtils.readStream(is));
-				} catch (FileNotFoundException e) {
-					log.warn("File for cloaking glow image could not be found: " + path);
-				} finally {
-					if (is != null)
-						is.close();
-				}
-			} else {
-				for (Glows glowId : Glows.getGlows()) {
-					path = set.getImage(glowId);
-
-					if (path != null) {
+					if (path != null && system.isAssigned()) {
 						InputStream is = null;
 						try {
 							is = Manager.getInputStream(path);
-							fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
+							fileName = "img/ship/interior/" + system.getInteriorNamespace() + ".png";
 							fileMap.put(fileName, IOUtils.readStream(is));
 						} catch (FileNotFoundException e) {
-							log.warn(String.format("File for %s's %s glow image could not be found: %s", object.getIdentifier(), glowId, path));
+							log.warn(String.format("File for %s interior image could not be found: %s", sys, path));
 						} finally {
 							if (is != null)
 								is.close();
@@ -230,9 +197,67 @@ public class ShipSaveUtils {
 					}
 				}
 			}
+
+			for (GlowObject object : newGlows) {
+				GlowSet set = object.getGlowSet();
+				String path = set.getImage(Glows.CLOAK);
+
+				if (path != null) {
+					SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
+					InputStream is = null;
+					try {
+						is = Manager.getInputStream(path);
+						fileName = "img/ship/interior/" + cloaking.getInteriorNamespace() + Glows.CLOAK.getSuffix() + ".png";
+						fileMap.put(fileName, IOUtils.readStream(is));
+					} catch (FileNotFoundException e) {
+						log.warn("File for cloaking glow image could not be found: " + path);
+					} finally {
+						if (is != null)
+							is.close();
+					}
+				} else {
+					for (Glows glowId : Glows.getGlows()) {
+						path = set.getImage(glowId);
+
+						if (path != null) {
+							InputStream is = null;
+							try {
+								is = Manager.getInputStream(path);
+								fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
+								fileMap.put(fileName, IOUtils.readStream(is));
+							} catch (FileNotFoundException e) {
+								log.warn(String.format("File for %s's %s glow image could not be found: %s", object.getIdentifier(), glowId, path));
+							} finally {
+								if (is != null)
+									is.close();
+							}
+						}
+					}
+				}
+			}
 		}
 
-		// TODO gib images
+		for (int i = 1; i <= ship.getGibs().length; i++) {
+			GibObject gib = ship.getGibById(i);
+			if (gib == null)
+				throw new IllegalStateException("Missing gib object with id " + i);
+
+			String path = gib.getImagePath();
+			if (path != null) {
+				InputStream is = null;
+				try {
+					is = Manager.getInputStream(path);
+					String datRelativePath = ship.isPlayerShip() ? "img/ship/" : "img/ships_glow/";
+					fileName = datRelativePath + ship.getImageNamespace() + "_gib" + gib.getId() + ".png";
+					fileMap.put(fileName, IOUtils.readStream(is));
+				} catch (FileNotFoundException e) {
+					log.warn(String.format("File for gib #%s could not be found: %s", gib.getId(), path));
+				} finally {
+					if (is != null)
+						is.close();
+				}
+			}
+		}
 
 		return fileMap;
 	}

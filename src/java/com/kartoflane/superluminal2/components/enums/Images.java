@@ -6,6 +6,15 @@ public enum Images {
 	SHIELD, HULL, FLOOR, CLOAK, THUMBNAIL, HANGAR;
 
 	/**
+	 * @return all Images, sans {@link #HANGAR}
+	 */
+	public static Images[] getShipImages() {
+		return new Images[] {
+				SHIELD, HULL, FLOOR, CLOAK, THUMBNAIL
+		};
+	}
+
+	/**
 	 * Returns the dat-relative path for this image type.<br>
 	 * The returned path has a trailing forward slash, but no
 	 * leading forward slash, like so:
@@ -30,6 +39,17 @@ public enum Images {
 				return "img/customizeUI/";
 			default:
 				return "img/ship/";
+		}
+	}
+
+	public boolean shouldSave(ShipObject ship) {
+		switch (this) {
+			case SHIELD:
+			case FLOOR:
+			case THUMBNAIL:
+				return false;
+			default:
+				return true;
 		}
 	}
 
