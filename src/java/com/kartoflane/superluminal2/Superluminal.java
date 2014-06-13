@@ -52,16 +52,26 @@ public class Superluminal {
 	 * settings ideas:
 	 * - checkboxes to make floor/cloak/shield/mounts follow hull, something along these lines
 	 * 
-	 * - config options to reset door links when the door is moved <-------- requested by Sleeper
-	 * 
 	 * - feature creeeeeeep
 	 * 
 	 * TODO:
-	 * - weapon selection reportedly clunky -> search function?
-	 * - add gibs
+	 * 
+	 * IMMEDIATE:
 	 * - dragging reorder to ship overview
-	 * - change fine optimal offset calculation to use hull image size instead??
-	 * - have each dialog remember its own location to where it opens
+	 * - weapon selection reportedly clunky -> search function?
+	 * - artillery
+	 * 
+	 * MEDIUM:
+	 * - entity deletion --> add (to) undo
+	 * - glow placement modification
+	 * - figure out a better way to represent weapon stats in weapon selection dialog
+	 * 
+	 * LOW:
+	 * - come up with a way to set which system is first when assigned to the same room?
+	 * - generate floor image feature ??
+	 * - .shp loading / conversion to .ftl
+	 * - Rework highlight to be cursor based? --> allows to show mounts/rooms that are hidden beneath hull/other rooms
+	 * - rework the layered painter to allow more freedom in arranging stuff's ordering
 	 * 
 	 * - artillery weapon UI idea:
 	 * Additionally, when placing artillery room(s), there should be a separate category under Armaments for Artillery weapons, and the selection of such for each. The best way, in my opinion, is to
@@ -70,19 +80,6 @@ public class Superluminal {
 	 * be used in an artillery slot, but can only fire based on the artillery cooldown. In addition, for each slot that a person wants to set up artillery for, a Power selector (max 4 - though can it
 	 * be exceeded? If so, add it. :P) should be added to the right of each Artillery weapon choice, so that way it will make adding multiple-artillery setups to AI (or human-controlled) ships much
 	 * easier.
-	 * 
-	 * - generate floor image feature ??
-	 * - .shp loading / conversion to .ftl
-	 * 
-	 * - figure out a better way to represent weapon stats in weapon selection dialog
-	 * - come up with a way to set which system is first when assigned to the same room?
-	 * - glow placement modification
-	 * 
-	 * - entity deletion --> add (to) undo
-	 * - undo przy pomocy reflection -- UndoableBooleanFieldEdit, etc ?? ...chyba nie
-	 * 
-	 * - Rework highlight to be cursor based? --> allows to show mounts/rooms that are hidden beneath hull/other rooms
-	 * - rework the layered painter to allow more freedom in arranging stuff's ordering
 	 * 
 	 * Suggestions:
 	 * - detachable toolbar?

@@ -1,5 +1,35 @@
 Changelog
 
+2.0.0 beta9:
+- Fixed a bug that would prevent weapon/drone slots from saving correctly for enemy ships
+- Ship save destination is now on a per-ship basis, instead of being application-wide
+- File and folder selection dialogs should now remember their own paths. Some of the file
+  selection dialogs are grouped together, eg. all interior images' dialogs use the same path.
+- Toggling hangar image for enemy ships now displays the enemy window instead
+- Disabled the horizontal offset slider for enemy ships, since it doesn't affect them
+- Fixed enemy offset loading & improved enemy optimal offset calculation
+- Ship Loader now also remembers previous selection
+- Enemy ship images now get saved to 'ships_glow' instead of 'ships_noglow' -- still not sure
+  if only one is enough for enemy ship hulls to show up correctly
+- Removed unnecessary method calls, reducing ManipulationTool dragging lag by around 33%
+- Fixed a bug with database reloading that would crash the editor in any mods were loaded
+- Corrected ship saving to only export interior and glow images when the system using them
+  is actually assigned
+- Fixed a bug with the loading dialog that would cause the editor to crash if two loading
+  dialogs were displayed at the same time
+- Hiding an object now also deselects it
+- Fixed config dialog's contents not wrapping when the window was resized, improved scrolling
+- Added artillery loading & saving (no modification yet)
+- Added new config option to reset door links when the door is moved
+- Reworked Gib Tool to be a part of Images Tool
+- Fixed a bug that would cause gib ordering to not be preserved
+- Fixed angular velocity not being loaded
+- Fixed gib saving
+- Added gib modification (WOOO!)
+- Added gib image saving
+- Fixed shield & interior images (?) being exported for enemy ships
+- Slightly reworked & improved the Overview Window, added gibs, and a visibility toggle button
+
 2.0.0 beta8:
 - The update dialog now displays a brief list of changes that have been made since the version
   you're using
