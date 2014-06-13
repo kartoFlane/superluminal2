@@ -198,6 +198,14 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 
 	@Override
 	public String toString() {
+		String result = toStringNoAlias();
+
+		if (getAlias() != null && !getAlias().equals(""))
+			result += " (" + getAlias() + ")";
+		return result;
+	}
+
+	public String toStringNoAlias() {
 		if (id == -1) {
 			return "-1: Airlock";
 		}
@@ -214,8 +222,6 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 			}
 		}
 
-		if (getAlias() != null && !getAlias().equals(""))
-			result += " (" + getAlias() + ")";
 		return result;
 	}
 }
