@@ -1063,6 +1063,7 @@ public class ShipObject extends GameObject {
 			mounts.remove(object);
 		} else if (object instanceof GibObject) {
 			gibs.remove(object);
+			coalesceGibs();
 		} else if (object instanceof AugmentObject) {
 			augments.remove(object);
 		} else if (object instanceof SystemObject) {
@@ -1083,6 +1084,20 @@ public class ShipObject extends GameObject {
 		for (RoomObject room : roomArray) {
 			room.setId(id++);
 			rooms.add(room);
+		}
+	}
+
+	/**
+	 * Coalesces the gibs, removing gaps in gib numbering.
+	 */
+	private void coalesceGibs() {
+		// Gibs are 1-relative
+		int id = 1;
+		GibObject[] gibArray = getGibs();
+		gibs.clear();
+		for (GibObject gib : gibArray) {
+			gib.setId(id++);
+			gibs.add(gib);
 		}
 	}
 

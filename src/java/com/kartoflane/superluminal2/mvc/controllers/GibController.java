@@ -27,7 +27,7 @@ public class GibController extends ImageController {
 		setLocModifiable(true);
 		setBounded(false);
 		setCollidable(false);
-		setDeletable(false);
+		setDeletable(true);
 	}
 
 	@Override
@@ -55,6 +55,10 @@ public class GibController extends ImageController {
 		removeFromPainter();
 		addToPainter(Layers.GIBS);
 		updateView();
+	}
+
+	public int getId() {
+		return getGameObject().getId();
 	}
 
 	@Override

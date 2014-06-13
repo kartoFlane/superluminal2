@@ -154,6 +154,13 @@ public class ShipContainer implements Disposable, SLListener {
 
 			add(mc);
 		}
+
+		createImageControllers();
+		ImageController hangarC = getImageController(Images.HANGAR);
+		Point fo = hangarC.getFollowOffset();
+		hangarC.setFollowOffset(fo.x - ship.getHorizontal(), fo.y - ship.getVertical());
+		hangarC.updateFollower();
+
 		// Gibs are not always listed in their order of appearance... Get by id instead
 		// of iterating over array.
 		GibObject gib = null;
@@ -162,11 +169,15 @@ public class ShipContainer implements Disposable, SLListener {
 		while ((gib = ship.getGibById(i)) != null) {
 			GibController gc = GibController.newInstance(this, gib);
 
+			// Calculate offset relative to the ship's anchor to prevent rounding errors from occuring
 			Point offset = ship.getHullOffset();
 			offset.x += ship.getXOffset() * CELL_SIZE + gc.getSize().x / 2 + gib.getOffsetX();
 			offset.y += ship.getYOffset() * CELL_SIZE + gc.getSize().y / 2 + gib.getOffsetY();
 			gc.setFollowOffset(offset);
 			gc.updateFollower();
+
+			gc.setParent(getImageController(Images.HULL));
+			gc.updateFollowOffset();
 
 			add(gc);
 			i--;
@@ -192,12 +203,6 @@ public class ShipContainer implements Disposable, SLListener {
 				}
 			}
 		}
-
-		createImageControllers();
-		ImageController hangarC = getImageController(Images.HANGAR);
-		Point fo = hangarC.getFollowOffset();
-		hangarC.setFollowOffset(fo.x - ship.getHorizontal(), fo.y - ship.getVertical());
-		hangarC.updateFollower();
 
 		updateBoundingArea();
 		updateChildBoundingAreas();
@@ -311,6 +316,14 @@ public class ShipContainer implements Disposable, SLListener {
 
 	public GibController[] getGibControllers() {
 		return gibControllers.toArray(new GibController[0]);
+	}
+
+	public GibController getGibControllerById(int id) {
+		for (GibController gc : gibControllers) {
+			if (gc.getGameObject().getId() == id)
+				return gc;
+		}
+		return null;
 	}
 
 	public StationController getStationController(Systems systemId) {
