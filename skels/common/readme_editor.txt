@@ -28,7 +28,8 @@ Setup
 	installation directory.
 	On OSX, you can select 'FTL.app', since the resources are inside it.
 
-	In most cases, this should be located automatically.
+	In most cases, this should be located automatically, and the editor
+	will only ask you for confirmation.
 	
 	The editor reads data directly from the game's files, so any mods you
 	have installed will show up in the editor.
