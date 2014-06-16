@@ -29,6 +29,8 @@ public enum Images {
 	 * @return the dat-relative path for this image type
 	 */
 	public String getDatRelativePath(ShipObject ship) {
+		if (ship == null)
+			throw new IllegalArgumentException("Argument must not be null.");
 		switch (this) {
 			case HULL:
 				if (ship.isPlayerShip())
@@ -42,17 +44,25 @@ public enum Images {
 		}
 	}
 
+	/**
+	 * @return true if this image type should be exported for the given ship, false otherwie.
+	 */
 	public boolean shouldSave(ShipObject ship) {
+		if (ship == null)
+			throw new IllegalArgumentException("Argument must not be null.");
 		switch (this) {
 			case SHIELD:
 			case FLOOR:
 			case THUMBNAIL:
-				return false;
+				return ship.isPlayerShip();
 			default:
 				return true;
 		}
 	}
 
+	/**
+	 * @return the prefix to the ship's image namespace for this image type.
+	 */
 	public String getPrefix() {
 		switch (this) {
 			case THUMBNAIL:
@@ -62,6 +72,9 @@ public enum Images {
 		}
 	}
 
+	/**
+	 * @return the suffix to the ship's image namespace for this image type.
+	 */
 	public String getSuffix() {
 		switch (this) {
 			case SHIELD:
@@ -75,6 +88,15 @@ public enum Images {
 			default:
 				return "";
 		}
+	}
+
+	/**
+	 * @return the name of the file this image should be exported as
+	 */
+	public String getFilename(ShipObject ship) {
+		if (ship == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		return getPrefix() + ship.getImageNamespace() + getSuffix() + ".png";
 	}
 
 	@Override
