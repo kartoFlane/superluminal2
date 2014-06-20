@@ -37,6 +37,7 @@ import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.utils.DataUtils;
 import com.kartoflane.superluminal2.utils.IOUtils;
+import com.kartoflane.superluminal2.utils.IOUtils.DecodeResult;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public class DatabaseEntry {
@@ -182,6 +183,7 @@ public class DatabaseEntry {
 		weaponLists.clear();
 		droneLists.clear();
 		animSheetMap.clear();
+		System.gc();
 	}
 
 	/**
@@ -198,11 +200,6 @@ public class DatabaseEntry {
 	public void dispose() throws IOException {
 		close();
 		clear();
-	}
-
-	public void reload() {
-		clear();
-		load();
 	}
 
 	public void store(AnimationObject anim) {
@@ -458,7 +455,7 @@ public class DatabaseEntry {
 			for (String innerPath : blueprintFiles) {
 				try {
 					is = getInputStream(innerPath + ext);
-					IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
+					DecodeResult dr = IOUtils.decodeText(is, null);
 
 					ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "shipBlueprint");
 					for (Element e : elements) {
@@ -523,7 +520,7 @@ public class DatabaseEntry {
 			for (String innerPath : blueprintFiles) {
 				try {
 					is = getInputStream(innerPath + ext);
-					IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
+					DecodeResult dr = IOUtils.decodeText(is, null);
 
 					ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "blueprintList");
 					for (Element e : elements) {
@@ -557,7 +554,7 @@ public class DatabaseEntry {
 		for (String ext : extensions) {
 			try {
 				is = getInputStream("data/rooms" + ext);
-				IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
+				DecodeResult dr = IOUtils.decodeText(is, null);
 
 				ArrayList<Element> elements = DataUtils.findTagsNamed(dr.text, "roomLayout");
 				for (Element e : elements) {
@@ -600,7 +597,7 @@ public class DatabaseEntry {
 				InputStream is = null;
 				try {
 					is = getInputStream(innerPath + ext);
-					IOUtils.DecodeResult dr = IOUtils.decodeText(is, null);
+					DecodeResult dr = IOUtils.decodeText(is, null);
 
 					Document doc = null;
 					doc = IOUtils.parseXML(dr.text);

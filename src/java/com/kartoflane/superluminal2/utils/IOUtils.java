@@ -66,7 +66,7 @@ public class IOUtils {
 	 * Reads the stream supplied in argument, and decodes it as text.<br>
 	 * This method fully reads the stream, and as such after this method has been invoked,
 	 * the stream will have reached EOF.<br>
-	 * This method does not close the stream.
+	 * <b>This method does not close the stream.</b>
 	 * 
 	 * @param is
 	 *            The stream to be read.
@@ -82,7 +82,7 @@ public class IOUtils {
 	 * Reads the stream supplied in argument, decodes it as text, and interprets it as XML.<br>
 	 * This method fully reads the stream, and as such after this method has been invoked,
 	 * the stream will have reached EOF.<br>
-	 * This method does not close the stream.
+	 * <b>This method does not close the stream.</b>
 	 * 
 	 * @param is
 	 *            The stream to be read.
@@ -98,7 +98,7 @@ public class IOUtils {
 	 * Clones the stream supplied in argument.<br>
 	 * This method fully reads the stream, and as such after this method has been invoked,
 	 * the stream will have reached EOF.<br>
-	 * This method does not close the stream.
+	 * <b>This method does not close the stream.</b>
 	 */
 	public static InputStream cloneStream(InputStream is) throws IOException {
 		return new ByteArrayInputStream(readStream(is));
@@ -108,7 +108,7 @@ public class IOUtils {
 	 * Reads the stream supplied in argument.<br>
 	 * This method fully reads the stream, and as such after this method has been invoked,
 	 * the stream will have reached EOF.<br>
-	 * This method does not close the stream.
+	 * <b>This method does not close the stream.</b>
 	 */
 	public static byte[] readStream(InputStream is) throws IOException {
 		int read = 0;
@@ -132,7 +132,7 @@ public class IOUtils {
 	 * Writes the contents of the input stream to the output stream.<br>
 	 * This method fully reads the input stream, and as such after this method has been invoked,
 	 * the stream will have reached EOF.<br>
-	 * This method does not close the streams.
+	 * <b>This method does not close the streams.</b>
 	 */
 	public static void write(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024 * 10];
@@ -226,7 +226,7 @@ public class IOUtils {
 	 * Determines text encoding for an InputStream and decodes its bytes as a string.<br>
 	 * 
 	 * CR and CR-LF line endings will be normalized to LF.<br>
-	 * This method does not close the stream.
+	 * <b>This method does not close the stream.</b>
 	 * 
 	 * @param is
 	 *            a stream to read

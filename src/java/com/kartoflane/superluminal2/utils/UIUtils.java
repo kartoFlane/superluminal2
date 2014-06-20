@@ -300,6 +300,18 @@ public class UIUtils {
 		dialog.open();
 	}
 
+	/**
+	 * Adds a tooltip to the given control.<br>
+	 * The tooltip will appear once the user hovers over the control, and will remain
+	 * visible until the user moves the cursor away.
+	 * 
+	 * @param c
+	 *            the control to which the tooltip will be added
+	 * @param tooltipText
+	 *            tooltip's title
+	 * @param tooltipMessage
+	 *            tooltip's message
+	 */
 	public static void addTooltip(final Control c, String tooltipText, String tooltipMessage) {
 		final ToolTip tip = new ToolTip(c.getShell(), SWT.NONE);
 		tip.setText(tooltipText);
@@ -329,6 +341,20 @@ public class UIUtils {
 		});
 	}
 
+	/**
+	 * Adds hotkey text to the given menu item.<br>
+	 * This method is used to avoid a bug with GTK version of SWT; adding
+	 * accelerator text to the menu item on Linux systems also changes the
+	 * accelerator itself.
+	 * 
+	 * @param mntm
+	 *            menu item to which the hotkey will be added
+	 * @param hotkeyText
+	 *            the text to be displayed as accelerator
+	 * 
+	 * @see MenuItem#setAccelerator(int)
+	 * @see MenuItem#setText(String)
+	 */
 	public static void addHotkeyText(MenuItem mntm, String hotkeyText) {
 		// Bug with SWT-GTK: MenuItem.setText() changes the widget's accelerator,
 		// contrary to the Javadoc. The accelerator consumes the key event that triggers
