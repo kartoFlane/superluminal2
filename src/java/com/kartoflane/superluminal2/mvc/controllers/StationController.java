@@ -152,4 +152,14 @@ public class StationController extends ObjectController implements Controller {
 			setVisible(false);
 		}
 	}
+
+	@Override
+	public void handleEvent(SLEvent e) {
+		if (e.type == SLEvent.VISIBLE) {
+			if (e.source == getParent() && getSlotId() != -2)
+				setVisible((Boolean) e.data);
+		} else {
+			super.handleEvent(e);
+		}
+	}
 }
