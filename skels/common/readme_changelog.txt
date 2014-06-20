@@ -1,5 +1,12 @@
 Changelog
 
+2.0.0 beta10:
+- Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
+- Fixed some stations being visible when they should not be
+- Fixed the corrupt image "bug" -- the editor now detects when you've installed mods with SMM
+  while the editor was running, and now automatically reloads the database
+- Added keybind modification to the Settings dialog
+
 2.0.0 beta9:
 - Fixed a bug that would prevent weapon/drone slots from saving correctly for enemy ships
 - Ship save destination is now on a per-ship basis, instead of being application-wide
