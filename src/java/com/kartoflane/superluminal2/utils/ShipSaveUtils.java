@@ -20,7 +20,10 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 import org.jdom2.Comment;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -163,6 +166,9 @@ public class ShipSaveUtils {
 			String path = object.getImagePath();
 
 			if (path != null) {
+				if (isImageCorrupt(path))
+					continue;
+
 				InputStream is = null;
 				try {
 					is = Manager.getInputStream(path);
@@ -183,6 +189,9 @@ public class ShipSaveUtils {
 					String path = system.getInteriorPath();
 
 					if (path != null && system.isAssigned()) {
+						if (isImageCorrupt(path))
+							continue;
+
 						InputStream is = null;
 						try {
 							is = Manager.getInputStream(path);
@@ -203,6 +212,9 @@ public class ShipSaveUtils {
 				String path = set.getImage(Glows.CLOAK);
 
 				if (path != null) {
+					if (isImageCorrupt(path))
+						continue;
+
 					SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
 					InputStream is = null;
 					try {
@@ -220,6 +232,9 @@ public class ShipSaveUtils {
 						path = set.getImage(glowId);
 
 						if (path != null) {
+							if (isImageCorrupt(path))
+								continue;
+
 							InputStream is = null;
 							try {
 								is = Manager.getInputStream(path);
@@ -244,6 +259,9 @@ public class ShipSaveUtils {
 
 			String path = gib.getImagePath();
 			if (path != null) {
+				if (isImageCorrupt(path))
+					continue;
+
 				InputStream is = null;
 				try {
 					is = Manager.getInputStream(path);
@@ -702,5 +720,28 @@ public class ShipSaveUtils {
 		zf.close();
 
 		return bos.toByteArray();
+	}
+
+	/**
+	 * Checks whether the image is corrupt.
+	 * 
+	 * @param path
+	 *            path to the image
+	 * @return true if the image is corrupt and should not be exported, false otherwise.
+	 */
+	private static boolean isImageCorrupt(String path) {
+		Image image = null;
+		try {
+			image = new Image(Display.getCurrent(), path);
+		} catch (SWTException e) {
+			if (e.getCause() instanceof FileNotFoundException == false) {
+				log.warn(String.format("Image '%s' is corrupt and will not be exported.", path));
+				return true;
+			}
+		} finally {
+			if (image != null)
+				image.dispose();
+		}
+		return false;
 	}
 }

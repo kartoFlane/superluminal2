@@ -10,6 +10,8 @@ import net.vhati.ftldat.FTLDat.FTLPack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
@@ -149,6 +151,29 @@ public class Database {
 		dataEntries.add(core);
 	}
 
+	/**
+	 * Verifies the Database, determining whether it is safe to read data from the archives.
+	 * 
+	 * @return true if the database has passed the verification, false otherwise.
+	 */
+	public boolean verify() {
+		DatabaseEntry core = getCore();
+		if (core == null)
+			throw new IllegalStateException("Database has not been initialised yet.");
+
+		Image img = null;
+		try {
+			InputStream is = core.getInputStream("img/nullResource.png");
+			img = new Image(Display.getCurrent(), is);
+			return true;
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (img != null)
+				img.dispose();
+		}
+	}
+
 	public DatabaseEntry[] getEntries() {
 		return dataEntries.toArray(new DatabaseEntry[0]);
 	}
@@ -192,6 +217,11 @@ public class Database {
 		}
 	}
 
+	/**
+	 * @param blueprint
+	 *            blueprint name of a ship
+	 * @return name of the file in which the given shipBlueprint should be saved
+	 */
 	public String getAssociatedFile(String blueprint) {
 		if (shipFileMap.containsKey(blueprint))
 			return shipFileMap.get(blueprint);

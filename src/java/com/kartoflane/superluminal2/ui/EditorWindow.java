@@ -490,6 +490,18 @@ public class EditorWindow {
 			}
 		});
 
+		display.addFilter(SWT.FocusIn, new Listener() {
+			public void handleEvent(Event e) {
+				Control focus = Display.getCurrent().getFocusControl();
+				if (focus == shell || focus == canvas || focus == sideContainer) {
+					if (!Database.getInstance().verify()) {
+						log.trace("Database failed to pass verification. Reload is required.");
+						mntmReloadDb.notifyListeners(SWT.Selection, null);
+					}
+				}
+			}
+		});
+
 		sideContainer.addListener(SWT.Resize, new Listener() {
 			public void handleEvent(Event e) {
 				Grid.getInstance().updateBounds(canvas.getSize().x, canvas.getSize().y);
@@ -620,6 +632,7 @@ public class EditorWindow {
 				UIUtils.showLoadDialog(shell, null, null, new LoadTask() {
 					public void execute() {
 						log.debug("Reloading Database...");
+
 						try {
 							Database db = Database.getInstance();
 							db.removeEntry(db.getCore());
