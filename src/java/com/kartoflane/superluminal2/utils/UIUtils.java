@@ -22,6 +22,13 @@ import org.eclipse.swt.widgets.ToolTip;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.ui.LoadingDialog;
 
+/**
+ * This class contains methods that are used to show customizable dialogs
+ * and UI prompts to the user.
+ * 
+ * @author kartoFlane
+ * 
+ */
 public class UIUtils {
 
 	/**
@@ -140,6 +147,20 @@ public class UIUtils {
 			parentShell.dispose();
 	}
 
+	/**
+	 * Prompts the user to select a directory.
+	 * 
+	 * @param parentShell
+	 *            the parent shell. Must not be null.
+	 * @param title
+	 *            title of the dialog window. Must not be null.
+	 * @param message
+	 *            description of the purpose of the dialog. Must not be null.
+	 * @param defaultPath
+	 *            the path that the dialog will initially show when it is opened.
+	 *            May be null for the system's default path.
+	 * @return the selected directory, or null if not selected.
+	 */
 	public static File promptForDirectory(Shell parentShell, String title, String message, String defaultPath) {
 		File result = null;
 		DirectoryDialog dialog = new DirectoryDialog(parentShell);
@@ -158,6 +179,21 @@ public class UIUtils {
 		return result;
 	}
 
+	/**
+	 * Prompts the user to select a file for the purpose of saving.
+	 * 
+	 * @param parentShell
+	 *            the parent shell. Must not be null.
+	 * @param title
+	 *            title of the dialog window. Must not be null.
+	 * @param defaultPath
+	 *            the path that the dialog will initially show when it is opened.
+	 *            May be null for the system's default path.
+	 * @param extensions
+	 *            an array of file extensions the user is allowed to select. May be null.<br>
+	 *            Usage: <code>new String[] { "*.txt" }</code>
+	 * @return the selected file, or null if not selected.
+	 */
 	public static File promptForSaveFile(Shell parentShell, String title, String defaultPath, String[] extensions) {
 		File result = null;
 		FileDialog dialog = new FileDialog(parentShell, SWT.SAVE);
@@ -178,6 +214,21 @@ public class UIUtils {
 		return result;
 	}
 
+	/**
+	 * Prompts the user to select a file for the purpose of loading.
+	 * 
+	 * @param parentShell
+	 *            the parent shell. Must not be null.
+	 * @param title
+	 *            title of the dialog window. Must not be null.
+	 * @param defaultPath
+	 *            the path that the dialog will initially show when it is opened.
+	 *            May be null for the system's default path.
+	 * @param extensions
+	 *            an array of file extensions the user is allowed to select. May be null.<br>
+	 *            Usage: <code>new String[] { "*.txt" }</code>
+	 * @return the selected file, or null if not selected.
+	 */
 	public static File promptForLoadFile(Shell parentShell, String title, String defaultPath, String[] extensions) {
 		File result = null;
 		FileDialog dialog = new FileDialog(parentShell, SWT.OPEN);

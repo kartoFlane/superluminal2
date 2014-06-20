@@ -31,6 +31,12 @@ import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
+/**
+ * This class contains utility methods used to interpret XML tags as game objects.
+ * 
+ * @author kartoFlane
+ * 
+ */
 public class DataUtils {
 
 	public static final Logger log = LogManager.getLogger(DataUtils.class);

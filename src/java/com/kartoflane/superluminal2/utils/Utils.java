@@ -7,6 +7,12 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
+/**
+ * This class contains various utility methods that didn't fit in the other util classes.
+ * 
+ * @author kartoFlane
+ * 
+ */
 public class Utils {
 
 	public static int distance(Point p1, Point p2) {

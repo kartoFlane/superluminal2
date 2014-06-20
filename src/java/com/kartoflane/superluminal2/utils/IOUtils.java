@@ -30,6 +30,14 @@ import net.vhati.modmanager.core.SloppyXMLParser;
 import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
 
+/**
+ * This class contains methods used to read and write files, as well as interpret content
+ * of files as XML or encoded text.
+ * 
+ * @author kartoFlane
+ * @author Vhati
+ * 
+ */
 public class IOUtils {
 
 	private static final Pattern PROTOCOL_PTRN = Pattern.compile("^[^:]+:");

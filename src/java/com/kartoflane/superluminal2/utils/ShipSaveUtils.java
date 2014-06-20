@@ -52,6 +52,13 @@ import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
+/**
+ * This class contains utility methods used to save a ship in a form that mirrors
+ * the game's own files.
+ * 
+ * @author kartoFlane
+ * 
+ */
 public class ShipSaveUtils {
 
 	private static final Logger log = LogManager.getLogger(ShipSaveUtils.class);
@@ -119,6 +126,16 @@ public class ShipSaveUtils {
 		}
 	}
 
+	/**
+	 * Saves the given ship as a HashMap, with keys denoting the inner pth and file name, and
+	 * values being the file's contents as bytes.
+	 * 
+	 * @param container
+	 *            the ship to be saved
+	 * @return a HashMap that is a complete representation of the ship in the file system
+	 * 
+	 * @throws IOException
+	 */
 	public static HashMap<String, byte[]> saveShip(ShipContainer container) throws IOException {
 		if (container == null)
 			throw new IllegalArgumentException("ShipContainer must not be null.");

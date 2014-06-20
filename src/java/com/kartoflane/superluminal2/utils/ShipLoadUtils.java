@@ -36,6 +36,12 @@ import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
+/**
+ * This class contains methods used to interpret XML code and .ftl files as a ship.
+ * 
+ * @author kartoFlane
+ * 
+ */
 public class ShipLoadUtils {
 
 	/**
@@ -90,7 +96,7 @@ public class ShipLoadUtils {
 		InputStream is = db.getInputStream(ship.getLayoutTXT());
 		loadLayoutTXT(ship, is, ship.getLayoutTXT());
 
-		// Load ship's images
+		// Load ship's image namespace
 		attr = e.getAttributeValue("img");
 		if (attr == null)
 			throw new IllegalArgumentException("Missing 'img' attribute.");
