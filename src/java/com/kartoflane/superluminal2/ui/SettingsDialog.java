@@ -1,5 +1,9 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
@@ -12,6 +16,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -20,12 +25,21 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class SettingsDialog {
 	private static SettingsDialog instance = null;
+	private Display display = null;
+
+	private Hotkeys currentBinding = null;
+	private ArrayList<Hotkey> modifiedHotkeys = new ArrayList<Hotkey>();
+
+	private Listener keyListener = null;
 
 	private Shell shell = null;
 	private Button btnOverlap;
@@ -36,11 +50,14 @@ public class SettingsDialog {
 	private Button btnSidebar;
 	private Button btnCancel;
 	private Button btnResetLinks;
+	private HashMap<Hotkeys, Button> hotkeyButton = new LinkedHashMap<Hotkeys, Button>();
+	private Composite compKeybinds;
 
 	public SettingsDialog(Shell parent) {
 		if (instance != null)
 			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
+		display = Display.getCurrent();
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
 		shell.setText(Superluminal.APP_NAME + " - Settings");
@@ -173,12 +190,49 @@ public class SettingsDialog {
 		scKeybinds.setExpandHorizontal(true);
 		scKeybinds.setExpandVertical(true);
 
-		final Composite compKeybinds = new Composite(scKeybinds, SWT.NONE);
-		compKeybinds.setLayout(new GridLayout(1, false));
+		compKeybinds = new Composite(scKeybinds, SWT.NONE);
+		compKeybinds.setLayout(new GridLayout(2, false));
 
-		Label lblNYI = new Label(compKeybinds, SWT.NONE);
-		lblNYI.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false, 1, 1));
-		lblNYI.setText("(UI not yet implemented - can be edited by hand in hotkeys.xml.\nEditor must not be running, or the changes will not be applied)");
+		Hotkeys[] tools = {
+				Hotkeys.POINTER_TOOL, Hotkeys.CREATE_TOOL, Hotkeys.IMAGES_TOOL,
+				Hotkeys.PROPERTIES_TOOL, Hotkeys.OVERVIEW_TOOL, Hotkeys.ROOM_TOOL,
+				Hotkeys.DOOR_TOOL, Hotkeys.MOUNT_TOOL, Hotkeys.STATION_TOOL
+		};
+		Hotkeys[] commands = {
+				Hotkeys.DELETE, Hotkeys.PIN, Hotkeys.NEW_SHIP, Hotkeys.LOAD_SHIP,
+				Hotkeys.SAVE_SHIP, Hotkeys.CLOSE_SHIP, Hotkeys.MANAGE_MOD, Hotkeys.SETTINGS,
+				Hotkeys.UNDO, Hotkeys.REDO, Hotkeys.CLOAK
+		};
+		Hotkeys[] view = {
+				Hotkeys.TOGGLE_GRID, Hotkeys.TOGGLE_HANGAR, Hotkeys.SHOW_ANCHOR,
+				Hotkeys.SHOW_MOUNTS, Hotkeys.SHOW_ROOMS, Hotkeys.SHOW_DOORS, Hotkeys.SHOW_STATIONS,
+				Hotkeys.SHOW_HULL, Hotkeys.SHOW_FLOOR, Hotkeys.SHOW_SHIELD, Hotkeys.SHOW_GIBS
+		};
+
+		Label lbl = new Label(compKeybinds, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lbl.setText("Tools:");
+		for (Hotkeys hotkey : tools)
+			hotkeyButton.put(hotkey, createHotkeyButton(hotkey));
+
+		lbl = new Label(compKeybinds, SWT.NONE); // Separator
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+		lbl = new Label(compKeybinds, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lbl.setText("Commands:");
+		for (Hotkeys hotkey : commands)
+			hotkeyButton.put(hotkey, createHotkeyButton(hotkey));
+
+		lbl = new Label(compKeybinds, SWT.NONE); // Separator
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+		lbl = new Label(compKeybinds, SWT.NONE);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lbl.setText("View Options:");
+		for (Hotkeys hotkey : view)
+			hotkeyButton.put(hotkey, createHotkeyButton(hotkey));
+
 		scKeybinds.setContent(compKeybinds);
 
 		/*
@@ -213,8 +267,13 @@ public class SettingsDialog {
 				Manager.startMaximised = btnMaximise.getSelection();
 
 				// Hotkeys
-
-				// TODO apply settings
+				for (Hotkey h : modifiedHotkeys) {
+					Hotkey keybind = Manager.getHotkey(h.getId());
+					keybind.setShift(h.getShift());
+					keybind.setCtrl(h.getCtrl());
+					keybind.setAlt(h.getAlt());
+					keybind.setKey(h.getKey());
+				}
 
 				if (Manager.sidebarOnRightSide != btnSidebar.getSelection()) {
 					Manager.sidebarOnRightSide = btnSidebar.getSelection();
@@ -284,8 +343,42 @@ public class SettingsDialog {
 			}
 		});
 
+		final ArrayList<Integer> blacklistedKeys = new ArrayList<Integer>();
+		blacklistedKeys.add(SWT.SHIFT);
+		blacklistedKeys.add(SWT.CTRL);
+		blacklistedKeys.add(SWT.ALT);
+		blacklistedKeys.add((int) SWT.DEL);
+		blacklistedKeys.add((int) '\r');
+		blacklistedKeys.add(SWT.TRAVERSE_ESCAPE);
+		blacklistedKeys.add(SWT.TRAVERSE_RETURN);
+		blacklistedKeys.add(SWT.TRAVERSE_TAB_NEXT);
+		blacklistedKeys.add(SWT.TRAVERSE_TAB_PREVIOUS);
+		blacklistedKeys.add(SWT.TRAVERSE_ESCAPE);
+		blacklistedKeys.add(SWT.ARROW_UP);
+		blacklistedKeys.add(SWT.ARROW_DOWN);
+		blacklistedKeys.add(SWT.ARROW_LEFT);
+		blacklistedKeys.add(SWT.ARROW_RIGHT);
+
+		keyListener = new Listener() {
+			public void handleEvent(Event e) {
+				if (currentBinding != null && !blacklistedKeys.contains(e.keyCode)) {
+					Hotkey newHotkey = new Hotkey(currentBinding);
+					newHotkey.setShift((e.stateMask & SWT.SHIFT) == SWT.SHIFT);
+					newHotkey.setCtrl((e.stateMask & SWT.CTRL) == SWT.CTRL);
+					newHotkey.setAlt((e.stateMask & SWT.ALT) == SWT.ALT);
+					newHotkey.setKey(e.keyCode);
+					bind(newHotkey);
+				}
+
+				if (e.keyCode == SWT.SPACE)
+					e.doit = false;
+			}
+		};
+
+		display.addFilter(SWT.KeyDown, keyListener);
+
 		shell.setMinimumSize(400, 300);
-		shell.pack();
+		shell.setSize(400, 300);
 
 		Point size = shell.getSize();
 		Point parSize = parent.getSize();
@@ -296,7 +389,6 @@ public class SettingsDialog {
 	}
 
 	public void open() {
-
 		// Behaviour
 		btnOverlap.setSelection(Manager.allowRoomOverlap);
 		btnLoader.setSelection(Manager.closeLoader);
@@ -308,11 +400,92 @@ public class SettingsDialog {
 		btnUpdates.setSelection(Manager.checkUpdates);
 		btnSidebar.setSelection(Manager.sidebarOnRightSide);
 
-		// Hotkeys
-
-		// TODO load settings
-
 		shell.open();
+	}
+
+	private Button createHotkeyButton(Hotkeys hotkey) {
+		Label label = new Label(compKeybinds, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		label.setText(hotkey.toString());
+
+		Button button = new Button(compKeybinds, SWT.TOGGLE);
+		button.setText(Manager.getHotkey(hotkey).toString());
+		button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		button.setData(hotkey);
+
+		button.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Button self = (Button) e.getSource();
+
+				if (self.getSelection()) {
+					currentBinding = (Hotkeys) self.getData();
+					self.setText("(Press any key)");
+
+					for (Hotkeys h : hotkeyButton.keySet()) {
+						if (h != self.getData()) {
+							Hotkey hotkey = getHotkey(h);
+							hotkeyButton.get(h).setSelection(false);
+							hotkeyButton.get(h).setText(hotkey.toString());
+						}
+					}
+				} else {
+					currentBinding = null;
+					Hotkey hotkey = getHotkey((Hotkeys) self.getData());
+					self.setText(hotkey.toString());
+				}
+			}
+		});
+
+		return button;
+	}
+
+	private void bind(Hotkey newHotkey) {
+		if (hotkeyCollides(newHotkey)) {
+			String msg = "The key combination you've selected is already bound to another command.\n" +
+					"Please choose another combination, or unbind it first.";
+			UIUtils.showWarningDialog(shell, null, msg);
+
+		} else {
+			Button b = hotkeyButton.get(newHotkey.getId());
+			b.setSelection(false);
+			b.setText(newHotkey.toString());
+
+			Hotkey prev = findModifiedHotkey(newHotkey.getId());
+			if (prev != null)
+				modifiedHotkeys.remove(prev);
+			modifiedHotkeys.add(newHotkey);
+
+			currentBinding = null;
+		}
+	}
+
+	private Hotkey getHotkey(Hotkeys h) {
+		Hotkey result = findModifiedHotkey(h);
+		if (result == null)
+			result = Manager.getHotkey(h);
+
+		return result;
+	}
+
+	private Hotkey findModifiedHotkey(Hotkeys h) {
+		Hotkey result = null;
+		for (Hotkey hotkey : modifiedHotkeys) {
+			if (hotkey.getId() == h) {
+				result = hotkey;
+				break;
+			}
+		}
+		return result;
+	}
+
+	private boolean hotkeyCollides(Hotkey newHotkey) {
+		for (Hotkeys h : Hotkeys.values()) {
+			Hotkey hotkey = getHotkey(h);
+			if (hotkey.collides(newHotkey))
+				return true;
+		}
+		return false;
 	}
 
 	public static SettingsDialog getInstance() {
@@ -324,6 +497,7 @@ public class SettingsDialog {
 	}
 
 	public void dispose() {
+		display.removeFilter(SWT.KeyDown, keyListener);
 		shell.dispose();
 		instance = null;
 	}
