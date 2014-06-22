@@ -33,7 +33,6 @@ public class LayeredPainter implements PaintListener {
 		IMAGES,
 		GRID,
 		ROOM,
-		ROOM_ZERO,
 		SYSTEM,
 		STATION,
 		DOOR,
@@ -46,8 +45,8 @@ public class LayeredPainter implements PaintListener {
 
 	/** Specifies the layer order for selection and highlighting purposes. */
 	private static final Layers[] selectionOrder = { Layers.BACKGROUND, Layers.GRID, Layers.GIBS,
-			Layers.IMAGES, Layers.MOUNT, Layers.ROOM, Layers.ROOM_ZERO, Layers.SYSTEM, Layers.DOOR,
-			Layers.STATION, Layers.PROP, Layers.SHIP_ORIGIN, Layers.CURSOR };
+			Layers.IMAGES, Layers.MOUNT, Layers.ROOM, Layers.SYSTEM, Layers.DOOR, Layers.STATION,
+			Layers.PROP, Layers.SHIP_ORIGIN, Layers.CURSOR };
 
 	/** Specifies the order in which the layers are drawn. */
 	private TreeMap<Layers, ArrayList<AbstractController>> layerMap = new TreeMap<Layers, ArrayList<AbstractController>>();
