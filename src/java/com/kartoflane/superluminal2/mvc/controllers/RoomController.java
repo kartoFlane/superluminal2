@@ -11,6 +11,7 @@ import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.View;
@@ -25,7 +26,7 @@ import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.RoomDataComposite;
 import com.kartoflane.superluminal2.utils.Utils;
 
-public class RoomController extends ObjectController implements Comparable<RoomController> {
+public class RoomController extends ObjectController implements Indexable, Comparable<RoomController> {
 
 	/**
 	 * Tolerance greater than half of CELL_SIZE will result in negative size for 1x1 rooms,

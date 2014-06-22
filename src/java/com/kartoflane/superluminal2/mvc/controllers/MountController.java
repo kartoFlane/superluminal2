@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
@@ -17,7 +18,7 @@ import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.MountDataComposite;
 import com.kartoflane.superluminal2.utils.Utils;
 
-public class MountController extends ObjectController implements Comparable<MountController> {
+public class MountController extends ObjectController implements Indexable, Comparable<MountController> {
 	public static final int DEFAULT_WIDTH = 16;
 	public static final int DEFAULT_HEIGHT = 50;
 	public static final String ARROW_PROP_ID = "DirectionArrow";
@@ -165,6 +166,27 @@ public class MountController extends ObjectController implements Comparable<Moun
 	@Override
 	public boolean intersects(Rectangle rect) {
 		return getBounds().intersects(rect);
+	}
+
+	@Override
+	public void addToPainter(Layers layer) {
+		super.addToPainter(layer);
+		PropController prop = getProp(ARROW_PROP_ID);
+		prop.addToPainter(layer);
+	}
+
+	@Override
+	public void addToPainterBottom(Layers layer) {
+		super.addToPainterBottom(layer);
+		PropController prop = getProp(ARROW_PROP_ID);
+		prop.addToPainter(layer);
+	}
+
+	@Override
+	public void removeFromPainter() {
+		super.removeFromPainter();
+		PropController prop = getProp(ARROW_PROP_ID);
+		prop.removeFromPainter();
 	}
 
 	private void createProps() {

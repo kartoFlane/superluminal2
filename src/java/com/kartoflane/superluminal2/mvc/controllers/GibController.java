@@ -4,6 +4,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.mvc.View;
@@ -16,7 +17,7 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.GibDataComposite;
 
-public class GibController extends ImageController {
+public class GibController extends ImageController implements Indexable, Comparable<GibController> {
 
 	private GibController(ShipContainer container, ObjectModel model, GibView view) {
 		super(container.getShipController(), model, view);
@@ -59,6 +60,10 @@ public class GibController extends ImageController {
 
 	public int getId() {
 		return getGameObject().getId();
+	}
+
+	public void setId(int index) {
+		getGameObject().setId(index);
 	}
 
 	@Override
@@ -129,5 +134,10 @@ public class GibController extends ImageController {
 		} else {
 			super.mouseUp(e);
 		}
+	}
+
+	@Override
+	public int compareTo(GibController o) {
+		return getGameObject().compareTo(o.getGameObject());
 	}
 }

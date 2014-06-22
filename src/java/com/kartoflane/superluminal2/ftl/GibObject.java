@@ -2,11 +2,12 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
-public class GibObject extends ImageObject implements Comparable<GibObject> {
+public class GibObject extends ImageObject implements Indexable, Comparable<GibObject> {
 
 	private int id = -1;
 
