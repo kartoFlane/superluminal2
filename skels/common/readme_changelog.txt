@@ -6,6 +6,7 @@ Changelog
 - Fixed the corrupt image "bug" -- the editor now detects when you've installed mods with SMM
   while the editor was running, and now automatically reloads the database
 - Added keybind modification to the Settings dialog
+- Rooms, weapon mounts and gibs can now be reordered via the Ship Overview window -- simply drag them.
 
 2.0.0 beta9:
 - Fixed a bug that would prevent weapon/drone slots from saving correctly for enemy ships
