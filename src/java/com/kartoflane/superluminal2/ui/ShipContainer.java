@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.ui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.eclipse.swt.graphics.Point;
@@ -614,6 +615,36 @@ public class ShipContainer implements Disposable, SLListener {
 
 			eventHandler.sendEvent(new SLEvent(SLEvent.REM_OBJECT, this, controller));
 		}
+	}
+
+	public void sort() {
+		int r = roomControllers.hashCode();
+		int m = mountControllers.hashCode();
+		int g = gibControllers.hashCode();
+
+		Collections.sort(roomControllers);
+		Collections.sort(mountControllers);
+		Collections.sort(gibControllers);
+
+		if (r != roomControllers.hashCode()) {
+			for (RoomController c : roomControllers)
+				c.removeFromPainter();
+			for (RoomController c : roomControllers)
+				c.addToPainter(Layers.ROOM);
+		}
+		if (m != mountControllers.hashCode()) {
+			for (MountController c : mountControllers)
+				c.removeFromPainter();
+			for (MountController c : mountControllers)
+				c.addToPainter(Layers.MOUNT);
+		}
+		if (g != gibControllers.hashCode()) {
+			for (GibController c : gibControllers)
+				c.removeFromPainter();
+			for (GibController c : gibControllers)
+				c.addToPainterBottom(Layers.GIBS);
+		}
+		window.canvasRedraw();
 	}
 
 	public void setImage(Images imageType, String path) {

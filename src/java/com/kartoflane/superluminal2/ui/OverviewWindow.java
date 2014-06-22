@@ -3,6 +3,16 @@ package com.kartoflane.superluminal2.ui;
 import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MenuAdapter;
@@ -17,6 +27,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Event;
@@ -33,6 +44,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
+import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -54,6 +66,9 @@ public class OverviewWindow {
 
 	private Color disabledColor = null;
 
+	private TreeItem dragItem = null;
+	private ObjectController dragData = null;
+
 	private Shell shell;
 	private TreeItem trtmRooms;
 	private TreeItem trtmDoors;
@@ -67,6 +82,8 @@ public class OverviewWindow {
 	private ToolItem tltmToggleVis;
 	private TreeColumn trclmnName;
 	private TreeColumn trclmnAlias;
+	private DragSource dragSource;
+	private DropTarget dropTarget;
 
 	public OverviewWindow(Shell parent) {
 		if (instance != null)
@@ -131,6 +148,16 @@ public class OverviewWindow {
 		trtmGibs = new TreeItem(tree, SWT.NONE);
 		trtmGibs.setText("Gibs");
 
+		// Need to specify a transfer type, even if it's not used, because
+		// otherwise it's not even possible to initiate drag and drop...
+		Transfer[] sourceTypes = new Transfer[] { TextTransfer.getInstance() };
+		dragSource = new DragSource(tree, DND.DROP_MOVE);
+		dragSource.setTransfer(sourceTypes);
+
+		Transfer[] dropTypes = new Transfer[] { TextTransfer.getInstance(), FileTransfer.getInstance() };
+		dropTarget = new DropTarget(tree, DND.DROP_MOVE | DND.DROP_DEFAULT);
+		dropTarget.setTransfer(dropTypes);
+
 		// Overview popup menu
 		overviewMenu = new Menu(tree);
 		tree.setMenu(overviewMenu);
@@ -140,6 +167,100 @@ public class OverviewWindow {
 
 		final MenuItem mntmRemoveAlias = new MenuItem(overviewMenu, SWT.NONE);
 		mntmRemoveAlias.setText("Remove Alias");
+
+		dragSource.addDragListener(new DragSourceListener() {
+			@Override
+			public void dragStart(DragSourceEvent e) {
+				TreeItem[] selection = tree.getSelection();
+				if (selection.length > 0 && selection[0].getData() instanceof Indexable) {
+					e.doit = true;
+					dragItem = selection[0];
+					dragData = (ObjectController) dragItem.getData();
+				} else {
+					e.doit = false;
+				}
+			}
+
+			@Override
+			public void dragSetData(DragSourceEvent e) {
+				e.data = "whatever"; // This needs not be an empty string, otherwise the drag mechanism freaks out...
+			}
+
+			@Override
+			public void dragFinished(DragSourceEvent e) {
+				dragItem = null;
+				dragData = null;
+			}
+		});
+
+		dropTarget.addDropListener(new DropTargetAdapter() {
+			@Override
+			public void dragOver(DropTargetEvent e) {
+				e.detail = DND.DROP_MOVE;
+				e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
+
+				if (dragItem != null) {
+					Point p = tree.toControl(e.x, e.y);
+					TreeItem item = tree.getItem(p);
+
+					if (item == null) {
+						e.detail = DND.DROP_NONE;
+						e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
+					} else {
+						TreeItem parent = item.getParentItem();
+						if (canDrop(parent, dragData)) {
+							e.detail = DND.DROP_MOVE;
+							Rectangle bounds = item.getBounds();
+							if (p.y < bounds.y + bounds.height / 2) {
+								e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL | DND.FEEDBACK_INSERT_BEFORE;
+							} else {
+								e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL | DND.FEEDBACK_INSERT_AFTER;
+							}
+						} else {
+							e.detail = DND.DROP_NONE;
+							e.feedback |= DND.FEEDBACK_NONE;
+						}
+					}
+				}
+			}
+
+			@Override
+			public void drop(DropTargetEvent e) {
+				if (dragData != null) {
+					if ((e.detail & DND.DROP_MOVE) == DND.DROP_MOVE) {
+						Point p = tree.toControl(e.x, e.y);
+						TreeItem item = tree.getItem(p);
+						if (item != null) {
+							Rectangle bounds = item.getBounds();
+							TreeItem parent = item.getParentItem();
+							if (parent != null) {
+								ShipContainer container = Manager.getCurrentShip();
+								TreeItem[] items = parent.getItems();
+								int from = indexOf(items, dragItem);
+								int to = indexOf(items, item);
+
+								if (dragItem != item) {
+									if (p.y > bounds.y + bounds.height / 2) {
+										to += from > to ? 1 : 0;
+									} else {
+										to += from > to ? 0 : -1;
+									}
+								}
+
+								Indexable[] array = new Indexable[items.length];
+								for (int i = 0; i < items.length; i++) {
+									array[i] = (Indexable) items[i].getData();
+								}
+
+								insert(array, from, to);
+								container.sort();
+								update();
+							}
+						}
+					}
+				}
+			}
+		});
 
 		shell.addListener(SWT.Close, new Listener() {
 			@Override
@@ -341,10 +462,14 @@ public class OverviewWindow {
 		}
 
 		TreeItem item = controllerMap.get(prevSelection);
-		if (item == null)
+		if (item == null) {
 			tree.select(trtmRooms);
-		else
+		} else {
 			tree.select(item);
+			Rectangle b = item.getBounds();
+			if (!tree.getClientArea().contains(b.x, b.y))
+				tree.setTopItem(item);
+		}
 
 		String alias = null;
 		if (prevSelection != null && prevSelection instanceof Alias)
@@ -393,8 +518,12 @@ public class OverviewWindow {
 
 		item.setBackground(oc.isVisible() ? null : disabledColor);
 
-		if (oc.isSelected())
+		if (oc.isSelected()) {
 			tree.select(item);
+			Rectangle b = item.getBounds();
+			if (!tree.getClientArea().contains(b.x, b.y))
+				tree.setTopItem(item);
+		}
 
 		tltmAlias.setEnabled(oc != null);
 		tltmRemove.setEnabled(oc != null && oc.getAlias() != null && !oc.getAlias().equals(""));
@@ -439,6 +568,47 @@ public class OverviewWindow {
 
 	public boolean isDisposed() {
 		return shell.isDisposed();
+	}
+
+	private boolean canDrop(TreeItem newParent, ObjectController data) {
+		return (newParent == trtmRooms && data instanceof RoomController) ||
+				(newParent == trtmMounts && data instanceof MountController) ||
+				(newParent == trtmGibs && data instanceof GibController);
+	}
+
+	private int indexOf(TreeItem[] items, TreeItem item) {
+		if (items == null)
+			throw new IllegalArgumentException("Array must not be null.");
+		if (item == null)
+			throw new IllegalArgumentException("Item must not be null.");
+		int result = -1;
+		for (int i = 0; i < items.length && result == -1; i++) {
+			if (items[i] == item)
+				result = i;
+		}
+		return result;
+	}
+
+	private void insert(Indexable[] array, int from, int to) {
+		if (from < 0 || from >= array.length)
+			throw new IndexOutOfBoundsException("" + from);
+		if (to < 0 || to >= array.length)
+			throw new IndexOutOfBoundsException("" + to);
+		if (to == from)
+			return;
+
+		int dir = from > to ? 1 : -1;
+		int oldId = array[to].getId();
+		/*
+		 * The loop needs to go on as long as
+		 * (from > to && i < from) || (from < to && i > from) is true
+		 * Let's say A = (from > to); B = (i < from), then the above becomes:
+		 * (A && B) || (!A && !B)
+		 * Hence the simplified condition is A == B
+		 */
+		for (int i = to; from > to == i < from; i += dir)
+			array[i].setId(array[i + dir < 0 ? 0 : i + dir].getId());
+		array[from].setId(oldId);
 	}
 
 	private TreeItem createItem(AbstractController controller) {

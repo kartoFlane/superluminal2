@@ -143,7 +143,7 @@ public class ModManagementDialog {
 
 			@Override
 			public void dragSetData(DragSourceEvent e) {
-				e.data = "whatever"; // This need not be an empty string, otherwise the drag mechanism freaks out...
+				e.data = "whatever"; // This needs not be an empty string, otherwise the drag mechanism freaks out...
 				dragData = (DatabaseEntry) dragItem.getData();
 			}
 
