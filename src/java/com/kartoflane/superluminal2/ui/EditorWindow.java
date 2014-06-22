@@ -494,7 +494,8 @@ public class EditorWindow {
 			public void handleEvent(Event e) {
 				Control focus = Display.getCurrent().getFocusControl();
 				if (focus == shell || focus == canvas || focus == sideContainer) {
-					if (!Database.getInstance().verify()) {
+					Database db = Database.getInstance();
+					if (db != null && !db.verify()) {
 						log.trace("Database failed to pass verification. Reload is required.");
 						mntmReloadDb.notifyListeners(SWT.Selection, null);
 					}

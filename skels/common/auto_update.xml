@@ -1,5 +1,5 @@
 <versions>
-	<latest id="2.0.0 beta9" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.0 beta10" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
 		<version id="2.0.0 beta10">
 			<change>Fixed a bug that would cause shield image to not be exported</change>
