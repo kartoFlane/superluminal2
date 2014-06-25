@@ -1,7 +1,7 @@
 <versions>
-	<latest id="2.0.0 beta10" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.1 beta" url="https://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
-		<version id="2.0.0 beta10">
+		<version id="2.0.1 beta">
 			<change>Fixed a bug that would cause shield image to not be exported</change>
 			<change>Added keybind modification via Settings window</change>
 			<change>Added automated database reloading when you've installed mods with SMM</change>

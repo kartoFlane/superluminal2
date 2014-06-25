@@ -1,6 +1,6 @@
 Changelog
 
-2.0.0 beta10:
+2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
 - Fixed some stations being visible when they should not be
 - Fixed the corrupt image "bug" -- the editor now detects when you've installed mods with SMM
