@@ -143,7 +143,7 @@ public class IOUtils {
 	 * <b>This method does not close the streams.</b>
 	 */
 	public static void write(InputStream in, OutputStream out) throws IOException {
-		byte[] buffer = new byte[1024 * 10];
+		byte[] buffer = new byte[1024 * 1024];
 		int len;
 		while ((len = in.read(buffer)) != -1) {
 			out.write(buffer, 0, len);
