@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Grid;
+import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
@@ -164,18 +165,12 @@ public class EditorWindow {
 		mntmFile.setMenu(menuFile);
 
 		mntmNewShip = new MenuItem(menuFile, SWT.NONE);
-		mntmNewShip.setText("New Ship");
-		UIUtils.addHotkeyText(mntmNewShip, Manager.getHotkey(Hotkeys.NEW_SHIP).toString());
 
 		mntmLoadShip = new MenuItem(menuFile, SWT.NONE);
-		mntmLoadShip.setText("Load Ship");
-		UIUtils.addHotkeyText(mntmLoadShip, Manager.getHotkey(Hotkeys.LOAD_SHIP).toString());
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmSaveShip = new MenuItem(menuFile, SWT.NONE);
-		mntmSaveShip.setText("Save Ship");
-		UIUtils.addHotkeyText(mntmSaveShip, Manager.getHotkey(Hotkeys.SAVE_SHIP).toString());
 
 		mntmSaveShipAs = new MenuItem(menuFile, SWT.NONE);
 		mntmSaveShipAs.setText("Save Ship As...");
@@ -183,8 +178,6 @@ public class EditorWindow {
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmModMan = new MenuItem(menuFile, SWT.NONE);
-		mntmModMan.setText("Mod Management");
-		UIUtils.addHotkeyText(mntmModMan, Manager.getHotkey(Hotkeys.MANAGE_MOD).toString());
 
 		mntmReloadDb = new MenuItem(menuFile, SWT.NONE);
 		mntmReloadDb.setText("Reload Database");
@@ -192,8 +185,6 @@ public class EditorWindow {
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
 		mntmCloseShip = new MenuItem(menuFile, SWT.NONE);
-		mntmCloseShip.setText("Close Ship");
-		UIUtils.addHotkeyText(mntmCloseShip, Manager.getHotkey(Hotkeys.CLOSE_SHIP).toString());
 
 		// Edit menu
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
@@ -203,12 +194,8 @@ public class EditorWindow {
 		mntmEdit.setMenu(menuEdit);
 
 		mntmUndo = new MenuItem(menuEdit, SWT.NONE);
-		mntmUndo.setText("Undo");
-		UIUtils.addHotkeyText(mntmUndo, Manager.getHotkey(Hotkeys.UNDO).toString());
 
 		mntmRedo = new MenuItem(menuEdit, SWT.NONE);
-		mntmRedo.setText("Redo");
-		UIUtils.addHotkeyText(mntmRedo, Manager.getHotkey(Hotkeys.REDO).toString());
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
@@ -221,14 +208,10 @@ public class EditorWindow {
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
 		mntmDelete = new MenuItem(menuEdit, SWT.NONE);
-		mntmDelete.setText("Delete");
-		UIUtils.addHotkeyText(mntmDelete, Manager.getHotkey(Hotkeys.DELETE).toString());
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
 		mntmSettings = new MenuItem(menuEdit, SWT.NONE);
-		mntmSettings.setText("Settings");
-		UIUtils.addHotkeyText(mntmSettings, Manager.getHotkey(Hotkeys.SETTINGS).toString());
 
 		// View menu
 		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
@@ -238,13 +221,9 @@ public class EditorWindow {
 		mntmView.setMenu(menuView);
 
 		mntmGrid = new MenuItem(menuView, SWT.CHECK);
-		mntmGrid.setText("Show Grid");
-		UIUtils.addHotkeyText(mntmGrid, Manager.getHotkey(Hotkeys.TOGGLE_GRID).toString());
 		mntmGrid.setSelection(true);
 
 		mntmHangar = new MenuItem(menuView, SWT.CHECK);
-		mntmHangar.setText("Show Hangar");
-		UIUtils.addHotkeyText(mntmHangar, Manager.getHotkey(Hotkeys.TOGGLE_HANGAR).toString());
 
 		new MenuItem(menuView, SWT.SEPARATOR);
 
@@ -256,27 +235,17 @@ public class EditorWindow {
 
 		mntmShowAnchor = new MenuItem(menuViewShip, SWT.CHECK);
 		mntmShowAnchor.setSelection(true);
-		mntmShowAnchor.setText("Show Ship Origin");
-		UIUtils.addHotkeyText(mntmShowAnchor, Manager.getHotkey(Hotkeys.SHOW_ANCHOR).toString());
 
 		mntmShowMounts = new MenuItem(menuViewShip, SWT.CHECK);
 		mntmShowMounts.setSelection(true);
-		mntmShowMounts.setText("Show Mounts");
-		UIUtils.addHotkeyText(mntmShowMounts, Manager.getHotkey(Hotkeys.SHOW_MOUNTS).toString());
 
 		mntmShowRooms = new MenuItem(menuViewShip, SWT.CHECK);
 		mntmShowRooms.setSelection(true);
-		mntmShowRooms.setText("Show Rooms");
-		UIUtils.addHotkeyText(mntmShowRooms, Manager.getHotkey(Hotkeys.SHOW_ROOMS).toString());
 
 		mntmShowDoors = new MenuItem(menuViewShip, SWT.CHECK);
-		mntmShowDoors.setText("Show Doors");
-		UIUtils.addHotkeyText(mntmShowDoors, Manager.getHotkey(Hotkeys.SHOW_DOORS).toString());
 		mntmShowDoors.setSelection(true);
 
 		mntmShowStations = new MenuItem(menuViewShip, SWT.CHECK);
-		mntmShowStations.setText("Show Stations");
-		UIUtils.addHotkeyText(mntmShowStations, Manager.getHotkey(Hotkeys.SHOW_STATIONS).toString());
 		mntmShowStations.setSelection(true);
 
 		MenuItem mntmShipImages = new MenuItem(menuView, SWT.CASCADE);
@@ -286,23 +255,15 @@ public class EditorWindow {
 		mntmShipImages.setMenu(menuViewImages);
 
 		mntmShowHull = new MenuItem(menuViewImages, SWT.CHECK);
-		mntmShowHull.setText("Show Hull");
-		UIUtils.addHotkeyText(mntmShowHull, Manager.getHotkey(Hotkeys.SHOW_HULL).toString());
 		mntmShowHull.setSelection(true);
 
 		mntmShowFloor = new MenuItem(menuViewImages, SWT.CHECK);
-		mntmShowFloor.setText("Show Floor");
-		UIUtils.addHotkeyText(mntmShowFloor, Manager.getHotkey(Hotkeys.SHOW_FLOOR).toString());
 		mntmShowFloor.setSelection(true);
 
 		mntmShowShield = new MenuItem(menuViewImages, SWT.CHECK);
-		mntmShowShield.setText("Show Shield");
-		UIUtils.addHotkeyText(mntmShowShield, Manager.getHotkey(Hotkeys.SHOW_SHIELD).toString());
 		mntmShowShield.setSelection(true);
 
 		mntmShowGibs = new MenuItem(menuViewImages, SWT.CHECK);
-		mntmShowGibs.setText("Show Gibs");
-		UIUtils.addHotkeyText(mntmShowGibs, Manager.getHotkey(Hotkeys.SHOW_GIBS).toString());
 		mntmShowGibs.setSelection(true);
 
 		// Help menu
@@ -347,7 +308,6 @@ public class EditorWindow {
 		tltmPointer.setImage(Cache.checkOutImage(this, "cpath:/assets/pointer.png"));
 		tltmPointer.addSelectionListener(toolSelectionAdapter);
 		tltmPointer.setData(Tools.POINTER);
-		tltmPointer.setToolTipText(String.format("Manipulation Tool (%s)", Manager.getHotkey(Hotkeys.POINTER_TOOL)));
 		toolItemMap.put(Tools.POINTER, tltmPointer);
 
 		// Room tool
@@ -355,7 +315,6 @@ public class EditorWindow {
 		tltmCreation.setImage(Cache.checkOutImage(this, "cpath:/assets/wrench.png"));
 		tltmCreation.addSelectionListener(toolSelectionAdapter);
 		tltmCreation.setData(Tools.CREATOR);
-		tltmCreation.setToolTipText(String.format("Layout Creation Tool (%s)", Manager.getHotkey(Hotkeys.CREATE_TOOL)));
 		toolItemMap.put(Tools.CREATOR, tltmCreation);
 
 		// Images button
@@ -363,7 +322,6 @@ public class EditorWindow {
 		tltmImages.setImage(Cache.checkOutImage(this, "cpath:/assets/images.png"));
 		tltmImages.addSelectionListener(toolSelectionAdapter);
 		tltmImages.setData(Tools.IMAGES);
-		tltmImages.setToolTipText(String.format("Ship Images (%s)", Manager.getHotkey(Hotkeys.IMAGES_TOOL)));
 		toolItemMap.put(Tools.IMAGES, tltmImages);
 
 		// Properties button
@@ -371,7 +329,6 @@ public class EditorWindow {
 		tltmProperties.setImage(Cache.checkOutImage(this, "cpath:/assets/system.png"));
 		tltmProperties.addSelectionListener(toolSelectionAdapter);
 		tltmProperties.setData(Tools.CONFIG);
-		tltmProperties.setToolTipText(String.format("Ship Loadout and Properties (%s)", Manager.getHotkey(Hotkeys.PROPERTIES_TOOL)));
 		toolItemMap.put(Tools.CONFIG, tltmProperties);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
@@ -379,7 +336,6 @@ public class EditorWindow {
 		// Manager button
 		tltmManager = new ToolItem(toolBar, SWT.PUSH);
 		tltmManager.setImage(Cache.checkOutImage(this, "cpath:/assets/overview.png"));
-		tltmManager.setToolTipText(String.format("Overview (%s)", Manager.getHotkey(Hotkeys.OVERVIEW_TOOL)));
 		tltmManager.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -392,7 +348,6 @@ public class EditorWindow {
 
 		tltmCloak = new ToolItem(toolBar, SWT.CHECK);
 		tltmCloak.setImage(Cache.checkOutImage(this, "cpath:/assets/cloak.png"));
-		tltmCloak.setToolTipText(String.format("View Cloaked Appearance (%s)", Manager.getHotkey(Hotkeys.CLOAK)));
 		tltmCloak.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -852,6 +807,8 @@ public class EditorWindow {
 			}
 		});
 
+		updateHotkeyTooltips();
+
 		canvas.addMouseListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseMoveListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseTrackListener(MouseInputDispatcher.getInstance());
@@ -876,6 +833,112 @@ public class EditorWindow {
 
 	public void open() {
 		shell.open();
+	}
+
+	public void updateHotkeyTooltips() {
+		Hotkey h = null;
+
+		// File
+		mntmNewShip.setText("New Ship");
+		h = Manager.getHotkey(Hotkeys.NEW_SHIP);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmNewShip, h.toString());
+		mntmLoadShip.setText("Load Ship");
+		h = Manager.getHotkey(Hotkeys.LOAD_SHIP);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmLoadShip, h.toString());
+		mntmSaveShip.setText("Save Ship");
+		h = Manager.getHotkey(Hotkeys.SAVE_SHIP);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmSaveShip, h.toString());
+		mntmModMan.setText("Mod Management");
+		h = Manager.getHotkey(Hotkeys.MANAGE_MOD);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmModMan, h.toString());
+		mntmCloseShip.setText("Close Ship");
+		h = Manager.getHotkey(Hotkeys.CLOSE_SHIP);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmCloseShip, h.toString());
+
+		// Edit
+		mntmUndo.setText("Undo");
+		h = Manager.getHotkey(Hotkeys.UNDO);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmUndo, h.toString());
+		mntmRedo.setText("Redo");
+		h = Manager.getHotkey(Hotkeys.REDO);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmRedo, h.toString());
+		mntmDelete.setText("Delete");
+		h = Manager.getHotkey(Hotkeys.DELETE);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmDelete, h.toString());
+		mntmSettings.setText("Settings");
+		h = Manager.getHotkey(Hotkeys.SETTINGS);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmSettings, h.toString());
+
+		// View
+		mntmGrid.setText("Show Grid");
+		h = Manager.getHotkey(Hotkeys.TOGGLE_GRID);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmGrid, h.toString());
+		mntmHangar.setText("Show Hangar");
+		h = Manager.getHotkey(Hotkeys.TOGGLE_HANGAR);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmHangar, h.toString());
+
+		mntmShowAnchor.setText("Show Ship Origin");
+		h = Manager.getHotkey(Hotkeys.SHOW_ANCHOR);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowAnchor, h.toString());
+		mntmShowMounts.setText("Show Mounts");
+		h = Manager.getHotkey(Hotkeys.SHOW_MOUNTS);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowMounts, h.toString());
+		mntmShowRooms.setText("Show Rooms");
+		h = Manager.getHotkey(Hotkeys.SHOW_ROOMS);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowRooms, h.toString());
+		mntmShowDoors.setText("Show Doors");
+		h = Manager.getHotkey(Hotkeys.SHOW_DOORS);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowDoors, h.toString());
+		mntmShowStations.setText("Show Stations");
+		h = Manager.getHotkey(Hotkeys.SHOW_STATIONS);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowStations, h.toString());
+
+		mntmShowHull.setText("Show Hull");
+		h = Manager.getHotkey(Hotkeys.SHOW_HULL);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowHull, h.toString());
+		mntmShowFloor.setText("Show Floor");
+		h = Manager.getHotkey(Hotkeys.SHOW_FLOOR);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowFloor, h.toString());
+		mntmShowShield.setText("Show Shield");
+		h = Manager.getHotkey(Hotkeys.SHOW_SHIELD);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowShield, h.toString());
+		mntmShowGibs.setText("Show Gibs");
+		h = Manager.getHotkey(Hotkeys.SHOW_GIBS);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmShowGibs, h.toString());
+
+		// Tools
+		h = Manager.getHotkey(Hotkeys.POINTER_TOOL);
+		tltmPointer.setToolTipText("Manipulation Tool" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
+		h = Manager.getHotkey(Hotkeys.CREATE_TOOL);
+		tltmCreation.setToolTipText("Layout Creation Tool" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
+		h = Manager.getHotkey(Hotkeys.IMAGES_TOOL);
+		tltmImages.setToolTipText("Ship Images" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
+		h = Manager.getHotkey(Hotkeys.PROPERTIES_TOOL);
+		tltmProperties.setToolTipText("Ship Loadout and Properties" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
+		h = Manager.getHotkey(Hotkeys.OVERVIEW_TOOL);
+		tltmManager.setToolTipText("Overview" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
+		h = Manager.getHotkey(Hotkeys.CLOAK);
+		tltmCloak.setToolTipText("View Cloaked Appearance" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
 	}
 
 	private void saveShip(ShipContainer container) {
@@ -930,7 +993,7 @@ public class EditorWindow {
 	}
 
 	/**
-	 * Do not use this method to dispose the content of the sidebar.
+	 * Do not use this method to <b>dispose</b> the content of the sidebar.
 	 * To do this, use {@link #disposeSidebarContent()}.
 	 * 
 	 * @return the Composite currently held by the sidebar.
@@ -966,7 +1029,8 @@ public class EditorWindow {
 
 	/**
 	 * Disposes the content of the sidebar, and sets the content to null.<br>
-	 * Prevents the editor from crashing when trying to change the sidebar positioning after closing a ship.
+	 * Prevents the editor from crashing when trying to change the sidebar positioning after closing
+	 * a ship.
 	 */
 	public void disposeSidebarContent() {
 		Control c = sideContainer.getContent();
@@ -988,7 +1052,8 @@ public class EditorWindow {
 	 * Checks whether the point is inside the canvas area -- eg. points non-negative coordinates
 	 * with values lesser than or equal to the canvas' dimensions (width and height)
 	 * 
-	 * @return true if the point (relative to the canvas) is within the canvas bounds, false otherwise
+	 * @return true if the point (relative to the canvas) is within the canvas bounds, false
+	 *         otherwise
 	 */
 	public boolean canvasContains(int x, int y) {
 		Rectangle bounds = canvas.getBounds();
@@ -1012,9 +1077,12 @@ public class EditorWindow {
 		canvas.redraw(x, y, w, h, false);
 	}
 
-	/** Only to be used to programmatically select the tool, when the user doesn't directly click on the tool's icon. */
+	/**
+	 * Only to be used to programmatically select the tool, when the user doesn't directly click on
+	 * the tool's icon.
+	 */
 	public void selectTool(Tools tool) {
-		if (!toolsEnabled())
+		if (!isToolsEnabled())
 			return;
 
 		for (ToolItem it : toolItemMap.values()) {
@@ -1036,7 +1104,7 @@ public class EditorWindow {
 		sideContainer.getVerticalBar().setEnabled(enable);
 	}
 
-	public boolean toolsEnabled() {
+	public boolean isToolsEnabled() {
 		return tltmPointer.isEnabled();
 	}
 
@@ -1070,7 +1138,7 @@ public class EditorWindow {
 		mntmReloadDb.setEnabled(!enable);
 	}
 
-	public boolean optionsEnabled() {
+	public boolean isOptionsEnabled() {
 		return mntmSaveShip.isEnabled();
 	}
 
@@ -1133,6 +1201,9 @@ public class EditorWindow {
 		return result;
 	}
 
+	/**
+	 * @return true if the control got focus, and false if it was unable to.
+	 */
 	public boolean forceFocus() {
 		return canvas.forceFocus();
 	}
@@ -1172,6 +1243,7 @@ public class EditorWindow {
 
 	private void handleHotkeys(Event e) {
 		// ====== Menu hotkeys
+
 		// File
 		if (Manager.getHotkey(Hotkeys.NEW_SHIP).passes(e.keyCode) && mntmNewShip.isEnabled()) {
 			mntmNewShip.notifyListeners(SWT.Selection, null);
@@ -1231,6 +1303,7 @@ public class EditorWindow {
 		}
 
 		// ====== Tool hotkeys
+
 		else if (Manager.getHotkey(Hotkeys.POINTER_TOOL).passes(e.keyCode) && tltmPointer.isEnabled()) {
 			tltmPointer.notifyListeners(SWT.Selection, null);
 		} else if (Manager.getHotkey(Hotkeys.CREATE_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
@@ -1244,9 +1317,10 @@ public class EditorWindow {
 		} else if (Manager.getHotkey(Hotkeys.CLOAK).passes(e.keyCode) && tltmCloak.isEnabled()) {
 			tltmCloak.setSelection(!tltmCloak.getSelection());
 			tltmCloak.notifyListeners(SWT.Selection, null);
+		}
 
-			// Creation Tool hotkeys
-		} else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
+		// Creation Tool hotkeys
+		else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
 			if (!tltmCreation.getSelection())
 				tltmCreation.notifyListeners(SWT.Selection, null);
 			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);

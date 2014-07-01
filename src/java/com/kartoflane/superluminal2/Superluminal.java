@@ -40,7 +40,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.1 beta");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.2 beta");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -60,26 +60,33 @@ public class Superluminal {
 	 * - artillery
 	 * - weapon selection reportedly clunky -> search function?
 	 * - undo system
+	 * - angular velocity modification
 	 * 
 	 * MEDIUM:
 	 * - entity deletion --> add (to) undo
 	 * - glow placement modification
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
+	 * - .shp loading / conversion to .ftl
 	 * 
 	 * LOW:
 	 * - come up with a way to set which system is first when assigned to the same room?
 	 * - generate floor image feature ??
-	 * - .shp loading / conversion to .ftl
-	 * - Rework highlight to be cursor based? --> allows to show mounts/rooms that are hidden beneath hull/other rooms
+	 * - Rework highlight to be cursor based? --> allows to show mounts/rooms that are hidden
+	 * beneath hull/other rooms
 	 * - rework the layered painter to allow more freedom in arranging stuff's ordering
 	 * 
 	 * - artillery weapon UI idea:
-	 * Additionally, when placing artillery room(s), there should be a separate category under Armaments for Artillery weapons, and the selection of such for each. The best way, in my opinion, is to
-	 * have the categories Weapons, Drones, Artillery, and Augments. Under Artillery, a number of slot selector should be added (with a warning that having more than one artillery weapon will prevent
-	 * the second, third, etc weapons from being accessed/disabled/enabled during play), to allow the builder to select the weapons for the artillery. From my understanding, any weapon in the game can
-	 * be used in an artillery slot, but can only fire based on the artillery cooldown. In addition, for each slot that a person wants to set up artillery for, a Power selector (max 4 - though can it
-	 * be exceeded? If so, add it. :P) should be added to the right of each Artillery weapon choice, so that way it will make adding multiple-artillery setups to AI (or human-controlled) ships much
-	 * easier.
+	 * Additionally, when placing artillery room(s), there should be a separate category under
+	 * Armaments for Artillery weapons, and the selection of such for each. The best way, in my
+	 * opinion, is to have the categories Weapons, Drones, Artillery, and Augments. Under Artillery,
+	 * a number of slot selector should be added (with a warning that having more than one artillery
+	 * weapon will prevent the second, third, etc weapons from being accessed/disabled/enabled
+	 * during play), to allow the builder to select the weapons for the artillery. From my
+	 * understanding, any weapon in the game can be used in an artillery slot, but can only fire
+	 * based on the artillery cooldown. In addition, for each slot that a person wants to set up
+	 * artillery for, a Power selector (max 4 - though can it be exceeded? If so, add it. :P) should
+	 * be added to the right of each Artillery weapon choice, so that way it will make adding
+	 * multiple-artillery setups to AI (or human-controlled) ships much easier.
 	 * 
 	 * Suggestions:
 	 * - detachable toolbar?
@@ -94,7 +101,8 @@ public class Superluminal {
 		System.out.println();
 
 		try {
-			// Try to retrieve the display in order to test whether the correct version of the editor has been downloaded
+			// Try to retrieve the display in order to test whether the correct version of the
+			// editor has been downloaded
 			Display.getDefault();
 		} catch (Throwable t) {
 			log.error("Failed to retrieve display - wrong version of the editor has been downloaded.");
@@ -403,7 +411,8 @@ public class Superluminal {
 				log.info("Program is up to date. (actually ahead)");
 			}
 			if (manual) {
-				// The user manually initiated the version check, so probably expects some kind of response in either case.
+				// The user manually initiated the version check, so probably expects some kind of
+				// response in either case.
 				UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, APP_NAME + " is up to date.");
 			}
 		}
@@ -446,28 +455,34 @@ public class Superluminal {
 					loading = "shift";
 					attr = bind.getAttributeValue(loading);
 					if (attr == null)
-						throw new IllegalArgumentException(action + " keybind if missing 'shift' attribute.");
+						throw new IllegalArgumentException(action + " keybind is missing 'shift' attribute.");
 					boolean shift = Boolean.valueOf(attr);
 
 					loading = "ctrl";
 					attr = bind.getAttributeValue(loading);
 					if (attr == null)
-						throw new IllegalArgumentException(action + " keybind if missing 'ctrl' attribute.");
+						throw new IllegalArgumentException(action + " keybind is missing 'ctrl' attribute.");
 					boolean ctrl = Boolean.valueOf(attr);
 
 					loading = "alt";
 					attr = bind.getAttributeValue(loading);
 					if (attr == null)
-						throw new IllegalArgumentException(action + " keybind if missing 'alt' attribute.");
+						throw new IllegalArgumentException(action + " keybind is missing 'alt' attribute.");
 					boolean alt = Boolean.valueOf(attr);
 
 					loading = "char";
 					attr = bind.getAttributeValue(loading);
-					if (attr.length() != 1)
-						throw new IllegalArgumentException(action + " keybind if missing 'char' attribute.");
-					int ch = attr.charAt(0);
+					if (attr == null)
+						throw new IllegalArgumentException(action + " keybind is missing 'char' attribute.");
+					if (attr.length() > 1)
+						throw new IllegalArgumentException(action + " keybind has invalid 'char' attribute: " + attr);
+					boolean enabled = attr.length() == 1;
+					int ch = '\0';
+					if (enabled)
+						ch = attr.charAt(0);
 
 					Hotkey h = Manager.getHotkey(action);
+					h.setEnabled(enabled);
 					h.setShift(shift);
 					h.setCtrl(ctrl);
 					h.setAlt(alt);
@@ -506,7 +521,7 @@ public class Superluminal {
 			bind.setAttribute("shift", "" + h.getShift());
 			bind.setAttribute("ctrl", "" + h.getCtrl());
 			bind.setAttribute("alt", "" + h.getAlt());
-			bind.setAttribute("char", "" + (char) h.getKey());
+			bind.setAttribute("char", "" + (h.isEnabled() ? h.getKeyString() : ""));
 
 			root.addContent(bind);
 		}

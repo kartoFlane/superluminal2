@@ -52,6 +52,7 @@ public class SettingsDialog {
 	private Button btnResetLinks;
 	private HashMap<Hotkeys, Button> hotkeyButton = new LinkedHashMap<Hotkeys, Button>();
 	private Composite compKeybinds;
+	private Button btnUnbind;
 
 	public SettingsDialog(Shell parent) {
 		if (instance != null)
@@ -61,10 +62,10 @@ public class SettingsDialog {
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
 		shell.setText(Superluminal.APP_NAME + " - Settings");
-		shell.setLayout(new GridLayout(2, false));
+		shell.setLayout(new GridLayout(3, false));
 
 		final TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
-		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 
 		/*
 		 * ====================
@@ -241,6 +242,14 @@ public class SettingsDialog {
 		 * ====================
 		 */
 
+		btnUnbind = new Button(shell, SWT.NONE);
+		GridData gd_btnUnbind = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnUnbind.widthHint = 80;
+		btnUnbind.setLayoutData(gd_btnUnbind);
+		btnUnbind.setText("Unbind");
+		btnUnbind.setEnabled(false);
+		btnUnbind.setVisible(false);
+
 		Button btnConfirm = new Button(shell, SWT.NONE);
 		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false, 1, 1);
 		gd_btnConfirm.widthHint = 80;
@@ -252,6 +261,16 @@ public class SettingsDialog {
 		gd_btnCancel.widthHint = 80;
 		btnCancel.setLayoutData(gd_btnCancel);
 		btnCancel.setText("Cancel");
+
+		btnUnbind.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Hotkey newHotkey = new Hotkey(currentBinding);
+				newHotkey.setEnabled(false);
+				bind(newHotkey);
+				btnUnbind.setEnabled(false);
+			}
+		});
 
 		btnConfirm.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -273,7 +292,10 @@ public class SettingsDialog {
 					keybind.setCtrl(h.getCtrl());
 					keybind.setAlt(h.getAlt());
 					keybind.setKey(h.getKey());
+					keybind.setEnabled(h.isEnabled());
 				}
+				if (modifiedHotkeys.size() > 0)
+					EditorWindow.getInstance().updateHotkeyTooltips();
 
 				if (Manager.sidebarOnRightSide != btnSidebar.getSelection()) {
 					Manager.sidebarOnRightSide = btnSidebar.getSelection();
@@ -317,6 +339,7 @@ public class SettingsDialog {
 					scConfig.forceFocus();
 				else if (i == 2)
 					scKeybinds.forceFocus();
+				btnUnbind.setVisible(i == 2);
 			}
 		});
 
@@ -368,6 +391,7 @@ public class SettingsDialog {
 					newHotkey.setAlt((e.stateMask & SWT.ALT) == SWT.ALT);
 					newHotkey.setKey(e.keyCode);
 					bind(newHotkey);
+					btnUnbind.setEnabled(false);
 				}
 
 				if (e.keyCode == SWT.SPACE)
@@ -409,7 +433,8 @@ public class SettingsDialog {
 		label.setText(hotkey.toString());
 
 		Button button = new Button(compKeybinds, SWT.TOGGLE);
-		button.setText(Manager.getHotkey(hotkey).toString());
+		Hotkey h = Manager.getHotkey(hotkey);
+		button.setText(h.isEnabled() ? h.toString() : "(Not bound)");
 		button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		button.setData(hotkey);
 
@@ -426,13 +451,15 @@ public class SettingsDialog {
 						if (h != self.getData()) {
 							Hotkey hotkey = getHotkey(h);
 							hotkeyButton.get(h).setSelection(false);
-							hotkeyButton.get(h).setText(hotkey.toString());
+							hotkeyButton.get(h).setText(hotkey.isEnabled() ? hotkey.toString() : "(Not bound)");
 						}
 					}
+					btnUnbind.setEnabled(true);
 				} else {
 					currentBinding = null;
 					Hotkey hotkey = getHotkey((Hotkeys) self.getData());
 					self.setText(hotkey.toString());
+					btnUnbind.setEnabled(false);
 				}
 			}
 		});
@@ -441,7 +468,7 @@ public class SettingsDialog {
 	}
 
 	private void bind(Hotkey newHotkey) {
-		if (hotkeyCollides(newHotkey)) {
+		if (newHotkey.isEnabled() && hotkeyCollides(newHotkey)) {
 			String msg = "The key combination you've selected is already bound to another command.\n" +
 					"Please choose another combination, or unbind it first.";
 			UIUtils.showWarningDialog(shell, null, msg);
@@ -449,7 +476,7 @@ public class SettingsDialog {
 		} else {
 			Button b = hotkeyButton.get(newHotkey.getId());
 			b.setSelection(false);
-			b.setText(newHotkey.toString());
+			b.setText(newHotkey.isEnabled() ? newHotkey.toString() : "(Not bound)");
 
 			Hotkey prev = findModifiedHotkey(newHotkey.getId());
 			if (prev != null)

@@ -1,5 +1,9 @@
 Changelog
 
+2.0.2 beta:
+- Menu buttons' hotkey text is now updated when you modify hotkeys
+- Hotkeys can now be unbound
+
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
 - Fixed some stations being visible when they should not be

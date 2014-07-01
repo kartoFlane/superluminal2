@@ -8,6 +8,7 @@ import com.kartoflane.superluminal2.core.Manager;
 public class Hotkey {
 	private final Hotkeys id;
 
+	private boolean enabled = true;
 	private boolean shift = false;
 	private boolean ctrl = false;
 	private boolean alt = false;
@@ -21,12 +22,27 @@ public class Hotkey {
 		return id;
 	}
 
+	public void setEnabled(boolean e) {
+		enabled = e;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
 	public void setKey(int ch) {
 		key = ch;
 	}
 
 	public int getKey() {
 		return key;
+	}
+
+	public String getKeyString() {
+		if (key == '\0')
+			return "";
+		else
+			return "" + ((char) getKey());
 	}
 
 	public void setShift(boolean shift) {
