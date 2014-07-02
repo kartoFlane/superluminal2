@@ -66,7 +66,6 @@ public class Superluminal {
 	 * - entity deletion --> add (to) undo
 	 * - glow placement modification
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
-	 * - .shp loading / conversion to .ftl
 	 * 
 	 * LOW:
 	 * - come up with a way to set which system is first when assigned to the same room?

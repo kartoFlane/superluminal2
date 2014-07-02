@@ -65,6 +65,7 @@ import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.utils.SHPUtils;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
@@ -83,6 +84,7 @@ public class EditorWindow {
 	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
 	private Color canvasColor = null;
 	private boolean shellResizing = false;
+	private static String prevShpPath = null;
 
 	private EventHandler eventHandler = new EventHandler();
 
@@ -112,6 +114,7 @@ public class EditorWindow {
 	private MenuItem mntmShowGibs;
 	private MenuItem mntmNewShip;
 	private MenuItem mntmLoadShip;
+	private MenuItem mntmConvertShp;
 	private MenuItem mntmSettings;
 	private MenuItem mntmGrid;
 	private MenuItem mntmSaveShip;
@@ -167,6 +170,11 @@ public class EditorWindow {
 		mntmNewShip = new MenuItem(menuFile, SWT.NONE);
 
 		mntmLoadShip = new MenuItem(menuFile, SWT.NONE);
+
+		new MenuItem(menuFile, SWT.SEPARATOR);
+
+		mntmConvertShp = new MenuItem(menuFile, SWT.NONE);
+		mntmConvertShp.setText("Open .shp");
 
 		new MenuItem(menuFile, SWT.SEPARATOR);
 
@@ -527,6 +535,25 @@ public class EditorWindow {
 			public void widgetSelected(SelectionEvent e) {
 				ShipLoaderDialog dialog = new ShipLoaderDialog(shell);
 				dialog.open();
+			}
+		});
+
+		mntmConvertShp.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				File f = UIUtils.promptForLoadFile(shell, Superluminal.APP_NAME + " - Open .shp", prevShpPath, new String[] { "*.shp" });
+				if (f != null) {
+					try {
+						prevShpPath = f.getParent();
+						Manager.loadShip(SHPUtils.loadShipSHP(f));
+					} catch (Exception ex) {
+						log.error("Error occured while reading .shp file:", ex);
+						String msg = "Superluminal was unable to open the legacy project file.\n\n" +
+								"This can happen when the file is structurized in a way that the editor doesn't expect.\n" +
+								"Posting the .shp file in the editor's thread at the FTL forums will help the editor's author fix the issue.";
+						UIUtils.showWarningDialog(shell, null, msg);
+					}
+				}
 			}
 		});
 
