@@ -1,6 +1,6 @@
 FTL Ship Editor - Superluminal 2
-https://github.com/kartoFlane/superluminal2/
-https://sourceforge.net/projects/superluminal2/
+http://github.com/kartoFlane/superluminal2/
+http://sourceforge.net/projects/superluminal2/
 
 
 About

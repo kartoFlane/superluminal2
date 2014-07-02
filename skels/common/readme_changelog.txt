@@ -3,6 +3,7 @@ Changelog
 2.0.2 beta:
 - Menu buttons' hotkey text is now updated when you modify hotkeys
 - Hotkeys can now be unbound
+- Added .shp file loading
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
