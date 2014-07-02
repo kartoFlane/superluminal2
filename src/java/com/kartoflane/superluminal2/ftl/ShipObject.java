@@ -721,7 +721,7 @@ public class ShipObject extends GameObject {
 	 */
 	public void setMinSector(int min) {
 		if (min < 1 || min > 8)
-			throw new IllegalArgumentException("Sector number must be within 1..8 range, inclusive.");
+			throw new IllegalArgumentException("Sector number must be within 1..8 range, inclusive: " + min);
 		minSector = min;
 	}
 
@@ -740,7 +740,7 @@ public class ShipObject extends GameObject {
 	 */
 	public void setMaxSector(int max) {
 		if (max < 1 || max > 8)
-			throw new IllegalArgumentException("Sector number must be within 1..8 range, inclusive.");
+			throw new IllegalArgumentException("Sector number must be within 1..8 range, inclusive: " + max);
 		maxSector = max;
 	}
 
@@ -1018,7 +1018,8 @@ public class ShipObject extends GameObject {
 	 * depending on its type.<br>
 	 * <br>
 	 * This method should not be called directly.
-	 * Use {@link com.kartoflane.superluminal2.ui.ShipContainer#add(AbstractController) ShipContainer.add()} instead
+	 * Use {@link com.kartoflane.superluminal2.ui.ShipContainer#add(AbstractController)
+	 * ShipContainer.add()} instead
 	 * 
 	 * @param object
 	 *            object that is to be added
@@ -1049,7 +1050,8 @@ public class ShipObject extends GameObject {
 	 * Removes the game object from the ship.<br>
 	 * <br>
 	 * This method should not be called directly.
-	 * Use {@link com.kartoflane.superluminal2.ui.ShipContainer#remove(RoomController) ShipContainer.remove()} instead
+	 * Use {@link com.kartoflane.superluminal2.ui.ShipContainer#remove(RoomController)
+	 * ShipContainer.remove()} instead
 	 * 
 	 * @param object
 	 *            object that is to be removed
