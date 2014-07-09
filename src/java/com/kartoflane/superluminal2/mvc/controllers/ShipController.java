@@ -6,13 +6,13 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 
-import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.Grid.Snapmodes;
-import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
+import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.ftl.ShipObject;

@@ -12,10 +12,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.EventHandler;
-import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.Grid.Snapmodes;
-import com.kartoflane.superluminal2.components.LayeredPainter;
-import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Boundable;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
@@ -27,7 +23,11 @@ import com.kartoflane.superluminal2.components.interfaces.Pinnable;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
+import com.kartoflane.superluminal2.core.Grid;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -447,20 +447,20 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * Checks whether the Followable is fit for the role of a parent.<br>
 	 * Throws appropriate exception when it is not.
 	 */
-	public final void checkParentConditions(Followable followable) {
+	protected final void checkParentConditions(Followable followable) {
 		if (followable != null && !(followable instanceof Controller)) // instanceof returns false for null, but we allow null argument
 			throw new IllegalArgumentException("Followable passed in argument is not a Controller.");
 		if (followable == this)
 			throw new IllegalArgumentException("Cannot be parent to itself.");
 		if (followable instanceof Follower && ((Follower) followable).getParent() == this)
 			throw new IllegalArgumentException("Cannot follow an object that is following the receiver.");
-		if (followable != null && parent == followable)
-			throw new IllegalArgumentException("Already following this object.");
 	}
 
 	@Override
 	public void setParent(Followable followable) {
 		checkParentConditions(followable);
+		if (parent == followable)
+			return;
 
 		// if it passes, change the parent
 		if (parent != null)
@@ -738,22 +738,56 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return model.getBoundingAreaH();
 	}
 
+	/**
+	 * Sets the area to which the controller is bounded.
+	 * 
+	 * @param x
+	 *            x coordinate of the top-left corner of the bounding area
+	 * @param y
+	 *            y coordinate of the top-left corner of the bounding area
+	 * @param w
+	 *            width of the bounding area
+	 * @param h
+	 *            height of the bounding area
+	 */
 	public void setBoundingArea(int x, int y, int w, int h) {
 		model.setBoundingArea(x, y, w, h);
 	}
 
+	/** Sets the area to which the controller is bounded. */
 	public void setBoundingArea(Rectangle r) {
 		setBoundingArea(r.x, r.y, r.width, r.height);
 	}
 
+	/**
+	 * Sets the area to which the controller is bounded.
+	 * 
+	 * @param x1
+	 *            x coordinate of the top-left corner of the bounding area
+	 * @param y1
+	 *            y coordinate of the top-left corner of the bounding area
+	 * @param x2
+	 *            x coordinate of the bottom-right corner of the bounding area
+	 * @param y2
+	 *            y coordinate of the bottom-right corner of the bounding area
+	 */
 	public void setBoundingPoints(int x1, int y1, int x2, int y2) {
 		setBoundingArea(x1, y1, x2 - x1, y2 - y1);
 	}
 
+	/**
+	 * Sets the area to which the controller is bounded.
+	 * 
+	 * @param start
+	 *            the top-left corner of the bounding area
+	 * @param end
+	 *            the bottom-right corner of the bounding area
+	 */
 	public void setBoundingPoints(Point start, Point end) {
 		setBoundingArea(start.x, start.y, end.x - start.x, end.y - start.y);
 	}
 
+	/** @return an array of two points describing the area to which the controller is bounded. */
 	public Point[] getBoundingPoints() {
 		Rectangle b = model.getBoundingArea();
 		return new Point[] {
@@ -761,6 +795,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		};
 	}
 
+	/** Updates the area that the controller is bounded to. */
 	public void updateBoundingArea() {
 	}
 
@@ -792,10 +827,17 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return getBounds().intersects(rect); // Some controllers modify their bounds, so use that instead of the model's
 	}
 
+	/**
+	 * Flags the controller's location as modifiable, which means that the controller's position
+	 * can be changed by nudging or via the sidebar coordinate boxes.
+	 */
 	public void setLocModifiable(boolean b) {
 		model.setLocModifiable(b);
 	}
 
+	/**
+	 * @see #setLocModifiable(boolean)
+	 */
 	public boolean isLocModifiable() {
 		return model.isLocModifiable();
 	}
@@ -883,9 +925,15 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		}
 	}
 
+	/**
+	 * By default, this method gets called when the controller receives a {@link SLEvent#MOVE} event
+	 */
 	public void notifyLocationChanged(int x, int y) {
 	}
 
+	/**
+	 * By default, this method gets called when the controller receives a {@link SLEvent#RESIZE} event
+	 */
 	public void notifySizeChanged(int w, int h) {
 		resize(w, h);
 	}

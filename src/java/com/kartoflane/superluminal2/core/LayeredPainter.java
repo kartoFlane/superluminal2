@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.components;
+package com.kartoflane.superluminal2.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;

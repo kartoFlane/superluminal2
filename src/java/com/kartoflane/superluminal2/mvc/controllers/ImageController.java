@@ -4,9 +4,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
-import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.ftl.ImageObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;

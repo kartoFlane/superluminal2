@@ -8,11 +8,11 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
 
-import com.kartoflane.superluminal2.components.LayeredPainter;
-import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Redrawable;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.LayeredPainter;
+import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
@@ -488,7 +488,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 	protected void paintBorderSquare(PaintEvent e, int x, int y, int w, int h, Color borderColor, int borderThickness, int alpha) {
 		if (borderColor != null) {
-			Color prevBgColor = e.gc.getBackground();
+			Color prevFgColor = e.gc.getForeground();
 			int prevAlpha = e.gc.getAlpha();
 			int prevWidth = e.gc.getLineWidth();
 
@@ -500,7 +500,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			e.gc.drawRectangle(x + borderThickness / 2, y + borderThickness / 2,
 					w - 1 - borderThickness / 2, h - 1 - borderThickness / 2);
 
-			e.gc.setForeground(prevBgColor);
+			e.gc.setForeground(prevFgColor);
 			e.gc.setAlpha(prevAlpha);
 			e.gc.setLineWidth(prevWidth);
 		}
@@ -517,7 +517,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 	protected void paintBorderOval(PaintEvent e, int x, int y, int w, int h, Color borderColor, int borderThickness, int alpha) {
 		if (borderColor != null) {
-			Color prevBgColor = e.gc.getBackground();
+			Color prevFgColor = e.gc.getForeground();
 			int prevAlpha = e.gc.getAlpha();
 			int prevWidth = e.gc.getLineWidth();
 
@@ -529,7 +529,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 			e.gc.drawOval(x + borderThickness / 2, y + borderThickness / 2,
 					w - 1 - borderThickness / 2, h - 1 - borderThickness / 2);
 
-			e.gc.setForeground(prevBgColor);
+			e.gc.setForeground(prevFgColor);
 			e.gc.setAlpha(prevAlpha);
 			e.gc.setLineWidth(prevWidth);
 		}
@@ -537,7 +537,7 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 	protected void paintBorderPolygon(PaintEvent e, int[] polygon, Color borderColor, int borderThickness, int alpha) {
 		if (borderColor != null) {
-			Color prevBgColor = e.gc.getBackground();
+			Color prevFgColor = e.gc.getForeground();
 			int prevAlpha = e.gc.getAlpha();
 			int prevWidth = e.gc.getLineWidth();
 
@@ -547,7 +547,39 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 
 			e.gc.drawPolygon(polygon);
 
-			e.gc.setForeground(prevBgColor);
+			e.gc.setForeground(prevFgColor);
+			e.gc.setAlpha(prevAlpha);
+			e.gc.setLineWidth(prevWidth);
+		}
+	}
+
+	/*
+	 * ====================================================================================
+	 * XXX: Paint line methods
+	 * ====================================================================================
+	 */
+
+	/**
+	 * Line is always drawn from <tt>(rect.x, rect.y)</tt> to <tt>(rect.x + rect.width, rect.y + rect.height)</tt>.
+	 * The rect can have negative width or height, however.
+	 */
+	protected void paintLine(PaintEvent e, Rectangle rect, Color borderColor, int borderThickness, int alpha) {
+		paintLine(e, rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, borderColor, borderThickness, alpha);
+	}
+
+	protected void paintLine(PaintEvent e, int sx, int sy, int ex, int ey, Color borderColor, int borderThickness, int alpha) {
+		if (borderColor != null) {
+			Color prevFgColor = e.gc.getForeground();
+			int prevAlpha = e.gc.getAlpha();
+			int prevWidth = e.gc.getLineWidth();
+
+			e.gc.setForeground(borderColor);
+			e.gc.setAlpha(alpha);
+			e.gc.setLineWidth(borderThickness);
+
+			e.gc.drawLine(sx, sy, ex, ey);
+
+			e.gc.setForeground(prevFgColor);
 			e.gc.setAlpha(prevAlpha);
 			e.gc.setLineWidth(prevWidth);
 		}

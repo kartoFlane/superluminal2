@@ -5,6 +5,12 @@ import org.eclipse.swt.events.MouseEvent;
 import com.kartoflane.superluminal2.components.interfaces.MouseInputListener;
 import com.kartoflane.superluminal2.tools.Tool;
 
+/**
+ * Listens for mouse-related events and then delegates them to the currently selected tool.
+ * 
+ * @author kartoFlane
+ *
+ */
 public class MouseInputDispatcher implements MouseInputListener {
 
 	private static MouseInputDispatcher instance = null;

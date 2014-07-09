@@ -3,11 +3,11 @@ package com.kartoflane.superluminal2.ui;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.Shapes;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Grid;
+import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;

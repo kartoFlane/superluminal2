@@ -39,15 +39,15 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.EventHandler;
-import com.kartoflane.superluminal2.components.Grid;
 import com.kartoflane.superluminal2.components.Hotkey;
-import com.kartoflane.superluminal2.components.LayeredPainter;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
+import com.kartoflane.superluminal2.core.Grid;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
 import com.kartoflane.superluminal2.events.SLEvent;
@@ -544,7 +544,7 @@ public class EditorWindow {
 				File f = UIUtils.promptForLoadFile(shell, Superluminal.APP_NAME + " - Open .shp", prevShpPath, new String[] { "*.shp" });
 				if (f != null) {
 					try {
-						prevShpPath = f.getParent();
+						prevShpPath = f.getAbsolutePath();
 						Manager.loadShip(SHPUtils.loadShipSHP(f));
 					} catch (Exception ex) {
 						log.error("Error occured while reading .shp file:", ex);

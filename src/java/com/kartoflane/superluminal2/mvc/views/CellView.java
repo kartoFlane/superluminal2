@@ -5,7 +5,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Transform;
 
-import com.kartoflane.superluminal2.components.Grid;
+import com.kartoflane.superluminal2.core.Grid;
 
 public class CellView extends BaseView {
 

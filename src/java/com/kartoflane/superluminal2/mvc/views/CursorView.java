@@ -3,11 +3,11 @@ package com.kartoflane.superluminal2.mvc.views;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Point;
 
-import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.Grid.Snapmodes;
-import com.kartoflane.superluminal2.components.LayeredPainter;
-import com.kartoflane.superluminal2.components.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Grid;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;

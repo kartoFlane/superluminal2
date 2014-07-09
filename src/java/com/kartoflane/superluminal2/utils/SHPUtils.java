@@ -21,13 +21,13 @@ import org.unsynchronized.Instance;
 import org.unsynchronized.JDeserialize;
 import org.unsynchronized.StringObject;
 
-import com.kartoflane.superluminal2.components.Grid;
-import com.kartoflane.superluminal2.components.Grid.Snapmodes;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Grid;
+import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
@@ -168,100 +168,139 @@ public class SHPUtils {
 				ship.setImage(Images.THUMBNAIL, "file:" + v);
 		}
 
-		Map<Object, Object> map = map(getFieldValueByName(shipInstance, "startMap"));
-		// System -> boolean
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
-			Systems sys = system(entry.getKey());
-			boolean available = bool(entry.getValue());
-			ship.getSystem(sys).setAvailable(available);
+		Map<Object, Object> map = null;
+		Object o = null;
+
+		o = getFieldValueByName(shipInstance, "startMap");
+		if (o != null) {
+			map = map(o);
+			// System -> boolean
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Systems sys = system(entry.getKey());
+				boolean available = bool(entry.getValue());
+				ship.getSystem(sys).setAvailable(available);
+			}
 		}
 
-		map = map(getFieldValueByName(shipInstance, "powerMap"));
-		// System -> integer
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
-			Systems sys = system(entry.getKey());
-			int level = integer(entry.getValue());
-			ship.getSystem(sys).setLevelStart(level);
+		o = getFieldValueByName(shipInstance, "powerMap");
+		if (o != null) {
+			map = map(o);
+			// System -> integer
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Systems sys = system(entry.getKey());
+				int level = integer(entry.getValue());
+				ship.getSystem(sys).setLevelStart(level);
+			}
 		}
 
-		map = map(getFieldValueByName(shipInstance, "levelMap"));
-		// System -> integer
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
-			Systems sys = system(entry.getKey());
-			int level = integer(entry.getValue());
-			ship.getSystem(sys).setLevelMax(level);
+		o = getFieldValueByName(shipInstance, "levelMap");
+		if (o != null) {
+			map = map(o);
+			// System -> integer
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Systems sys = system(entry.getKey());
+				int level = integer(entry.getValue());
+				ship.getSystem(sys).setLevelMax(level);
+			}
 		}
 
-		map = map(getFieldValueByName(shipInstance, "slotMap"));
-		// System -> integer
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
-			Systems sys = system(entry.getKey());
-			if (!sys.canContainStation())
-				continue;
+		o = getFieldValueByName(shipInstance, "slotMap");
+		if (o != null) {
+			map = map(o);
+			// System -> integer
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Systems sys = system(entry.getKey());
+				if (!sys.canContainStation())
+					continue;
 
-			int slot = integer(entry.getValue());
-			SystemObject system = ship.getSystem(sys);
-			StationObject station = system.getStation();
-			station.setSlotId(slot);
+				int slot = integer(entry.getValue());
+				SystemObject system = ship.getSystem(sys);
+				StationObject station = system.getStation();
+				station.setSlotId(slot);
+			}
 		}
 
-		map = map(getFieldValueByName(shipInstance, "slotDirMap"));
-		// System -> Direction
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
-			Systems sys = system(entry.getKey());
-			if (!sys.canContainStation())
-				continue;
+		o = getFieldValueByName(shipInstance, "slotDirMap");
+		if (o != null) {
+			map = map(o);
+			// System -> Direction
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Systems sys = system(entry.getKey());
+				if (!sys.canContainStation())
+					continue;
 
-			Directions dir = direction(entry.getValue());
-			SystemObject system = ship.getSystem(sys);
-			StationObject station = system.getStation();
-			station.setSlotDirection(dir);
+				Directions dir = direction(entry.getValue());
+				SystemObject system = ship.getSystem(sys);
+				StationObject station = system.getStation();
+				station.setSlotDirection(dir);
+			}
 		}
 
-		map = map(getFieldValueByName(shipInstance, "crewMap"));
-		// Crew -> integer
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
-			Races race = race(entry.getKey());
-			int count = integer(entry.getValue());
-			ship.setCrewMin(race, count);
-			for (int in = 0; in < count; in++)
-				ship.changeCrew(Races.NO_CREW, race);
+		o = getFieldValueByName(shipInstance, "crewMap");
+		if (o != null) {
+			map = map(o);
+			// Crew -> integer
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Races race = race(entry.getKey());
+				int count = integer(entry.getValue());
+				ship.setCrewMin(race, count);
+				for (int in = 0; in < count; in++)
+					ship.changeCrew(Races.NO_CREW, race);
+			}
 		}
 
-		map = map(getFieldValueByName(shipInstance, "crewMaxMap"));
-		// Crew -> integer
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
-			Races race = race(entry.getKey());
-			int count = integer(entry.getValue());
-			ship.setCrewMax(race, count);
+		o = getFieldValueByName(shipInstance, "crewMaxMap");
+		if (o != null) {
+			map = map(o);
+			// Crew -> integer
+			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+				Races race = race(entry.getKey());
+				int count = integer(entry.getValue());
+				ship.setCrewMax(race, count);
+			}
 		}
 
-		Collection<Object> col = collection(getFieldValueByName(shipInstance, "rooms"));
-		// RoomObject
-		for (Object o : col) {
-			GameObject go = room(o, anchor);
-			ship.add(go);
+		Collection<Object> col = null;
+		o = null;
+
+		o = getFieldValueByName(shipInstance, "rooms");
+		if (o != null) {
+			col = collection(o);
+			// RoomObject
+			for (Object ob : col) {
+				GameObject go = room(ob, anchor);
+				ship.add(go);
+			}
 		}
 
-		col = collection(getFieldValueByName(shipInstance, "doors"));
-		// DoorObject
-		for (Object o : col) {
-			GameObject go = door(o, anchor);
-			ship.add(go);
+		o = getFieldValueByName(shipInstance, "doors");
+		if (o != null) {
+			col = collection(o);
+			// DoorObject
+			for (Object ob : col) {
+				GameObject go = door(ob, anchor);
+				ship.add(go);
+			}
 		}
 
-		col = collection(getFieldValueByName(shipInstance, "gibs"));
-		// GibObject
-		for (Object o : col) {
-			GameObject go = gib(o);
-			ship.add(go);
+		o = getFieldValueByName(shipInstance, "gibs");
+		if (o != null) {
+			col = collection(o);
+			// GibObject
+			for (Object ob : col) {
+				GameObject go = gib(ob);
+				ship.add(go);
+			}
 		}
 
-		col = collection(getFieldValueByName(shipInstance, "mounts"));
-		// MountObject
-		for (Object o : col) {
-			GameObject go = mount(o, anchor);
-			ship.add(go);
+		o = getFieldValueByName(shipInstance, "mounts");
+		if (o != null) {
+			col = collection(o);
+			// MountObject
+			for (Object ob : col) {
+				GameObject go = mount(ob, anchor);
+				ship.add(go);
+			}
 		}
 
 		Database db = Database.getInstance();
@@ -269,15 +308,15 @@ public class SHPUtils {
 		boolean bySet = bool(getFieldValueByName(shipInstance, "dronesBySet"));
 		col = collection(getFieldValueByName(shipInstance, "droneSet"));
 		if (bySet) {
-			for (Object o : col) {
-				DroneList list = db.getDroneList(string(o));
+			for (Object ob : col) {
+				DroneList list = db.getDroneList(string(ob));
 				if (list != null)
 					ship.setDroneList(list);
 				break;
 			}
 		} else {
-			for (Object o : col) {
-				DroneObject drone = db.getDrone(string(o));
+			for (Object ob : col) {
+				DroneObject drone = db.getDrone(string(ob));
 				if (drone != null)
 					ship.changeDrone(Database.DEFAULT_DRONE_OBJ, drone);
 			}
@@ -286,23 +325,23 @@ public class SHPUtils {
 		bySet = bool(getFieldValueByName(shipInstance, "weaponsBySet"));
 		col = collection(getFieldValueByName(shipInstance, "weaponSet"));
 		if (bySet) {
-			for (Object o : col) {
-				WeaponList list = db.getWeaponList(string(o));
+			for (Object ob : col) {
+				WeaponList list = db.getWeaponList(string(ob));
 				if (list != null)
 					ship.setWeaponList(list);
 				break;
 			}
 		} else {
-			for (Object o : col) {
-				WeaponObject weapon = db.getWeapon(string(o));
+			for (Object ob : col) {
+				WeaponObject weapon = db.getWeapon(string(ob));
 				if (weapon != null)
 					ship.changeWeapon(Database.DEFAULT_WEAPON_OBJ, weapon);
 			}
 		}
 
 		col = collection(getFieldValueByName(shipInstance, "augmentSet"));
-		for (Object o : col) {
-			AugmentObject aug = db.getAugment(string(o));
+		for (Object ob : col) {
+			AugmentObject aug = db.getAugment(string(ob));
 			if (aug != null)
 				ship.changeAugment(Database.DEFAULT_AUGMENT_OBJ, aug);
 		}
@@ -480,7 +519,7 @@ public class SHPUtils {
 			return Boolean.valueOf(((StringObject) o).value);
 		} else if (o instanceof Instance) {
 			Instance i = (Instance) o;
-			return (Boolean) getFieldValueByName(i, "value");
+			return bool(getFieldValueByName(i, "value"));
 		} else
 			throw new IllegalArgumentException("Not a Boolean: " + o.getClass());
 	}
@@ -496,7 +535,7 @@ public class SHPUtils {
 			return Integer.valueOf(((StringObject) o).value);
 		} else if (o instanceof Instance) {
 			Instance i = (Instance) o;
-			return (Integer) getFieldValueByName(i, "value");
+			return integer(getFieldValueByName(i, "value"));
 		} else
 			throw new IllegalArgumentException("Not an Integer: " + o.getClass());
 	}
@@ -514,7 +553,7 @@ public class SHPUtils {
 			return Double.valueOf(((StringObject) o).value);
 		} else if (o instanceof Instance) {
 			Instance i = (Instance) o;
-			return (Double) getFieldValueByName(i, "value");
+			return doubel(getFieldValueByName(i, "value"));
 		} else
 			throw new IllegalArgumentException("Not a Double or Float: " + o.getClass());
 	}
