@@ -6,7 +6,10 @@ The editor provides a layer of abstraction over the game's files, making the tas
 
 It is a complete rewrite of, and successor to, the original editor ([Superluminal](https://github.com/kartoFlane/Superluminal)).
 
-To download the compiled program, go [here](https://sourceforge.net/projects/superluminal2/files/Superluminal2/)
+To **download** the compiled program, go [here](https://sourceforge.net/projects/superluminal2/files/Superluminal2/)
+
+If you're looking to get a hang of how the program works, [readme_developers](https://github.com/kartoFlane/superluminal2/blob/master/readme_developers.txt) roughly outlines the repo's structure.  
+For a more code-related inquiry, the [main class](https://github.com/kartoFlane/superluminal2/blob/master/src/java/com/kartoflane/superluminal2/Superluminal.java) is always a good entry point to branch out from.
 
 <a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png" width="145px" height="auto" /></a>
 
