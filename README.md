@@ -8,8 +8,7 @@ It is a complete rewrite of, and successor to, the original editor ([Superlumina
 
 To **download** the compiled program, go [here](https://sourceforge.net/projects/superluminal2/files/Superluminal2/)
 
-If you're looking to get a hang of how the program works, [readme_developers](https://github.com/kartoFlane/superluminal2/blob/master/readme_developers.txt) roughly outlines the repo's structure.  
-For a more code-related inquiry, the [main class](https://github.com/kartoFlane/superluminal2/blob/master/src/java/com/kartoflane/superluminal2/Superluminal.java) is always a good entry point to branch out from.
+If you're looking to get a hang of how the program works, [readme_developers](https://github.com/kartoFlane/superluminal2/blob/master/readme_developers.txt) roughly outlines the repo's structure and purpose behind all of the packages in the source code folder.
 
 <a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png" width="145px" height="auto" /></a>
 
