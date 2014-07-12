@@ -24,9 +24,9 @@ This project depends on the following libraries:
 
 Also incorporates the following libraries into the source code to make minute adjustments:
 - FTLDat (part of Slipstream Mod Manager)
-	http://github.com/Vhati/Slipstream-Mod-Manager
+  http://github.com/Vhati/Slipstream-Mod-Manager
 - jdeserialize
-	http://code.google.com/p/jdeserialize/
+  http://code.google.com/p/jdeserialize/
 
 
 ====================================================
@@ -74,86 +74,86 @@ Explanation of the repository's directory structure:
 ===============================================================
 General explanation of source code packages and their contents:
 
-	"com.kartoflane.superluminal2"
-		Contains the main class.
-		
-		".components"
-			General purpose classes that are used across the application.
-		
-			".enums"
-				Enums used in the editor.
-			
-			".interfaces"
-				Interfaces used in the editor.
-			
-		".core"
-			Classes that fulfill a central role in the application, like the Cache to
-			request resource handles, game object Database, or the Grid for positioning.
+  "com.kartoflane.superluminal2"
+    Contains the main class.
+    
+    ".components"
+      General purpose classes that are used across the application.
+    
+      ".enums"
+        Enums used in the editor.
+      
+      ".interfaces"
+        Interfaces used in the editor.
+      
+    ".core"
+      Classes that fulfill a central role in the application, like the Cache to
+      request resource handles, game object Database, or the Grid for positioning.
 
-		".events"
-			A rudimentary event system that attempts to facilitate loosely coupled
-			communication between Controllers.
+    ".events"
+      A rudimentary event system that attempts to facilitate loosely coupled
+      communication between Controllers.
 
-		".ftl"
-			Classes representing the in-game objects that are of interest to this editor.
+    ".ftl"
+      Classes representing the in-game objects that are of interest to this editor.
 
-		".mvc"
-			Interfaces for the editor's MVC system.
-			
-			".controllers"
-				Controller classes. Controllers are the front-end class that the user
-				interacts with. They also provide abstraction for the data held by Models.
+    ".mvc"
+      Interfaces for the editor's MVC system.
+      
+      ".controllers"
+        Controller classes. Controllers are the front-end class that the user
+        interacts with. They also provide abstraction for the data held by Models.
 
-				".props"
-					Controllers for props. Props are MVC entities that are used to break
-					down complex data structures into simpler ones.
+        ".props"
+          Controllers for props. Props are MVC entities that are used to break
+          down complex data structures into simpler ones.
 
-			".models"
-				Model classes. Models are tha back-end classes that hold data, and make
-				it available via Controller classes.
-				In a proper MVC system, there probably should me much more of those...
-				In this editor however, they're used exclusively to hold positioning 
-				related data, and link the controller to a GameObject from the ".ftl" package,
-				which hold all of the game-related data.
+      ".models"
+        Model classes. Models are tha back-end classes that hold data, and make
+        it available via Controller classes.
+        In a proper MVC system, there probably should me much more of those...
+        In this editor however, they're used exclusively to hold positioning 
+        related data, and link the controller to a GameObject from the ".ftl" package,
+        which hold all of the game-related data.
 
-			".views"
-				View classes. Views are the visual representation of the data held by Models
-				and abstracted by Controllers.
+      ".views"
+        View classes. Views are the visual representation of the data held by Models
+        and abstracted by Controllers.
 
-				".props"
-					Views for props.
+        ".props"
+          Views for props.
 
-		".tools"
-			Classes for the tools used in the editor. Originally they were intended to be
-			pretty flexible and self-contained -- each tool defining the behaviour of the
-			mouse cursor (eg. what happens when the user left-clicks), but in practice most
-			of the actual functionality ended up in the UI/Sidebar classes.
+    ".tools"
+      Classes for the tools used in the editor. Originally they were intended to be
+      pretty flexible and self-contained -- each tool defining the behaviour of the
+      mouse cursor (eg. what happens when the user left-clicks), but in practice most
+      of the actual functionality ended up in the UI/Sidebar classes.
 
-		".ui"
-			All classes defining windows or dialogs in the editor, or UI-related widgets.
-			ShipContainer and GibPropContainer are not actual UI widgets per se, but
-			containers that serve to provide an additional layer of abstraction over the
-			entire MVC system and wrap it up nicely in a single entity.
-		
-			".sidebar"
-				UI widgets that are containers for several other widgets that, when grouped
-				together, are used to manipulate the currently selected tool or element.
-				These containers are inserted into the sidebar.
-				Originally intended to be freely swappable, but ended up strongly coupled with,
-				and dependent on, the currently selected tool.
-				
-				".data"
-					Same as above, but for selectable Controllers that have modifiable data.
-					Instead of being inserted into the sidebar directly however, they're
-					inserted into the Manipulation Tool's container.
+    ".ui"
+      All classes defining windows or dialogs in the editor, or UI-related widgets.
+      ShipContainer and GibPropContainer are not actual UI widgets per se, but
+      containers that serve to provide an additional layer of abstraction over the
+      entire MVC system and wrap it up nicely in a single entity.
+    
+      ".sidebar"
+        UI widgets that are containers for several other widgets that, when grouped
+        together, are used to manipulate the currently selected tool or element.
+        These containers are inserted into the sidebar.
+        Originally intended to be freely swappable, but ended up strongly coupled with,
+        and dependent on, the currently selected tool.
+        
+        ".data"
+          Same as above, but for selectable Controllers that have modifiable data.
+          Instead of being inserted into the sidebar directly however, they're
+          inserted into the Manipulation Tool's container.
 
-		".utils"
-			Various utility classes. Stream-level IO, XML doc interpretation, ship loading and
-			saving are all handled through here.
+    ".utils"
+      Various utility classes. Stream-level IO, XML doc interpretation, ship loading and
+      saving are all handled through here.
 
-	"net.vhati"
-		Parts of code from Vhati's SMM that the editor uses.
+  "net.vhati"
+    Parts of code from Vhati's SMM that the editor uses.
 
-	"org.unsynchronised"
-		Source code from JDeserialize (link above). Basically unchanged, save for the class
-		names that now follow the proper Java casing scheme.
+  "org.unsynchronised"
+    Source code from JDeserialize (link above). Basically unchanged, save for the class
+    names that now follow the proper Java casing scheme.
