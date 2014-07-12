@@ -7,6 +7,7 @@ import com.kartoflane.superluminal2.mvc.views.props.ArcPropView;
 public class ArcPropController extends PropController {
 	private int startAngle = 0;
 	private int arcSpan = 0;
+	private boolean rim = false;
 
 	public ArcPropController(AbstractController parent, String id) {
 		super(parent, new BaseModel(), new ArcPropView(), id);
@@ -26,5 +27,13 @@ public class ArcPropController extends PropController {
 
 	public int getArcSpan() {
 		return arcSpan;
+	}
+
+	public void setPaintRim(boolean rim) {
+		this.rim = rim;
+	}
+
+	public boolean getPaintRim() {
+		return rim;
 	}
 }
