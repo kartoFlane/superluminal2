@@ -8,7 +8,7 @@ import com.kartoflane.superluminal2.mvc.views.BaseView;
 
 public class PropView extends BaseView {
 
-	private Shapes shape = Shapes.RECTANGLE;
+	protected Shapes shape = Shapes.RECTANGLE;
 
 	public PropView() {
 		super();
@@ -22,6 +22,9 @@ public class PropView extends BaseView {
 	public void paintControl(PaintEvent e) {
 		if (alpha > 0) {
 			switch (shape) {
+				case LINE:
+					// Do nothing.
+					break;
 				case RECTANGLE:
 					paintBackgroundSquare(e, backgroundColor, alpha);
 					break;
@@ -32,9 +35,18 @@ public class PropView extends BaseView {
 					paintBackgroundPolygon(e, getController().getPolygon().toArray(), backgroundColor, alpha);
 					break;
 			}
+
 			paintImage(e, image, cachedImageBounds, alpha);
 
 			switch (shape) {
+				case LINE:
+					int sx = controller.getParent().getX(),
+					sy = controller.getParent().getY(),
+					ex = controller.getX(),
+					ey = controller.getY();
+
+					paintLine(e, sx, sy, ex, ey, borderColor, borderThickness, alpha);
+					break;
 				case RECTANGLE:
 					paintBorderSquare(e, borderColor, borderThickness, alpha);
 					break;
