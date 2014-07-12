@@ -5,6 +5,7 @@ Changelog
 - Hotkeys can now be unbound
 - Added .shp file loading
 - Added gibs' angular velocity modification
+- Added raw value modification to gibs
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
