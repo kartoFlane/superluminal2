@@ -24,9 +24,9 @@ This project depends on the following libraries:
 
 Also incorporates the following libraries into the source code to make minute adjustments:
 - FTLDat (part of Slipstream Mod Manager)
-  http://github.com/Vhati/Slipstream-Mod-Manager
+    http://github.com/Vhati/Slipstream-Mod-Manager
 - jdeserialize
-  http://code.google.com/p/jdeserialize/
+    http://code.google.com/p/jdeserialize/
 
 
 ====================================================
