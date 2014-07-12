@@ -37,8 +37,8 @@ public class GibPropContainer {
 	private static final String DIR_MIN_PROP_ID = "DirectionMin";
 	private static final String DIR_MAX_PROP_ID = "DirectionMax";
 	private static final String DIR_ARC_PROP_ID = "DirectionArc";
-	private static final String ANG_MIN_PROP_ID = "AngularMin";
-	private static final String ANG_MAX_PROP_ID = "AngularMax";
+	private static final String ANG_PROP_ID = "AngularValue";
+	private static final String ANG_ARC_PROP_ID = "AngularArc";
 	private static final String LIN_MIN_PROP_ID = "LinearMin";
 	private static final String LIN_MAX_PROP_ID = "LinearMax";
 	private static final String LIN_MIN_RANGE_PROP_ID = "LinearRangeMin";
@@ -101,6 +101,15 @@ public class GibPropContainer {
 						dataLoad = false;
 					}
 				} else if (currentlyShownControls == PropControls.ANGULAR) {
+					PropController angProp = getProp(ANG_PROP_ID);
+
+					String[] propIds = { ANG_PROP_ID, ANG_ARC_PROP_ID };
+
+					for (String id : propIds) {
+						PropController prop = getProp(id);
+						prop.setVisible(currentController != null && currentController.isVisible() &&
+								(currentController.isSelected() || angProp.isSelected()));
+					}
 				}
 			}
 		};
@@ -109,6 +118,11 @@ public class GibPropContainer {
 	}
 
 	public void setCurrentController(GibController controller) {
+		if (currentController == controller) {
+			updateData();
+			return;
+		}
+
 		dataLoad = true;
 
 		if (currentController != null) {
@@ -165,7 +179,11 @@ public class GibPropContainer {
 			prop.setVisible(control == PropControls.LINEAR && currentController != null && currentController.isVisible());
 		}
 
-		// TODO other controls
+		String[] angPropIds = { ANG_PROP_ID, ANG_ARC_PROP_ID };
+		for (String id : angPropIds) {
+			PropController prop = getProp(id);
+			prop.setVisible(control == PropControls.ANGULAR && currentController != null && currentController.isVisible());
+		}
 
 		updateData();
 	}
@@ -178,33 +196,49 @@ public class GibPropContainer {
 		if (currentController == null)
 			return;
 
+		OrbitPropController opc;
+		PropController prop;
 		dataLoad = true;
 
-		OrbitPropController opc;
-		opc = (OrbitPropController) getProp(DIR_MIN_PROP_ID);
-		opc.setLocation(opc.angleToOrbitLocation(currentController.getDirectionMin()));
-		opc.updateFollowOffset();
+		if (currentlyShownControls == PropControls.DIRECTION) {
+			opc = (OrbitPropController) getProp(DIR_MIN_PROP_ID);
+			opc.reposition(opc.angleToOrbitLocation(currentController.getDirectionMin()));
+			opc.updateFollowOffset();
 
-		opc = (OrbitPropController) getProp(DIR_MAX_PROP_ID);
-		opc.setLocation(opc.angleToOrbitLocation(currentController.getDirectionMax()));
-		opc.updateFollowOffset();
+			opc = (OrbitPropController) getProp(DIR_MAX_PROP_ID);
+			opc.reposition(opc.angleToOrbitLocation(currentController.getDirectionMax()));
+			opc.updateFollowOffset();
 
-		PropController prop;
-		prop = getProp(LIN_MIN_PROP_ID);
-		prop.setBounded(false);
-		double velocity = currentController.getLinearVelocityMin();
-		velocity *= Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED;
-		prop.setFollowOffset((int) Math.round(velocity), prop.getFollowOffsetY());
-		prop.updateFollower();
-		prop.setBounded(!currentController.isSelected());
+		} else if (currentlyShownControls == PropControls.LINEAR) {
+			double velocity = 0;
 
-		prop = getProp(LIN_MAX_PROP_ID);
-		prop.setBounded(false);
-		velocity = currentController.getLinearVelocityMax();
-		velocity *= Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED;
-		prop.setFollowOffset((int) Math.round(velocity), prop.getFollowOffsetY());
-		prop.updateFollower();
-		prop.setBounded(!currentController.isSelected());
+			prop = getProp(LIN_MIN_PROP_ID);
+			prop.setBounded(false);
+			velocity = currentController.getLinearVelocityMin();
+			velocity *= Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED;
+			prop.setFollowOffset((int) Math.round(velocity), prop.getFollowOffsetY());
+			prop.updateFollower();
+			prop.setBounded(!currentController.isSelected());
+
+			prop = getProp(LIN_MAX_PROP_ID);
+			prop.setBounded(false);
+			velocity = currentController.getLinearVelocityMax();
+			velocity *= Database.GIB_DEATH_ANIM_TIME * Database.GIB_LINEAR_SPEED;
+			prop.setFollowOffset((int) Math.round(velocity), prop.getFollowOffsetY());
+			prop.updateFollower();
+			prop.setBounded(!currentController.isSelected());
+
+		} else if (currentlyShownControls == PropControls.ANGULAR) {
+			double angle = 0;
+
+			opc = (OrbitPropController) getProp(ANG_PROP_ID);
+
+			angle = currentController.getAngularVelocityMax();
+			angle *= Database.GIB_DEATH_ANIM_TIME * Database.GIB_ANGULAR_SPEED;
+			angle = Math.toDegrees(angle);
+			opc.reposition(opc.angleToOrbitLocation(angle));
+			opc.updateFollowOffset();
+		}
 
 		dataLoad = false;
 	}
@@ -434,6 +468,55 @@ public class GibPropContainer {
 	 * Creates the prop controllers responsible for angular velocity modification.
 	 */
 	public void createAngularVelocityProps() {
+		SLListener angularListener = new SLListener() {
+			public void handleEvent(SLEvent e) {
+				if (currentlyShownControls != PropControls.ANGULAR)
+					return;
+
+				PropController angProp = getProp(ANG_PROP_ID);
+				ArcPropController angArc = (ArcPropController) getProp(ANG_ARC_PROP_ID);
+
+				double angle = Utils.angle(currentController.getLocation(), angProp.getLocation());
+
+				angArc.setArcSpan((int) Math.round(angle));
+				angArc.redraw();
+
+				if (!dataLoad) {
+					// Angular velocities are symmetrical, only differ by sign
+					currentController.setAngularVelocityMin(-Math.toRadians(angle) / (Database.GIB_DEATH_ANIM_TIME * Database.GIB_ANGULAR_SPEED));
+					currentController.setAngularVelocityMax(Math.toRadians(angle) / (Database.GIB_DEATH_ANIM_TIME * Database.GIB_ANGULAR_SPEED));
+				}
+			}
+		};
+
+		ArcPropController arc = new ArcPropController(null, ANG_ARC_PROP_ID);
+		arc.setInheritVisibility(false);
+		arc.setVisible(false);
+		arc.setDefaultBackgroundColor(64, 192, 255);
+		arc.setAlpha(128);
+		arc.setSize(200, 200);
+		arc.setStartAngle(90);
+		arc.addToPainter(Layers.PROP);
+		arc.updateView();
+		addProp(arc);
+
+		OrbitPropController orbitProp = new OrbitPropController(null, ANG_PROP_ID);
+		orbitProp.setShape(Shapes.OVAL);
+		orbitProp.setSelectable(true);
+		orbitProp.setInheritVisibility(false);
+		orbitProp.setVisible(false);
+		orbitProp.setDefaultBorderColor(0, 0, 0);
+		orbitProp.setDefaultBackgroundColor(64, 192, 255);
+		orbitProp.setOrbitOffset(100);
+		orbitProp.setSize(2 * ShipContainer.CELL_SIZE / 3, 2 * ShipContainer.CELL_SIZE / 3);
+		orbitProp.setBorderThickness(3);
+		orbitProp.addToPainter(Layers.PROP);
+		orbitProp.updateView();
+		orbitProp.setCompositeTitle("Angular Velocity");
+		orbitProp.addListener(SLEvent.SELECT, selectionListener);
+		orbitProp.addListener(SLEvent.DESELECT, selectionListener);
+		orbitProp.addListener(SLEvent.MOVE, angularListener);
+		addProp(orbitProp);
 	}
 
 	public void dispose() {

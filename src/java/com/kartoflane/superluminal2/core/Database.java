@@ -61,6 +61,11 @@ public class Database {
 	 */
 	public static final int GIB_LINEAR_SPEED = 30;
 
+	/**
+	 * The angle that a gib gets rotated by with angular velocity of 1, in radians.
+	 */
+	public static final double GIB_ANGULAR_SPEED = Math.PI / 2;
+
 	private static Database instance;
 
 	// Constant
