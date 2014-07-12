@@ -60,7 +60,7 @@ public class Superluminal {
 	 * - artillery
 	 * - weapon selection reportedly clunky -> search function?
 	 * - undo system
-	 * - angular velocity modification
+	 * - add mount-gib linking
 	 * 
 	 * MEDIUM:
 	 * - entity deletion --> add (to) undo
@@ -339,11 +339,11 @@ public class Superluminal {
 						}
 					}
 				} catch (UnknownHostException e) {
-					log.warn("Update check failed -- connection to the repository could not be estabilished.");
+					log.error("Update check failed -- connection to the repository could not be estabilished.");
 				} catch (JDOMException e) {
-					log.warn("Udpate check failed -- an error has occured while parsing update file.", e);
+					log.error("Udpate check failed -- an error has occured while parsing update file.", e);
 				} catch (Exception e) {
-					log.warn("An error occured while checking updates.", e);
+					log.error("An error occured while checking for updates.", e);
 				} finally {
 					try {
 						if (is != null)
@@ -401,7 +401,7 @@ public class Superluminal {
 					}
 				}
 			} catch (Exception e) {
-				log.warn("An error has occured while displaying update result.", e);
+				log.error("An error has occured while displaying update result.", e);
 			}
 		} else {
 			if (APP_VERSION.compareTo(remoteVersion[0]) == 0) {
@@ -493,7 +493,7 @@ public class Superluminal {
 				}
 			}
 		} catch (FileNotFoundException ex) {
-			log.warn("Keybind file could not be found: " + f.getAbsolutePath());
+			log.error("Keybind file could not be found: " + f.getAbsolutePath());
 		} catch (IOException ex) {
 			log.error("An error has occured while loading keybind file: ", ex);
 		} catch (JDOMParseException ex) {
@@ -531,7 +531,7 @@ public class Superluminal {
 		try {
 			IOUtils.writeFileXML(keyDoc, f);
 		} catch (IOException e) {
-			log.warn("An error occured while saving hotkeys file: ", e);
+			log.error("An error occured while saving hotkeys file: ", e);
 		}
 	}
 

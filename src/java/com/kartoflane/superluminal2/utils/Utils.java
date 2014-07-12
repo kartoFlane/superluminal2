@@ -52,7 +52,7 @@ public class Utils {
 	}
 
 	/**
-	 * Computes angle between the two points.<br>
+	 * Computes angle between the two points, in degrees.<br>
 	 * 0 means north, increases counter-clockwise.
 	 */
 	public static double angle(Point p1, Point p2) {
@@ -65,6 +65,10 @@ public class Utils {
 		return angle % 360;
 	}
 
+	/**
+	 * @return int array of length 8, containing alternating x and y coordinates,
+	 *         describing the corners of the given rectangle.
+	 */
 	public static int[] toArray(Rectangle rect) {
 		return new int[] {
 				rect.x, rect.y,
