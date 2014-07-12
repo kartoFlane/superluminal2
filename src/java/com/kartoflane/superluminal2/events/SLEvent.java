@@ -59,4 +59,52 @@ public class SLEvent {
 		this.source = source;
 		this.data = data;
 	}
+
+	public static String typeToString(int type) {
+		switch (type) {
+			case NONE:
+				return "None";
+			case MOVE:
+				return "Move";
+			case RESIZE:
+				return "Resize";
+			case DELETE:
+				return "Delete";
+			case RESTORE:
+				return "Restore";
+			case SELECT:
+				return "Selection";
+			case DESELECT:
+				return "Deselection";
+			case ADD_OBJECT:
+				return "Add Object";
+			case REM_OBJECT:
+				return "Remove Object";
+			case MOD_SHIFT:
+				return "Mod Shift";
+			case MOD_ALT:
+				return "Mod Alt";
+			case MOD_CTRL:
+				return "Mod Control";
+			case DISPOSE:
+				return "Dispose";
+			case VISIBLE:
+				return "Visibility";
+			default:
+				return "";
+		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		buf.append("SLEvent: { type: ");
+		buf.append(typeToString(type));
+		buf.append(", source: ");
+		buf.append(source);
+		buf.append(", data: ");
+		buf.append(data);
+		buf.append(" }");
+		return buf.toString();
+	}
 }
