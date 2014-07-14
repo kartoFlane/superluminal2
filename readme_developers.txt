@@ -92,7 +92,7 @@ General explanation of source code packages and their contents:
 
     ".events"
       A rudimentary event system that attempts to facilitate loosely coupled
-      communication between Controllers.
+      communication between unrelated Controllers.
 
     ".ftl"
       Classes representing the in-game objects that are of interest to this editor.
@@ -106,7 +106,11 @@ General explanation of source code packages and their contents:
 
         ".props"
           Controllers for props. Props are MVC entities that are used to break
-          down complex data structures into simpler ones.
+          down complex data structures into simpler ones by representing a single
+          aspect of their parent controller.
+          Example: a weapon mount has a direction property, among others. Instead of
+          having the MountController's View draw the arrow image, a PropController
+          is created and attached to the MountController to represent the arrow.
 
       ".models"
         Model classes. Models are tha back-end classes that hold data, and make
