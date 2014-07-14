@@ -22,29 +22,50 @@ public class Hotkey {
 		return id;
 	}
 
+	/**
+	 * Sets whether the hotkey is active. An inactive hotkey is considered to not be bound to anything.
+	 */
 	public void setEnabled(boolean e) {
 		enabled = e;
 	}
 
+	/**
+	 * @return whether the hotkey is active. An inactive hotkey is considered to not be bound to anything.
+	 */
 	public boolean isEnabled() {
 		return enabled;
 	}
 
+	/**
+	 * Sets the character that this hotkey is bound to.
+	 * 
+	 * @param ch
+	 *            the code point representing the character, according to {@link Character}
+	 * 
+	 * @see Character
+	 */
 	public void setKey(int ch) {
 		key = ch;
 	}
 
+	/**
+	 * @return the code point representing the character to which this hotkey is bound, according to {@link Character}
+	 */
 	public int getKey() {
 		return key;
 	}
 
+	/**
+	 * @see Character#toString(char)
+	 */
 	public String getKeyString() {
 		if (key == '\0')
 			return "";
 		else
-			return "" + ((char) getKey());
+			return Character.toString((char) getKey());
 	}
 
+	/** Sets whether the hotkey's activation requires Shift modifier to be pressed. */
 	public void setShift(boolean shift) {
 		this.shift = shift;
 	}
@@ -53,6 +74,7 @@ public class Hotkey {
 		return shift;
 	}
 
+	/** Sets whether the hotkey's activation requires Control modifier to be pressed. */
 	public void setCtrl(boolean control) {
 		ctrl = control;
 	}
@@ -61,6 +83,7 @@ public class Hotkey {
 		return ctrl;
 	}
 
+	/** Sets whether the hotkey's activation requires Alt / Function(?) modifier to be pressed. */
 	public void setAlt(boolean alt) {
 		this.alt = alt;
 	}
@@ -82,8 +105,19 @@ public class Hotkey {
 				Character.toLowerCase(key) == Character.toLowerCase(keyCode);
 	}
 
+	/**
+	 * Checks whether the receiver collides with the hotkey passed in argument, ie. whether their actvation
+	 * requirements are the same.<br>
+	 * Basically a customised {@link #equals(Object)}.
+	 */
 	public boolean collides(Hotkey h) {
 		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && key == h.key;
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof Hotkey == true)
+			return collides((Hotkey) o);
+		return super.equals(o);
 	}
 
 	@Override
@@ -135,7 +169,7 @@ public class Hotkey {
 		else if (key == SWT.SCROLL_LOCK)
 			msg += "Scroll Lock";
 		else
-			msg += Character.toUpperCase((char) key);
+			msg += getKeyString().toUpperCase();
 
 		return msg;
 	}

@@ -137,6 +137,15 @@ public class Utils {
 				Math.abs(r.width), Math.abs(r.height));
 	}
 
+	/**
+	 * Tests whether a rectangle contains another.
+	 * 
+	 * @param rect
+	 *            the "larger" rectangle (that supposedly contains the "smaller" one)
+	 * @param other
+	 *            the "smaller" rectangle (that supposedly is contained within the "larger" one)
+	 * @return true if the first rectangle contains the second, false otherwise.
+	 */
 	public static boolean contains(Rectangle rect, Rectangle other) {
 		return rect.contains(other.x, other.y) && rect.contains(other.x + other.width, other.y + other.height);
 	}
