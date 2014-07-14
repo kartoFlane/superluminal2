@@ -16,10 +16,10 @@ import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Grid;
-import com.kartoflane.superluminal2.core.LayeredPainter;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -489,7 +489,6 @@ public class ShipContainer implements Disposable, SLListener {
 			throw new NullPointerException("Room controller is null. Use unassign() instead.");
 
 		SystemController system = (SystemController) getController(sys);
-		StationController station = (StationController) getController(sys.getStation());
 
 		unassign(sys);
 		system.assignTo(room.getGameObject());
@@ -497,19 +496,7 @@ public class ShipContainer implements Disposable, SLListener {
 		system.setParent(room);
 
 		setActiveSystem(room.getGameObject(), sys);
-
-		room.addListener(SLEvent.RESIZE, system);
 		system.notifySizeChanged(room.getW(), room.getH());
-
-		if (sys.canContainStation()) {
-			if (!shipController.isPlayerShip()) {
-				station.setSlotId(-2);
-			}
-			room.addListener(SLEvent.RESIZE, station);
-			station.updateFollowOffset();
-			station.updateFollower();
-			station.updateView();
-		}
 	}
 
 	public void unassign(SystemObject system) {
@@ -517,26 +504,17 @@ public class ShipContainer implements Disposable, SLListener {
 			throw new NullPointerException("System must not be null.");
 
 		SystemController systemC = (SystemController) getController(system);
-		StationController stationC = (StationController) getController(system.getStation());
-		RoomController roomC = (RoomController) getController(system.getRoom());
+		RoomObject room = system.getRoom();
 
-		if (system.canContainStation())
-			stationC.setVisible(false);
-		systemC.unassign();
-
-		if (roomC != null) {
-			roomC.removeListener(SLEvent.RESIZE, systemC);
-			roomC.removeListener(SLEvent.RESIZE, stationC);
-			roomC.redraw();
-
-			if (activeSystemMap.get(roomC.getGameObject()) == system) {
-				ArrayList<SystemObject> systems = getAllAssignedSystems(roomC.getGameObject());
-				if (systems.size() > 0)
-					setActiveSystem(roomC.getGameObject(), systems.get(0));
-				else
-					activeSystemMap.remove(roomC.getGameObject());
-			}
+		if (activeSystemMap.get(room) == system) {
+			ArrayList<SystemObject> systems = getAllAssignedSystems(room);
+			if (systems.size() > 0)
+				setActiveSystem(room, systems.get(0));
+			else
+				activeSystemMap.remove(room);
 		}
+
+		systemC.unassign();
 	}
 
 	public boolean isAssigned(Systems sys) {
@@ -626,6 +604,9 @@ public class ShipContainer implements Disposable, SLListener {
 		Collections.sort(mountControllers);
 		Collections.sort(gibControllers);
 
+		// Reinsert controllers into the painter so that they're drawn in the correct order
+
+		// Compare hash codes to determine whether the collections have changed
 		if (r != roomControllers.hashCode()) {
 			for (RoomController c : roomControllers)
 				c.removeFromPainter();
@@ -1028,31 +1009,45 @@ public class ShipContainer implements Disposable, SLListener {
 		return LayeredPainter.getInstance().isLayerDrawn(Layers.GIBS);
 	}
 
-	public void setActiveSystem(RoomObject room, SystemObject sys) {
+	public void setActiveSystem(RoomObject room, SystemObject newSystem) {
 		if (room == null)
 			throw new IllegalArgumentException("Room must not be null.");
-		if (sys == null)
+		if (newSystem == null)
 			throw new IllegalArgumentException("System must not be null.");
 
 		RoomController roomC = (RoomController) getController(room);
-		SystemController currSystemC = (SystemController) getController(sys);
+		SystemController newSystemC = (SystemController) getController(newSystem);
 
 		SystemObject prevSystem = getActiveSystem(room);
 		SystemController prevSystemC = (SystemController) getController(prevSystem);
 
+		if (newSystemC == prevSystemC)
+			return; // They're the same, nothing to do
+
 		prevSystemC.setVisible(false);
+		newSystemC.setVisible(true);
+
 		roomC.removeListener(SLEvent.VISIBLE, prevSystemC);
-		roomC.addListener(SLEvent.VISIBLE, currSystemC);
+		roomC.removeListener(SLEvent.RESIZE, prevSystemC);
+		if (prevSystemC.canContainStation()) {
+			StationController station = (StationController) getController(prevSystem.getStation());
+			roomC.removeListener(SLEvent.RESIZE, station);
+			// station.setVisible(false);
+		}
 
-		activeSystemMap.put(room, sys);
+		activeSystemMap.put(room, newSystem);
 
-		if (prevSystem != null && prevSystem.canContainStation())
-			getController(prevSystem.getStation()).updateView();
-
-		currSystemC.setVisible(true);
-		if (sys.canContainStation())
-			getController(sys.getStation()).updateView();
-		roomC.redraw();
+		roomC.addListener(SLEvent.VISIBLE, newSystemC);
+		roomC.addListener(SLEvent.RESIZE, newSystemC);
+		if (newSystemC.canContainStation()) {
+			StationController station = (StationController) getController(newSystem.getStation());
+			if (!shipController.isPlayerShip())
+				station.setSlotId(-2);
+			roomC.addListener(SLEvent.RESIZE, station);
+			station.updateFollowOffset();
+			station.updateFollower();
+			// station.updateView();
+		}
 	}
 
 	public SystemObject getActiveSystem(RoomObject room) {
