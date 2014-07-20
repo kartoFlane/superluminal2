@@ -1,13 +1,13 @@
 package com.kartoflane.superluminal2.components.enums;
 
 public enum DroneTypes {
-	COMBAT,
-	SHIP_REPAIR,
-	BOARDER,
 	BATTLE,
-	REPAIR,
+	BOARDER,
+	COMBAT,
 	DEFENSE,
+	REPAIR,
 	SHIELD,
+	SHIP_REPAIR,
 	/** Used for the hacking system's drone only. */
 	HACKING;
 
@@ -15,6 +15,18 @@ public enum DroneTypes {
 	 * @return an array of all drone types, sans HACKING
 	 */
 	public static DroneTypes[] getPlayableDroneTypes() {
-		return new DroneTypes[] { COMBAT, SHIP_REPAIR, BOARDER, BATTLE, REPAIR, DEFENSE, SHIELD };
+		return new DroneTypes[] {
+				BATTLE, BOARDER, COMBAT, DEFENSE, REPAIR, SHIELD, SHIP_REPAIR
+		};
+	}
+
+	public String toString() {
+		switch (this) {
+			case SHIP_REPAIR:
+				return "Ship Repair";
+			default:
+				String s = name();
+				return s.substring(0, 1) + s.substring(1).toLowerCase();
+		}
 	}
 }
