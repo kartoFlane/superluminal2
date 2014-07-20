@@ -16,5 +16,5 @@ Requirements
 ------------
 * Java (1.6 or higher)
     * http://www.java.com/en/download/
-* FTL: AE (1.5.10, Windows/OSX/Linux, Steam/GOG/Standalone)
+* FTL: AE (1.5.10 or higher, Windows/OSX/Linux, Steam/GOG/Standalone)
     * http://www.ftlgame.com/
