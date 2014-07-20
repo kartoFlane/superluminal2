@@ -193,7 +193,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 			btnInteriorClear = new Button(imagesComposite, SWT.NONE);
 			btnInteriorClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-			btnInteriorClear.setText("Reset");
+			btnInteriorClear.setText("Default");
 
 			txtInterior = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
 			txtInterior.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
