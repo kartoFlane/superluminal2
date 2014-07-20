@@ -58,7 +58,6 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - artillery
-	 * - weapon selection reportedly clunky -> search function?
 	 * - undo system
 	 * 
 	 * MEDIUM:

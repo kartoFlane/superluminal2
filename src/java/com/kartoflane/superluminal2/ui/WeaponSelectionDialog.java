@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
@@ -51,6 +52,11 @@ public class WeaponSelectionDialog {
 	private static final int defaultNameTabWidth = 150;
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
+	private static final Predicate<WeaponObject> defaultFilter = new Predicate<WeaponObject>() {
+		public boolean accept(WeaponObject object) {
+			return true;
+		}
+	};
 
 	private static WeaponObject selection = Database.DEFAULT_WEAPON_OBJ;
 	private static WeaponList selectionList = Database.DEFAULT_WEAPON_LIST;
@@ -63,6 +69,7 @@ public class WeaponSelectionDialog {
 	private boolean sortByBlueprint = true;
 	private HashMap<WeaponTypes, TreeItem> treeItemMap = null;
 	private Preview preview = null;
+	private Predicate<WeaponObject> filter = defaultFilter;
 
 	private Shell shell = null;
 	private Text txtDesc;
@@ -73,6 +80,7 @@ public class WeaponSelectionDialog {
 	private Canvas canvas;
 	private TreeColumn trclmnBlueprint;
 	private TreeColumn trclmnName;
+	private Button btnSearch;
 
 	public WeaponSelectionDialog(Shell parent) {
 		if (instance != null)
@@ -142,11 +150,17 @@ public class WeaponSelectionDialog {
 		sashForm.setWeights(new int[] { minTreeWidth, defaultDataWidth });
 
 		Composite compButtons = new Composite(shell, SWT.NONE);
-		GridLayout gl_compButtons = new GridLayout(2, false);
+		GridLayout gl_compButtons = new GridLayout(3, false);
 		gl_compButtons.marginWidth = 0;
 		gl_compButtons.marginHeight = 0;
 		compButtons.setLayout(gl_compButtons);
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+
+		btnSearch = new Button(compButtons, SWT.NONE);
+		GridData gd_btnSearch = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSearch.widthHint = 80;
+		btnSearch.setLayoutData(gd_btnSearch);
+		btnSearch.setText("Search");
 
 		btnConfirm = new Button(compButtons, SWT.NONE);
 		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
@@ -230,6 +244,24 @@ public class WeaponSelectionDialog {
 					sortByBlueprint = false;
 					updateTree();
 				}
+			}
+		});
+
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WeaponSearchDialog wsDialog = new WeaponSearchDialog(shell);
+				Predicate<WeaponObject> result = wsDialog.open();
+
+				if (result == AbstractSearchDialog.RESULT_DEFAULT) {
+					filter = defaultFilter;
+				} else if (result == AbstractSearchDialog.RESULT_UNCHANGED) {
+					// Do nothing
+				} else {
+					filter = result;
+				}
+
+				updateTree();
 			}
 		});
 
@@ -333,6 +365,8 @@ public class WeaponSelectionDialog {
 			selectionList = resultList;
 		}
 
+		btnSearch.setEnabled(false);
+
 		open();
 
 		if (response == SWT.YES) {
@@ -352,6 +386,8 @@ public class WeaponSelectionDialog {
 		} else {
 			selection = result;
 		}
+
+		btnSearch.setEnabled(true);
 
 		open();
 
@@ -514,7 +550,16 @@ public class WeaponSelectionDialog {
 
 		public WeaponIterator(ArrayList<WeaponObject> list, boolean byBlueprint) {
 			comparator = new WeaponComparator(byBlueprint);
-			this.list = list;
+
+			if (filter == defaultFilter) {
+				this.list = list;
+			} else {
+				this.list = new ArrayList<WeaponObject>();
+				for (WeaponObject w : list) {
+					if (filter.accept(w))
+						this.list.add(w);
+				}
+			}
 		}
 
 		private WeaponObject getSmallestElement() {

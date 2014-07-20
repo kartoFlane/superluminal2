@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -46,6 +47,11 @@ public class DroneSelectionDialog {
 	private static final int defaultNameTabWidth = 150;
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
+	private static final Predicate<DroneObject> defaultFilter = new Predicate<DroneObject>() {
+		public boolean accept(DroneObject object) {
+			return true;
+		}
+	};
 
 	private static DroneObject selection = null;
 	private static DroneList selectionList = null;
@@ -57,6 +63,7 @@ public class DroneSelectionDialog {
 	private boolean listMode = false;
 	private boolean sortByBlueprint = true;
 	private HashMap<DroneTypes, TreeItem> treeItemMap = null;
+	private Predicate<DroneObject> filter = defaultFilter;
 
 	private Shell shell = null;
 	private Text txtDesc;
@@ -66,6 +73,7 @@ public class DroneSelectionDialog {
 	private Tree tree;
 	private TreeColumn trclmnBlueprint;
 	private TreeColumn trclmnName;
+	private Button btnSearch;
 
 	public DroneSelectionDialog(Shell parent) {
 		if (instance != null)
@@ -124,11 +132,17 @@ public class DroneSelectionDialog {
 		sashForm.setWeights(new int[] { minTreeWidth, defaultDataWidth });
 
 		Composite compButtons = new Composite(shell, SWT.NONE);
-		GridLayout gl_compButtons = new GridLayout(2, false);
+		GridLayout gl_compButtons = new GridLayout(3, false);
 		gl_compButtons.marginWidth = 0;
 		gl_compButtons.marginHeight = 0;
 		compButtons.setLayout(gl_compButtons);
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+
+		btnSearch = new Button(compButtons, SWT.NONE);
+		GridData gd_btnSearch = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSearch.widthHint = 80;
+		btnSearch.setLayoutData(gd_btnSearch);
+		btnSearch.setText("Search");
 
 		btnConfirm = new Button(compButtons, SWT.NONE);
 		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
@@ -212,6 +226,24 @@ public class DroneSelectionDialog {
 					sortByBlueprint = false;
 					updateTree();
 				}
+			}
+		});
+
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DroneSearchDialog dsDialog = new DroneSearchDialog(shell);
+				Predicate<DroneObject> result = dsDialog.open();
+
+				if (result == AbstractSearchDialog.RESULT_DEFAULT) {
+					filter = defaultFilter;
+				} else if (result == AbstractSearchDialog.RESULT_UNCHANGED) {
+					// Do nothing
+				} else {
+					filter = result;
+				}
+
+				updateTree();
 			}
 		});
 
@@ -303,6 +335,8 @@ public class DroneSelectionDialog {
 			selectionList = resultList;
 		}
 
+		btnSearch.setEnabled(false);
+
 		open();
 
 		if (response == SWT.YES)
@@ -321,6 +355,8 @@ public class DroneSelectionDialog {
 		} else {
 			selection = result;
 		}
+
+		btnSearch.setEnabled(true);
 
 		open();
 
@@ -476,7 +512,16 @@ public class DroneSelectionDialog {
 
 		public DroneIterator(ArrayList<DroneObject> list, boolean byBlueprint) {
 			comparator = new DroneComparator(byBlueprint);
-			this.list = list;
+
+			if (filter == defaultFilter) {
+				this.list = list;
+			} else {
+				this.list = new ArrayList<DroneObject>();
+				for (DroneObject d : list) {
+					if (filter.accept(d))
+						this.list.add(d);
+				}
+			}
 		}
 
 		private DroneObject getSmallestElement() {
