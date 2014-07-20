@@ -22,7 +22,14 @@ public enum Directions {
 	}
 
 	public Directions nextDirection() {
-		return Directions.values()[(ordinal() + 1) % Directions.values().length];
+		return values()[(ordinal() + 1) % values().length];
+	}
+
+	public Directions prevDirection() {
+		int i = ordinal() - 1;
+		if (i < 0)
+			i = values().length - 1;
+		return values()[i];
 	}
 
 	@Override
@@ -36,17 +43,18 @@ public enum Directions {
 	}
 
 	/**
-	 * @return angle represented by the direction, in degrees
+	 * @return angle represented by the direction, in degrees.<br>
+	 *         0 points <b>north</b>, values increase <b>counter-clockwise</b>
 	 */
 	public int getAngleDeg() {
-		return (ordinal() % Directions.values().length) * 90;
+		return (ordinal() % values().length) * 90;
 	}
 
 	/**
 	 * @return angle represented by the direction, in radians
 	 */
 	public float getAngleRad() {
-		return (float) ((ordinal() % Directions.values().length) * Math.PI / 4);
+		return (float) ((ordinal() % values().length) * Math.PI / 4);
 	}
 
 	public int getVectorX() {
