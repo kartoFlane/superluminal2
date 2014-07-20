@@ -123,4 +123,20 @@ public class GibObject extends ImageObject implements Indexable, Comparable<GibO
 	public int compareTo(GibObject o) {
 		return id - o.id;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		buf.append("Gib ");
+		buf.append(id);
+
+		String alias = getAlias();
+		if (alias != null) {
+			buf.append("(");
+			buf.append(alias);
+			buf.append(")");
+		}
+
+		return buf.toString();
+	}
 }

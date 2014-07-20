@@ -60,7 +60,6 @@ public class Superluminal {
 	 * - artillery
 	 * - weapon selection reportedly clunky -> search function?
 	 * - undo system
-	 * - add mount-gib linking
 	 * 
 	 * MEDIUM:
 	 * - entity deletion --> add (to) undo

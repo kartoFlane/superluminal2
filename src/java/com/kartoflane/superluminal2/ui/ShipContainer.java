@@ -132,6 +132,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 			add(rc);
 		}
+
 		for (DoorObject door : ship.getDoors()) {
 			DoorController dc = DoorController.newInstance(this, door);
 
@@ -142,18 +143,6 @@ public class ShipContainer implements Disposable, SLListener {
 			dc.updateFollowOffset();
 
 			add(dc);
-		}
-		Point hullOffset = ship.getHullOffset();
-		for (MountObject mount : ship.getMounts()) {
-			MountController mc = MountController.newInstance(this, mount);
-
-			int totalX = ship.getXOffset() * CELL_SIZE + mount.getX() + hullOffset.x;
-			int totalY = ship.getYOffset() * CELL_SIZE + mount.getY() + hullOffset.y;
-
-			mc.setFollowOffset(totalX, totalY);
-			mc.updateFollower();
-
-			add(mc);
 		}
 
 		createImageControllers();
@@ -182,6 +171,19 @@ public class ShipContainer implements Disposable, SLListener {
 
 			add(gc);
 			i--;
+		}
+
+		Point hullOffset = ship.getHullOffset();
+		for (MountObject mount : ship.getMounts()) {
+			MountController mc = MountController.newInstance(this, mount);
+
+			int totalX = ship.getXOffset() * CELL_SIZE + mount.getX() + hullOffset.x;
+			int totalY = ship.getYOffset() * CELL_SIZE + mount.getY() + hullOffset.y;
+
+			mc.setFollowOffset(totalX, totalY);
+			mc.updateFollower();
+
+			add(mc);
 		}
 
 		// Instantiate first, assign later
@@ -336,6 +338,9 @@ public class ShipContainer implements Disposable, SLListener {
 		return null;
 	}
 
+	/**
+	 * @return the controller associated with the object passed in argument, or null if not found.
+	 */
 	public AbstractController getController(GameObject object) {
 		return objectControllerMap.get(object);
 	}

@@ -6,7 +6,10 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
+import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
@@ -48,6 +51,7 @@ public class MountController extends ObjectController implements Indexable, Comp
 		MountController controller = new MountController(container, model, view);
 
 		controller.setWeapon(object.getWeapon());
+		controller.setGib(object.getGib());
 		controller.setDirection(object.getDirection());
 
 		return controller;
@@ -77,7 +81,7 @@ public class MountController extends ObjectController implements Indexable, Comp
 
 	public void setWeapon(WeaponObject weapon) {
 		if (weapon == null)
-			throw new NullPointerException("Must not be null. For default, use DEFAULT_WEAPON_OBJ");
+			throw new IllegalArgumentException("Argument must not be null. For default, use DEFAULT_WEAPON_OBJ");
 
 		setVisible(false);
 		setSize(weapon.getAnimation().getFrameSize());
@@ -88,6 +92,25 @@ public class MountController extends ObjectController implements Indexable, Comp
 
 	public WeaponObject getWeapon() {
 		return getGameObject().getWeapon();
+	}
+
+	public void setGib(GibObject gib) {
+		if (gib == null)
+			throw new IllegalArgumentException("Argument must not be null. For default, use DEFAULT_GIB_OBJ");
+
+		AbstractController gibC = container.getController(getGib());
+		if (gibC != null)
+			gibC.removeListener(SLEvent.DELETE, this);
+
+		getGameObject().setGib(gib);
+
+		gibC = container.getController(getGib());
+		if (gibC != null)
+			gibC.addListener(SLEvent.DELETE, this);
+	}
+
+	public GibObject getGib() {
+		return getGameObject().getGib();
 	}
 
 	public void setRotated(boolean rotated) {
@@ -195,5 +218,16 @@ public class MountController extends ObjectController implements Indexable, Comp
 		prop.setAlpha(255);
 		prop.addToPainter(Layers.MOUNT);
 		addProp(prop);
+	}
+
+	@Override
+	public void handleEvent(SLEvent e) {
+		if (e.type == SLEvent.DELETE) {
+			if (e.data instanceof GibController) {
+				setGib(Database.DEFAULT_GIB_OBJ);
+			}
+		} else {
+			super.handleEvent(e);
+		}
 	}
 }

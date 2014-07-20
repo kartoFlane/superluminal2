@@ -12,15 +12,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
+import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class MountDataComposite extends Composite implements DataComposite {
+
+	private static final String noLinkText = "Not linked";
+	private static final String selectGibText = "Select a gib";
 
 	private MountController controller = null;
 
@@ -33,6 +40,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 	private Button btnWeapon;
 	private Label lblWeaponInfo;
 	private Label lblDirHelp;
+	private Label lblLinkedGib;
+	private Label lblGibInfo;
+	private Button btnLinkedGib;
+	private Button btnSelectGib;
 
 	public MountDataComposite(Composite parent, MountController control) {
 		super(parent, SWT.NONE);
@@ -55,7 +66,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnRotated.setText("Rotated");
 
 		lblRotHelp = new Label(this, SWT.NONE);
-		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblRotHelp.setImage(helpImage);
 		String msg = "This determines the direction the weapon is going to face,\n" +
 				"and in which it's going to shoot.";
@@ -66,7 +77,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnMirrored.setText("Mirrored");
 
 		lblMirHelp = new Label(this, SWT.NONE);
-		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblMirHelp.setImage(helpImage);
 		msg = "Flips the weapon along X or Y axis, depending on rotation.";
 		UIUtils.addTooltip(lblMirHelp, "", msg);
@@ -75,7 +86,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblDirection.setText("Power-up Direction:");
 
 		lblDirHelp = new Label(this, SWT.NONE);
-		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblDirHelp.setImage(helpImage);
 		msg = "This determines the direction in which the weapon\n" +
 				"will 'slide' when it is powered up.";
@@ -87,11 +98,33 @@ public class MountDataComposite extends Composite implements DataComposite {
 		cmbDirection.setLayoutData(gd_cmbDirection);
 		cmbDirection.select(0);
 
+		lblLinkedGib = new Label(this, SWT.NONE);
+		lblLinkedGib.setText("Linked Gib:");
+
+		lblGibInfo = new Label(this, SWT.NONE);
+		lblGibInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblGibInfo.setImage(helpImage);
+		msg = "This determines the gib to which this mount is attached.\n" +
+				"When the ship explodes, the mount will float along with the gib.\n" +
+				"If no gib is specified, the mount will simply disappear.";
+		UIUtils.addTooltip(lblGibInfo, "", msg);
+
+		btnLinkedGib = new Button(this, SWT.TOGGLE);
+		btnLinkedGib.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		btnLinkedGib.setText(noLinkText);
+
+		btnSelectGib = new Button(this, SWT.NONE);
+		GridData gd_btnSelectGib = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSelectGib.widthHint = 30;
+		btnSelectGib.setLayoutData(gd_btnSelectGib);
+		btnSelectGib.setText(">");
+		UIUtils.addTooltip(btnSelectGib, "", "Select the linked gib");
+
 		Label lblWeapon = new Label(this, SWT.NONE);
 		lblWeapon.setText("Displayed Weapon:");
 
 		lblWeaponInfo = new Label(this, SWT.NONE);
-		lblWeaponInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+		lblWeaponInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblWeaponInfo.setImage(helpImage);
 		msg = "This setting is only cosmetic, and allows\n" +
 				"you to view how a given weapon would look,\n" +
@@ -111,6 +144,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
 		});
+
 		btnMirrored.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -120,12 +154,14 @@ public class MountDataComposite extends Composite implements DataComposite {
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
 			}
 		});
+
 		cmbDirection.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				controller.setDirection(cmbDirection.getDirection());
 			}
 		});
+
 		btnWeapon.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -137,6 +173,29 @@ public class MountDataComposite extends Composite implements DataComposite {
 					controller.setWeapon(neu);
 					updateData();
 				}
+			}
+		});
+
+		btnLinkedGib.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ManipulationTool tool = (ManipulationTool) Manager.getSelectedTool();
+
+				if (btnLinkedGib.getSelection()) {
+					btnLinkedGib.setText(selectGibText);
+					tool.setStateMountGibLink();
+				} else {
+					GibObject gib = controller.getGib();
+					btnLinkedGib.setText(gib == Database.DEFAULT_GIB_OBJ ? noLinkText : gib.toString());
+					tool.setStateManipulate();
+				}
+			}
+		});
+
+		btnSelectGib.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.setSelected(Manager.getCurrentShip().getController(controller.getGib()));
 			}
 		});
 
@@ -155,6 +214,15 @@ public class MountDataComposite extends Composite implements DataComposite {
 
 		WeaponObject weapon = controller.getWeapon();
 		btnWeapon.setText(weapon.toString());
+
+		GibObject gib = controller.getGib();
+		if (gib == Database.DEFAULT_GIB_OBJ)
+			btnLinkedGib.setText(noLinkText);
+		else
+			btnLinkedGib.setText(gib.toString());
+		btnLinkedGib.setSelection(false);
+
+		btnSelectGib.setEnabled(gib != Database.DEFAULT_GIB_OBJ);
 	}
 
 	@Override

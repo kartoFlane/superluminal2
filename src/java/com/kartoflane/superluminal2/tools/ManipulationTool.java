@@ -4,13 +4,16 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 
+import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Grid;
-import com.kartoflane.superluminal2.core.LayeredPainter;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
+import com.kartoflane.superluminal2.mvc.controllers.GibController;
+import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
@@ -23,7 +26,8 @@ public class ManipulationTool extends Tool {
 		NORMAL,
 		ROOM_RESIZE,
 		DOOR_LINK_LEFT,
-		DOOR_LINK_RIGHT
+		DOOR_LINK_RIGHT,
+		MOUNT_GIB_LINK
 	}
 
 	private States state = States.NORMAL;
@@ -100,6 +104,15 @@ public class ManipulationTool extends Tool {
 		return state == States.DOOR_LINK_RIGHT;
 	}
 
+	public void setStateMountGibLink() {
+		state = States.MOUNT_GIB_LINK;
+		cursor.updateView();
+	}
+
+	public boolean isStateMountGibLink() {
+		return state == States.MOUNT_GIB_LINK;
+	}
+
 	public void setStateRoomResize() {
 		state = States.ROOM_RESIZE;
 		cursor.updateView();
@@ -156,6 +169,26 @@ public class ManipulationTool extends Tool {
 				doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
 			else
 				doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
+			ManipulationToolComposite mtc = (ManipulationToolComposite) window.getSidebarContent();
+			mtc.updateData();
+
+			setStateManipulate();
+
+		} else if (state == States.MOUNT_GIB_LINK) {
+			// get the controller at the mouse click pos, and if found, notify it about mouseDown event
+			AbstractController control = null;
+			for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
+				if (selectableLayerIds[i] != null) {
+					control = LayeredPainter.getInstance().getSelectableControllerAt(e.x, e.y, selectableLayerIds[i]);
+					if (control != null && control instanceof GibController)
+						break;
+				}
+			}
+
+			GibController gibC = control instanceof GibController ? (GibController) control : null;
+			MountController mountC = (MountController) Manager.getSelected();
+
+			mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
 			ManipulationToolComposite mtc = (ManipulationToolComposite) window.getSidebarContent();
 			mtc.updateData();
 
@@ -274,7 +307,7 @@ public class ManipulationTool extends Tool {
 			if (!room.isResizing())
 				setStateManipulate();
 
-		} else if (state == States.DOOR_LINK_LEFT || state == States.DOOR_LINK_RIGHT) {
+		} else if (state == States.DOOR_LINK_LEFT || state == States.DOOR_LINK_RIGHT || state == States.MOUNT_GIB_LINK) {
 			// move the cursor around to follow mouse
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
 			// always redraw it - prevents an odd visual bug where the controller sometimes doesn't register that it was moved
