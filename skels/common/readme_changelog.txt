@@ -6,6 +6,9 @@ Changelog
 - Added .shp file loading
 - Added gibs' angular velocity modification
 - Added raw value modification to gibs
+- Fixed a somewhat rare bug with system visibility
+- Added mount-gib linking
+- Added weapon & drone search dialogs
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
