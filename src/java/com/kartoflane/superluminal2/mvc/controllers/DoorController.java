@@ -6,9 +6,10 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.core.Grid;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.View;
@@ -47,7 +48,10 @@ public class DoorController extends ObjectController {
 		ObjectModel model = new ObjectModel(object);
 		DoorView view = new DoorView();
 		DoorController controller = new DoorController(container, model, view);
+
 		controller.setHorizontal(controller.getGameObject().isHorizontal());
+		controller.setLeftRoom(object.getLeftRoom());
+		controller.setRightRoom(object.getRightRoom());
 
 		return controller;
 	}
@@ -80,12 +84,34 @@ public class DoorController extends ObjectController {
 		this.view.addToPainter(Layers.DOOR);
 	}
 
+	/**
+	 * Links this door to the specified room. May be null for automatic linking.
+	 */
 	public void setLeftRoom(RoomObject room) {
+		AbstractController roomC = container.getController(getLeftRoom());
+		if (roomC != null)
+			roomC.removeListener(SLEvent.DELETE, this);
+
 		getGameObject().setLeftRoom(room);
+
+		roomC = container.getController(getLeftRoom());
+		if (roomC != null)
+			roomC.addListener(SLEvent.DELETE, this);
 	}
 
+	/**
+	 * Links this door to the specified room. May be null for automatic linking.
+	 */
 	public void setRightRoom(RoomObject room) {
+		AbstractController roomC = container.getController(getRightRoom());
+		if (roomC != null)
+			roomC.removeListener(SLEvent.DELETE, this);
+
 		getGameObject().setRightRoom(room);
+
+		roomC = container.getController(getRightRoom());
+		if (roomC != null)
+			roomC.addListener(SLEvent.DELETE, this);
 	}
 
 	public RoomObject getLeftRoom() {
@@ -203,10 +229,17 @@ public class DoorController extends ObjectController {
 		return result;
 	}
 
-	/**
-	 * Makes sure that the door is not linked to a deleted room.
-	 */
-	public void verifyLinks() {
-		getGameObject().verifyLinks();
+	@Override
+	public void handleEvent(SLEvent e) {
+		if (e.type == SLEvent.DELETE) {
+			if (e.data instanceof RoomController) {
+				if (container.getController(getLeftRoom()) == e.data)
+					setLeftRoom(null);
+				else if (container.getController(getRightRoom()) == e.data)
+					setRightRoom(null);
+			}
+		} else {
+			super.handleEvent(e);
+		}
 	}
 }

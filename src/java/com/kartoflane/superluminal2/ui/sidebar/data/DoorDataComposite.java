@@ -151,8 +151,6 @@ public class DoorDataComposite extends Composite implements DataComposite {
 
 	@Override
 	public void updateData() {
-		controller.verifyLinks();
-
 		RoomObject linkedRoom = null;
 		String alias = controller.getAlias();
 		label.setText("Door" + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
