@@ -262,6 +262,7 @@ public class WeaponSelectionDialog {
 				}
 
 				updateTree();
+				tree.notifyListeners(SWT.Selection, null);
 			}
 		});
 
@@ -429,11 +430,12 @@ public class WeaponSelectionDialog {
 		TreeItem selection = null;
 
 		for (WeaponTypes type : WeaponTypes.values()) {
+			TreeItem typeItem = treeItemMap.get(type);
 			WeaponIterator it = new WeaponIterator(Database.getInstance().getWeaponsByType(type), sortByBlueprint);
 			for (it.first(); it.hasNext(); it.next()) {
 				WeaponObject weapon = it.current();
 
-				trtm = new TreeItem(treeItemMap.get(type), SWT.NONE);
+				trtm = new TreeItem(typeItem, SWT.NONE);
 				trtm.setText(0, weapon.getBlueprintName());
 				trtm.setText(1, weapon.getTitle());
 				trtm.setData(weapon);
@@ -441,6 +443,9 @@ public class WeaponSelectionDialog {
 				if (result == weapon)
 					selection = trtm;
 			}
+
+			if (typeItem.getItemCount() == 0)
+				typeItem.dispose();
 		}
 
 		tree.layout();

@@ -244,6 +244,7 @@ public class DroneSelectionDialog {
 				}
 
 				updateTree();
+				tree.notifyListeners(SWT.Selection, null);
 			}
 		});
 
@@ -411,11 +412,12 @@ public class DroneSelectionDialog {
 		TreeItem selection = null;
 
 		for (DroneTypes type : DroneTypes.getPlayableDroneTypes()) {
+			TreeItem typeItem = treeItemMap.get(type);
 			DroneIterator it = new DroneIterator(Database.getInstance().getDronesByType(type), sortByBlueprint);
 			for (it.first(); it.hasNext(); it.next()) {
 				DroneObject drone = it.current();
 
-				trtm = new TreeItem(treeItemMap.get(type), SWT.NONE);
+				trtm = new TreeItem(typeItem, SWT.NONE);
 				trtm.setText(0, drone.getBlueprintName());
 				trtm.setText(1, drone.getTitle());
 				trtm.setData(drone);
@@ -423,7 +425,15 @@ public class DroneSelectionDialog {
 				if (result == drone)
 					selection = trtm;
 			}
+
+			if (typeItem.getItemCount() == 0)
+				typeItem.dispose();
 		}
+
+		if (trtmDef.getItemCount() == 0)
+			trtmDef.dispose();
+		if (trtmOff.getItemCount() == 0)
+			trtmOff.dispose();
 
 		tree.layout();
 

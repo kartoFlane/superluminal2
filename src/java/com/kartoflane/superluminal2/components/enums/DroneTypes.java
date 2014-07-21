@@ -22,8 +22,12 @@ public enum DroneTypes {
 
 	public String toString() {
 		switch (this) {
+			case BATTLE:
+				return "Anti-Personnel";
+			case REPAIR:
+				return "System Repair";
 			case SHIP_REPAIR:
-				return "Ship Repair";
+				return "Hull Repair";
 			default:
 				String s = name();
 				return s.substring(0, 1) + s.substring(1).toLowerCase();

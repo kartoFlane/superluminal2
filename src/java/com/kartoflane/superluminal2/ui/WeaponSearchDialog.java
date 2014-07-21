@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -164,7 +165,10 @@ public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject> {
 
 		shell.pack();
 		shell.setSize(_defaultWidth, shell.getSize().y);
-		shell.setMinimumSize(shell.getSize());
+		Point s = shell.getSize();
+		Point p = parent.getSize();
+		shell.setMinimumSize(s);
+		shell.setLocation(parent.getLocation().x + p.x / 2 - s.x / 2, parent.getLocation().y + p.y / 2 - s.y / 2);
 	}
 
 	@Override
