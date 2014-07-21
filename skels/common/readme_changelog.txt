@@ -8,7 +8,9 @@ Changelog
 - Added raw value modification to gibs
 - Fixed a somewhat rare bug with system visibility
 - Added mount-gib linking
-- Added weapon & drone search dialogs
+- Reworked hotkey system
+- Added search functionality to weapon, drone & augment selection dialogs (Ctrl+F hotkey)
+- Added hotkeys to Mod Management: Confirm (Enter), Load (Ctrl+L), Remove (Delete)
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
