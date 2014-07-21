@@ -1,6 +1,9 @@
 package com.kartoflane.superluminal2.components;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.ToolItem;
 
 public class Hotkey {
 	private HotkeyAction action;
@@ -188,6 +191,84 @@ public class Hotkey {
 			msg += getKeyString().toUpperCase();
 
 		return msg;
+	}
+
+	/**
+	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
+	 */
+	public void addNotifyAction(final MenuItem item) {
+		setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled())
+					item.notifyListeners(SWT.Selection, null);
+			}
+		});
+	}
+
+	/**
+	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
+	 */
+	public void addNotifyAction(final ToolItem item) {
+		setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled())
+					item.notifyListeners(SWT.Selection, null);
+			}
+		});
+	}
+
+	/**
+	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
+	 */
+	public void addNotifyAction(final Button item) {
+		setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled())
+					item.notifyListeners(SWT.Selection, null);
+			}
+		});
+	}
+
+	/**
+	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
+	 */
+	public void addNotifyAndToggleAction(final MenuItem item) {
+		setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled()) {
+					item.setSelection(!item.getSelection());
+					item.notifyListeners(SWT.Selection, null);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
+	 */
+	public void addNotifyAndToggleAction(final ToolItem item) {
+		setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled()) {
+					item.setSelection(!item.getSelection());
+					item.notifyListeners(SWT.Selection, null);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
+	 */
+	public void addNotifyAndToggleAction(final Button item) {
+		setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled()) {
+					item.setSelection(!item.getSelection());
+					item.notifyListeners(SWT.Selection, null);
+				}
+			}
+		});
 	}
 
 	public interface HotkeyAction {
