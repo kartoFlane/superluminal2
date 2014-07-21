@@ -31,7 +31,10 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 
 public class AugmentSelectionDialog {
@@ -42,6 +45,11 @@ public class AugmentSelectionDialog {
 	private static final int defaultNameTabWidth = 150;
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
+	private static final Predicate<AugmentObject> defaultFilter = new Predicate<AugmentObject>() {
+		public boolean accept(AugmentObject object) {
+			return true;
+		}
+	};
 
 	private static AugmentObject selection = null;
 
@@ -49,6 +57,7 @@ public class AugmentSelectionDialog {
 	private int response = SWT.NO;
 
 	private boolean sortByBlueprint = true;
+	private Predicate<AugmentObject> filter = defaultFilter;
 
 	private Shell shell = null;
 	private Text txtDesc;
@@ -57,6 +66,7 @@ public class AugmentSelectionDialog {
 	private Tree tree;
 	private TreeColumn trclmnBlueprint;
 	private TreeColumn trclmnName;
+	private Button btnSearch;
 
 	public AugmentSelectionDialog(Shell parent) {
 		if (instance != null)
@@ -105,11 +115,17 @@ public class AugmentSelectionDialog {
 		sashForm.setWeights(new int[] { minTreeWidth, defaultDataWidth });
 
 		Composite compButtons = new Composite(shell, SWT.NONE);
-		GridLayout gl_compButtons = new GridLayout(2, false);
+		GridLayout gl_compButtons = new GridLayout(3, false);
 		gl_compButtons.marginWidth = 0;
 		gl_compButtons.marginHeight = 0;
 		compButtons.setLayout(gl_compButtons);
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+
+		btnSearch = new Button(compButtons, SWT.NONE);
+		GridData gd_btnSearch = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSearch.widthHint = 80;
+		btnSearch.setLayoutData(gd_btnSearch);
+		btnSearch.setText("Search");
 
 		btnConfirm = new Button(compButtons, SWT.NONE);
 		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
@@ -189,6 +205,25 @@ public class AugmentSelectionDialog {
 			}
 		});
 
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				AugmentSearchDialog asDialog = new AugmentSearchDialog(shell);
+				Predicate<AugmentObject> result = asDialog.open();
+
+				if (result == AbstractSearchDialog.RESULT_DEFAULT) {
+					filter = defaultFilter;
+				} else if (result == AbstractSearchDialog.RESULT_UNCHANGED) {
+					// Do nothing
+				} else {
+					filter = result;
+				}
+
+				updateTree();
+				tree.notifyListeners(SWT.Selection, null);
+			}
+		});
+
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -245,6 +280,13 @@ public class AugmentSelectionDialog {
 		Point parSize = parent.getSize();
 		Point parLoc = parent.getLocation();
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+
+		// Register hotkeys
+		Hotkey h = new Hotkey();
+		h.setCtrl(true);
+		h.setKey('f');
+		h.addNotifyAction(btnSearch);
+		Manager.hookHotkey(shell, h);
 	}
 
 	private void open() {
@@ -338,7 +380,16 @@ public class AugmentSelectionDialog {
 
 		public AugmentIterator(ArrayList<AugmentObject> list, boolean byBlueprint) {
 			comparator = new AugmentComparator(byBlueprint);
-			this.list = list;
+
+			if (filter == defaultFilter) {
+				this.list = list;
+			} else {
+				this.list = new ArrayList<AugmentObject>();
+				for (AugmentObject a : list) {
+					if (filter.accept(a))
+						this.list.add(a);
+				}
+			}
 		}
 
 		private AugmentObject getSmallestElement() {
