@@ -37,7 +37,7 @@ public class SettingsDialog {
 	private Display display = null;
 
 	private Hotkeys currentBinding = null;
-	private ArrayList<Hotkey> modifiedHotkeys = new ArrayList<Hotkey>();
+	private HashMap<Hotkeys, Hotkey> modifiedHotkeys = new HashMap<Hotkeys, Hotkey>();
 
 	private Listener keyListener = null;
 
@@ -265,9 +265,9 @@ public class SettingsDialog {
 		btnUnbind.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Hotkey newHotkey = new Hotkey(currentBinding);
+				Hotkey newHotkey = new Hotkey(Manager.getHotkey(currentBinding));
 				newHotkey.setEnabled(false);
-				bind(newHotkey);
+				bind(currentBinding, newHotkey);
 				btnUnbind.setEnabled(false);
 			}
 		});
@@ -286,8 +286,9 @@ public class SettingsDialog {
 				Manager.startMaximised = btnMaximise.getSelection();
 
 				// Hotkeys
-				for (Hotkey h : modifiedHotkeys) {
-					Hotkey keybind = Manager.getHotkey(h.getId());
+				for (Hotkeys id : modifiedHotkeys.keySet()) {
+					Hotkey keybind = Manager.getHotkey(id);
+					Hotkey h = modifiedHotkeys.get(id);
 					keybind.setShift(h.getShift());
 					keybind.setCtrl(h.getCtrl());
 					keybind.setAlt(h.getAlt());
@@ -385,12 +386,13 @@ public class SettingsDialog {
 		keyListener = new Listener() {
 			public void handleEvent(Event e) {
 				if (currentBinding != null && !blacklistedKeys.contains(e.keyCode)) {
-					Hotkey newHotkey = new Hotkey(currentBinding);
+					Hotkey newHotkey = new Hotkey(Manager.getHotkey(currentBinding));
+					newHotkey.setEnabled(true);
 					newHotkey.setShift((e.stateMask & SWT.SHIFT) == SWT.SHIFT);
 					newHotkey.setCtrl((e.stateMask & SWT.CTRL) == SWT.CTRL);
 					newHotkey.setAlt((e.stateMask & SWT.ALT) == SWT.ALT);
 					newHotkey.setKey(e.keyCode);
-					bind(newHotkey);
+					bind(currentBinding, newHotkey);
 					btnUnbind.setEnabled(false);
 				}
 
@@ -467,49 +469,34 @@ public class SettingsDialog {
 		return button;
 	}
 
-	private void bind(Hotkey newHotkey) {
+	private void bind(Hotkeys h, Hotkey newHotkey) {
 		if (newHotkey.isEnabled() && hotkeyCollides(newHotkey)) {
 			String msg = "The key combination you've selected is already bound to another command.\n" +
 					"Please choose another combination, or unbind it first.";
 			UIUtils.showWarningDialog(shell, null, msg);
 
 		} else {
-			Button b = hotkeyButton.get(newHotkey.getId());
+			Button b = hotkeyButton.get(h);
 			b.setSelection(false);
 			b.setText(newHotkey.isEnabled() ? newHotkey.toString() : "(Not bound)");
 
-			Hotkey prev = findModifiedHotkey(newHotkey.getId());
-			if (prev != null)
-				modifiedHotkeys.remove(prev);
-			modifiedHotkeys.add(newHotkey);
-
+			modifiedHotkeys.put(h, newHotkey);
 			currentBinding = null;
 		}
 	}
 
 	private Hotkey getHotkey(Hotkeys h) {
-		Hotkey result = findModifiedHotkey(h);
+		Hotkey result = modifiedHotkeys.get(h);
 		if (result == null)
 			result = Manager.getHotkey(h);
 
 		return result;
 	}
 
-	private Hotkey findModifiedHotkey(Hotkeys h) {
-		Hotkey result = null;
-		for (Hotkey hotkey : modifiedHotkeys) {
-			if (hotkey.getId() == h) {
-				result = hotkey;
-				break;
-			}
-		}
-		return result;
-	}
-
 	private boolean hotkeyCollides(Hotkey newHotkey) {
 		for (Hotkeys h : Hotkeys.values()) {
 			Hotkey hotkey = getHotkey(h);
-			if (hotkey.collides(newHotkey))
+			if (hotkey.isEnabled() && hotkey.collides(newHotkey))
 				return true;
 		}
 		return false;

@@ -29,6 +29,7 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -257,6 +258,10 @@ public class Superluminal {
 			}
 		}
 
+		KeyboardInputDispatcher kid = new KeyboardInputDispatcher();
+		display.addFilter(SWT.KeyDown, kid);
+		display.addFilter(SWT.KeyUp, kid);
+
 		// Open the main window's shell, making it visible
 		editorWindow.open();
 
@@ -415,10 +420,10 @@ public class Superluminal {
 		}
 	}
 
-	/** Create a Hotkey object for each hotkey, and store them in the hotkey map. */
+	/** Create a dummy Hotkey object for each hotkey, and store them in the hotkey map. */
 	private static void initHotkeys() {
 		for (Hotkeys keyId : Hotkeys.values())
-			Manager.HOTKEY_MAP.put(keyId, new Hotkey(keyId));
+			Manager.putHotkey(keyId, new Hotkey());
 	}
 
 	/**

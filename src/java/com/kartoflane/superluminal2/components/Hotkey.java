@@ -2,24 +2,40 @@ package com.kartoflane.superluminal2.components;
 
 import org.eclipse.swt.SWT;
 
-import com.kartoflane.superluminal2.components.enums.Hotkeys;
-import com.kartoflane.superluminal2.core.Manager;
-
 public class Hotkey {
-	private final Hotkeys id;
-
+	private HotkeyAction action;
 	private boolean enabled = true;
 	private boolean shift = false;
 	private boolean ctrl = false;
 	private boolean alt = false;
 	private int key = '\0';
 
-	public Hotkey(Hotkeys id) {
-		this.id = id;
+	public Hotkey() {
 	}
 
-	public Hotkeys getId() {
-		return id;
+	public Hotkey(HotkeyAction action) {
+		this.action = action;
+	}
+
+	public Hotkey(Hotkey h) {
+		if (h == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		action = h.action;
+		enabled = h.enabled;
+		shift = h.shift;
+		ctrl = h.ctrl;
+		alt = h.ctrl;
+		key = h.key;
+	}
+
+	public void execute() {
+		if (action == null)
+			return;
+		action.execute();
+	}
+
+	public void setAction(HotkeyAction action) {
+		this.action = action;
 	}
 
 	/**
@@ -100,8 +116,8 @@ public class Hotkey {
 	 *            int representing the currently pressed key
 	 * @return true if the hotkey is tiggered, false otherwise
 	 */
-	public boolean passes(int keyCode) {
-		return Manager.modShift == shift && Manager.modCtrl == ctrl && Manager.modAlt == alt &&
+	public boolean passes(boolean shift, boolean ctrl, boolean alt, int keyCode) {
+		return this.shift == shift && this.ctrl == ctrl && this.alt == alt &&
 				Character.toLowerCase(key) == Character.toLowerCase(keyCode);
 	}
 
@@ -172,5 +188,9 @@ public class Hotkey {
 			msg += getKeyString().toUpperCase();
 
 		return msg;
+	}
+
+	public interface HotkeyAction {
+		public void execute();
 	}
 }

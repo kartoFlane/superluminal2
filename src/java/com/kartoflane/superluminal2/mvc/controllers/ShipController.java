@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.mvc.controllers;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -342,7 +343,7 @@ public class ShipController extends ObjectController {
 
 	@Override
 	public void mouseUp(MouseEvent e) {
-		if (isSelected() && Manager.modShift) {
+		if (isSelected() && (e.stateMask & SWT.SHIFT) == SWT.SHIFT) {
 			Point offset = container.findShipOffset();
 			offset.x /= ShipContainer.CELL_SIZE;
 			offset.y /= ShipContainer.CELL_SIZE;

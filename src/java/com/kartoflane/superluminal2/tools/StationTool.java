@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.tools;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -110,7 +111,7 @@ public class StationTool extends Tool {
 
 		if (canPlace && e.button == 1) {
 			if (state == States.PLACEMENT) {
-				if (Manager.modShift) {
+				if ((e.stateMask & SWT.SHIFT) == SWT.SHIFT) {
 					// direction change
 					ShipContainer container = Manager.getCurrentShip();
 					RoomController roomC = (RoomController) LayeredPainter.getInstance().getControllerAt(e.x, e.y, Layers.ROOM);

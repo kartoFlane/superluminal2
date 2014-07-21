@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.tools;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -128,11 +129,11 @@ public class MountTool extends Tool {
 			mount.redraw();
 			OverviewWindow.staticUpdate();
 		} else if (e.button == 3) {
-			if (Manager.modShift) {
+			if ((e.stateMask & SWT.SHIFT) == SWT.SHIFT) {
 				Directions dir = toolMount.getDirection();
 				toolMount.setDirection(dir.nextDirection());
 				toolMount.updateView();
-			} else if (Manager.modAlt) {
+			} else if ((e.stateMask & SWT.ALT) == SWT.ALT) {
 				toolMount.setVisible(false);
 				cursor.setVisible(false);
 				toolMount.setMirrored(!toolMount.isMirrored());

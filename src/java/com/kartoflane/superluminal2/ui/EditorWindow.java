@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.Hotkey.HotkeyAction;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
@@ -50,7 +51,6 @@ import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
-import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
@@ -69,6 +69,7 @@ import com.kartoflane.superluminal2.utils.SHPUtils;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class EditorWindow {
 	private static final Logger log = LogManager.getLogger(EditorWindow.class);
@@ -399,49 +400,13 @@ public class EditorWindow {
 			editorContainer.setWeights(new int[] { SIDEBAR_MIN_WIDTH, displaySize.width - SIDEBAR_MIN_WIDTH });
 		}
 
-		display.addFilter(SWT.KeyDown, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				// display filter is notified every time a key is pressed, regardless of focus
-				// only proceed if the main window has focus
-				if (!isFocusControl())
-					return;
-
-				// update modifier states for use in other places in the application
-				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT) {
-					Manager.modShift = true;
-					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_SHIFT, EditorWindow.this, true));
-				}
-				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT) {
-					Manager.modAlt = true;
-					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_ALT, EditorWindow.this, true));
-				}
-				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL) {
-					Manager.modCtrl = true;
-					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_CTRL, EditorWindow.this, true));
-				}
-
-				handleHotkeys(e);
-			}
-		});
+		registerHotkeys();
 
 		display.addFilter(SWT.KeyUp, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				if (e.keyCode == SWT.SHIFT || e.stateMask == SWT.SHIFT) {
-					Manager.modShift = false;
-					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_SHIFT, EditorWindow.this, false));
-				}
-				if (e.keyCode == SWT.ALT || e.stateMask == SWT.ALT) {
-					Manager.modAlt = false;
-					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_ALT, EditorWindow.this, false));
-				}
-				if (e.keyCode == SWT.CTRL || e.stateMask == SWT.CTRL) {
-					Manager.modCtrl = false;
-					eventHandler.sendEvent(new SLEvent(SLEvent.MOD_CTRL, EditorWindow.this, false));
-				}
-
-				if (e.keyCode == SWT.SPACE && Manager.getSelected() != null)
+				if ((e.keyCode == SWT.SPACE || e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
+						e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) && Manager.getSelected() != null)
 					e.doit = false;
 			}
 		});
@@ -1268,113 +1233,206 @@ public class EditorWindow {
 		editorContainer.layout();
 	}
 
-	private void handleHotkeys(Event e) {
+	private void registerHotkeys() {
+		Hotkey h = null;
+
 		// ====== Menu hotkeys
 
 		// File
-		if (Manager.getHotkey(Hotkeys.NEW_SHIP).passes(e.keyCode) && mntmNewShip.isEnabled()) {
-			mntmNewShip.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.LOAD_SHIP).passes(e.keyCode) && mntmLoadShip.isEnabled()) {
-			mntmLoadShip.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SAVE_SHIP).passes(e.keyCode) && mntmSaveShip.isEnabled()) {
-			mntmSaveShip.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.MANAGE_MOD).passes(e.keyCode) && mntmModMan.isEnabled()) {
-			mntmModMan.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.CLOSE_SHIP).passes(e.keyCode) && mntmCloseShip.isEnabled()) {
-			mntmCloseShip.notifyListeners(SWT.Selection, null);
-		}
+		h = Manager.getHotkey(Hotkeys.NEW_SHIP);
+		addNotifyAction(h, mntmNewShip);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.LOAD_SHIP);
+		addNotifyAction(h, mntmLoadShip);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SAVE_SHIP);
+		addNotifyAction(h, mntmSaveShip);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.MANAGE_MOD);
+		addNotifyAction(h, mntmModMan);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.CLOSE_SHIP);
+		addNotifyAction(h, mntmCloseShip);
+		Manager.hookHotkey(shell, h);
 
 		// Edit
-		else if (Manager.getHotkey(Hotkeys.UNDO).passes(e.keyCode) && mntmUndo.isEnabled()) {
-			mntmUndo.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.REDO).passes(e.keyCode) && mntmRedo.isEnabled()) {
-			mntmRedo.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SETTINGS).passes(e.keyCode) && mntmSettings.isEnabled()) {
-			mntmSettings.notifyListeners(SWT.Selection, null);
-		}
+		h = Manager.getHotkey(Hotkeys.UNDO);
+		addNotifyAction(h, mntmUndo);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.REDO);
+		addNotifyAction(h, mntmRedo);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SETTINGS);
+		addNotifyAction(h, mntmSettings);
+		Manager.hookHotkey(shell, h);
 
 		// View
-		else if (Manager.getHotkey(Hotkeys.TOGGLE_GRID).passes(e.keyCode) && mntmGrid.isEnabled()) {
-			mntmGrid.setSelection(!mntmGrid.getSelection());
-			mntmGrid.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.TOGGLE_HANGAR).passes(e.keyCode) && mntmHangar.isEnabled()) {
-			mntmHangar.setSelection(!mntmHangar.getSelection());
-			mntmHangar.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_ANCHOR).passes(e.keyCode) && mntmShowAnchor.isEnabled()) {
-			mntmShowAnchor.setSelection(!mntmShowAnchor.getSelection());
-			mntmShowAnchor.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_MOUNTS).passes(e.keyCode) && mntmShowMounts.isEnabled()) {
-			mntmShowMounts.setSelection(!mntmShowMounts.getSelection());
-			mntmShowMounts.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_ROOMS).passes(e.keyCode) && mntmShowRooms.isEnabled()) {
-			mntmShowRooms.setSelection(!mntmShowRooms.getSelection());
-			mntmShowRooms.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_DOORS).passes(e.keyCode) && mntmShowDoors.isEnabled()) {
-			mntmShowDoors.setSelection(!mntmShowDoors.getSelection());
-			mntmShowDoors.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_STATIONS).passes(e.keyCode) && mntmShowStations.isEnabled()) {
-			mntmShowStations.setSelection(!mntmShowStations.getSelection());
-			mntmShowStations.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_HULL).passes(e.keyCode) && mntmShowHull.isEnabled()) {
-			mntmShowHull.setSelection(!mntmShowHull.getSelection());
-			mntmShowHull.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_FLOOR).passes(e.keyCode) && mntmShowFloor.isEnabled()) {
-			mntmShowFloor.setSelection(!mntmShowFloor.getSelection());
-			mntmShowFloor.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_SHIELD).passes(e.keyCode) && mntmShowShield.isEnabled()) {
-			mntmShowShield.setSelection(!mntmShowShield.getSelection());
-			mntmShowShield.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.SHOW_GIBS).passes(e.keyCode) && mntmShowGibs.isEnabled()) {
-			mntmShowGibs.setSelection(!mntmShowGibs.getSelection());
-			mntmShowGibs.notifyListeners(SWT.Selection, null);
-		}
+		h = Manager.getHotkey(Hotkeys.TOGGLE_GRID);
+		addNotifyAndToggleAction(h, mntmGrid);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.TOGGLE_HANGAR);
+		addNotifyAndToggleAction(h, mntmHangar);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_ANCHOR);
+		addNotifyAndToggleAction(h, mntmShowAnchor);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_MOUNTS);
+		addNotifyAndToggleAction(h, mntmShowMounts);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_ROOMS);
+		addNotifyAndToggleAction(h, mntmShowRooms);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_DOORS);
+		addNotifyAndToggleAction(h, mntmShowDoors);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_STATIONS);
+		addNotifyAndToggleAction(h, mntmShowStations);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_HULL);
+		addNotifyAndToggleAction(h, mntmShowHull);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_FLOOR);
+		addNotifyAndToggleAction(h, mntmShowFloor);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_SHIELD);
+		addNotifyAndToggleAction(h, mntmShowShield);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.SHOW_GIBS);
+		addNotifyAndToggleAction(h, mntmShowGibs);
+		Manager.hookHotkey(shell, h);
 
 		// ====== Tool hotkeys
 
-		else if (Manager.getHotkey(Hotkeys.POINTER_TOOL).passes(e.keyCode) && tltmPointer.isEnabled()) {
-			tltmPointer.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.CREATE_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
-			tltmCreation.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.IMAGES_TOOL).passes(e.keyCode) && tltmImages.isEnabled()) {
-			tltmImages.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.PROPERTIES_TOOL).passes(e.keyCode) && tltmProperties.isEnabled()) {
-			tltmProperties.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.OVERVIEW_TOOL).passes(e.keyCode) && tltmManager.isEnabled()) {
-			tltmManager.notifyListeners(SWT.Selection, null);
-		} else if (Manager.getHotkey(Hotkeys.CLOAK).passes(e.keyCode) && tltmCloak.isEnabled()) {
-			tltmCloak.setSelection(!tltmCloak.getSelection());
-			tltmCloak.notifyListeners(SWT.Selection, null);
-		}
+		h = Manager.getHotkey(Hotkeys.POINTER_TOOL);
+		addNotifyAction(h, tltmPointer);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.CREATE_TOOL);
+		addNotifyAction(h, tltmCreation);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.IMAGES_TOOL);
+		addNotifyAction(h, tltmImages);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.PROPERTIES_TOOL);
+		addNotifyAction(h, tltmProperties);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.OVERVIEW_TOOL);
+		addNotifyAction(h, tltmManager);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.CLOAK);
+		addNotifyAndToggleAction(h, tltmCloak);
+		Manager.hookHotkey(shell, h);
 
 		// Creation Tool hotkeys
-		else if (Manager.getHotkey(Hotkeys.ROOM_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
-			if (!tltmCreation.getSelection())
-				tltmCreation.notifyListeners(SWT.Selection, null);
-			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-			ctool.selectSubtool(Tools.ROOM);
-		} else if (Manager.getHotkey(Hotkeys.DOOR_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
-			if (!tltmCreation.getSelection())
-				tltmCreation.notifyListeners(SWT.Selection, null);
-			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-			ctool.selectSubtool(Tools.DOOR);
-		} else if (Manager.getHotkey(Hotkeys.MOUNT_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
-			if (!tltmCreation.getSelection())
-				tltmCreation.notifyListeners(SWT.Selection, null);
-			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-			ctool.selectSubtool(Tools.WEAPON);
-		} else if (Manager.getHotkey(Hotkeys.STATION_TOOL).passes(e.keyCode) && tltmCreation.isEnabled()) {
-			if (!tltmCreation.getSelection())
-				tltmCreation.notifyListeners(SWT.Selection, null);
-			CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
-			ctool.selectSubtool(Tools.STATION);
-		}
+		h = Manager.getHotkey(Hotkeys.ROOM_TOOL);
+		addCreateToolAction(h, Tools.ROOM);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.DOOR_TOOL);
+		addCreateToolAction(h, Tools.DOOR);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.MOUNT_TOOL);
+		addCreateToolAction(h, Tools.WEAPON);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.STATION_TOOL);
+		addCreateToolAction(h, Tools.STATION);
+		Manager.hookHotkey(shell, h);
 
 		// ====== Tool-specific hotkeys
 
-		else if (Manager.getSelectedToolId() == Tools.POINTER) {
-			// Arrow keys movement
-			if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_RIGHT ||
-					e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_LEFT) {
+		h = Manager.getHotkey(Hotkeys.DELETE);
+		addNotifyAction(h, mntmDelete);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.DEL);
+		addNotifyAction(h, mntmDelete);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.PIN);
+		h.setAction(new HotkeyAction() {
+			public void execute() {
+				if (Manager.getSelectedToolId() == Tools.POINTER) {
+					AbstractController selected = Manager.getSelected();
+					if (selected != null) {
+						selected.setPinned(!selected.isPinned());
+						updateSidebarContent();
+					}
+				}
+			}
+		});
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.ARROW_UP);
+		addNudgeAction(h, 0, -1);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.ARROW_RIGHT);
+		addNudgeAction(h, 1, 0);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.ARROW_DOWN);
+		addNudgeAction(h, 0, 1);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.ARROW_LEFT);
+		addNudgeAction(h, -1, 0);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setShift(true);
+		h.setKey(SWT.ARROW_UP);
+		addNudgeAction(h, 0, -1);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setShift(true);
+		h.setKey(SWT.ARROW_RIGHT);
+		addNudgeAction(h, 1, 0);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setShift(true);
+		h.setKey(SWT.ARROW_DOWN);
+		addNudgeAction(h, 0, 1);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setShift(true);
+		h.setKey(SWT.ARROW_LEFT);
+		addNudgeAction(h, -1, 0);
+		Manager.hookHotkey(shell, h);
+	}
+
+	private void addNudgeAction(final Hotkey h, final int amountX, final int amountY) {
+		h.setAction(new HotkeyAction() {
+			public void execute() {
 				AbstractController selected = Manager.getSelected();
 				if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
 					Point p = selected.getPresentedLocation();
@@ -1382,10 +1440,12 @@ public class EditorWindow {
 
 					oldBounds = selected.getBounds();
 
-					int nudgeAmount = Manager.modShift && selected.getPresentedFactor() == 1 ? ShipContainer.CELL_SIZE : 1;
+					int nudgeX = h.getShift() && selected.getPresentedFactor() == 1 ?
+							Utils.sign(amountX) * ShipContainer.CELL_SIZE : amountX;
+					int nudgeY = h.getShift() && selected.getPresentedFactor() == 1 ?
+							Utils.sign(amountY) * ShipContainer.CELL_SIZE : amountY;
 
-					selected.setPresentedLocation(p.x + (e.keyCode == SWT.ARROW_RIGHT ? nudgeAmount : e.keyCode == SWT.ARROW_LEFT ? -nudgeAmount : 0),
-							p.y + (e.keyCode == SWT.ARROW_DOWN ? nudgeAmount : e.keyCode == SWT.ARROW_UP ? -nudgeAmount : 0));
+					selected.setPresentedLocation(p.x + nudgeX, p.y + nudgeY);
 					selected.updateFollowOffset();
 					Manager.getCurrentShip().updateBoundingArea();
 					selected.updateView();
@@ -1394,21 +1454,61 @@ public class EditorWindow {
 					canvasRedraw(oldBounds);
 
 					updateSidebarContent();
-
-					e.doit = false;
-				}
-			} else if (Manager.getHotkey(Hotkeys.DELETE).passes(e.keyCode) || e.keyCode == SWT.DEL) {
-				// Deletion
-				mntmDelete.notifyListeners(SWT.Selection, null);
-			} else if (Manager.getHotkey(Hotkeys.PIN).passes(e.keyCode)) {
-				// Pin
-				AbstractController selected = Manager.getSelected();
-				if (selected != null) {
-					selected.setPinned(!selected.isPinned());
-					updateSidebarContent();
-					e.doit = false;
 				}
 			}
-		}
+		});
+	}
+
+	private void addNotifyAction(Hotkey h, final MenuItem item) {
+		h.setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled())
+					item.notifyListeners(SWT.Selection, null);
+			}
+		});
+	}
+
+	private void addNotifyAction(Hotkey h, final ToolItem item) {
+		h.setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled())
+					item.notifyListeners(SWT.Selection, null);
+			}
+		});
+	}
+
+	private void addNotifyAndToggleAction(Hotkey h, final MenuItem item) {
+		h.setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled()) {
+					item.setSelection(!item.getSelection());
+					item.notifyListeners(SWT.Selection, null);
+				}
+			}
+		});
+	}
+
+	private void addNotifyAndToggleAction(Hotkey h, final ToolItem item) {
+		h.setAction(new HotkeyAction() {
+			public void execute() {
+				if (item.isEnabled()) {
+					item.setSelection(!item.getSelection());
+					item.notifyListeners(SWT.Selection, null);
+				}
+			}
+		});
+	}
+
+	private void addCreateToolAction(Hotkey h, final Tools tool) {
+		h.setAction(new HotkeyAction() {
+			public void execute() {
+				if (tltmCreation.isEnabled()) {
+					if (!tltmCreation.getSelection())
+						tltmCreation.notifyListeners(SWT.Selection, null);
+					CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
+					ctool.selectSubtool(tool);
+				}
+			}
+		});
 	}
 }

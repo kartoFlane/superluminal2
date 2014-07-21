@@ -15,9 +15,15 @@ import java.util.zip.ZipFile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.KeybindHandler;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -36,7 +42,7 @@ import com.kartoflane.superluminal2.utils.IOUtils;
  * @author kartoFlane
  * 
  */
-public class Manager {
+public abstract class Manager {
 	private static final Logger log = LogManager.getLogger(Manager.class);
 
 	/**
@@ -48,11 +54,11 @@ public class Manager {
 	 * - Those characters then have to be terminated by a period<br>
 	 * - After that, a non-zero number of any characters other than a forward slash
 	 */
-	private static final Pattern FILE_PTRN = Pattern.compile(".+\\.[^/]+");
+	private static final Pattern _filePattern = Pattern.compile(".+\\.[^/]+");
+	private static final HashMap<Hotkeys, Hotkey> _hotkeyMap = new HashMap<Hotkeys, Hotkey>();
 
 	public static final HashMap<Tools, Tool> TOOL_MAP = new HashMap<Tools, Tool>();
 	public static final LinkedList<Deletable> DELETED_LIST = new LinkedList<Deletable>();
-	public static final HashMap<Hotkeys, Hotkey> HOTKEY_MAP = new HashMap<Hotkeys, Hotkey>();
 
 	// Config variables
 	public static boolean sidebarOnRightSide = true;
@@ -69,13 +75,11 @@ public class Manager {
 	// Runtime variables
 	public static boolean leftMouseDown = false;
 	public static boolean rightMouseDown = false;
-	public static boolean modShift = false;
-	public static boolean modAlt = false;
-	public static boolean modCtrl = false;
 
 	private static AbstractController selectedController;
 	private static ShipContainer currentShip = null;
 	private static Tools selectedTool = null;
+	private static KeybindHandler keyHandler = new KeybindHandler();
 
 	/**
 	 * Selects the given box, deselecting the previous one if it was already selected.<br>
@@ -182,7 +186,8 @@ public class Manager {
 	}
 
 	/**
-	 * Select the given tool item, also triggering the tools' {@link Tool#select() select()} and {@link Tool#deselect() deselect()} methods, as needed.
+	 * Select the given tool item, also triggering the tools' {@link Tool#select() select()} and {@link Tool#deselect() deselect()} methods, as
+	 * needed.
 	 */
 	public static void selectTool(Tools tool) {
 		// Deny trying to select the same tool twice
@@ -219,7 +224,13 @@ public class Manager {
 	}
 
 	public static Hotkey getHotkey(Hotkeys key) {
-		return HOTKEY_MAP.get(key);
+		return _hotkeyMap.get(key);
+	}
+
+	public static void putHotkey(Hotkeys key, Hotkey h) {
+		if (key == null || h == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		_hotkeyMap.put(key, h);
 	}
 
 	/** Loads the default hotkey values, which are later overridden by config or the user. */
@@ -294,6 +305,33 @@ public class Manager {
 		getHotkey(Hotkeys.SHOW_GIBS).setKey('9');
 	}
 
+	protected static void notifyKeyPressed(KeyEvent e) {
+		Control f = Display.getCurrent().getFocusControl();
+		if (f != null) {
+			Shell shell = f.getShell();
+
+			if (shell != null)
+				keyHandler.notify(shell, (e.stateMask & SWT.SHIFT) == SWT.SHIFT,
+						(e.stateMask & SWT.CONTROL) == SWT.CONTROL,
+						(e.stateMask & SWT.ALT) == SWT.ALT, e.keyCode);
+		}
+	}
+
+	protected static void notifyKeyReleased(KeyEvent e) {
+	}
+
+	public static void hookHotkey(Shell shell, Hotkey hotkey) {
+		keyHandler.hook(shell, hotkey);
+	}
+
+	public static void unhookHotkey(Shell shell, Hotkey hotkey) {
+		keyHandler.unhook(shell, hotkey);
+	}
+
+	public static void unhookHotkeys(Shell shell) {
+		keyHandler.unhook(shell);
+	}
+
 	/**
 	 * Request an InputStream for the given path.<br>
 	 * <br>
@@ -347,7 +385,7 @@ public class Manager {
 				result = new FileInputStream(new File(loadPath));
 			} else if (protocol.equals("zip:")) {
 				// Refers to file in a zip archive
-				Matcher m = FILE_PTRN.matcher(loadPath);
+				Matcher m = _filePattern.matcher(loadPath);
 				if (m.find()) {
 					String zipPath = m.group(1);
 					String innerPath = loadPath.replace(zipPath + "/", "");

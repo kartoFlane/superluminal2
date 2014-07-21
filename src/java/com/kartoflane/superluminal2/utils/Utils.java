@@ -51,6 +51,10 @@ public class Utils {
 		return Math.min(a, Math.min(b, c));
 	}
 
+	public static int sign(int x) {
+		return x == 0 ? 0 : x / Math.abs(x);
+	}
+
 	/**
 	 * Computes angle between the two points, in degrees.<br>
 	 * 0 means north, increases counter-clockwise.
