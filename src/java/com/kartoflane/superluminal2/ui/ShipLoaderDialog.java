@@ -17,8 +17,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -36,6 +34,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.Hotkey.HotkeyAction;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
@@ -299,19 +299,6 @@ public class ShipLoaderDialog {
 			}
 		});
 
-		shell.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_RETURN && tree.getSelectionCount() != 0) {
-					TreeItem selectedItem = tree.getSelection()[0];
-					if (selectedItem.getItemCount() == 0 && btnLoad.isEnabled())
-						btnLoad.notifyListeners(SWT.Selection, null);
-					else
-						selectedItem.setExpanded(!selectedItem.getExpanded());
-				}
-			}
-		});
-
 		canvas.addControlListener(new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
@@ -339,6 +326,21 @@ public class ShipLoaderDialog {
 		Point parSize = parent.getSize();
 		Point parLoc = parent.getLocation();
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+
+		// Register hotkeys
+		Hotkey h = new Hotkey(new HotkeyAction() {
+			public void execute() {
+				if (tree.getSelectionCount() != 0) {
+					TreeItem selectedItem = tree.getSelection()[0];
+					if (selectedItem.getItemCount() == 0 && btnLoad.isEnabled())
+						btnLoad.notifyListeners(SWT.Selection, null);
+					else
+						selectedItem.setExpanded(!selectedItem.getExpanded());
+				}
+			}
+		});
+		h.setKey('\r');
+		Manager.hookHotkey(shell, h);
 
 		loadShipList();
 	}

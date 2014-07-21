@@ -34,9 +34,11 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 
@@ -359,6 +361,23 @@ public class ModManagementDialog {
 		Point parSize = parent.getSize();
 		Point parLoc = parent.getLocation();
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+
+		// Register hotkeys
+		Hotkey h = new Hotkey();
+		h.setKey('\r');
+		h.addNotifyAction(btnConfirm);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey('l');
+		h.setCtrl(true);
+		h.addNotifyAction(btnLoad);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.DEL);
+		h.addNotifyAction(btnRemove);
+		Manager.hookHotkey(shell, h);
 	}
 
 	public static ModManagementDialog getInstance() {

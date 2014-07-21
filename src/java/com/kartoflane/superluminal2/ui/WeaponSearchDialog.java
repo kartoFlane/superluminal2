@@ -17,8 +17,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject> {
@@ -169,6 +171,12 @@ public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject> {
 		Point p = parent.getSize();
 		shell.setMinimumSize(s);
 		shell.setLocation(parent.getLocation().x + p.x / 2 - s.x / 2, parent.getLocation().y + p.y / 2 - s.y / 2);
+
+		// Register hotkeys
+		Hotkey h = new Hotkey();
+		h.setKey('\r');
+		h.addNotifyAction(btnConfirm);
+		Manager.hookHotkey(shell, h);
 	}
 
 	@Override
