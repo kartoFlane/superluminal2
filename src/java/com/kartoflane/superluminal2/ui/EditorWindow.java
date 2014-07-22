@@ -1140,13 +1140,13 @@ public class EditorWindow {
 	 * @return true if the editor window controls the focus and should execute hotkey actions.
 	 */
 	public boolean isFocusControl() {
-		Display d = Display.getCurrent(); // Can sometimes return null
-		if (d == null)
-			Display.getDefault();
+		Display display = Display.getCurrent(); // Can sometimes return null
+		if (display == null)
+			display = Display.getDefault();
 
-		Control c = d.getFocusControl();
+		Control c = display.getFocusControl();
 
-		boolean result = c == null || !(c.isEnabled() && (c instanceof Spinner ||
+		boolean result = c != null && !(c.isEnabled() && (c instanceof Spinner ||
 				(c instanceof Text && ((Text) c).getEditable())));
 
 		if (result) {

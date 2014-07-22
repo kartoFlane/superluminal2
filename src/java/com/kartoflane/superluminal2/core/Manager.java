@@ -25,6 +25,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.KeybindHandler;
@@ -340,9 +342,16 @@ public abstract class Manager {
 	}
 
 	protected static void notifyKeyPressed(KeyEvent e) {
-		Control f = Display.getCurrent().getFocusControl();
-		if (f != null) {
-			Shell shell = f.getShell();
+		Display display = Display.getCurrent(); // Can sometimes return null
+		if (display == null)
+			display = Display.getDefault();
+
+		Control c = display.getFocusControl();
+		boolean execute = c != null && !(c.isEnabled() && (c instanceof Spinner ||
+				(c instanceof Text && ((Text) c).getEditable())));
+
+		if (execute) {
+			Shell shell = c.getShell();
 
 			if (shell != null)
 				keyHandler.notify(shell, (e.stateMask & SWT.SHIFT) == SWT.SHIFT,
