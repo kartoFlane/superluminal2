@@ -1,22 +1,61 @@
 package com.kartoflane.superluminal2.undo;
 
 import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
 
 import com.kartoflane.superluminal2.components.interfaces.Action;
 
 @SuppressWarnings("serial")
-public abstract class ValueUndoableEdit<T> extends AbstractUndoableEdit {
+public class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 
 	private Action undoCallback = null;
 	private Action redoCallback = null;
 
-	public abstract void setOld(T old);
+	protected T old;
+	protected T cur;
 
-	public abstract T getOld();
+	public void setOld(T old) {
+		this.old = old;
+	}
 
-	public abstract void setCurrent(T cur);
+	public T getOld() {
+		return old;
+	}
 
-	public abstract T getCurrent();
+	public void setCurrent(T cur) {
+		this.cur = cur;
+	}
+
+	public T getCurrent() {
+		return cur;
+	}
+
+	public void doUndo() throws CannotUndoException {
+	}
+
+	public void doRedo() throws CannotRedoException {
+	}
+
+	@Override
+	public final void undo() throws CannotUndoException {
+		super.undo();
+
+		doUndo();
+
+		if (undoCallback != null)
+			undoCallback.execute();
+	}
+
+	@Override
+	public final void redo() throws CannotRedoException {
+		super.undo();
+
+		doRedo();
+
+		if (redoCallback != null)
+			redoCallback.execute();
+	}
 
 	/**
 	 * Adds an action that can be executed after the undo() method is completed.
@@ -25,20 +64,10 @@ public abstract class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 		undoCallback = a;
 	}
 
-	protected void executeUndoCallback() {
-		if (undoCallback != null)
-			undoCallback.execute();
-	}
-
 	/**
 	 * Adds an action that can be executed after the redo() method is completed.
 	 */
 	public void setRedoCallback(Action a) {
 		redoCallback = a;
-	}
-
-	protected void executeRedoCallback() {
-		if (redoCallback != null)
-			redoCallback.execute();
 	}
 }

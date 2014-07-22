@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.undo;
 
 import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import com.kartoflane.superluminal2.core.Manager;
@@ -35,7 +36,7 @@ public class UndoableCreateEdit extends AbstractUndoableEdit {
 	}
 
 	@Override
-	public void redo() throws CannotUndoException {
+	public void redo() throws CannotRedoException {
 		super.redo();
 		Manager.getCurrentShip().restore(data);
 		disposeOnDie = false;

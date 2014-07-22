@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.undo;
 
 import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import com.kartoflane.superluminal2.core.Manager;
@@ -34,7 +35,7 @@ public class UndoableDeleteEdit extends AbstractUndoableEdit {
 	}
 
 	@Override
-	public void redo() throws CannotUndoException {
+	public void redo() throws CannotRedoException {
 		super.redo();
 		// Don't call ShipContainer.delete() so's to prevent each undo of this edit from creating new edits.
 		Manager.getCurrentShip().deleteNonUndoable(data);

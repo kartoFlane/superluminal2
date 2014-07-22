@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.undo;
 
+import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import org.eclipse.swt.graphics.Point;
@@ -11,9 +12,13 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 public class UndoableMoveEdit extends ValueUndoableEdit<Point> {
 
 	private AbstractController data = null;
-	private Point oldLoc;
-	private Point curLoc;
 
+	/**
+	 * Constructs a new UndoableMoveEdit.
+	 * 
+	 * @param ac
+	 *            the controller whom this edit concerns
+	 */
 	public UndoableMoveEdit(AbstractController ac) {
 		if (ac == null)
 			throw new IllegalArgumentException("Argument must not be null.");
@@ -27,64 +32,38 @@ public class UndoableMoveEdit extends ValueUndoableEdit<Point> {
 	}
 
 	@Override
-	public void undo() throws CannotUndoException {
-		if (oldLoc == null)
+	public void doUndo() throws CannotUndoException {
+		if (old == null)
 			throw new IllegalStateException("Old location is null!");
-		super.undo();
 
 		// Select the controller to mimic authentic user interaction
 		// Eg. ShipController.select() modifies its children's collidablity
 		data.select();
 
-		data.reposition(oldLoc);
+		data.reposition(old);
 		data.updateFollowOffset();
 		data.updateView();
 
 		// Don't deselect if it was actually selected by the user
 		if (Manager.getSelected() != data)
 			data.deselect();
-
-		executeUndoCallback();
 	}
 
 	@Override
-	public void redo() throws CannotUndoException {
-		if (curLoc == null)
+	public void doRedo() throws CannotRedoException {
+		if (cur == null)
 			throw new IllegalStateException("Current location is null!");
-		super.redo();
 
 		// Select the controller to mimic authentic user interaction
 		// Eg. ShipController.select() modifies its children's collidablity
 		data.select();
 
-		data.reposition(curLoc);
+		data.reposition(cur);
 		data.updateFollowOffset();
 		data.updateView();
 
 		// Don't deselect if it was actually selected by the user
 		if (Manager.getSelected() != data)
 			data.deselect();
-
-		executeUndoCallback();
-	}
-
-	@Override
-	public void setOld(Point old) {
-		oldLoc = old;
-	}
-
-	@Override
-	public Point getOld() {
-		return oldLoc;
-	}
-
-	@Override
-	public void setCurrent(Point cur) {
-		curLoc = cur;
-	}
-
-	@Override
-	public Point getCurrent() {
-		return curLoc;
 	}
 }
