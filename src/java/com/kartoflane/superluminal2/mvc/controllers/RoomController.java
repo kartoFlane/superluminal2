@@ -202,14 +202,16 @@ public class RoomController extends ObjectController implements Indexable, Compa
 			}
 			super.mouseDown(e);
 
-			Action a = new Action() {
-				public void execute() {
-					container.getParent().updateSidebarContent();
-					container.updateBoundingArea();
-				}
-			};
-			currentEdit.setUndoCallback(a);
-			currentEdit.setRedoCallback(a);
+			if (currentEdit != null) {
+				Action a = new Action() {
+					public void execute() {
+						container.getParent().updateSidebarContent();
+						container.updateBoundingArea();
+					}
+				};
+				currentEdit.setUndoCallback(a);
+				currentEdit.setRedoCallback(a);
+			}
 		}
 	}
 
