@@ -49,7 +49,7 @@ public class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 
 	@Override
 	public final void redo() throws CannotRedoException {
-		super.undo();
+		super.redo();
 
 		doRedo();
 
