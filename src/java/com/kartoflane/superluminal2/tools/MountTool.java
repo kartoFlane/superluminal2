@@ -16,6 +16,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.MountToolComposite;
+import com.kartoflane.superluminal2.undo.UndoableCreateEdit;
 
 public class MountTool extends Tool {
 
@@ -124,10 +125,13 @@ public class MountTool extends Tool {
 			mount.updateFollowOffset();
 
 			container.add(mount);
+			container.store(mount);
 
 			window.canvasRedraw(oldBounds);
 			mount.redraw();
 			OverviewWindow.staticUpdate();
+
+			container.postEdit(new UndoableCreateEdit(mount));
 		} else if (e.button == 3) {
 			if ((e.stateMask & SWT.SHIFT) == SWT.SHIFT) {
 				Directions dir = toolMount.getDirection();

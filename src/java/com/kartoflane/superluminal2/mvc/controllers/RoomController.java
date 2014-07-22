@@ -7,12 +7,13 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Grid;
-import com.kartoflane.superluminal2.core.LayeredPainter;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -200,6 +201,15 @@ public class RoomController extends ObjectController implements Indexable, Compa
 				}
 			}
 			super.mouseDown(e);
+
+			Action a = new Action() {
+				public void execute() {
+					container.getParent().updateSidebarContent();
+					container.updateBoundingArea();
+				}
+			};
+			currentEdit.setUndoCallback(a);
+			currentEdit.setRedoCallback(a);
 		}
 	}
 
@@ -286,7 +296,7 @@ public class RoomController extends ObjectController implements Indexable, Compa
 						updateView();
 						updateFollowOffset();
 
-						((ManipulationToolComposite) container.getParent().getSidebarContent()).updateData();
+						container.getParent().updateSidebarContent();
 						container.updateBoundingArea();
 					}
 				}

@@ -6,9 +6,9 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.core.Grid;
+import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
@@ -17,6 +17,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.DoorToolComposite;
+import com.kartoflane.superluminal2.undo.UndoableCreateEdit;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public class DoorTool extends Tool {
@@ -84,12 +85,15 @@ public class DoorTool extends Tool {
 			doorController.setFollowOffset(p.x - doorController.getParent().getX(), p.y - doorController.getParent().getY());
 
 			container.add(doorController);
+			container.store(doorController);
 
 			window.canvasRedraw(oldBounds);
 			doorController.redraw();
 
 			container.updateBoundingArea();
 			OverviewWindow.staticUpdate(doorController);
+
+			container.postEdit(new UndoableCreateEdit(doorController));
 		}
 		// handle cursor
 		if (cursor.isVisible() && e.button == 1) {

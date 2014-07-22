@@ -35,7 +35,7 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
-import com.kartoflane.superluminal2.components.Hotkey.HotkeyAction;
+import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
@@ -328,7 +328,7 @@ public class ShipLoaderDialog {
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 
 		// Register hotkeys
-		Hotkey h = new Hotkey(new HotkeyAction() {
+		Hotkey h = new Hotkey(new Action() {
 			public void execute() {
 				if (tree.getSelectionCount() != 0) {
 					TreeItem selectedItem = tree.getSelection()[0];

@@ -19,6 +19,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.RoomToolComposite;
+import com.kartoflane.superluminal2.undo.UndoableCreateEdit;
 
 public class RoomTool extends Tool {
 	public static final int COLLISION_TOLERANCE = ShipContainer.CELL_SIZE / 2;
@@ -133,12 +134,15 @@ public class RoomTool extends Tool {
 					roomController.setLocation(p.x, p.y);
 
 					container.add(roomController);
+					container.store(roomController);
 
 					roomController.updateFollowOffset();
 					container.updateBoundingArea();
 
 					window.canvasRedraw(createBounds);
 					OverviewWindow.staticUpdate(roomController);
+
+					container.postEdit(new UndoableCreateEdit(roomController));
 				} else {
 					// if collided with a room, just redraw the area (cursor isn't visible)
 					window.canvasRedraw(createBounds);

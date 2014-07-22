@@ -24,10 +24,10 @@ import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.components.interfaces.Resizable;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
 import com.kartoflane.superluminal2.core.Grid;
-import com.kartoflane.superluminal2.core.LayeredPainter;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -39,6 +39,8 @@ import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.undo.UndoableMoveEdit;
+import com.kartoflane.superluminal2.undo.ValueUndoableEdit;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public abstract class AbstractController implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
@@ -64,6 +66,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	protected Snapmodes snapmode = Snapmodes.FREE;
 	protected Point clickOffset = new Point(0, 0);
+
+	protected ValueUndoableEdit<?> currentEdit = null;
 
 	@Override
 	public void setModel(Model model) {
@@ -635,6 +639,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 				if (contains && !selected)
 					Manager.setSelected(this);
 				setMoving(contains);
+
+				currentEdit = new UndoableMoveEdit(this);
+				undoInit();
 			}
 		}
 	}
@@ -646,6 +653,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 				if (!contains(e.x, e.y) && !contains(getX() + clickOffset.x, getY() + clickOffset.y) && selected)
 					Manager.setSelected(null);
 				setMoving(false);
+
+				undoFinalize();
 			}
 		}
 	}
@@ -876,6 +885,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		return deleted;
 	}
 
+	public boolean isDisposed() {
+		return model.isDisposed();
+	}
+
 	@Override
 	public void setDeletable(boolean deletable) {
 		model.setDeletable(deletable);
@@ -1014,5 +1027,30 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			Point p = getLocation();
 			setFollowOffset(p.x - getParent().getX(), p.y - getParent().getY());
 		}
+	}
+
+	protected void undoInit() {
+		if (currentEdit == null)
+			return;
+
+		if (currentEdit instanceof UndoableMoveEdit) {
+			UndoableMoveEdit move = (UndoableMoveEdit) currentEdit;
+			move.setOld(getLocation());
+		}
+	}
+
+	protected void undoFinalize() {
+		if (currentEdit == null)
+			return;
+
+		if (currentEdit instanceof UndoableMoveEdit) {
+			UndoableMoveEdit move = (UndoableMoveEdit) currentEdit;
+			move.setCurrent(getLocation());
+		}
+
+		if (!currentEdit.getOld().equals(currentEdit.getCurrent()))
+			Manager.getCurrentShip().postEdit(currentEdit);
+
+		currentEdit = null;
 	}
 }

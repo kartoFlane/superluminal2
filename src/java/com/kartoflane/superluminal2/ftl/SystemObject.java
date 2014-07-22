@@ -199,7 +199,7 @@ public class SystemObject extends GameObject implements Alias {
 
 	/** Returns true is the system is assigned to a room, false otherwise. */
 	public boolean isAssigned() {
-		return room != null;
+		return room != null && !room.isDeleted();
 	}
 
 	/** Returns true if the system can have a station, false otherwise. */

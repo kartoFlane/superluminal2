@@ -20,6 +20,8 @@ public class ObjectModel extends BaseModel {
 	}
 
 	public GameObject getGameObject() {
+		if (gameObject == null)
+			throw new IllegalStateException("Model is disposed.");
 		return gameObject;
 	}
 
@@ -32,21 +34,29 @@ public class ObjectModel extends BaseModel {
 
 	@Override
 	public void delete() {
+		if (gameObject == null)
+			throw new IllegalStateException("Model is disposed.");
 		gameObject.delete();
 	}
 
 	@Override
 	public void restore() {
+		if (gameObject == null)
+			throw new IllegalStateException("Model is disposed.");
 		gameObject.restore();
 	}
 
 	@Override
 	public void setDeletable(boolean deletable) {
+		if (gameObject == null)
+			throw new IllegalStateException("Model is disposed.");
 		gameObject.setDeletable(deletable);
 	}
 
 	@Override
 	public boolean isDeletable() {
+		if (gameObject == null)
+			throw new IllegalStateException("Model is disposed.");
 		return gameObject.isDeletable();
 	}
 }

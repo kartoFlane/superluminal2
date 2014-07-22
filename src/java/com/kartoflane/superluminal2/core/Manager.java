@@ -6,12 +6,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+
+import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +29,6 @@ import org.eclipse.swt.widgets.Shell;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.KeybindHandler;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
-import com.kartoflane.superluminal2.components.interfaces.Deletable;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
@@ -56,9 +59,7 @@ public abstract class Manager {
 	 */
 	private static final Pattern _filePattern = Pattern.compile(".+\\.[^/]+");
 	private static final HashMap<Hotkeys, Hotkey> _hotkeyMap = new HashMap<Hotkeys, Hotkey>();
-
-	public static final HashMap<Tools, Tool> TOOL_MAP = new HashMap<Tools, Tool>();
-	public static final LinkedList<Deletable> DELETED_LIST = new LinkedList<Deletable>();
+	private static final HashMap<Tools, Tool> _toolMap = new HashMap<Tools, Tool>();
 
 	// Config variables
 	public static boolean sidebarOnRightSide = true;
@@ -80,6 +81,13 @@ public abstract class Manager {
 	private static ShipContainer currentShip = null;
 	private static Tools selectedTool = null;
 	private static KeybindHandler keyHandler = new KeybindHandler();
+	private static UndoManager undoManager = new UndoManager();
+
+	/*
+	 * ================
+	 * Selection system
+	 * ================
+	 */
 
 	/**
 	 * Selects the given box, deselecting the previous one if it was already selected.<br>
@@ -111,6 +119,12 @@ public abstract class Manager {
 	public static AbstractController getSelected() {
 		return selectedController;
 	}
+
+	/*
+	 * =====================================
+	 * Ship system - loading/saving/creation
+	 * =====================================
+	 */
 
 	public static void createNewShip(boolean playerShip) {
 		EditorWindow window = EditorWindow.getInstance();
@@ -168,6 +182,8 @@ public abstract class Manager {
 		EditorWindow window = EditorWindow.getInstance();
 		setSelected(null);
 
+		undoManager.discardAllEdits();
+
 		if (currentShip != null)
 			currentShip.dispose();
 
@@ -185,6 +201,12 @@ public abstract class Manager {
 		return currentShip;
 	}
 
+	/*
+	 * ========================
+	 * Tool system -- selection
+	 * ========================
+	 */
+
 	/**
 	 * Select the given tool item, also triggering the tools' {@link Tool#select() select()} and {@link Tool#deselect() deselect()} methods, as
 	 * needed.
@@ -197,13 +219,13 @@ public abstract class Manager {
 		EditorWindow window = EditorWindow.getInstance();
 
 		if (selectedTool != null)
-			TOOL_MAP.get(selectedTool).deselect();
+			_toolMap.get(selectedTool).deselect();
 
 		selectedTool = tool;
 		if (tool != null) {
-			MouseInputDispatcher.getInstance().setCurrentTool(TOOL_MAP.get(tool));
+			MouseInputDispatcher.getInstance().setCurrentTool(_toolMap.get(tool));
 			window.selectTool(tool);
-			TOOL_MAP.get(tool).select();
+			_toolMap.get(tool).select();
 		} else {
 			MouseInputDispatcher.getInstance().setCurrentTool(null);
 			window.selectTool(null);
@@ -216,12 +238,24 @@ public abstract class Manager {
 	}
 
 	public static Tool getSelectedTool() {
-		return TOOL_MAP.get(selectedTool);
+		return _toolMap.get(selectedTool);
 	}
 
 	public static Tool getTool(Tools tool) {
-		return TOOL_MAP.get(tool);
+		return _toolMap.get(tool);
 	}
+
+	public static void putTool(Tools id, Tool tool) {
+		if (id == null || tool == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		_toolMap.put(id, tool);
+	}
+
+	/*
+	 * ==================================================
+	 * Hotkey system -- loading/registration/notification
+	 * ==================================================
+	 */
 
 	public static Hotkey getHotkey(Hotkeys key) {
 		return _hotkeyMap.get(key);
@@ -331,6 +365,60 @@ public abstract class Manager {
 	public static void unhookHotkeys(Shell shell) {
 		keyHandler.unhook(shell);
 	}
+
+	/*
+	 * ================
+	 * Undo/Redo system
+	 * ================
+	 */
+
+	/**
+	 * This method should not be called directly. Use {@link ShipContainer#postEdit(AbstractUndoableEdit)} instead.
+	 */
+	public static void postEdit(AbstractUndoableEdit aue) {
+		undoManager.addEdit(aue);
+		EditorWindow.getInstance().updateUndoButtons();
+	}
+
+	public static void undo() {
+		try {
+			undoManager.undo();
+			EditorWindow.getInstance().updateUndoButtons();
+		} catch (CannotUndoException e) {
+			log.trace("Cannot undo:", e);
+		}
+	}
+
+	public static boolean canUndo() {
+		return currentShip != null && undoManager.canUndo();
+	}
+
+	public static String getUndoPresentationName() {
+		return undoManager.getUndoPresentationName();
+	}
+
+	public static void redo() {
+		try {
+			undoManager.redo();
+			EditorWindow.getInstance().updateUndoButtons();
+		} catch (CannotRedoException e) {
+			log.trace("Cannot redo:", e);
+		}
+	}
+
+	public static boolean canRedo() {
+		return currentShip != null && undoManager.canRedo();
+	}
+
+	public static String getRedoPresentationName() {
+		return undoManager.getRedoPresentationName();
+	}
+
+	/*
+	 * ==============
+	 * Miscellanneous
+	 * ==============
+	 */
 
 	/**
 	 * Request an InputStream for the given path.<br>

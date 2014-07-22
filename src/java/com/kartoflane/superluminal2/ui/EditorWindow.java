@@ -40,10 +40,10 @@ import org.eclipse.swt.widgets.ToolItem;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Hotkey;
-import com.kartoflane.superluminal2.components.Hotkey.HotkeyAction;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
@@ -66,13 +66,12 @@ import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.SHPUtils;
-import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public class EditorWindow {
-	private static final Logger log = LogManager.getLogger(EditorWindow.class);
+	static final Logger log = LogManager.getLogger(EditorWindow.class);
 
 	public static final int SIDEBAR_MIN_WIDTH = 290;
 	public static final int CANVAS_MIN_SIZE = 400;
@@ -148,14 +147,14 @@ public class EditorWindow {
 		new MouseInputDispatcher();
 		CursorController.newInstance();
 
-		Manager.TOOL_MAP.put(Tools.POINTER, new ManipulationTool(this));
-		Manager.TOOL_MAP.put(Tools.CREATOR, new CreationTool(this));
-		Manager.TOOL_MAP.put(Tools.IMAGES, new ImagesTool(this));
-		Manager.TOOL_MAP.put(Tools.CONFIG, new PropertyTool(this));
-		Manager.TOOL_MAP.put(Tools.ROOM, new RoomTool(this));
-		Manager.TOOL_MAP.put(Tools.DOOR, new DoorTool(this));
-		Manager.TOOL_MAP.put(Tools.WEAPON, new MountTool(this));
-		Manager.TOOL_MAP.put(Tools.STATION, new StationTool(this));
+		Manager.putTool(Tools.POINTER, new ManipulationTool(this));
+		Manager.putTool(Tools.CREATOR, new CreationTool(this));
+		Manager.putTool(Tools.IMAGES, new ImagesTool(this));
+		Manager.putTool(Tools.CONFIG, new PropertyTool(this));
+		Manager.putTool(Tools.ROOM, new RoomTool(this));
+		Manager.putTool(Tools.DOOR, new DoorTool(this));
+		Manager.putTool(Tools.WEAPON, new MountTool(this));
+		Manager.putTool(Tools.STATION, new StationTool(this));
 
 		// Menu bar
 		Menu menu = new Menu(shell, SWT.BAR);
@@ -540,8 +539,7 @@ public class EditorWindow {
 				}
 
 				if (temp != null) { // User could've aborted selection, which returns null.
-					container.setSaveDestination(temp);
-					saveShip(container);
+					container.save(temp);
 				} else {
 					log.trace("User exited save dialog, ship was not saved.");
 				}
@@ -558,8 +556,7 @@ public class EditorWindow {
 				File temp = dialog.open();
 
 				if (temp != null) { // User could've aborted selection, which returns null.
-					container.setSaveDestination(temp);
-					saveShip(container);
+					container.save(temp);
 				} else {
 					log.trace("User exited save dialog, ship was not saved.");
 				}
@@ -626,16 +623,16 @@ public class EditorWindow {
 		mntmUndo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO
-				if (Manager.DELETED_LIST.size() > 0)
-					Manager.DELETED_LIST.removeLast().restore();
+				if (Manager.canUndo())
+					Manager.undo();
 			}
 		});
 
 		mntmRedo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO
+				if (Manager.canRedo())
+					Manager.redo();
 			}
 		});
 
@@ -933,33 +930,11 @@ public class EditorWindow {
 		tltmCloak.setToolTipText("View Cloaked Appearance" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
 	}
 
-	private void saveShip(ShipContainer container) {
-		File saveDestination = container.getSaveDestination();
-
-		if (saveDestination == null)
-			throw new IllegalStateException("Save destination must not be null.");
-
-		if (saveDestination.isDirectory()) {
-			log.trace("Saving ship to " + saveDestination.getAbsolutePath());
-
-			try {
-				ShipSaveUtils.saveShipXML(saveDestination, container);
-				log.trace("Ship saved successfully.");
-			} catch (Exception ex) {
-				log.error("An error occured while saving the ship: ", ex);
-				UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
-			}
-		} else {
-			log.trace("Saving ship as " + saveDestination.getAbsolutePath());
-
-			try {
-				ShipSaveUtils.saveShipFTL(saveDestination, container);
-				log.trace("Ship saved successfully.");
-			} catch (Exception ex) {
-				log.error("An error occured while saving the ship: ", ex);
-				UIUtils.showWarningDialog(shell, null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
-			}
-		}
+	public void updateUndoButtons() {
+		mntmUndo.setEnabled(Manager.canUndo());
+		mntmUndo.setText(Manager.getUndoPresentationName());
+		mntmRedo.setEnabled(Manager.canRedo());
+		mntmRedo.setText(Manager.getRedoPresentationName());
 	}
 
 	/**
@@ -1107,8 +1082,8 @@ public class EditorWindow {
 		mntmCloseShip.setEnabled(enable);
 
 		// Edit
-		mntmUndo.setEnabled(false); // TODO
-		mntmRedo.setEnabled(false); // TODO
+		mntmUndo.setEnabled(enable && Manager.canUndo());
+		mntmRedo.setEnabled(enable && Manager.canRedo());
 		mntmResetLinks.setEnabled(enable);
 		mntmOptimalOffset.setEnabled(enable);
 		mntmDelete.setEnabled(enable);
@@ -1373,7 +1348,7 @@ public class EditorWindow {
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.PIN);
-		h.setAction(new HotkeyAction() {
+		h.setAction(new Action() {
 			public void execute() {
 				if (Manager.getSelectedToolId() == Tools.POINTER) {
 					AbstractController selected = Manager.getSelected();
@@ -1432,7 +1407,7 @@ public class EditorWindow {
 	}
 
 	private void addNudgeAction(final Hotkey h, final int amountX, final int amountY) {
-		h.setAction(new HotkeyAction() {
+		h.setAction(new Action() {
 			public void execute() {
 				AbstractController selected = Manager.getSelected();
 				if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
@@ -1461,7 +1436,7 @@ public class EditorWindow {
 	}
 
 	private void addCreateToolAction(Hotkey h, final Tools tool) {
-		h.setAction(new HotkeyAction() {
+		h.setAction(new Action() {
 			public void execute() {
 				if (tltmCreation.isEnabled()) {
 					if (!tltmCreation.getSelection())

@@ -352,6 +352,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 							gib.setImagePath("file:" + path);
 							GibController gc = GibController.newInstance(container, gib);
 							container.add(gc);
+							container.store(gc);
 							gc.updateFollower();
 
 							createGibWidgets(gib);

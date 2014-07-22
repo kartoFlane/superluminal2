@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import javax.swing.undo.AbstractUndoableEdit;
+
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
@@ -44,6 +46,9 @@ import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
+import com.kartoflane.superluminal2.utils.ShipSaveUtils;
+import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
 /**
@@ -131,6 +136,7 @@ public class ShipContainer implements Disposable, SLListener {
 			rc.updateFollowOffset();
 
 			add(rc);
+			store(rc);
 		}
 
 		for (DoorObject door : ship.getDoors()) {
@@ -143,6 +149,7 @@ public class ShipContainer implements Disposable, SLListener {
 			dc.updateFollowOffset();
 
 			add(dc);
+			store(dc);
 		}
 
 		createImageControllers();
@@ -170,6 +177,7 @@ public class ShipContainer implements Disposable, SLListener {
 			gc.updateFollowOffset();
 
 			add(gc);
+			store(gc);
 			i--;
 		}
 
@@ -184,6 +192,7 @@ public class ShipContainer implements Disposable, SLListener {
 			mc.updateFollower();
 
 			add(mc);
+			store(mc);
 		}
 
 		// Instantiate first, assign later
@@ -192,8 +201,12 @@ public class ShipContainer implements Disposable, SLListener {
 				SystemController systemC = SystemController.newInstance(this, system);
 
 				add(systemC);
-				if (sys.canContainStation())
-					add(StationController.newInstance(this, systemC, system.getStation()));
+				store(systemC);
+				if (sys.canContainStation()) {
+					StationController sc = StationController.newInstance(this, systemC, system.getStation());
+					add(sc);
+					store(sc);
+				}
 			}
 		}
 
@@ -285,16 +298,61 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 	}
 
-	public boolean isSaved() {
-		return shipSaved;
+	public void postEdit(AbstractUndoableEdit aue) {
+		if (aue == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		shipSaved = false;
+		Manager.postEdit(aue);
 	}
 
-	public void setSaveDestination(File f) {
+	/**
+	 * Saves the ship at the location supplied in argument.<br>
+	 * <br>
+	 * Saving method depends on the argument:<br>
+	 * - if the argument is a directory, the ship is saved as a resource folder (ie. creates "data" and
+	 * "img" folders in the directory passed in argument)
+	 * - if the argument is a file, the ship is saved as a zip archive
+	 * 
+	 * @param f
+	 *            the file the ship is to be saved as, or the directory in which it is to be saved
+	 */
+	public void save(File f) {
+		if (f == null)
+			throw new IllegalStateException("Save destination must not be null.");
+
 		saveDestination = f;
+
+		if (saveDestination.isDirectory()) {
+			EditorWindow.log.trace("Saving ship to " + saveDestination.getAbsolutePath());
+
+			try {
+				ShipSaveUtils.saveShipXML(saveDestination, this);
+				shipSaved = true;
+				EditorWindow.log.trace("Ship saved successfully.");
+			} catch (Exception ex) {
+				EditorWindow.log.error("An error occured while saving the ship: ", ex);
+				UIUtils.showWarningDialog(window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+			}
+		} else {
+			EditorWindow.log.trace("Saving ship as " + saveDestination.getAbsolutePath());
+
+			try {
+				ShipSaveUtils.saveShipFTL(saveDestination, this);
+				shipSaved = true;
+				EditorWindow.log.trace("Ship saved successfully.");
+			} catch (Exception ex) {
+				EditorWindow.log.error("An error occured while saving the ship: ", ex);
+				UIUtils.showWarningDialog(window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+			}
+		}
 	}
 
 	public File getSaveDestination() {
 		return saveDestination;
+	}
+
+	public boolean isSaved() {
+		return shipSaved;
 	}
 
 	public ShipController getShipController() {
@@ -564,8 +622,6 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 
 		if (controller instanceof ObjectController) {
-			objectControllerMap.put(((ObjectController) controller).getGameObject(), controller);
-
 			eventHandler.sendEvent(new SLEvent(SLEvent.ADD_OBJECT, this, controller));
 		}
 	}
@@ -594,10 +650,19 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 
 		if (controller instanceof ObjectController) {
-			objectControllerMap.remove(((ObjectController) controller).getGameObject());
-
 			eventHandler.sendEvent(new SLEvent(SLEvent.REM_OBJECT, this, controller));
 		}
+	}
+
+	public void store(AbstractController controller) {
+		if (controller instanceof ObjectController)
+			objectControllerMap.put(((ObjectController) controller).getGameObject(), controller);
+	}
+
+	public void dispose(AbstractController controller) {
+		if (controller instanceof ObjectController)
+			objectControllerMap.remove(((ObjectController) controller).getGameObject());
+		controller.dispose();
 	}
 
 	public void sort() {
@@ -692,7 +757,13 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 	}
 
-	public void delete(AbstractController controller) {
+	/**
+	 * Deletes the controller without posting an undoable edit.<br>
+	 * Intended to be used only by {@link UndoableDeleteEdit}. Use {@link #delete(AbstractController)} instead.
+	 */
+	public void deleteNonUndoable(AbstractController controller) {
+		if (controller == null)
+			throw new IllegalArgumentException("Argument must not be null.");
 		if (!controller.isDeletable())
 			throw new NotDeletableException();
 
@@ -700,17 +771,38 @@ public class ShipContainer implements Disposable, SLListener {
 		remove(controller);
 		updateBoundingArea();
 
-		if (controller instanceof RoomController) {
-			RoomController rc = (RoomController) controller;
-			for (SystemObject sys : getAllAssignedSystems(rc.getGameObject())) {
-				unassign(sys);
-			}
-		}
+		/*
+		 * if (controller instanceof RoomController) {
+		 * RoomController rc = (RoomController) controller;
+		 * for (SystemObject sys : getAllAssignedSystems(rc.getGameObject())) {
+		 * unassign(sys);
+		 * }
+		 * }
+		 */
 	}
 
+	/**
+	 * Deletes the controller and posts an undoable edit.
+	 */
+	public void delete(AbstractController controller) {
+		deleteNonUndoable(controller);
+		postEdit(new UndoableDeleteEdit(controller));
+	}
+
+	/**
+	 * Restores the deleted controller.
+	 */
 	public void restore(AbstractController controller) {
+		if (controller == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		if (!controller.isDeletable())
+			throw new NotDeletableException();
+		if (!controller.isDeleted())
+			throw new IllegalArgumentException("The controller has not been deleted.");
+
 		controller.restore();
 		add(controller);
+		updateBoundingArea();
 	}
 
 	@Override
@@ -851,6 +943,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 		imageControllerMap.put(Images.SHIELD, shield);
 		add(shield);
+		store(shield);
 		shield.setBounded(true);
 
 		if (!ship.isPlayerShip()) {
@@ -893,6 +986,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 		imageControllerMap.put(Images.HULL, hull);
 		add(hull);
+		store(hull);
 		hull.setBounded(true);
 
 		// Load cloak
@@ -909,6 +1003,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 		imageControllerMap.put(Images.CLOAK, cloak);
 		add(cloak);
+		store(cloak);
 		cloak.setVisible(false); // Cloak is only displayed when View Cloak is enabled
 		cloak.setBounded(true);
 
@@ -926,6 +1021,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 		imageControllerMap.put(Images.FLOOR, floor);
 		add(floor);
+		store(floor);
 		floor.setBounded(true);
 
 		// Load thumbnail
@@ -935,6 +1031,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 		imageControllerMap.put(Images.THUMBNAIL, thumbnail);
 		add(thumbnail);
+		store(thumbnail);
 		thumbnail.setVisible(false);
 	}
 
