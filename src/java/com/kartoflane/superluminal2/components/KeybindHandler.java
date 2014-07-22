@@ -49,7 +49,7 @@ public class KeybindHandler {
 			throw new IllegalArgumentException("Shell must not be null.");
 		if (keyMap == null)
 			return;
-		if (keyMap.get(shell) == null)
+		if (!hooks(shell))
 			return;
 
 		for (Hotkey h : keyMap.get(shell)) {
@@ -80,7 +80,8 @@ public class KeybindHandler {
 	}
 
 	public void dispose() {
-		keyMap.clear();
+		if (keyMap != null)
+			keyMap.clear();
 		keyMap = null;
 	}
 }

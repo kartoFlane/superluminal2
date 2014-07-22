@@ -515,6 +515,7 @@ public class DroneSelectionDialog {
 	}
 
 	public void dispose() {
+		Manager.unhookHotkeys(shell);
 		shell.dispose();
 		instance = null;
 	}

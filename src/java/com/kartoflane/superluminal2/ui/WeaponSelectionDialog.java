@@ -548,6 +548,7 @@ public class WeaponSelectionDialog {
 	}
 
 	public void dispose() {
+		Manager.unhookHotkeys(shell);
 		shell.dispose();
 		instance = null;
 	}

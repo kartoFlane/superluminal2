@@ -389,6 +389,7 @@ public class ModManagementDialog {
 	}
 
 	public void dispose() {
+		Manager.unhookHotkeys(shell);
 		if (disabledColor != null)
 			Cache.checkInColor(this, disabledColor.getRGB());
 		disabledColor = null;

@@ -364,6 +364,7 @@ public class AugmentSelectionDialog {
 	}
 
 	public void dispose() {
+		Manager.unhookHotkeys(shell);
 		shell.dispose();
 		instance = null;
 	}

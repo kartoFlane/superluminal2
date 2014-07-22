@@ -430,6 +430,7 @@ public class ShipLoaderDialog {
 	}
 
 	public void dispose() {
+		Manager.unhookHotkeys(shell);
 		dataTreeMap.clear();
 		blueprintTreeMap.clear();
 		preview.dispose();

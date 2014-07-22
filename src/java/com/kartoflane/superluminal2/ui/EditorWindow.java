@@ -1201,6 +1201,7 @@ public class EditorWindow {
 	}
 
 	public void dispose() {
+		Manager.unhookHotkeys(shell);
 		Cache.checkInColor(this, canvasRGB);
 		Grid.getInstance().dispose();
 		Cache.dispose();
