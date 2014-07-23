@@ -21,7 +21,9 @@ import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
-import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
+import com.kartoflane.superluminal2.undo.UndoableSystemAssignmentEdit;
+import com.kartoflane.superluminal2.undo.UndoableSystemEmptyEdit;
+import com.kartoflane.superluminal2.undo.UndoableSystemEmptyEdit.NoSystemsException;
 
 public class SystemsMenu {
 
@@ -29,7 +31,6 @@ public class SystemsMenu {
 
 	private ShipContainer container = null;
 	private RoomController controller = null;
-	private ManipulationToolComposite mtc = null;
 
 	private HashMap<SystemObject, MenuItem> systemItemMap = new HashMap<SystemObject, MenuItem>();
 
@@ -60,7 +61,6 @@ public class SystemsMenu {
 		if (Manager.getSelected() instanceof RoomController == false)
 			throw new IllegalStateException("The selected controller is not a RoomController.");
 
-		mtc = (ManipulationToolComposite) EditorWindow.getInstance().getSidebarContent();
 		container = Manager.getCurrentShip();
 
 		SystemObject sys = container.getActiveSystem(controller.getGameObject());
@@ -209,14 +209,29 @@ public class SystemsMenu {
 				Widget w = (Widget) e.getSource();
 
 				if (w == mntmEmpty) {
+					try {
+						container.postEdit(new UndoableSystemEmptyEdit(controller));
+					} catch (NoSystemsException ex) {
+						// Ignore, only serves to prevent the edit from being posted
+					}
+
 					for (SystemObject system : container.getAllAssignedSystems(controller.getGameObject())) {
 						container.unassign(system);
 					}
 				} else {
+					SystemObject so = (SystemObject) w.getData();
+					SystemController sys = (SystemController) container.getController(so);
+					RoomController rc = (RoomController) container.getController(so.getRoom());
+
 					container.assign((SystemObject) w.getData(), controller);
+
+					UndoableSystemAssignmentEdit edit = new UndoableSystemAssignmentEdit(sys);
+					edit.setOld(rc);
+					edit.setCurrent(controller);
+					container.postEdit(edit);
 				}
 
-				mtc.updateData();
+				EditorWindow.getInstance().updateSidebarContent();
 				controller.redraw();
 				OverviewWindow.staticUpdate(controller);
 			}
@@ -254,15 +269,23 @@ public class SystemsMenu {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				container.setActiveSystem(controller.getGameObject(), sys);
-				mtc.updateData();
+				EditorWindow.getInstance().updateSidebarContent();
 			}
 		});
 
 		mntmUnassign.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				SystemController sc = (SystemController) container.getController(sys);
+				RoomController rc = (RoomController) container.getController(sys.getRoom());
+
 				container.unassign(sys);
-				mtc.updateData();
+				EditorWindow.getInstance().updateSidebarContent();
+
+				UndoableSystemAssignmentEdit edit = new UndoableSystemAssignmentEdit(sc);
+				edit.setOld(rc);
+				edit.setCurrent(null);
+				container.postEdit(edit);
 			}
 		});
 
