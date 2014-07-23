@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolTip;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.ui.LoadingDialog;
 
 /**
@@ -303,12 +304,12 @@ public class UIUtils {
 	 * executing the given task in another thread, and waiting for it to finish.<br>
 	 * <br>
 	 * Note that SWT is a single-threaded library, so you <b>cannot create or modify
-	 * UI widgets</b> via LoadTask.<br>
+	 * UI widgets</b> via this method.<br>
 	 * <br>
 	 * Usage:
 	 * 
 	 * <pre>
-	 * showLoadDialog(shell, title, message, new LoadTask() {
+	 * showLoadDialog(shell, title, message, new Action() {
 	 * 	public void execute() {
 	 * 		// your code here...
 	 * 	}
@@ -329,7 +330,7 @@ public class UIUtils {
 	 * @throws IllegalArgumentException
 	 *             when the parent shell is null.
 	 */
-	public static void showLoadDialog(Shell parentShell, String title, String message, final LoadTask task) throws IllegalArgumentException {
+	public static void showLoadDialog(Shell parentShell, String title, String message, final Action task) throws IllegalArgumentException {
 		if (task == null)
 			return;
 
@@ -418,9 +419,5 @@ public class UIUtils {
 		} else {
 			mntm.setText(mntm.getText() + "\t" + hotkeyText);
 		}
-	}
-
-	public interface LoadTask {
-		public void execute();
 	}
 }

@@ -35,12 +35,12 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.utils.UIUtils;
-import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 
 public class ModManagementDialog {
 	private static final Logger log = LogManager.getLogger(ModManagementDialog.class);
@@ -317,7 +317,7 @@ public class ModManagementDialog {
 		btnConfirm.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new LoadTask() {
+				UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new Action() {
 					public void execute() {
 						// Load added entries
 						DatabaseEntry[] dbEntries = db.getEntries();

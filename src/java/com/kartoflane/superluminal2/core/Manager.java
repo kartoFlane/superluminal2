@@ -346,6 +346,7 @@ public abstract class Manager {
 		if (display == null)
 			display = Display.getDefault();
 
+		// Don't execute the hotkey action if an editable widget has focus
 		Control c = display.getFocusControl();
 		boolean execute = c != null && !(c.isEnabled() && (c instanceof Spinner ||
 				(c instanceof Text && ((Text) c).getEditable())));

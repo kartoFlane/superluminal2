@@ -65,9 +65,9 @@ import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
 import com.kartoflane.superluminal2.utils.SHPUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
-import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public class EditorWindow {
@@ -574,7 +574,7 @@ public class EditorWindow {
 		mntmReloadDb.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				UIUtils.showLoadDialog(shell, null, null, new LoadTask() {
+				UIUtils.showLoadDialog(shell, null, null, new Action() {
 					public void execute() {
 						log.debug("Reloading Database...");
 
@@ -671,6 +671,8 @@ public class EditorWindow {
 						selected.redraw();
 
 						Manager.setSelected(null);
+
+						Manager.getCurrentShip().postEdit(new UndoableDeleteEdit(selected));
 					} catch (NotDeletableException ex) {
 						log.trace("Selected object is not deletable: " + selected.getClass().getSimpleName());
 					}
@@ -933,8 +935,14 @@ public class EditorWindow {
 	public void updateUndoButtons() {
 		mntmUndo.setEnabled(Manager.canUndo());
 		mntmUndo.setText(Manager.getUndoPresentationName());
+		Hotkey h = Manager.getHotkey(Hotkeys.UNDO);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmUndo, h.toString());
 		mntmRedo.setEnabled(Manager.canRedo());
 		mntmRedo.setText(Manager.getRedoPresentationName());
+		h = Manager.getHotkey(Hotkeys.REDO);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmRedo, h.toString());
 	}
 
 	/**

@@ -30,8 +30,7 @@ public class UndoableCreateEdit extends AbstractUndoableEdit {
 	@Override
 	public void undo() throws CannotUndoException {
 		super.undo();
-		// Don't call ShipContainer.delete() so's to prevent each undo of this edit from creating new edits.
-		Manager.getCurrentShip().deleteNonUndoable(data);
+		Manager.getCurrentShip().delete(data);
 		disposeOnDie = true;
 	}
 

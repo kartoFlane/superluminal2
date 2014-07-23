@@ -46,7 +46,6 @@ import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
-import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -758,10 +757,9 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	/**
-	 * Deletes the controller without posting an undoable edit.<br>
-	 * Intended to be used only by {@link UndoableDeleteEdit}. Use {@link #delete(AbstractController)} instead.
+	 * Deletes the controller and posts an undoable edit.
 	 */
-	public void deleteNonUndoable(AbstractController controller) {
+	public void delete(AbstractController controller) {
 		if (controller == null)
 			throw new IllegalArgumentException("Argument must not be null.");
 		if (!controller.isDeletable())
@@ -770,23 +768,6 @@ public class ShipContainer implements Disposable, SLListener {
 		controller.delete();
 		remove(controller);
 		updateBoundingArea();
-
-		/*
-		 * if (controller instanceof RoomController) {
-		 * RoomController rc = (RoomController) controller;
-		 * for (SystemObject sys : getAllAssignedSystems(rc.getGameObject())) {
-		 * unassign(sys);
-		 * }
-		 * }
-		 */
-	}
-
-	/**
-	 * Deletes the controller and posts an undoable edit.
-	 */
-	public void delete(AbstractController controller) {
-		deleteNonUndoable(controller);
-		postEdit(new UndoableDeleteEdit(controller));
 	}
 
 	/**
@@ -1167,6 +1148,13 @@ public class ShipContainer implements Disposable, SLListener {
 					systems.add(system);
 			}
 		}
+
+		SystemObject active = getActiveSystem(room);
+		if (active != null) {
+			systems.remove(active);
+			systems.add(active);
+		}
+
 		return systems;
 	}
 

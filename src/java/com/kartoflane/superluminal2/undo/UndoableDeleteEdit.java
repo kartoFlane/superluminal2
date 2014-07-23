@@ -37,8 +37,7 @@ public class UndoableDeleteEdit extends AbstractUndoableEdit {
 	@Override
 	public void redo() throws CannotRedoException {
 		super.redo();
-		// Don't call ShipContainer.delete() so's to prevent each undo of this edit from creating new edits.
-		Manager.getCurrentShip().deleteNonUndoable(data);
+		Manager.getCurrentShip().delete(data);
 		disposeOnDie = true;
 	}
 

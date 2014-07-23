@@ -28,6 +28,7 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
+import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
 import com.kartoflane.superluminal2.core.Manager;
@@ -35,13 +36,12 @@ import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
-import com.kartoflane.superluminal2.utils.UIUtils.LoadTask;
 
 public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.2 beta");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.3 beta");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -59,10 +59,15 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - artillery
+	 * - station locations don't get updated correctly when assigning to rooms of different sizes
 	 * - undo system
+	 * == make sure that system assignment works correctly when deleting rooms with systems
+	 * == system assignment undo
+	 * == door linking undo/redo
+	 * ==
+	 * == various properties undos
 	 * 
 	 * MEDIUM:
-	 * - entity deletion --> add (to) undo
 	 * - glow placement modification
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * 
@@ -241,7 +246,7 @@ public class Superluminal {
 
 				log.trace("Loading database...");
 
-				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new LoadTask() {
+				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new Action() {
 					public void execute() {
 						db.getCore().load();
 						db.cacheAnimations();
@@ -317,7 +322,7 @@ public class Superluminal {
 		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
 		final ArrayList<String> changes = new ArrayList<String>();
 
-		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new LoadTask() {
+		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new Action() {
 			public void execute() {
 				InputStream is = null;
 				try {
