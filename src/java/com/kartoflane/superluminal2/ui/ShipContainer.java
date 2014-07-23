@@ -221,6 +221,9 @@ public class ShipContainer implements Disposable, SLListener {
 
 		updateBoundingArea();
 		updateChildBoundingAreas();
+
+		// Mark the ship as saved
+		shipSaved = true;
 	}
 
 	public EditorWindow getParent() {
@@ -297,6 +300,12 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 	}
 
+	/**
+	 * Posts the edit passed in argument to the UndoManager, and flags the ship as not saved.
+	 * 
+	 * @param aue
+	 *            the undoable edit to be posted. Must not be null.
+	 */
 	public void postEdit(AbstractUndoableEdit aue) {
 		if (aue == null)
 			throw new IllegalArgumentException("Argument must not be null.");

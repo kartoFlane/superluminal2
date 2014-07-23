@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.KeybindHandler;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
@@ -40,6 +41,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.IOUtils;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 /**
  * Manager class to manage the current ship, interface flags, selection.
@@ -130,7 +132,9 @@ public abstract class Manager {
 
 	public static void createNewShip(boolean playerShip) {
 		EditorWindow window = EditorWindow.getInstance();
-		closeShip();
+
+		if (!closeShip())
+			return;
 
 		currentShip = new ShipContainer(window, new ShipObject(playerShip));
 		currentShip.getShipController().reposition(3 * ShipContainer.CELL_SIZE, 3 * ShipContainer.CELL_SIZE);
@@ -146,7 +150,9 @@ public abstract class Manager {
 
 	public static void loadShip(ShipObject ship) {
 		EditorWindow window = EditorWindow.getInstance();
-		closeShip();
+
+		if (!closeShip())
+			return;
 
 		currentShip = new ShipContainer(window, ship);
 		ShipController sc = currentShip.getShipController();
@@ -168,18 +174,38 @@ public abstract class Manager {
 		OverviewWindow.staticUpdate();
 	}
 
-	public static void closeShip() {
+	/**
+	 * Attempts to close the ship, asking user beforehand if the ship is not saved and there are
+	 * edits that can be undone.
+	 * 
+	 * @return true if the ship was closed, false otherwise
+	 */
+	public static boolean closeShip() {
 		if (currentShip == null)
-			return;
+			return true;
 
-		if (currentShip.isSaved()) {
-			closeShipForce();
-		} else {
-			closeShipForce();
-			// TODO UI prompts and shit
+		if (undoManager.canUndo() && !currentShip.isSaved()) {
+			String msg = "Your ship has unsaved changes. Do you wish to save them?";
+			int response = UIUtils.showYesNoCancelDialog(null, Superluminal.APP_NAME + " - Save Changes?", msg);
+
+			if (response == SWT.YES) {
+				if (!EditorWindow.getInstance().promptSaveShip(currentShip, false))
+					return false; // Abort if the user cancelled saving
+			} else if (response == SWT.NO) {
+				// Ignore and continue
+			} else if (response == SWT.CANCEL) {
+				// Abort
+				return false;
+			}
 		}
+
+		closeShipForce();
+		return true;
 	}
 
+	/**
+	 * Closes the ship without asking the user for confirmation.
+	 */
 	public static void closeShipForce() {
 		EditorWindow window = EditorWindow.getInstance();
 		setSelected(null);
@@ -204,9 +230,9 @@ public abstract class Manager {
 	}
 
 	/*
-	 * ========================
-	 * Tool system -- selection
-	 * ========================
+	 * =============================
+	 * Tool system -- tool selection
+	 * =============================
 	 */
 
 	/**
@@ -383,9 +409,17 @@ public abstract class Manager {
 	 */
 
 	/**
+	 * Posts the edit passed in argument to the UndoManager.<br>
+	 * <br>
 	 * This method should not be called directly. Use {@link ShipContainer#postEdit(AbstractUndoableEdit)} instead.
+	 * 
+	 * @param aue
+	 *            the undoable edit to be posted. Must not be null.
 	 */
 	public static void postEdit(AbstractUndoableEdit aue) {
+		if (aue == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+
 		undoManager.addEdit(aue);
 		EditorWindow.getInstance().updateUndoButtons();
 	}

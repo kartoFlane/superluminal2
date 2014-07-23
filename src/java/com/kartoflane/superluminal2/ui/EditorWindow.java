@@ -531,18 +531,8 @@ public class EditorWindow {
 					return;
 				}
 
-				File temp = container.getSaveDestination();
-				// Only prompt for save directory if the user hasn't chosen any yet
-				if (temp == null) {
-					SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
-					temp = dialog.open();
-				}
-
-				if (temp != null) { // User could've aborted selection, which returns null.
-					container.save(temp);
-				} else {
+				if (!promptSaveShip(container, false))
 					log.trace("User exited save dialog, ship was not saved.");
-				}
 			}
 		});
 
@@ -550,16 +540,8 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ShipContainer container = Manager.getCurrentShip();
-
-				// Always prompt for save directory
-				SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
-				File temp = dialog.open();
-
-				if (temp != null) { // User could've aborted selection, which returns null.
-					container.save(temp);
-				} else {
+				if (!promptSaveShip(container, false))
 					log.trace("User exited save dialog, ship was not saved.");
-				}
 			}
 		});
 
@@ -1004,8 +986,7 @@ public class EditorWindow {
 
 	/**
 	 * Disposes the content of the sidebar, and sets the content to null.<br>
-	 * Prevents the editor from crashing when trying to change the sidebar positioning after closing
-	 * a ship.
+	 * Prevents the editor from crashing when trying to change the sidebar positioning after closing a ship.
 	 */
 	public void disposeSidebarContent() {
 		Control c = sideContainer.getContent();
@@ -1027,8 +1008,7 @@ public class EditorWindow {
 	 * Checks whether the point is inside the canvas area -- eg. points non-negative coordinates
 	 * with values lesser than or equal to the canvas' dimensions (width and height)
 	 * 
-	 * @return true if the point (relative to the canvas) is within the canvas bounds, false
-	 *         otherwise
+	 * @return true if the point (relative to the canvas) is within the canvas bounds, false otherwise
 	 */
 	public boolean canvasContains(int x, int y) {
 		Rectangle bounds = canvas.getBounds();
@@ -1053,8 +1033,7 @@ public class EditorWindow {
 	}
 
 	/**
-	 * Only to be used to programmatically select the tool, when the user doesn't directly click on
-	 * the tool's icon.
+	 * Only to be used to programmatically select the tool, when the user doesn't directly click on the tool's icon.
 	 */
 	public void selectTool(Tools tool) {
 		if (!isToolsEnabled())
@@ -1090,6 +1069,7 @@ public class EditorWindow {
 		mntmCloseShip.setEnabled(enable);
 
 		// Edit
+		updateUndoButtons();
 		mntmUndo.setEnabled(enable && Manager.canUndo());
 		mntmRedo.setEnabled(enable && Manager.canRedo());
 		mntmResetLinks.setEnabled(enable);
@@ -1215,6 +1195,20 @@ public class EditorWindow {
 		}
 
 		editorContainer.layout();
+	}
+
+	public boolean promptSaveShip(ShipContainer container, boolean prompt) {
+		File temp = container.getSaveDestination();
+
+		if (temp == null || prompt) {
+			SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
+			temp = dialog.open();
+		}
+
+		if (temp != null) // User could've aborted selection, which returns null.
+			container.save(temp);
+
+		return temp != null;
 	}
 
 	private void registerHotkeys() {
