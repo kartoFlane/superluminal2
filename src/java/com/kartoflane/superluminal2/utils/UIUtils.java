@@ -149,6 +149,83 @@ public class UIUtils {
 	}
 
 	/**
+	 * Displays a dialog prompting the user for a yes/no response.
+	 * 
+	 * @param parentShell
+	 *            a shell which will be the parent of the dialog. May be null.
+	 * @param title
+	 *            the title of the dialog window. Must not be null.
+	 * @param message
+	 *            the message that will be displayed to the user. Must not be null.
+	 * 
+	 * @return true if the user selected "Yes", false otherwise.
+	 */
+	public static boolean showYesNoDialog(Shell parentShell, String title, String message) {
+		boolean dispose = false;
+
+		if (title == null)
+			throw new IllegalArgumentException("Title must not be null.");
+		if (message == null)
+			throw new IllegalArgumentException("Message must not be null.");
+
+		if (parentShell == null) {
+			parentShell = new Shell(Display.getCurrent());
+			dispose = true;
+		}
+
+		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+
+		box.setText(title);
+		box.setMessage(message);
+
+		boolean result = box.open() == SWT.YES;
+
+		if (dispose)
+			parentShell.dispose();
+
+		return result;
+	}
+
+	/**
+	 * Displays a dialog prompting the user for a yes/no/cancel response.
+	 * 
+	 * @param parentShell
+	 *            a shell which will be the parent of the dialog. May be null.
+	 * @param title
+	 *            the title of the dialog window. Must not be null.
+	 * @param message
+	 *            the message that will be displayed to the user. Must not be null.
+	 * 
+	 * @return int value equal to {@link SWT.YES} is the user selected "Yes", {@link SWT.NO} is the user selected "No",
+	 *         and {@link SWT.CANCEL} is the user selected "Cancel",
+	 */
+	public static int showYesNoCancelDialog(Shell parentShell, String title, String message) {
+		boolean dispose = false;
+
+		if (title == null)
+			throw new IllegalArgumentException("Title must not be null.");
+		if (message == null)
+			throw new IllegalArgumentException("Message must not be null.");
+
+		if (parentShell == null) {
+			parentShell = new Shell(Display.getCurrent());
+			dispose = true;
+		}
+
+		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO | SWT.CANCEL);
+
+		box.setText(title);
+		box.setMessage(message);
+
+		int result = box.open();
+
+		if (dispose)
+			parentShell.dispose();
+
+		return result;
+	}
+
+	/**
 	 * Prompts the user to select a directory.
 	 * 
 	 * @param parentShell
