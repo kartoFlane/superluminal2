@@ -11,6 +11,12 @@ Changelog
 - Reworked hotkey system
 - Added search functionality to weapon, drone & augment selection dialogs (Ctrl+F hotkey)
 - Added hotkeys to Mod Management: Confirm (Enter), Load (Ctrl+L), Remove (Delete)
+- Added undo/redo. Currently undoable operations:
+  * Creation & deletion
+  * Move (by mouse)
+  * Room resize
+  * System (un)assignment
+  * Door linking
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
