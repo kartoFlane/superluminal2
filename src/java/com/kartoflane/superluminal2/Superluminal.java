@@ -59,7 +59,7 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - artillery
-	 * - station locations don't get updated correctly when assigning to rooms of different sizes
+	 * - station locations don't get updated correctly when assigning to rooms of different sizes -- missing canContain(slot) check?
 	 * - undo system
 	 * == make sure that system assignment works correctly when deleting rooms with systems
 	 * == system assignment undo

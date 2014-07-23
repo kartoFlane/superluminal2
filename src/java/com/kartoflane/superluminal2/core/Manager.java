@@ -47,7 +47,6 @@ import com.kartoflane.superluminal2.utils.UIUtils;
  * Manager class to manage the current ship, interface flags, selection.
  * 
  * @author kartoFlane
- * 
  */
 public abstract class Manager {
 	private static final Logger log = LogManager.getLogger(Manager.class);
@@ -119,7 +118,7 @@ public abstract class Manager {
 		}
 	}
 
-	/** Returns the currently selected controller. */
+	/** @return the currently selected controller. */
 	public static AbstractController getSelected() {
 		return selectedController;
 	}
@@ -490,7 +489,6 @@ public abstract class Manager {
 	 * @param path
 	 *            path to the requested file, preceded by protocol
 	 * @return input stream for the given file, or null if not found
-	 * 
 	 * @throws FileNotFoundException
 	 *             when there was no file under the specified path
 	 * @throws IllegalArgumentException

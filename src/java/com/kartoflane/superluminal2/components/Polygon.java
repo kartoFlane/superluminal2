@@ -238,4 +238,8 @@ public class Polygon {
 		buf.append(" }");
 		return buf.toString();
 	}
+
+	public int hashCode() {
+		return bounds.hashCode() ^ points.hashCode();
+	}
 }
