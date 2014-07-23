@@ -19,6 +19,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
+import com.kartoflane.superluminal2.undo.UndoableDoorLinkEdit;
 
 public class ManipulationTool extends Tool {
 
@@ -165,13 +166,21 @@ public class ManipulationTool extends Tool {
 			RoomController roomC = control instanceof RoomController ? (RoomController) control : null;
 			DoorController doorC = (DoorController) Manager.getSelected();
 
-			if (state == States.DOOR_LINK_LEFT)
+			if (state == States.DOOR_LINK_LEFT) {
+				UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, true);
+				edit.setOld(doorC.getLeftRoom());
+				edit.setCurrent(roomC == null ? null : roomC.getGameObject());
 				doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
-			else
+				Manager.getCurrentShip().postEdit(edit);
+			} else {
+				UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, false);
+				edit.setOld(doorC.getRightRoom());
+				edit.setCurrent(roomC == null ? null : roomC.getGameObject());
 				doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
-			ManipulationToolComposite mtc = (ManipulationToolComposite) window.getSidebarContent();
-			mtc.updateData();
+				Manager.getCurrentShip().postEdit(edit);
+			}
 
+			EditorWindow.getInstance().updateSidebarContent();
 			setStateManipulate();
 
 		} else if (state == States.MOUNT_GIB_LINK) {
@@ -189,9 +198,8 @@ public class ManipulationTool extends Tool {
 			MountController mountC = (MountController) Manager.getSelected();
 
 			mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
-			ManipulationToolComposite mtc = (ManipulationToolComposite) window.getSidebarContent();
-			mtc.updateData();
 
+			EditorWindow.getInstance().updateSidebarContent();
 			setStateManipulate();
 		}
 
