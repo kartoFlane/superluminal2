@@ -7,6 +7,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Grid;
@@ -25,6 +26,7 @@ import com.kartoflane.superluminal2.ui.SystemsMenu;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.RoomDataComposite;
+import com.kartoflane.superluminal2.undo.UndoableResizeEdit;
 import com.kartoflane.superluminal2.utils.Utils;
 
 public class RoomController extends ObjectController implements Indexable, Comparable<RoomController> {
@@ -238,6 +240,10 @@ public class RoomController extends ObjectController implements Indexable, Compa
 						resLoc = Grid.getInstance().snapToGrid(resLoc, getSnapMode(w, h));
 						resSize = Grid.getInstance().snapToGrid(resSize, Snapmodes.CROSS);
 
+						UndoableResizeEdit edit = new UndoableResizeEdit(this);
+						edit.setOld(new Tuple<Point, Point>(getLocation(), getSize()));
+						edit.setCurrent(new Tuple<Point, Point>(resLoc, resSize));
+
 						setSize(resSize);
 						setLocation(resLoc);
 
@@ -246,6 +252,16 @@ public class RoomController extends ObjectController implements Indexable, Compa
 
 						container.updateBoundingArea();
 						setVisible(true);
+
+						Action a = new Action() {
+							public void execute() {
+								container.getParent().updateSidebarContent();
+								container.updateBoundingArea();
+							}
+						};
+						edit.setUndoCallback(a);
+						edit.setRedoCallback(a);
+						container.postEdit(edit);
 					}
 					updateView();
 				}
