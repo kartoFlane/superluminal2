@@ -1,8 +1,5 @@
 package com.kartoflane.superluminal2.undo;
 
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-
 import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.core.Manager;
@@ -32,7 +29,7 @@ public class UndoableMoveEdit extends ValueUndoableEdit<Point> {
 	}
 
 	@Override
-	public void doUndo() throws CannotUndoException {
+	public void doUndo() {
 		if (old == null)
 			throw new IllegalStateException("Old location is null!");
 
@@ -50,7 +47,7 @@ public class UndoableMoveEdit extends ValueUndoableEdit<Point> {
 	}
 
 	@Override
-	public void doRedo() throws CannotRedoException {
+	public void doRedo() {
 		if (cur == null)
 			throw new IllegalStateException("Current location is null!");
 
