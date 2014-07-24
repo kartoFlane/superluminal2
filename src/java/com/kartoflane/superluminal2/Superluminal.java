@@ -60,12 +60,9 @@ public class Superluminal {
 	 * IMMEDIATE:
 	 * - artillery
 	 * 
-	 * !!!
-	 * - door linking done by automatic linking persists after saving ---> can cause bugs when user
-	 * saves a second time after making changes, find a fix for this (make ResetDoorLinksOnMove default, add listeners to door from linked rooms?)
-	 * 
 	 * - undo system
 	 * == various properties undos
+	 * == reorder undo
 	 * 
 	 * MEDIUM:
 	 * - glow placement modification

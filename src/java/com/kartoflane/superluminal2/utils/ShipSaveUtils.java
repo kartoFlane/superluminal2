@@ -28,6 +28,7 @@ import org.jdom2.Comment;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
+import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Races;
@@ -147,7 +148,14 @@ public class ShipSaveUtils {
 
 		container.updateGameObjects();
 		ship.coalesceRooms();
+
+		// Remember door links and recover them later -- linking doors automatically persists after saving
+		// is completed, which can cause bugs when the user moves the doors/rooms around and saves again
+		HashMap<DoorObject, Tuple<RoomObject, RoomObject>> doorLinkMap = new HashMap<DoorObject, Tuple<RoomObject, RoomObject>>();
+		for (DoorObject d : ship.getDoors())
+			doorLinkMap.put(d, new Tuple<RoomObject, RoomObject>(d.getLeftRoom(), d.getRightRoom()));
 		ship.linkDoors();
+
 		GlowObject[] newGlows = ship.createGlows();
 
 		HashMap<String, byte[]> fileMap = new HashMap<String, byte[]>();
@@ -172,6 +180,12 @@ public class ShipSaveUtils {
 			fileName = "data/rooms.xml.append";
 			bytes = IOUtils.readDocument(generateRoomsXML(newGlows)).getBytes();
 			fileMap.put(fileName, bytes);
+		}
+
+		// Recover door links
+		for (DoorObject d : ship.getDoors()) {
+			d.setLeftRoom(doorLinkMap.get(d).getKey());
+			d.setRightRoom(doorLinkMap.get(d).getValue());
 		}
 
 		// Copy images
