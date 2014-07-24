@@ -1,5 +1,5 @@
 <versions>
-	<latest id="2.0.1 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.3 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
 		<version id="2.0.3 beta">
 			<change>Added undo/redo system -- see changelog for currently undoable operations</change>
