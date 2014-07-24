@@ -1,6 +1,13 @@
 <versions>
 	<latest id="2.0.1 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.0.3 beta">
+			<change>Added undo/redo system -- see changelog for currently undoable operations</change>
+			<change>Added "Unsaved Changes" warnings</change>
+			<change>Added .shp file loading</change>
+			<change>Gib angular velocity modification, mount-gib linking</change>
+			<change>Added search functionality to weapon/drone/augment selection dialogs</change>
+		</version>
 		<version id="2.0.1 beta">
 			<change>Fixed a bug that would cause shield image to not be exported</change>
 			<change>Added keybind modification via Settings window</change>

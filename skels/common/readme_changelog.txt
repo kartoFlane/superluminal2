@@ -1,24 +1,30 @@
 Changelog
 
-2.0.2 beta:
+2.0.3 beta:
 - Menu buttons' hotkey text is now updated when you modify hotkeys
 - Hotkeys can now be unbound
 - Added .shp file loading
 - Added gibs' angular velocity modification
 - Added raw value modification to gibs
 - Fixed a somewhat rare bug with system visibility
+- Fixed a bug with station visibility that would cause the station to not be hidden when its
+  system was assigned to a room that cannot contain it
+- Fixed a bug with automated door linking persisting after saving was completed, which could
+  cause bugged links when the user moved the doors/rooms around and then saved again
 - Fixed a bug with Mod Management that would allow the same mod to be loaded multiple times
 - Added mount-gib linking
 - Reworked hotkey system
 - Added search functionality to weapon, drone & augment selection dialogs (Ctrl+F hotkey)
 - Added hotkeys to Mod Management: Confirm (Enter), Load (Ctrl+L), Remove (Delete)
 - Added undo/redo. Currently undoable operations:
-  * Creation & deletion
+  * Creation of new rooms, doors, mounts and gibs
+  * Deletion of rooms, doors, mounts and gibs
   * Move (by mouse)
   * Room resize
   * System (un)assignment
   * Door linking
-- Added "Unsaved Changes" warnings/prompts
+- Added "Unsaved Changes" warnings/prompts -- however, this is tied to the undo/redo system,
+  so only making undoable changes will cause the warnings to pop up
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
