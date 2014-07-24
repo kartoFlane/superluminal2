@@ -44,7 +44,9 @@ import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
 /**
- * Manager class to manage the current ship, interface flags, selection.
+ * Manager class to manage the current ship, interface flags, object & tool selection,
+ * hotkey registration and handling, undo/redo system, and requesting of file handles
+ * via the editor's protocol system.
  * 
  * @author kartoFlane
  */

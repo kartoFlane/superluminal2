@@ -151,6 +151,9 @@ General explanation of source code packages and their contents:
           Instead of being inserted into the sidebar directly however, they're
           inserted into the Manipulation Tool's container.
 
+    ".undo"
+      Classes representing undoable operations in the editor's undo system.
+
     ".utils"
       Various utility classes. Stream-level IO, XML doc interpretation, ship loading and
       saving are all handled through here.
