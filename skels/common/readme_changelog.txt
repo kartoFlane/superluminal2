@@ -7,6 +7,7 @@ Changelog
 - Added gibs' angular velocity modification
 - Added raw value modification to gibs
 - Fixed a somewhat rare bug with system visibility
+- Fixed a bug with Mod Management that would allow the same mod to be loaded multiple times
 - Added mount-gib linking
 - Reworked hotkey system
 - Added search functionality to weapon, drone & augment selection dialogs (Ctrl+F hotkey)
@@ -17,6 +18,7 @@ Changelog
   * Room resize
   * System (un)assignment
   * Door linking
+- Added "Unsaved Changes" warnings/prompts
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.

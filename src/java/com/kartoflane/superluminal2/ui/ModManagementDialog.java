@@ -427,7 +427,7 @@ public class ModManagementDialog {
 
 	private boolean contains(Object[] array, Object object) {
 		for (Object o : array)
-			if (o == object)
+			if (o.equals(object))
 				return true;
 		return false;
 	}
