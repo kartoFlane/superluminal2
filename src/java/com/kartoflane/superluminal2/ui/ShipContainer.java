@@ -1143,8 +1143,11 @@ public class ShipContainer implements Disposable, SLListener {
 	}
 
 	public SystemObject getActiveSystem(RoomObject room) {
-		if (activeSystemMap.containsKey(room))
-			return activeSystemMap.get(room);
+		if (activeSystemMap.containsKey(room)) {
+			SystemObject result = activeSystemMap.get(room);
+			if (result != null && result.isAssigned() && result.getRoom() == room)
+				return result;
+		}
 		return shipController.getGameObject().getSystem(Systems.EMPTY);
 	}
 
@@ -1159,7 +1162,7 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 
 		SystemObject active = getActiveSystem(room);
-		if (active != null) {
+		if (active.getSystemId() != Systems.EMPTY) {
 			systems.remove(active);
 			systems.add(active);
 		}
