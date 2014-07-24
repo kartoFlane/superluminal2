@@ -156,8 +156,9 @@ public class StationController extends ObjectController implements Controller {
 	@Override
 	public void handleEvent(SLEvent e) {
 		if (e.type == SLEvent.VISIBLE) {
-			if (e.source == getParent() && getSlotId() != -2)
-				setVisible((Boolean) e.data);
+			RoomController room = (RoomController) container.getController(system.getRoom());
+			if (e.source == getParent())
+				setVisible((Boolean) e.data && (room == null || room.canContainSlotId(getSlotId())));
 		} else {
 			super.handleEvent(e);
 		}

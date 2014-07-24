@@ -1124,7 +1124,6 @@ public class ShipContainer implements Disposable, SLListener {
 		if (prevSystemC.canContainStation()) {
 			StationController station = (StationController) getController(prevSystem.getStation());
 			roomC.removeListener(SLEvent.RESIZE, station);
-			// station.setVisible(false);
 		}
 
 		activeSystemMap.put(room, newSystem);
@@ -1138,7 +1137,6 @@ public class ShipContainer implements Disposable, SLListener {
 			roomC.addListener(SLEvent.RESIZE, station);
 			station.updateFollowOffset();
 			station.updateFollower();
-			// station.updateView();
 		}
 	}
 

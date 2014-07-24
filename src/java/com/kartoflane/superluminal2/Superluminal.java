@@ -59,12 +59,12 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - artillery
-	 * - station locations don't get updated correctly when assigning to rooms of different sizes -- missing canContain(slot) check?
+	 * 
+	 * !!!
+	 * - door linking done by automatic linking persists after saving ---> can cause bugs when user
+	 * saves a second time after making changes, find a fix for this (make ResetDoorLinksOnMove default, add listeners to door from linked rooms?)
+	 * 
 	 * - undo system
-	 * == make sure that system assignment works correctly when deleting rooms with systems
-	 * == system assignment undo
-	 * == door linking undo/redo
-	 * ==
 	 * == various properties undos
 	 * 
 	 * MEDIUM:
