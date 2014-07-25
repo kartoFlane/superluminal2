@@ -13,6 +13,7 @@
 			<outputDirectory>/</outputDirectory>
 			<excludes>
 				<exclude>**/*.command</exclude>
+				<exclude>**/runme</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>  <!-- Executables. -->
@@ -20,8 +21,9 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.command</include>
+				<include>**/runme</include>
 			</includes>
-			<fileMode>755</fileMode>
+			<fileMode>0755</fileMode>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}</directory>
