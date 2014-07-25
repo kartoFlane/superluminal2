@@ -539,7 +539,7 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ShipContainer container = Manager.getCurrentShip();
-				if (!promptSaveShip(container, false))
+				if (!promptSaveShip(container, true))
 					log.trace("User exited save dialog, ship was not saved.");
 			}
 		});
