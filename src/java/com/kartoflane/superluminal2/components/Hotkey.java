@@ -8,7 +8,8 @@ import org.eclipse.swt.widgets.ToolItem;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 
 public class Hotkey {
-	private Action action;
+	private Action onPressAction;
+	private Action onReleaseAction;
 	private boolean enabled = true;
 	private boolean shift = false;
 	private boolean ctrl = false;
@@ -18,14 +19,15 @@ public class Hotkey {
 	public Hotkey() {
 	}
 
-	public Hotkey(Action action) {
-		this.action = action;
+	public Hotkey(Action onPress, Action onRelease) {
+		onPressAction = onPress;
+		onReleaseAction = onRelease;
 	}
 
 	public Hotkey(Hotkey h) {
 		if (h == null)
 			throw new IllegalArgumentException("Argument must not be null.");
-		action = h.action;
+		onPressAction = h.onPressAction;
 		enabled = h.enabled;
 		shift = h.shift;
 		ctrl = h.ctrl;
@@ -33,14 +35,24 @@ public class Hotkey {
 		key = h.key;
 	}
 
-	public void execute() {
-		if (action == null)
+	public void executePress() {
+		if (onPressAction == null)
 			return;
-		action.execute();
+		onPressAction.execute();
 	}
 
-	public void setAction(Action action) {
-		this.action = action;
+	public void executeRelease() {
+		if (onReleaseAction == null)
+			return;
+		onReleaseAction.execute();
+	}
+
+	public void setOnPress(Action action) {
+		this.onPressAction = action;
+	}
+
+	public void setOnRelease(Action action) {
+		this.onReleaseAction = action;
 	}
 
 	/**
@@ -198,78 +210,108 @@ public class Hotkey {
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
-	public void addNotifyAction(final MenuItem item) {
-		setAction(new Action() {
+	public void addNotifyAction(final MenuItem item, boolean onPress) {
+		Action a = new Action() {
 			public void execute() {
 				if (item.isEnabled())
 					item.notifyListeners(SWT.Selection, null);
 			}
-		});
+		};
+
+		if (onPress)
+			setOnPress(a);
+		else
+			setOnRelease(a);
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
-	public void addNotifyAction(final ToolItem item) {
-		setAction(new Action() {
+	public void addNotifyAction(final ToolItem item, boolean onPress) {
+		Action a = new Action() {
 			public void execute() {
 				if (item.isEnabled())
 					item.notifyListeners(SWT.Selection, null);
 			}
-		});
+		};
+
+		if (onPress)
+			setOnPress(a);
+		else
+			setOnRelease(a);
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
-	public void addNotifyAction(final Button item) {
-		setAction(new Action() {
+	public void addNotifyAction(final Button item, boolean onPress) {
+		Action a = new Action() {
 			public void execute() {
 				if (item.isEnabled())
 					item.notifyListeners(SWT.Selection, null);
 			}
-		});
+		};
+
+		if (onPress)
+			setOnPress(a);
+		else
+			setOnRelease(a);
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
-	public void addNotifyAndToggleAction(final MenuItem item) {
-		setAction(new Action() {
+	public void addNotifyAndToggleAction(final MenuItem item, boolean onPress) {
+		Action a = new Action() {
 			public void execute() {
 				if (item.isEnabled()) {
 					item.setSelection(!item.getSelection());
 					item.notifyListeners(SWT.Selection, null);
 				}
 			}
-		});
+		};
+
+		if (onPress)
+			setOnPress(a);
+		else
+			setOnRelease(a);
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
-	public void addNotifyAndToggleAction(final ToolItem item) {
-		setAction(new Action() {
+	public void addNotifyAndToggleAction(final ToolItem item, boolean onPress) {
+		Action a = new Action() {
 			public void execute() {
 				if (item.isEnabled()) {
 					item.setSelection(!item.getSelection());
 					item.notifyListeners(SWT.Selection, null);
 				}
 			}
-		});
+		};
+
+		if (onPress)
+			setOnPress(a);
+		else
+			setOnRelease(a);
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
-	public void addNotifyAndToggleAction(final Button item) {
-		setAction(new Action() {
+	public void addNotifyAndToggleAction(final Button item, boolean onPress) {
+		Action a = new Action() {
 			public void execute() {
 				if (item.isEnabled()) {
 					item.setSelection(!item.getSelection());
 					item.notifyListeners(SWT.Selection, null);
 				}
 			}
-		});
+		};
+
+		if (onPress)
+			setOnPress(a);
+		else
+			setOnRelease(a);
 	}
 }

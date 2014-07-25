@@ -50,6 +50,7 @@ import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
+import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
@@ -1223,107 +1224,107 @@ public class EditorWindow {
 
 		// File
 		h = Manager.getHotkey(Hotkeys.NEW_SHIP);
-		h.addNotifyAction(mntmNewShip);
+		h.addNotifyAction(mntmNewShip, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.LOAD_SHIP);
-		h.addNotifyAction(mntmLoadShip);
+		h.addNotifyAction(mntmLoadShip, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SAVE_SHIP);
-		h.addNotifyAction(mntmSaveShip);
+		h.addNotifyAction(mntmSaveShip, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.MANAGE_MOD);
-		h.addNotifyAction(mntmModMan);
+		h.addNotifyAction(mntmModMan, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.CLOSE_SHIP);
-		h.addNotifyAction(mntmCloseShip);
+		h.addNotifyAction(mntmCloseShip, true);
 		Manager.hookHotkey(shell, h);
 
 		// Edit
 		h = Manager.getHotkey(Hotkeys.UNDO);
-		h.addNotifyAction(mntmUndo);
+		h.addNotifyAction(mntmUndo, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.REDO);
-		h.addNotifyAction(mntmRedo);
+		h.addNotifyAction(mntmRedo, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SETTINGS);
-		h.addNotifyAction(mntmSettings);
+		h.addNotifyAction(mntmSettings, true);
 		Manager.hookHotkey(shell, h);
 
 		// View
 		h = Manager.getHotkey(Hotkeys.TOGGLE_GRID);
-		h.addNotifyAndToggleAction(mntmGrid);
+		h.addNotifyAndToggleAction(mntmGrid, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.TOGGLE_HANGAR);
-		h.addNotifyAndToggleAction(mntmHangar);
+		h.addNotifyAndToggleAction(mntmHangar, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_ANCHOR);
-		h.addNotifyAndToggleAction(mntmShowAnchor);
+		h.addNotifyAndToggleAction(mntmShowAnchor, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_MOUNTS);
-		h.addNotifyAndToggleAction(mntmShowMounts);
+		h.addNotifyAndToggleAction(mntmShowMounts, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_ROOMS);
-		h.addNotifyAndToggleAction(mntmShowRooms);
+		h.addNotifyAndToggleAction(mntmShowRooms, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_DOORS);
-		h.addNotifyAndToggleAction(mntmShowDoors);
+		h.addNotifyAndToggleAction(mntmShowDoors, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_STATIONS);
-		h.addNotifyAndToggleAction(mntmShowStations);
+		h.addNotifyAndToggleAction(mntmShowStations, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_HULL);
-		h.addNotifyAndToggleAction(mntmShowHull);
+		h.addNotifyAndToggleAction(mntmShowHull, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_FLOOR);
-		h.addNotifyAndToggleAction(mntmShowFloor);
+		h.addNotifyAndToggleAction(mntmShowFloor, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_SHIELD);
-		h.addNotifyAndToggleAction(mntmShowShield);
+		h.addNotifyAndToggleAction(mntmShowShield, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.SHOW_GIBS);
-		h.addNotifyAndToggleAction(mntmShowGibs);
+		h.addNotifyAndToggleAction(mntmShowGibs, true);
 		Manager.hookHotkey(shell, h);
 
 		// ====== Tool hotkeys
 
 		h = Manager.getHotkey(Hotkeys.POINTER_TOOL);
-		h.addNotifyAction(tltmPointer);
+		h.addNotifyAction(tltmPointer, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.CREATE_TOOL);
-		h.addNotifyAction(tltmCreation);
+		h.addNotifyAction(tltmCreation, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.IMAGES_TOOL);
-		h.addNotifyAction(tltmImages);
+		h.addNotifyAction(tltmImages, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.PROPERTIES_TOOL);
-		h.addNotifyAction(tltmProperties);
+		h.addNotifyAction(tltmProperties, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.OVERVIEW_TOOL);
-		h.addNotifyAction(tltmManager);
+		h.addNotifyAction(tltmManager, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.CLOAK);
-		h.addNotifyAndToggleAction(tltmCloak);
+		h.addNotifyAndToggleAction(tltmCloak, true);
 		Manager.hookHotkey(shell, h);
 
 		// Creation Tool hotkeys
@@ -1346,16 +1347,16 @@ public class EditorWindow {
 		// ====== Tool-specific hotkeys
 
 		h = Manager.getHotkey(Hotkeys.DELETE);
-		h.addNotifyAction(mntmDelete);
+		h.addNotifyAction(mntmDelete, true);
 		Manager.hookHotkey(shell, h);
 
 		h = new Hotkey();
 		h.setKey(SWT.DEL);
-		h.addNotifyAction(mntmDelete);
+		h.addNotifyAction(mntmDelete, true);
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.PIN);
-		h.setAction(new Action() {
+		h.setOnPress(new Action() {
 			public void execute() {
 				if (Manager.getSelectedToolId() == Tools.POINTER) {
 					AbstractController selected = Manager.getSelected();
@@ -1368,6 +1369,26 @@ public class EditorWindow {
 		});
 		Manager.hookHotkey(shell, h);
 
+		// Modifier hotkeys
+		h = new Hotkey();
+		h.setKey(SWT.SHIFT);
+		h.setShift(true);
+		addModifierAction(h, SLEvent.MOD_SHIFT);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.CTRL);
+		h.setCtrl(true);
+		addModifierAction(h, SLEvent.MOD_CTRL);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.ALT);
+		h.setAlt(true);
+		addModifierAction(h, SLEvent.MOD_ALT);
+		Manager.hookHotkey(shell, h);
+
+		// Arrow hotkeys
 		h = new Hotkey();
 		h.setKey(SWT.ARROW_UP);
 		addNudgeAction(h, 0, -1);
@@ -1414,7 +1435,7 @@ public class EditorWindow {
 	}
 
 	private void addNudgeAction(final Hotkey h, final int amountX, final int amountY) {
-		h.setAction(new Action() {
+		h.setOnPress(new Action() {
 			public void execute() {
 				AbstractController selected = Manager.getSelected();
 				if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
@@ -1443,7 +1464,7 @@ public class EditorWindow {
 	}
 
 	private void addCreateToolAction(Hotkey h, final Tools tool) {
-		h.setAction(new Action() {
+		h.setOnPress(new Action() {
 			public void execute() {
 				if (tltmCreation.isEnabled()) {
 					if (!tltmCreation.getSelection())
@@ -1451,6 +1472,19 @@ public class EditorWindow {
 					CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
 					ctool.selectSubtool(tool);
 				}
+			}
+		});
+	}
+
+	private void addModifierAction(Hotkey h, final int modifier) {
+		h.setOnPress(new Action() {
+			public void execute() {
+				eventHandler.sendEvent(new SLEvent(modifier, EditorWindow.this, true));
+			}
+		});
+		h.setOnRelease(new Action() {
+			public void execute() {
+				eventHandler.sendEvent(new SLEvent(modifier, EditorWindow.this, false));
 			}
 		});
 	}

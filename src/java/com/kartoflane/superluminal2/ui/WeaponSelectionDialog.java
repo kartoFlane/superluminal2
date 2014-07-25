@@ -341,7 +341,7 @@ public class WeaponSelectionDialog {
 		Hotkey h = new Hotkey();
 		h.setCtrl(true);
 		h.setKey('f');
-		h.addNotifyAction(btnSearch);
+		h.addNotifyAction(btnSearch, true);
 		Manager.hookHotkey(shell, h);
 	}
 

@@ -365,18 +365,18 @@ public class ModManagementDialog {
 		// Register hotkeys
 		Hotkey h = new Hotkey();
 		h.setKey('\r');
-		h.addNotifyAction(btnConfirm);
+		h.addNotifyAction(btnConfirm, true);
 		Manager.hookHotkey(shell, h);
 
 		h = new Hotkey();
 		h.setKey('l');
 		h.setCtrl(true);
-		h.addNotifyAction(btnLoad);
+		h.addNotifyAction(btnLoad, true);
 		Manager.hookHotkey(shell, h);
 
 		h = new Hotkey();
 		h.setKey(SWT.DEL);
-		h.addNotifyAction(btnRemove);
+		h.addNotifyAction(btnRemove, true);
 		Manager.hookHotkey(shell, h);
 	}
 

@@ -328,7 +328,8 @@ public class ShipLoaderDialog {
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 
 		// Register hotkeys
-		Hotkey h = new Hotkey(new Action() {
+		Hotkey h = new Hotkey();
+		h.setOnPress(new Action() {
 			public void execute() {
 				if (tree.getSelectionCount() != 0) {
 					TreeItem selectedItem = tree.getSelection()[0];

@@ -382,13 +382,38 @@ public abstract class Manager {
 			Shell shell = c.getShell();
 
 			if (shell != null)
-				keyHandler.notify(shell, (e.stateMask & SWT.SHIFT) == SWT.SHIFT,
-						(e.stateMask & SWT.CONTROL) == SWT.CONTROL,
-						(e.stateMask & SWT.ALT) == SWT.ALT, e.keyCode);
+				keyHandler.notifyPressed(shell, checkShift(e), checkCtrl(e), checkAlt(e), e.keyCode);
 		}
 	}
 
 	protected static void notifyKeyReleased(KeyEvent e) {
+		Display display = Display.getCurrent(); // Can sometimes return null
+		if (display == null)
+			display = Display.getDefault();
+
+		// Don't execute the hotkey action if an editable widget has focus
+		Control c = display.getFocusControl();
+		boolean execute = c != null && !(c.isEnabled() && (c instanceof Spinner ||
+				(c instanceof Text && ((Text) c).getEditable())));
+
+		if (execute) {
+			Shell shell = c.getShell();
+
+			if (shell != null)
+				keyHandler.notifyReleased(shell, checkShift(e), checkCtrl(e), checkAlt(e), e.keyCode);
+		}
+	}
+
+	private static boolean checkShift(KeyEvent e) {
+		return (e.stateMask & SWT.SHIFT) == SWT.SHIFT || e.keyCode == SWT.SHIFT;
+	}
+
+	private static boolean checkCtrl(KeyEvent e) {
+		return (e.stateMask & SWT.CTRL) == SWT.CTRL || e.keyCode == SWT.CTRL;
+	}
+
+	private static boolean checkAlt(KeyEvent e) {
+		return (e.stateMask & SWT.ALT) == SWT.ALT || e.keyCode == SWT.ALT;
 	}
 
 	public static void hookHotkey(Shell shell, Hotkey hotkey) {

@@ -44,7 +44,7 @@ public class KeybindHandler {
 		return keyMap.containsKey(shell);
 	}
 
-	public void notify(Shell shell, boolean shift, boolean ctrl, boolean alt, int key) {
+	public void notifyPressed(Shell shell, boolean shift, boolean ctrl, boolean alt, int key) {
 		if (shell == null)
 			throw new IllegalArgumentException("Shell must not be null.");
 		if (keyMap == null)
@@ -54,7 +54,23 @@ public class KeybindHandler {
 
 		for (Hotkey h : keyMap.get(shell)) {
 			if (h.isEnabled() && h.passes(shift, ctrl, alt, key)) {
-				h.execute();
+				h.executePress();
+				break;
+			}
+		}
+	}
+
+	public void notifyReleased(Shell shell, boolean shift, boolean ctrl, boolean alt, int key) {
+		if (shell == null)
+			throw new IllegalArgumentException("Shell must not be null.");
+		if (keyMap == null)
+			return;
+		if (!hooks(shell))
+			return;
+
+		for (Hotkey h : keyMap.get(shell)) {
+			if (h.isEnabled() && h.passes(shift, ctrl, alt, key)) {
+				h.executeRelease();
 				break;
 			}
 		}

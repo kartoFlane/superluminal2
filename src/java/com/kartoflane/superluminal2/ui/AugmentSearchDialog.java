@@ -138,7 +138,7 @@ public class AugmentSearchDialog extends AbstractSearchDialog<AugmentObject> {
 		// Register hotkeys
 		Hotkey h = new Hotkey();
 		h.setKey('\r');
-		h.addNotifyAction(btnConfirm);
+		h.addNotifyAction(btnConfirm, true);
 		Manager.hookHotkey(shell, h);
 	}
 
