@@ -114,8 +114,8 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnLinkedGib.setText(noLinkText);
 
 		btnSelectGib = new Button(this, SWT.NONE);
-		GridData gd_btnSelectGib = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
-		gd_btnSelectGib.widthHint = 30;
+		GridData gd_btnSelectGib = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		gd_btnSelectGib.widthHint = 35;
 		btnSelectGib.setLayoutData(gd_btnSelectGib);
 		btnSelectGib.setText(">");
 		UIUtils.addTooltip(btnSelectGib, "", "Select the linked gib");

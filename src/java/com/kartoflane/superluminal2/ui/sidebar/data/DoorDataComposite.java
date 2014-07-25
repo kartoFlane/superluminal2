@@ -66,8 +66,8 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		btnIdLeft.setText(autolinkText);
 
 		btnSelectLeft = new Button(this, SWT.NONE);
-		GridData gd_btnSelectLeft = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_btnSelectLeft.widthHint = 30;
+		GridData gd_btnSelectLeft = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		gd_btnSelectLeft.widthHint = 35;
 		btnSelectLeft.setLayoutData(gd_btnSelectLeft);
 		btnSelectLeft.setText(">");
 		UIUtils.addTooltip(btnSelectLeft, "", "Select the linked room");
@@ -81,8 +81,8 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		btnIdRight.setText(autolinkText);
 
 		btnSelectRight = new Button(this, SWT.NONE);
-		GridData gd_btnSelectRight = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_btnSelectRight.widthHint = 30;
+		GridData gd_btnSelectRight = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		gd_btnSelectRight.widthHint = 35;
 		btnSelectRight.setLayoutData(gd_btnSelectRight);
 		btnSelectRight.setText(">");
 		UIUtils.addTooltip(btnSelectRight, "", "Select the linked room");
