@@ -1,5 +1,10 @@
 Changelog
 
+2.0.3b beta:
+- Fixed shift-dragging the ship origin
+- Fixed a bug with messed up numbering when reordering game objects via ShipOverview, and then
+  adding new objects of the same type
+
 2.0.3a beta:
 - Fixed a bug that would cause the editor to crash when you tried to open the editor without
   pointing it to the game's archives
