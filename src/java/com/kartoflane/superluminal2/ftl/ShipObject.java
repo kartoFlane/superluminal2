@@ -1200,6 +1200,28 @@ public class ShipObject extends GameObject {
 		return glows.toArray(new GlowObject[0]);
 	}
 
+	public void sort() {
+		// Reinsert all objects to sort the sets
+
+		Object[] array = rooms.toArray(new Object[0]);
+		for (Object o : array)
+			rooms.remove(o);
+		for (Object o : array)
+			rooms.add((RoomObject) o);
+
+		array = mounts.toArray(new Object[0]);
+		for (Object o : array)
+			mounts.remove(o);
+		for (Object o : array)
+			mounts.add((MountObject) o);
+
+		array = gibs.toArray(new Object[0]);
+		for (Object o : array)
+			gibs.remove(o);
+		for (Object o : array)
+			gibs.add((GibObject) o);
+	}
+
 	/**
 	 * @return the next unused ID that can be assigned to a new room
 	 */

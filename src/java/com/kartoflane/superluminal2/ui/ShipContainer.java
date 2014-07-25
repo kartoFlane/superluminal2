@@ -682,6 +682,8 @@ public class ShipContainer implements Disposable, SLListener {
 		Collections.sort(mountControllers);
 		Collections.sort(gibControllers);
 
+		shipController.getGameObject().sort();
+
 		// Reinsert controllers into the painter so that they're drawn in the correct order
 
 		// Compare hash codes to determine whether the collections have changed
