@@ -1,7 +1,6 @@
 package com.kartoflane.superluminal2.ui;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -422,7 +421,7 @@ public class EditorWindow {
 				Control focus = Display.getCurrent().getFocusControl();
 				if (focus == shell || focus == canvas || focus == sideContainer) {
 					Database db = Database.getInstance();
-					if (db != null && !db.verify()) {
+					if (db != null && db.getCore() != null && !db.verify()) {
 						log.trace("Database failed to pass verification. Reload is required.");
 						mntmReloadDb.notifyListeners(SWT.Selection, null);
 					}
@@ -556,6 +555,8 @@ public class EditorWindow {
 		mntmReloadDb.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				final Exception[] ex = new Exception[1];
+				ex[0] = null;
 				UIUtils.showLoadDialog(shell, null, null, new Action() {
 					public void execute() {
 						log.debug("Reloading Database...");
@@ -583,15 +584,19 @@ public class EditorWindow {
 							}
 
 							db.cacheAnimations();
-						} catch (IOException e) {
-							log.error("An error has occured while reloading the database.", e);
-							String msg = "An error has occured while reloading the Database:\n" +
-									e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n" +
-									"Check the log for details.";
-							UIUtils.showErrorDialog(shell, null, msg);
+						} catch (Exception e) {
+							ex[0] = e;
 						}
 					}
 				});
+
+				if (ex[0] != null) {
+					log.error("An error has occured while reloading the database.", ex[0]);
+					String msg = "An error has occured while reloading the Database:\n" +
+							ex[0].getClass().getSimpleName() + ": " + ex[0].getMessage() + "\n\n" +
+							"Check the log for details.";
+					UIUtils.showErrorDialog(null, null, msg);
+				}
 			}
 		});
 
