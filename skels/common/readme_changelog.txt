@@ -1,5 +1,12 @@
 Changelog
 
+2.0.3a beta:
+- Fixed a bug that would cause the editor to crash when you tried to open the editor without
+  pointing it to the game's archives
+- Fixed "Save As" thinking it was "Save"
+- Fixed Mac distribution of the editor not having proper permissions set -- you should now be
+  able to launch the editor without having to go through the chmod command
+
 2.0.3 beta:
 - Menu buttons' hotkey text is now updated when you modify hotkeys
 - Hotkeys can now be unbound
