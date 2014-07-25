@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.0.3 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.3a beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.0.3a beta">
+			<change>Fixed "Save As" thinking it was "Save"</change>
+			<change>Fixed Mac version's permissions</change>
+		</version>
 		<version id="2.0.3 beta">
 			<change>Added undo/redo system -- see changelog for currently undoable operations</change>
 			<change>Added "Unsaved Changes" warnings</change>
