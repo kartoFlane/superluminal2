@@ -24,10 +24,16 @@ public class Hotkey {
 		onReleaseAction = onRelease;
 	}
 
+	/**
+	 * Creates a shallow copy of the Hotkey passed in argument.
+	 * 
+	 * @param h
+	 */
 	public Hotkey(Hotkey h) {
 		if (h == null)
 			throw new IllegalArgumentException("Argument must not be null.");
 		onPressAction = h.onPressAction;
+		onReleaseAction = h.onReleaseAction;
 		enabled = h.enabled;
 		shift = h.shift;
 		ctrl = h.ctrl;
@@ -167,9 +173,13 @@ public class Hotkey {
 		if (alt)
 			msg += "Alt+";
 
-		if (key == ' ')
+		if (key == SWT.SPACE)
 			msg += "Spacebar";
-		else if (key == '\t')
+		else if (key == SWT.KEYPAD_CR || key == SWT.CR)
+			msg += "Enter";
+		else if (key == SWT.BS)
+			msg += "Backspace";
+		else if (key == SWT.TAB)
 			msg += "Tab";
 		else if (key == SWT.F1)
 			msg += "F1";
@@ -201,6 +211,24 @@ public class Hotkey {
 			msg += "Num Lock";
 		else if (key == SWT.SCROLL_LOCK)
 			msg += "Scroll Lock";
+		else if (key == SWT.PRINT_SCREEN)
+			msg += "Print Screen";
+		else if (key == SWT.PAUSE)
+			msg += "Pause";
+		else if (key == SWT.BREAK)
+			msg += "Break";
+		else if (key == SWT.INSERT)
+			msg += "Insert";
+		else if (key == SWT.DEL)
+			msg += "Delete";
+		else if (key == SWT.HOME)
+			msg += "Home";
+		else if (key == SWT.END)
+			msg += "End";
+		else if (key == SWT.PAGE_UP)
+			msg += "Page Up";
+		else if (key == SWT.PAGE_DOWN)
+			msg += "Page Down";
 		else
 			msg += getKeyString().toUpperCase();
 
