@@ -382,7 +382,7 @@ public abstract class Manager {
 			Shell shell = c.getShell();
 
 			if (shell != null)
-				keyHandler.notifyPressed(shell, checkShift(e), checkCtrl(e), checkAlt(e), e.keyCode);
+				keyHandler.notifyPressed(shell, checkShift(e), checkCtrl(e), checkAlt(e), checkCommand(e), e.keyCode);
 		}
 	}
 
@@ -400,7 +400,7 @@ public abstract class Manager {
 			Shell shell = c.getShell();
 
 			if (shell != null)
-				keyHandler.notifyReleased(shell, checkShift(e), checkCtrl(e), checkAlt(e), e.keyCode);
+				keyHandler.notifyReleased(shell, checkShift(e), checkCtrl(e), checkAlt(e), checkCommand(e), e.keyCode);
 		}
 	}
 
@@ -414,6 +414,10 @@ public abstract class Manager {
 
 	private static boolean checkAlt(KeyEvent e) {
 		return (e.stateMask & SWT.ALT) == SWT.ALT || e.keyCode == SWT.ALT;
+	}
+
+	private static boolean checkCommand(KeyEvent e) {
+		return (e.stateMask & SWT.COMMAND) == SWT.COMMAND || e.keyCode == SWT.COMMAND;
 	}
 
 	public static void hookHotkey(Shell shell, Hotkey hotkey) {

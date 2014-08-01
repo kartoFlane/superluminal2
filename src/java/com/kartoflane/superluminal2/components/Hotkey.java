@@ -14,6 +14,8 @@ public class Hotkey {
 	private boolean shift = false;
 	private boolean ctrl = false;
 	private boolean alt = false;
+	/** the Mac Command button */
+	private boolean command = false;
 	private int key = '\0';
 
 	public Hotkey() {
@@ -38,6 +40,7 @@ public class Hotkey {
 		shift = h.shift;
 		ctrl = h.ctrl;
 		alt = h.ctrl;
+		command = h.command;
 		key = h.key;
 	}
 
@@ -131,6 +134,15 @@ public class Hotkey {
 		return alt;
 	}
 
+	/** Sets whether the hotkey's activation requires Command modifier to be pressed. */
+	public void setCommand(boolean command) {
+		this.command = command;
+	}
+
+	public boolean getCommand() {
+		return command;
+	}
+
 	/**
 	 * Checks whether the hotkey is to be activated by comparing the hotkey's modifier settings with currently
 	 * active modifiers, and the hotkey's trigger key with currently pressed key.
@@ -139,8 +151,8 @@ public class Hotkey {
 	 *            int representing the currently pressed key
 	 * @return true if the hotkey is tiggered, false otherwise
 	 */
-	public boolean passes(boolean shift, boolean ctrl, boolean alt, int keyCode) {
-		return this.shift == shift && this.ctrl == ctrl && this.alt == alt &&
+	public boolean passes(boolean shift, boolean ctrl, boolean alt, boolean cmd, int keyCode) {
+		return this.shift == shift && this.ctrl == ctrl && this.alt == alt && this.command == cmd &&
 				Character.toLowerCase(key) == Character.toLowerCase(keyCode);
 	}
 
@@ -150,7 +162,7 @@ public class Hotkey {
 	 * Basically a customised {@link #equals(Object)}.
 	 */
 	public boolean collides(Hotkey h) {
-		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && key == h.key;
+		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && command == h.command && key == h.key;
 	}
 
 	public boolean equals(Object o) {
@@ -172,6 +184,8 @@ public class Hotkey {
 			msg += "Ctrl+";
 		if (alt)
 			msg += "Alt+";
+		if (command)
+			msg += "⌘+";
 
 		if (key == SWT.SPACE)
 			msg += "Spacebar";

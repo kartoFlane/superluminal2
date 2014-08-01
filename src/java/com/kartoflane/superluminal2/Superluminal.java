@@ -59,6 +59,7 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - artillery
+	 * - gib animation
 	 * 
 	 * - undo system
 	 * == various properties undos
@@ -458,21 +459,19 @@ public class Superluminal {
 				try {
 					loading = "shift";
 					attr = bind.getAttributeValue(loading);
-					if (attr == null)
-						throw new IllegalArgumentException(action + " keybind is missing 'shift' attribute.");
-					boolean shift = Boolean.valueOf(attr);
+					boolean shift = attr != null && Boolean.valueOf(attr);
 
 					loading = "ctrl";
 					attr = bind.getAttributeValue(loading);
-					if (attr == null)
-						throw new IllegalArgumentException(action + " keybind is missing 'ctrl' attribute.");
-					boolean ctrl = Boolean.valueOf(attr);
+					boolean ctrl = attr != null && Boolean.valueOf(attr);
 
 					loading = "alt";
 					attr = bind.getAttributeValue(loading);
-					if (attr == null)
-						throw new IllegalArgumentException(action + " keybind is missing 'alt' attribute.");
-					boolean alt = Boolean.valueOf(attr);
+					boolean alt = attr != null && Boolean.valueOf(attr);
+
+					loading = "cmd";
+					attr = bind.getAttributeValue(loading);
+					boolean cmd = attr != null && Boolean.valueOf(attr);
 
 					loading = "char";
 					attr = bind.getAttributeValue(loading);
@@ -490,6 +489,7 @@ public class Superluminal {
 					h.setShift(shift);
 					h.setCtrl(ctrl);
 					h.setAlt(alt);
+					h.setCommand(cmd);
 					h.setKey(ch);
 				} catch (IllegalArgumentException e) {
 					log.warn("A keybind for action " + action.name() + " had invalid '" + loading + "' attribute, and was not loaded.");
@@ -525,6 +525,7 @@ public class Superluminal {
 			bind.setAttribute("shift", "" + h.getShift());
 			bind.setAttribute("ctrl", "" + h.getCtrl());
 			bind.setAttribute("alt", "" + h.getAlt());
+			bind.setAttribute("cmd", "" + h.getCommand());
 			bind.setAttribute("char", "" + (h.isEnabled() ? h.getKeyString() : ""));
 
 			root.addContent(bind);
