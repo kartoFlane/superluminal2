@@ -4,6 +4,8 @@ Changelog
 - Fixed shift-dragging the ship origin
 - Fixed a bug with messed up numbering when reordering game objects via ShipOverview, and then
   adding new objects of the same type
+- Added support for Mac's Command key in hotkeys (untested)
+- Fixed application name on Mac
 
 2.0.3a beta:
 - Fixed a bug that would cause the editor to crash when you tried to open the editor without

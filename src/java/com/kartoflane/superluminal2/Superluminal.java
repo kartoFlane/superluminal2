@@ -102,9 +102,11 @@ public class Superluminal {
 		System.out.println();
 
 		try {
-			// Try to retrieve the display in order to test whether the correct version of the
-			// editor has been downloaded
-			Display.getDefault();
+			// Display#setAppName() allows to set the name of the application on OSX
+			// However, in order to work, it has to be called before any instance of Display is created
+			// Also tests whether the correct version of the editor is installed (since SWT code is platform-specific)
+			Display.setAppName(APP_NAME);
+			Display.setAppVersion(APP_VERSION.toString());
 		} catch (Throwable t) {
 			log.error("Failed to retrieve display - wrong version of the editor has been downloaded.");
 
@@ -118,7 +120,7 @@ public class Superluminal {
 			msg += "You have downloaded a wrong version of the editor for your system.\n";
 			msg += "\n";
 			if (os == null) {
-				msg += String.format("Your system (%s %s) was not\nrecognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model"));
+				msg += String.format("Your system (%s %s) was not recognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model"));
 			} else {
 				msg += "You should download version for: " + os;
 			}
@@ -128,8 +130,6 @@ public class Superluminal {
 		}
 
 		Display display = Display.getDefault();
-		Display.setAppName(APP_NAME);
-		Display.setAppVersion(APP_VERSION.toString());
 
 		File configFile = new File(CONFIG_FILE);
 
