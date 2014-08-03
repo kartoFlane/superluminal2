@@ -197,7 +197,8 @@ public class ManipulationTool extends Tool {
 			GibController gibC = control instanceof GibController ? (GibController) control : null;
 			MountController mountC = (MountController) Manager.getSelected();
 
-			mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
+			if (mountC != null)
+				mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
 
 			EditorWindow.getInstance().updateSidebarContent();
 			setStateManipulate();
