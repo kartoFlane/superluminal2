@@ -1,23 +1,21 @@
 package com.kartoflane.superluminal2.components;
 
 import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.GC;
-
-import com.kartoflane.superluminal2.utils.Utils;
 
 /**
- * A class representing a drawable polygon.
+ * A class representing a drawable convex polygon.
  * 
  * @author kartoFlane
  * 
  */
 public class Polygon {
 	/**
-	 * An array of alternating x and y values
-	 * even indices = x
-	 * odd indices = y
+	 * An array of alternating x and y values<br>
+	 * Even indices = x<br>
+	 * Odd indices = y
 	 */
 	private int[] points;
 
@@ -35,6 +33,75 @@ public class Polygon {
 	 * @param pointsY
 	 */
 	public Polygon(int[] pointsX, int[] pointsY) {
+		set(pointsX, pointsY);
+	}
+
+	/**
+	 * Creates a polygon from an array of alternating x and y values.<br>
+	 * The array's length has to be greater than 2.
+	 * 
+	 * @param points
+	 *            an array of alternating x and y values
+	 */
+	public Polygon(int[] points) {
+		set(points);
+	}
+
+	/**
+	 * Creates a polygon from an array of points.<br>
+	 * The array's length has to be greater than 2.
+	 * 
+	 * @param points
+	 */
+	public Polygon(Point[] points) {
+		set(points);
+	}
+
+	/**
+	 * Creates a polygon with the specified number of vertices, but all values at 0.
+	 * 
+	 * @param vertices
+	 */
+	public Polygon(int vertices) {
+		if (vertices <= 2)
+			throw new IllegalArgumentException("Number of vertices is too low (3 minimum)");
+
+		this.vertices = vertices;
+		this.points = new int[vertices * 2];
+	}
+
+	/**
+	 * Constructs a deep copy of the specified polygon.
+	 */
+	public Polygon(Polygon poly) {
+		points = poly.toArray();
+		vertices = poly.vertices;
+		bounds = poly.getBounds();
+	}
+
+	/**
+	 * @return the center of the polygon's bounds
+	 */
+	public Point getCenter() {
+		return new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+	}
+
+	/**
+	 * @return the number of vertices this polygon has.
+	 */
+	public int getVertexCount() {
+		return vertices;
+	}
+
+	/**
+	 * Creates a polygon from two arrays, one specifying the vertices' x coordinates,
+	 * the other - y coordinates.<br>
+	 * The arrays' lengths have to be equal, and greater than 2.
+	 * 
+	 * @param pointsX
+	 * @param pointsY
+	 */
+	public void set(int[] pointsX, int[] pointsY) {
 		if (pointsX.length != pointsY.length)
 			throw new IllegalArgumentException("Coordinate arrays are not equal.");
 		if (pointsX.length <= 2)
@@ -58,7 +125,7 @@ public class Polygon {
 	 * @param points
 	 *            an array of alternating x and y values
 	 */
-	public Polygon(int[] points) {
+	public void set(int[] points) {
 		if (points.length % 2 != 0)
 			throw new IllegalArgumentException("Array length must be even.");
 		if (points.length <= 2)
@@ -81,7 +148,7 @@ public class Polygon {
 	 * 
 	 * @param points
 	 */
-	public Polygon(Point[] points) {
+	public void set(Point[] points) {
 		if (points.length <= 2)
 			throw new IllegalArgumentException("The array is too small to create a polygon.");
 
@@ -97,12 +164,8 @@ public class Polygon {
 	}
 
 	/**
-	 * @return the center of the polygon's bounds
+	 * Moves the polygon by the specified vector.
 	 */
-	public Point getCenter() {
-		return new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
-	}
-
 	public void translate(int dx, int dy) {
 		for (int i = 0; i < vertices; i++) {
 			points[i * 2] += dx;
@@ -112,6 +175,11 @@ public class Polygon {
 		bounds.y += dy;
 	}
 
+	/**
+	 * Centers the polygon at the specified location.
+	 * 
+	 * @see #getCenter()
+	 */
 	public void setLocation(int x, int y) {
 		Point center = getCenter();
 		translate(x - center.x, y - center.y);
@@ -156,6 +224,13 @@ public class Polygon {
 	}
 
 	/**
+	 * @see #rotate(float, int, int)
+	 */
+	public void rotate(float radians, Point p) {
+		rotate(radians, p.x, p.y);
+	}
+
+	/**
 	 * Rotates the polygon around its {@link #getCenter center point}.
 	 * 
 	 * @param radians
@@ -170,7 +245,7 @@ public class Polygon {
 	 * @return the smallest rectangle that can contain the polygon.
 	 */
 	public Rectangle getBounds() {
-		return Utils.copy(bounds);
+		return new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 
 	/**
@@ -195,16 +270,21 @@ public class Polygon {
 	 * @return true if the polygon contains the point, false otherwise
 	 */
 	public boolean contains(int x, int y) {
-		int i;
-		int j;
 		boolean result = false;
-		for (i = 0, j = vertices - 1; i < vertices; j = i++) {
+		for (int i = 0, j = vertices - 1; i < vertices; j = i++) {
 			if ((points[i * 2 + 1] > y) != (points[j * 2 + 1] > y) &&
 					(x < (points[j * 2] - points[i * 2]) * (y - points[i * 2 + 1]) / (points[j * 2 + 1] - points[i * 2 + 1]) + points[i * 2])) {
 				result = !result;
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * @see #contains(int, int)
+	 */
+	public boolean contains(Point p) {
+		return contains(p.x, p.y);
 	}
 
 	/**
