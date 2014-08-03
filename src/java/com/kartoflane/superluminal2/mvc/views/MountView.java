@@ -4,9 +4,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Point;
 
 import com.kartoflane.superluminal2.ftl.AnimationObject;
-import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
-import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 
 public class MountView extends BaseView {
 
@@ -39,14 +37,6 @@ public class MountView extends BaseView {
 		}
 	}
 
-	private ObjectModel getModel() {
-		return (ObjectModel) model;
-	}
-
-	private MountObject getGameObject() {
-		return (MountObject) getModel().getGameObject();
-	}
-
 	@Override
 	public void updateView() {
 		AnimationObject anim = getController().getWeapon().getAnimation();
@@ -67,9 +57,6 @@ public class MountView extends BaseView {
 			setBackgroundColor(defaultBackground);
 			setBorderThickness(2);
 		}
-
-		setRotation(getGameObject().isRotated() ? 90 : 0);
-		setFlippedX(getGameObject().isMirrored());
 	}
 
 	@Override

@@ -53,6 +53,8 @@ public class MountController extends ObjectController implements Indexable, Comp
 		controller.setWeapon(object.getWeapon());
 		controller.setGib(object.getGib());
 		controller.setDirection(object.getDirection());
+		controller.setRotated(object.isRotated());
+		controller.setMirrored(object.isMirrored());
 
 		return controller;
 	}
@@ -115,6 +117,7 @@ public class MountController extends ObjectController implements Indexable, Comp
 
 	public void setRotated(boolean rotated) {
 		getGameObject().setRotated(rotated);
+		setRotation(rotated ? 90 : 0);
 		updateView();
 	}
 
@@ -124,6 +127,7 @@ public class MountController extends ObjectController implements Indexable, Comp
 
 	public void setMirrored(boolean mirrored) {
 		getGameObject().setMirrored(mirrored);
+		view.setFlippedX(mirrored);
 		updateView();
 	}
 
