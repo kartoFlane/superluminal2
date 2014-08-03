@@ -42,6 +42,22 @@ public class IOUtils {
 
 	private static final Pattern PROTOCOL_PTRN = Pattern.compile("^[^:]+:");
 
+	/**
+	 * Removes the protocol from the argument and returns the resulting string.<br>
+	 * Protocol is the text from the start of the string until the first : , eg.
+	 * 
+	 * <pre>
+	 * <tt>file:example</tt>
+	 * </pre>
+	 * 
+	 * Protocols used in the editor are listed in {@link com.kartoflane.superluminal2.core.Manager#getInputStream(String)
+	 * Manager.getInputStream(String)}<br>
+	 * <br>
+	 * 
+	 * @param input
+	 *            string to be trimmed
+	 * @return the trimmed string, or the argument if no protocol was found.
+	 */
 	public static String trimProtocol(String input) {
 		Matcher m = PROTOCOL_PTRN.matcher(input);
 		if (m.find())
@@ -50,6 +66,20 @@ public class IOUtils {
 			return input;
 	}
 
+	/**
+	 * Retrieves the protocol from the argument and returns it.
+	 * Protocol is the text from the start of the string until the first : , eg.
+	 * 
+	 * <pre>
+	 * <tt>file:example</tt>
+	 * </pre>
+	 * 
+	 * Protocols used in the editor are listed in {@link com.kartoflane.superluminal2.core.Manager#getInputStream(String)
+	 * Manager.getInputStream(String)}<br>
+	 * <br>
+	 * 
+	 * @return the argument's protocol, or an empty string if no protocol was found.
+	 */
 	public static String getProtocol(String input) {
 		Matcher m = PROTOCOL_PTRN.matcher(input);
 		if (m.find())
@@ -58,13 +88,41 @@ public class IOUtils {
 			return "";
 	}
 
+	/**
+	 * Decodes the contents of the specified file as text and returns them as a string.
+	 * 
+	 * @param f
+	 *            the file to be read
+	 * @return the contents of the file
+	 * 
+	 * @throws FileNotFoundException
+	 *             when the file is not found
+	 * @throws IOException
+	 *             when an IO exception occurs while reading the file
+	 */
 	public static String readFileText(File f) throws FileNotFoundException, IOException {
+		if (f == null)
+			throw new IllegalArgumentException("Argument must not be null.");
 		FileInputStream fis = new FileInputStream(f);
 		DecodeResult dr = decodeText(fis, f.getName());
 		fis.close();
 		return dr.text;
 	}
 
+	/**
+	 * Decodes the contents of the specified file as text, and then interprets the text as XML.
+	 * 
+	 * @param f
+	 *            the file to be read
+	 * @return the XML document representing the contents of the file
+	 * 
+	 * @throws FileNotFoundException
+	 *             when the file is not found
+	 * @throws IOException
+	 *             when an IO exception occurs while reading the file
+	 * @throws JDOMParseException
+	 *             when an exception occurs while parsing XML
+	 */
 	public static Document readFileXML(File f) throws FileNotFoundException, IOException, JDOMParseException {
 		String contents = readFileText(f);
 		return parseXML(contents);
@@ -127,6 +185,16 @@ public class IOUtils {
 		return baos.toByteArray();
 	}
 
+	/**
+	 * Interprets the string as XML.
+	 * 
+	 * @param contents
+	 *            the string to be interpreted
+	 * @return the XML document representing the string
+	 * 
+	 * @throws JDOMParseException
+	 *             when an exception occurs while parsing XML
+	 */
 	public static Document parseXML(String contents) throws JDOMParseException {
 		if (contents == null)
 			throw new IllegalArgumentException("Parsed string must not be null.");
@@ -141,6 +209,11 @@ public class IOUtils {
 	 * This method fully reads the input stream, and as such after this method has been invoked,
 	 * the stream will have reached EOF.<br>
 	 * <b>This method does not close the streams.</b>
+	 * 
+	 * @param in
+	 *            the source stream
+	 * @param out
+	 *            the destination stream
 	 */
 	public static void write(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024 * 1024];
@@ -184,6 +257,10 @@ public class IOUtils {
 	}
 
 	/**
+	 * Reads the specified XML document, and returns its textual representation.
+	 * 
+	 * @param doc
+	 *            the XML document to be read
 	 * @return string representation of the Document's XML code
 	 */
 	public static String readDocument(Document doc) throws IOException {
