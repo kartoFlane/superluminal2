@@ -166,18 +166,21 @@ public class ManipulationTool extends Tool {
 			RoomController roomC = control instanceof RoomController ? (RoomController) control : null;
 			DoorController doorC = (DoorController) Manager.getSelected();
 
-			if (state == States.DOOR_LINK_LEFT) {
-				UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, true);
-				edit.setOld(doorC.getLeftRoom());
-				edit.setCurrent(roomC == null ? null : roomC.getGameObject());
-				doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
-				Manager.getCurrentShip().postEdit(edit);
-			} else {
-				UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, false);
-				edit.setOld(doorC.getRightRoom());
-				edit.setCurrent(roomC == null ? null : roomC.getGameObject());
-				doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
-				Manager.getCurrentShip().postEdit(edit);
+			// Can be null if the the user hides the door/door layer during linking
+			if (doorC != null) {
+				if (state == States.DOOR_LINK_LEFT) {
+					UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, true);
+					edit.setOld(doorC.getLeftRoom());
+					edit.setCurrent(roomC == null ? null : roomC.getGameObject());
+					doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
+					Manager.getCurrentShip().postEdit(edit);
+				} else {
+					UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, false);
+					edit.setOld(doorC.getRightRoom());
+					edit.setCurrent(roomC == null ? null : roomC.getGameObject());
+					doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
+					Manager.getCurrentShip().postEdit(edit);
+				}
 			}
 
 			EditorWindow.getInstance().updateSidebarContent();
@@ -197,6 +200,7 @@ public class ManipulationTool extends Tool {
 			GibController gibC = control instanceof GibController ? (GibController) control : null;
 			MountController mountC = (MountController) Manager.getSelected();
 
+			// Can be null if the the user hides the mount/mount layer during linking
 			if (mountC != null)
 				mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
 
