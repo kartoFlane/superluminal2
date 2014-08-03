@@ -497,4 +497,11 @@ public class UIUtils {
 			mntm.setText(mntm.getText() + "\t" + hotkeyText);
 		}
 	}
+
+	public static Display getDisplay() {
+		Display display = Display.getCurrent(); // Can sometimes return null
+		if (display == null)
+			display = Display.getDefault();
+		return display;
+	}
 }

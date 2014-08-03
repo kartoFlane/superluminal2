@@ -369,9 +369,7 @@ public abstract class Manager {
 	}
 
 	protected static void notifyKeyPressed(KeyEvent e) {
-		Display display = Display.getCurrent(); // Can sometimes return null
-		if (display == null)
-			display = Display.getDefault();
+		Display display = UIUtils.getDisplay();
 
 		// Don't execute the hotkey action if an editable widget has focus
 		Control c = display.getFocusControl();
@@ -387,9 +385,7 @@ public abstract class Manager {
 	}
 
 	protected static void notifyKeyReleased(KeyEvent e) {
-		Display display = Display.getCurrent(); // Can sometimes return null
-		if (display == null)
-			display = Display.getDefault();
+		Display display = UIUtils.getDisplay();
 
 		// Don't execute the hotkey action if an editable widget has focus
 		Control c = display.getFocusControl();

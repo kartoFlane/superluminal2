@@ -55,6 +55,24 @@ public class Utils {
 		return x == 0 ? 0 : x / Math.abs(x);
 	}
 
+	public static int random(int min, int max) {
+		if (min > max) {
+			int t = min;
+			min = max;
+			max = t;
+		}
+		return min + (int) Math.round(Math.random() * (max - min));
+	}
+
+	public static double random(double min, double max) {
+		if (min > max) {
+			double t = min;
+			min = max;
+			max = t;
+		}
+		return min + Math.random() * (max - min);
+	}
+
 	/**
 	 * Computes angle between the two points, in degrees.<br>
 	 * 0 means north, increases counter-clockwise.
@@ -67,6 +85,13 @@ public class Utils {
 			angle += 360;
 		}
 		return angle % 360;
+	}
+
+	public static Point polar(Point origin, double rad, int distance) {
+		Point result = new Point(0, 0);
+		result.x = origin.x + (int) Math.round(Math.cos(rad) * distance);
+		result.y = origin.y + (int) Math.round(Math.sin(rad) * distance);
+		return result;
 	}
 
 	/**
