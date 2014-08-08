@@ -22,6 +22,7 @@ public class SuperluminalConfig {
 	public static final String GEOMETRY = "geometry";
 	public static final String CHECK_UPDATES = "checkUpdatesOnStartup";
 	public static final String ALLOW_OVERLAP = "allowRoomOverlap";
+	public static final String ALLOW_OVERLAP_DOOR = "allowDoorOverlap";
 	public static final String RESET_LINKS = "resetDoorLinksOnMove";
 	public static final String SLOT_WARNING = "shownSlotWarning";
 
@@ -93,6 +94,7 @@ public class SuperluminalConfig {
 		config.setProperty(GEOMETRY, "");
 		config.setProperty(CHECK_UPDATES, "true");
 		config.setProperty(ALLOW_OVERLAP, "false");
+		config.setProperty(ALLOW_OVERLAP_DOOR, "false");
 		config.setProperty(RESET_LINKS, "false");
 		config.setProperty(SLOT_WARNING, "false");
 	}
@@ -108,6 +110,7 @@ public class SuperluminalConfig {
 		config.setProperty(CHECK_UPDATES, "" + Manager.checkUpdates);
 		config.setProperty(CLOSE_LOADER, "" + Manager.closeLoader);
 		config.setProperty(ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
+		config.setProperty(ALLOW_OVERLAP_DOOR, "" + Manager.allowDoorOverlap);
 		config.setProperty(RESET_LINKS, "" + Manager.resetDoorLinksOnMove);
 		config.setProperty(SLOT_WARNING, "" + Manager.shownSlotWarning);
 		if (Manager.rememberGeometry && !Manager.startMaximised)
@@ -127,6 +130,7 @@ public class SuperluminalConfig {
 			configComments += " " + CLOSE_LOADER + " - If true, ship loader window will automatically close after a ship is loaded.\n";
 			configComments += " " + CHECK_UPDATES + " - If true, the program will automatically check for updates each time it is started.\n";
 			configComments += " " + ALLOW_OVERLAP + " - If true, room collision will be disabled, allowing rooms to be placed on top of each other.\n";
+			configComments += " " + ALLOW_OVERLAP_DOOR + " - If true, door collision will be disabled, allowing doors to be placed on top of each other.\n";
 			configComments += "\n";
 			configComments += " " + GEOMETRY + " - Last saved size of the main window.\n";
 			configComments += "\n";

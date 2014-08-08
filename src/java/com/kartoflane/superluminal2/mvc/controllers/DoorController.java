@@ -37,7 +37,7 @@ public class DoorController extends ObjectController {
 		setSelectable(true);
 		setLocModifiable(true);
 		setBounded(true);
-		setCollidable(true);
+		setCollidable(!Manager.allowDoorOverlap);
 		setTolerance(COLLISION_TOLERANCE);
 		setParent(container.getShipController());
 		setPresentedFactor(ShipContainer.CELL_SIZE);

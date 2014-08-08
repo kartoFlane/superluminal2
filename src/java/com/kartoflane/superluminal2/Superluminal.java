@@ -59,7 +59,6 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - artillery
-	 * 
 	 * - undo system
 	 * == various properties undos
 	 * == reorder undo
@@ -67,13 +66,14 @@ public class Superluminal {
 	 * MEDIUM:
 	 * - glow placement modification
 	 * - figure out a better way to represent weapon stats in weapon selection dialog
+	 * - ship overview sometimes messes up invisible object detection (grays out items incorrectly)
 	 * 
 	 * LOW:
-	 * - come up with a way to set which system is first when assigned to the same room?
 	 * - generate floor image feature ??
 	 * - Rework highlight to be cursor based? --> allows to show mounts/rooms that are hidden
 	 * beneath hull/other rooms
-	 * - rework the layered painter to allow more freedom in arranging stuff's ordering
+	 * - rework the layered painter to allow more freedom in arranging stuff's ordering -> single views
+	 * consisting of primitive subviews placed on different layers?
 	 * 
 	 * - artillery weapon UI idea:
 	 * Additionally, when placing artillery room(s), there should be a separate category under
@@ -159,6 +159,7 @@ public class Superluminal {
 		Manager.startMaximised = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.START_MAX));
 		Manager.closeLoader = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CLOSE_LOADER));
 		Manager.allowRoomOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP));
+		Manager.allowDoorOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP_DOOR));
 		Manager.resetDoorLinksOnMove = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.RESET_LINKS));
 		Manager.shownSlotWarning = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SLOT_WARNING));
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);

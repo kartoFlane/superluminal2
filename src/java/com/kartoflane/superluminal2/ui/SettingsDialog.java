@@ -29,6 +29,7 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.utils.UIUtils;
@@ -54,6 +55,7 @@ public class SettingsDialog {
 	private HashMap<Hotkeys, Button> hotkeyButton = new LinkedHashMap<Hotkeys, Button>();
 	private Composite compKeybinds;
 	private Button btnUnbind;
+	private Button btnOverlapDoors;
 
 	public SettingsDialog(Shell parent) {
 		if (instance != null)
@@ -97,6 +99,16 @@ public class SettingsDialog {
 		Label separator01 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator01.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 
+		btnOverlapDoors = new Button(compBehaviour, SWT.CHECK);
+		btnOverlapDoors.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		btnOverlapDoors.setText("Allow Door Overlap");
+
+		Label lblOverlapDoor = new Label(compBehaviour, SWT.NONE);
+		lblOverlapDoor.setText("Disables door collision when checked, allowing them to overlap.");
+
+		Label separator02 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator02.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+
 		btnLoader = new Button(compBehaviour, SWT.CHECK);
 		btnLoader.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		btnLoader.setText("Close Ship Loader After Loading");
@@ -105,8 +117,8 @@ public class SettingsDialog {
 		lblLoader.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		lblLoader.setText("Closes the ship loader when a ship is successfully loaded.");
 
-		Label separator02 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator02.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+		Label separator03 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator03.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 
 		btnResetLinks = new Button(compBehaviour, SWT.CHECK);
 		btnResetLinks.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
@@ -278,6 +290,7 @@ public class SettingsDialog {
 			public void widgetSelected(SelectionEvent e) {
 				// Behaviour
 				Manager.allowRoomOverlap = btnOverlap.getSelection();
+				Manager.allowDoorOverlap = btnOverlapDoors.getSelection();
 				Manager.closeLoader = btnLoader.getSelection();
 				Manager.resetDoorLinksOnMove = btnResetLinks.getSelection();
 
@@ -309,6 +322,9 @@ public class SettingsDialog {
 					ShipController sc = container.getShipController();
 					for (RoomController rc : container.getRoomControllers()) {
 						rc.setCollidable(!Manager.allowRoomOverlap && !sc.isSelected());
+					}
+					for (DoorController dc : container.getDoorControllers()) {
+						dc.setCollidable(!Manager.allowDoorOverlap && !sc.isSelected());
 					}
 				}
 
@@ -446,6 +462,7 @@ public class SettingsDialog {
 	public void open() {
 		// Behaviour
 		btnOverlap.setSelection(Manager.allowRoomOverlap);
+		btnOverlapDoors.setSelection(Manager.allowDoorOverlap);
 		btnLoader.setSelection(Manager.closeLoader);
 		btnResetLinks.setSelection(Manager.resetDoorLinksOnMove);
 
