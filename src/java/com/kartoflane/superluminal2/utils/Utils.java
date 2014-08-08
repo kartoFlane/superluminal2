@@ -55,21 +55,35 @@ public class Utils {
 		return x == 0 ? 0 : x / Math.abs(x);
 	}
 
-	public static int random(int min, int max) {
-		if (min > max) {
-			int t = min;
-			min = max;
-			max = t;
-		}
-		return min + (int) Math.round(Math.random() * (max - min));
+	/**
+	 * Values returned by {@link #angle(Point, Point)} sometimes need to be filtered through this
+	 * method in order to work correctly with regular Math functions...
+	 * 
+	 * @param angle
+	 *            angle, in degrees
+	 */
+	public static int convertAngle(int angle) {
+		return angle * (-1) + 270;
 	}
 
+	/**
+	 * @see #convertAngle(int)
+	 */
+	public static double convertAngle(double angle) {
+		return angle * (-1) + 270;
+	}
+
+	/**
+	 * @return random number in the specified range, both ends inclusive
+	 */
+	public static int random(int min, int max) {
+		return (int) Math.round(random((double) min, max));
+	}
+
+	/**
+	 * @see #random(int, int)
+	 */
 	public static double random(double min, double max) {
-		if (min > max) {
-			double t = min;
-			min = max;
-			max = t;
-		}
 		return min + Math.random() * (max - min);
 	}
 
@@ -85,13 +99,6 @@ public class Utils {
 			angle += 360;
 		}
 		return angle % 360;
-	}
-
-	public static Point polar(Point origin, double rad, int distance) {
-		Point result = new Point(0, 0);
-		result.x = origin.x + (int) Math.round(Math.cos(rad) * distance);
-		result.y = origin.y + (int) Math.round(Math.sin(rad) * distance);
-		return result;
 	}
 
 	/**
@@ -150,6 +157,17 @@ public class Utils {
 		p.x = (int) (Math.cos(rad) * (point.x - cx) - Math.sin(rad) * (point.y - cy) + cx);
 		p.y = (int) (Math.sin(rad) * (point.x - cx) + Math.cos(rad) * (point.y - cy) + cy);
 		return p;
+	}
+
+	public static Point rotate(Point p, Point c, float rad) {
+		return rotate(p, c.x, c.y, rad);
+	}
+
+	public static Point polar(Point origin, double rad, int distance) {
+		Point result = new Point(0, 0);
+		result.x = origin.x + (int) Math.round(Math.cos(rad) * distance);
+		result.y = origin.y + (int) Math.round(Math.sin(rad) * distance);
+		return result;
 	}
 
 	/**
