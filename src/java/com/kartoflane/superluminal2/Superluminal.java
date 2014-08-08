@@ -51,9 +51,7 @@ public class Superluminal {
 
 	/**
 	 * settings ideas:
-	 * - checkboxes to make floor/cloak/shield/mounts follow hull, something along these lines
-	 * 
-	 * - feature creeeeeeep
+	 * --------
 	 * 
 	 * TODO:
 	 * 

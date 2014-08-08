@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
@@ -44,6 +45,8 @@ public class MountDataComposite extends Composite implements DataComposite {
 	private Label lblGibInfo;
 	private Button btnLinkedGib;
 	private Button btnSelectGib;
+	private Button btnFollowHull;
+	private Label lblFollowHelp;
 
 	public MountDataComposite(Composite parent, MountController control) {
 		super(parent, SWT.NONE);
@@ -61,6 +64,32 @@ public class MountDataComposite extends Composite implements DataComposite {
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
+		btnFollowHull = new Button(this, SWT.CHECK);
+		btnFollowHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		btnFollowHull.setText("Follow Hull");
+
+		lblFollowHelp = new Label(this, SWT.NONE);
+		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblFollowHelp.setImage(helpImage);
+		String msg = "When checked, this object will follow the hull image, so that\n" +
+				"when hull is moved, this object is moved as well.";
+		UIUtils.addTooltip(lblFollowHelp, "", msg);
+
+		btnFollowHull.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (btnFollowHull.getSelection()) {
+					controller.setParent(Manager.getCurrentShip().getImageController(Images.HULL));
+				} else {
+					controller.setParent(Manager.getCurrentShip().getShipController());
+				}
+				controller.updateFollowOffset();
+			}
+		});
+
+		new Label(this, SWT.NONE);
+		new Label(this, SWT.NONE);
+
 		btnRotated = new Button(this, SWT.CHECK);
 		btnRotated.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		btnRotated.setText("Rotated");
@@ -68,7 +97,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblRotHelp = new Label(this, SWT.NONE);
 		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblRotHelp.setImage(helpImage);
-		String msg = "This determines the direction the weapon is going to face,\n" +
+		msg = "This determines the direction the weapon is going to face,\n" +
 				"and in which it's going to shoot.";
 		UIUtils.addTooltip(lblRotHelp, "", msg);
 
@@ -206,6 +235,8 @@ public class MountDataComposite extends Composite implements DataComposite {
 	public void updateData() {
 		String alias = controller.getAlias();
 		label.setText("Mount " + controller.getId() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
+
+		btnFollowHull.setSelection(controller.getParent() == Manager.getCurrentShip().getImageController(Images.HULL));
 
 		btnRotated.setSelection(controller.isRotated());
 		btnMirrored.setSelection(controller.isMirrored());
