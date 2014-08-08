@@ -40,6 +40,14 @@ import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.IOUtils.DecodeResult;
 import com.kartoflane.superluminal2.utils.Utils;
 
+/**
+ * A class representing a database entry that can be installed in the {@link com.kartoflane.superluminal2.core.Database Database} to modify its
+ * contents.<br>
+ * Database entries are basically the editor's representation of .ftl files.
+ * 
+ * @author kartoFlane
+ *
+ */
 public class DatabaseEntry {
 
 	private static final Logger log = LogManager.getLogger(DatabaseEntry.class);

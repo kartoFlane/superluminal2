@@ -62,9 +62,10 @@ public class Database {
 	public static final int GIB_LINEAR_SPEED = 30;
 
 	/**
-	 * The angle that a gib gets rotated by with angular velocity of 1, in radians.
+	 * The angle that a gib gets rotated by with angular velocity of 1, in radians.<br>
+	 * Id est, a gib with anuglar velocity of 10 does a full rotation.
 	 */
-	public static final double GIB_ANGULAR_SPEED = Math.PI / 2;
+	public static final double GIB_ANGULAR_SPEED = Math.PI / 20;
 
 	private static Database instance;
 
@@ -160,6 +161,9 @@ public class Database {
 	 * Verifies the Database, determining whether it is safe to read data from the archives.
 	 * 
 	 * @return true if the database has passed the verification, false otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if the database has not been initialised yet
 	 */
 	public boolean verify() {
 		DatabaseEntry core = getCore();
@@ -179,15 +183,27 @@ public class Database {
 		}
 	}
 
+	/**
+	 * @return all database entries currently installed in the database, in the order in which they take effect.
+	 *         Entry at index 0 is the core entry (ie. represents the content of the game's archives)
+	 */
 	public DatabaseEntry[] getEntries() {
 		return dataEntries.toArray(new DatabaseEntry[0]);
 	}
 
+	/**
+	 * Adds a new database entry to the database.<br>
+	 * {@link #cacheAnimations()} should be called afterwards to update weapon sprites and animations.
+	 */
 	public void addEntry(DatabaseEntry de) {
 		dataEntries.add(de);
 		de.load();
 	}
 
+	/**
+	 * Removes the specified database entry from the database.<br>
+	 * {@link #cacheAnimations()} should be called afterwards to update weapon sprites and animations.
+	 */
 	public void removeEntry(DatabaseEntry de) {
 		try {
 			dataEntries.remove(de);
@@ -197,7 +213,20 @@ public class Database {
 		}
 	}
 
-	public void reorderEntry(DatabaseEntry de, int index) {
+	/**
+	 * Reorders the specified database entry, allowing to manipulate the order in which the entries' contents take effect.<br>
+	 * {@link #cacheAnimations()} should be called afterwards to update weapon sprites and animations.
+	 * 
+	 * @param de
+	 *            the entry to be reordered
+	 * @param index
+	 *            index at which the entry is to be inserted
+	 * @throws IndexOutOfBoundsException
+	 *             if the index is out of range (index < 0 || index > size())
+	 */
+	public void reorderEntry(DatabaseEntry de, int index) throws IndexOutOfBoundsException {
+		if (index < 0 || index > dataEntries.size())
+			throw new IndexOutOfBoundsException();
 		dataEntries.remove(de);
 		dataEntries.add(index, de);
 	}
