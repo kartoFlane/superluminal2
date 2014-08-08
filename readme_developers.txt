@@ -4,11 +4,14 @@ The build process for this project is automated by Maven.
   http://docs.codehaus.org/display/MAVENUSER/Getting+Started+with+Maven
 
 
-To build for all platforms, run "mvn clean package" in this folder.
-To build for a specific platform, add '-P win', '-P linux' or '-P mac' to
-the above command (without the quotes)
-To just compile the source code, add '-P compile' to the above command
+To build for all platforms, run "mvn package" in this folder.
+Command "mvn clean" deletes "target/" folders lingering from previous invocations
+of "mvn package" command.
+
+To build for a specific platform, use one of the profiles: 'win', 'mac' or 'linux'.
+To just compile the source code, use 'compile' profile.
 (compiled jar will be located in "modules/core/target")
+For example, "mvn package -P win"
 
 ================================================
 This project depends on the following libraries:
