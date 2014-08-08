@@ -1,15 +1,22 @@
 Changelog
 
-2.0.4 beta:
-- Fixed shift-dragging the ship origin
+2.0.5 beta:
+- Fixed shift-dragging the ship origin to set the offset
 - Fixed a bug with messed up numbering when reordering game objects via ShipOverview, and then
   adding new objects of the same type
 - Added support for Mac's Command key in hotkeys (untested)
-- Fixed application name on Mac
+- Fixed application name on Mac (now reads 'Superluminal' instead of 'SWT')
 - Fixed a bug that would cause the editor to crash during mount-gib or door linking
 - Fixed value of angular velocity constant in the editor's database (was 10 times too big), which
   was causing gibs to spin wildly
 - Added ship death animation simulation -- animates both gibs and weapon mounts attached to them
+- Save command now always saves the ship, without checking whether or not it's been modified
+- Made 3 more actions hotkeyable: Save Ship As, Open .shp, Animate Gibs
+- Made some minor improvements to the Settings window
+- Added 'allowDoorOverlap' settings option
+- Added option to make weapon mounts and images follow hull (select object > check "Follow Hull")
+- Added mono-directional dragging -- hold down Shift while dragging an object to have it move in
+  only one direction (horizontal or vertical)
 
 2.0.3a beta:
 - Fixed a bug that would cause the editor to crash when you tried to open the editor without
