@@ -9,6 +9,7 @@ import javax.swing.undo.AbstractUndoableEdit;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.NotDeletableException;
@@ -77,6 +78,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 	private boolean anchorVisible = true;
 	private boolean stationsVisible = true;
+	private volatile boolean animateGibs = false;
 
 	private boolean shipSaved = false;
 	private File saveDestination = null;
@@ -1182,5 +1184,161 @@ public class ShipContainer implements Disposable, SLListener {
 	public void handleEvent(SLEvent e) {
 		// Send the event over to controllers
 		eventHandler.sendEvent(e);
+	}
+
+	/**
+	 * Initiates gib animation, while also putting the editor in a non-interactable state.<br>
+	 * Does nothing if gib animation is currently in progress.
+	 */
+	public void triggerGibAnimation() {
+		if (!isGibAnimationInProgress()) {
+			animateGibs = true;
+			window.updateGibAnimationButton(false);
+			window.setInteractable(false);
+			animateGibs();
+		}
+	}
+
+	/**
+	 * Cancels the gib animation.
+	 */
+	public void stopGibAnimation() {
+		animateGibs = false;
+		window.updateGibAnimationButton(true);
+		window.setInteractable(true);
+	}
+
+	public boolean isGibAnimationInProgress() {
+		return animateGibs;
+	}
+
+	/**
+	 * Animates gibs and weapon mounts attached to them, trying to mimic how the animation will look in-game.<br>
+	 * 
+	 * Animation is executed in a separate thread, leaving GUI responsive.
+	 */
+	private void animateGibs() {
+		// Stores time that has elapsed since the animation started, in ms
+		final int[] elapsed = new int[1];
+		// Time between animation frames, in ms
+		final int interval = 20;
+		// Total time the animation is supposed to last, in ms
+		final int animTime = Database.GIB_DEATH_ANIM_TIME * 1000;
+
+		// Map to store the gib's index for use with the arrays defined below
+		// Sure there's indexOf(), but it'd have to be ran multiple times every interval
+		final HashMap<GibController, Integer> gMap = new HashMap<GibController, Integer>();
+		// Store mounts that are to be animated (ie. ones that are linked to a gib)
+		final ArrayList<MountController> animMounts = new ArrayList<MountController>();
+		// Remember which mounts were shown and hidden (since unlinked mounts are hidden during animation)
+		final boolean[] mVis = new boolean[mountControllers.size()];
+
+		// Mounts that are not linked to a gib are hidden and not animated
+		for (int i = 0; i < mountControllers.size(); i++) {
+			MountController mc = mountControllers.get(i);
+			boolean visible = mc.getGib() != Database.DEFAULT_GIB_OBJ;
+			if (visible)
+				animMounts.add(mc);
+			mVis[i] = mc.isVisible();
+			mc.setVisible(mVis[i] && visible);
+			mc.getProp(MountController.ARROW_PROP_ID).setVisible(false);
+		}
+
+		final int gSize = gibControllers.size();
+		final int mSize = animMounts.size();
+
+		// Select direction in which the gib will float
+		final int[] direction = new int[gSize];
+		// Select linear velocity
+		final double[] linear = new double[gSize];
+		// Select angular velocity, in degrees
+		final double[] angular = new double[gSize];
+		// Remember old locations
+		final Point[] gLocations = new Point[gSize];
+		final Point[] mLocations = new Point[mSize];
+		// Distance between mount and its linked gib
+		final int[] distance = new int[mSize];
+		// Angle between the mount and its linked gib
+		final double[] angles = new double[mSize];
+
+		// Gather data from gibs
+		for (int i = 0; i < gSize; i++) {
+			GibController gc = gibControllers.get(i);
+			gMap.put(gc, i);
+			gLocations[i] = gc.getLocation();
+			direction[i] = Utils.convertAngle(Utils.random(gc.getDirectionMin(), gc.getDirectionMax()));
+			linear[i] = Utils.random(gc.getLinearVelocityMin(), gc.getLinearVelocityMax()) * Database.GIB_LINEAR_SPEED;
+			angular[i] = Utils.random(gc.getAngularVelocityMin(), gc.getAngularVelocityMax()) * Math.toDegrees(Database.GIB_ANGULAR_SPEED);
+		}
+
+		// Gather data from mounts
+		for (int i = 0; i < mSize; i++) {
+			MountController mc = animMounts.get(i);
+			Point p = getController(mc.getGib()).getLocation();
+			mLocations[i] = mc.getLocation();
+			distance[i] = Utils.distance(mLocations[i], p);
+			angles[i] = Utils.convertAngle(Utils.angle(p, mLocations[i]));
+		}
+
+		final Display display = UIUtils.getDisplay();
+		Runnable animateRun = new Runnable() {
+			public void run() {
+				// Prevent the editor from crashing if the user exits the application while animation is in progress
+				if (window.getShell().isDisposed())
+					return;
+
+				// Animate gibs
+				for (int i = 0; i < gSize; i++) {
+					GibController gc = gibControllers.get(i);
+					int x = gLocations[i].x + (int) Math.round(linear[i] * (elapsed[0] / 1000f) * Math.cos(Math.toRadians(direction[i])));
+					int y = gLocations[i].y + (int) Math.round(linear[i] * (elapsed[0] / 1000f) * Math.sin(Math.toRadians(direction[i])));
+					gc.setVisible(false);
+					gc.setRotation((float) angular[i] * (elapsed[0] / 1000f));
+					gc.setLocation(x, y);
+					gc.setVisible(true);
+				}
+
+				// Animate mounts
+				for (int i = 0; i < mSize; i++) {
+					MountController mc = animMounts.get(i);
+					GibController gc = (GibController) getController(mc.getGib());
+					int j = gMap.get(gc);
+					float ang = (float) angular[j] * (elapsed[0] / 1000f);
+					Point p = Utils.polar(gc.getLocation(), Math.toRadians(angles[i] + ang), distance[i]);
+					mc.setVisible(false);
+					mc.setRotation((mc.isRotated() ? 90 : 0) + ang);
+					mc.setLocation(p);
+					mc.setVisible(true);
+				}
+
+				elapsed[0] += interval;
+				// User can cancel animation via button, which modifies the animateGibs var, so check for that too
+				animateGibs = elapsed[0] < animTime && animateGibs;
+
+				if (animateGibs) {
+					// If animation is supposed to continue, run the runnable again
+					display.timerExec(interval, this);
+				} else {
+					// Restore data
+					for (int i = 0; i < gSize; i++) {
+						GibController gc = gibControllers.get(i);
+						gc.setRotation(0);
+						gc.reposition(gLocations[i]);
+					}
+					for (int i = 0; i < mountControllers.size(); i++) {
+						MountController mc = mountControllers.get(i);
+						mc.setVisible(mVis[i]);
+						mc.getProp(MountController.ARROW_PROP_ID).setVisible(mVis[i]);
+					}
+					for (int i = 0; i < mSize; i++) {
+						MountController mc = animMounts.get(i);
+						mc.setRotation(mc.isRotated() ? 90 : 0);
+						mc.reposition(mLocations[i]);
+					}
+					stopGibAnimation();
+				}
+			}
+		};
+		display.timerExec(interval, animateRun);
 	}
 }

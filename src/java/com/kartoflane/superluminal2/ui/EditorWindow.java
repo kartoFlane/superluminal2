@@ -64,6 +64,7 @@ import com.kartoflane.superluminal2.tools.PropertyTool;
 import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
 import com.kartoflane.superluminal2.utils.SHPUtils;
@@ -127,6 +128,7 @@ public class EditorWindow {
 	private MenuItem mntmOptimalOffset;
 	private MenuItem mntmReloadDb;
 	private MenuItem mntmHangar;
+	private ToolItem tltmAnimate;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -366,6 +368,20 @@ public class EditorWindow {
 			}
 		});
 
+		tltmAnimate = new ToolItem(toolBar, SWT.PUSH);
+		updateGibAnimationButton(true);
+		tltmAnimate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ShipContainer container = Manager.getCurrentShip();
+				if (container.isGibAnimationInProgress()) {
+					container.stopGibAnimation();
+				} else {
+					container.triggerGibAnimation();
+				}
+			}
+		});
+
 		// Info container - mouse position, etc
 		Composite infoContainer = new Composite(toolContainer, SWT.NONE);
 		infoContainer.setLayout(new GridLayout(1, false));
@@ -398,8 +414,6 @@ public class EditorWindow {
 			canvas.setParent(editorContainer);
 			editorContainer.setWeights(new int[] { SIDEBAR_MIN_WIDTH, displaySize.width - SIDEBAR_MIN_WIDTH });
 		}
-
-		registerHotkeys();
 
 		display.addFilter(SWT.KeyUp, new Listener() {
 			@Override
@@ -786,6 +800,7 @@ public class EditorWindow {
 			}
 		});
 
+		registerHotkeys();
 		updateHotkeyTooltips();
 
 		canvas.addMouseListener(MouseInputDispatcher.getInstance());
@@ -1057,9 +1072,15 @@ public class EditorWindow {
 		tltmImages.setEnabled(enable);
 		tltmProperties.setEnabled(enable);
 		tltmManager.setEnabled(enable);
+
+		ShipContainer c = Manager.getCurrentShip();
+		tltmAnimate.setEnabled(enable || (c != null && c.isGibAnimationInProgress()));
+
 		tltmCloak.setEnabled(enable);
 		if (!enable && tltmCloak.getSelection())
 			tltmCloak.setSelection(false);
+		else if (enable && c.getImageController(Images.CLOAK).isVisible())
+			tltmCloak.setSelection(true);
 
 		sideContainer.getVerticalBar().setEnabled(enable);
 	}
@@ -1083,6 +1104,7 @@ public class EditorWindow {
 		mntmDelete.setEnabled(enable);
 
 		// View
+		mntmGrid.setEnabled(enable);
 		mntmHangar.setEnabled(enable);
 		mntmShowAnchor.setEnabled(enable);
 		mntmShowMounts.setEnabled(enable);
@@ -1094,9 +1116,10 @@ public class EditorWindow {
 		mntmShowShield.setEnabled(enable);
 		mntmShowGibs.setEnabled(enable);
 
-		// Disable mod management, only available when a ship is not loaded
-		mntmModMan.setEnabled(!enable);
-		mntmReloadDb.setEnabled(!enable);
+		// Mod management only available when a ship is not loaded
+		ShipContainer c = Manager.getCurrentShip();
+		mntmModMan.setEnabled(!enable && c == null);
+		mntmReloadDb.setEnabled(!enable && c == null);
 	}
 
 	public boolean isOptionsEnabled() {
@@ -1127,6 +1150,40 @@ public class EditorWindow {
 			container.setRoomsVisible(set);
 			container.setDoorsVisible(set);
 			container.setStationsVisible(set);
+		}
+	}
+
+	/**
+	 * Allows to put the editor in a completely non-interactable state, save for the menu options under "Help".
+	 */
+	public void setInteractable(boolean interactable) {
+		enableTools(interactable);
+		enableOptions(interactable);
+		// Toggle widgets not covered by the two methods
+		mntmNewShip.setEnabled(interactable);
+		mntmLoadShip.setEnabled(interactable);
+		mntmConvertShp.setEnabled(interactable);
+		mntmSettings.setEnabled(interactable);
+
+		// Toggle the overview window, if it is currently opened
+		OverviewWindow w = OverviewWindow.getInstance();
+		if (w != null) {
+			w.setEnabled(interactable);
+		}
+
+		// Toggle tool
+		Manager.setSelected(null);
+		if (interactable) {
+			Manager.selectTool(Tools.POINTER);
+		} else {
+			Manager.selectTool(null);
+		}
+
+		// Select none gib prop controller
+		ShipContainer container = Manager.getCurrentShip();
+		if (container != null && !interactable) {
+			GibPropContainer propC = container.getGibContainer();
+			propC.showControls(PropControls.NONE);
 		}
 	}
 
@@ -1487,5 +1544,22 @@ public class EditorWindow {
 				eventHandler.sendEvent(new SLEvent(modifier, EditorWindow.this, false));
 			}
 		});
+	}
+
+	/**
+	 * @param animate
+	 *            if true, sets the button's appearance to 'ready-to-animate' state,<br>
+	 *            if false, sets the button's appearance to 'stop animating' state.
+	 */
+	public void updateGibAnimationButton(boolean animate) {
+		if (animate) {
+			Cache.checkInImage(this, "cpath:/assets/stop.png");
+			tltmAnimate.setImage(Cache.checkOutImage(this, "cpath:/assets/play.png"));
+			tltmAnimate.setToolTipText("Animate Gibs");
+		} else {
+			Cache.checkInImage(this, "cpath:/assets/play.png");
+			tltmAnimate.setImage(Cache.checkOutImage(this, "cpath:/assets/stop.png"));
+			tltmAnimate.setToolTipText("Stop Gib Animation");
+		}
 	}
 }

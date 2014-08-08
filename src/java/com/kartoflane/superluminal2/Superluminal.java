@@ -41,7 +41,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.3a beta");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.4 beta");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -59,7 +59,6 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - artillery
-	 * - gib animation
 	 * 
 	 * - undo system
 	 * == various properties undos
@@ -126,13 +125,11 @@ public class Superluminal {
 			}
 
 			UIUtils.showSwingDialog(APP_NAME + " - Wrong version", msg);
-			System.exit(0);
+			System.exit(1);
 		}
 
 		Display display = Display.getDefault();
-
 		File configFile = new File(CONFIG_FILE);
-
 		Properties config = new Properties();
 		SuperluminalConfig appConfig = new SuperluminalConfig(config, configFile);
 
@@ -191,7 +188,6 @@ public class Superluminal {
 		// Create the main window instance
 		EditorWindow editorWindow = null;
 		try {
-			display = Display.getDefault();
 			editorWindow = new EditorWindow(display);
 		} catch (Exception e) {
 			log.error("Exception occured while creating EditorWindow: ", e);
