@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -350,24 +351,51 @@ public class SettingsDialog {
 				// wrap or things happen that require it
 				Rectangle r = scKeybinds.getClientArea();
 				scKeybinds.setMinHeight(compKeybinds.computeSize(r.width, SWT.DEFAULT).y);
+
+				// Set scrolling speed on the vertical scrollbar
+				ScrollBar sb = scKeybinds.getVerticalBar();
+				if (sb != null) {
+					sb.setPageIncrement(sb.getThumb());
+					sb.setIncrement(Math.max(1, sb.getThumb() / 15));
+				}
 			}
 		});
 
 		scConfig.addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
+				// Recalculate height in case the resize makes texts
+				// wrap or things happen that require it
 				Rectangle r = scConfig.getClientArea();
 				scConfig.setMinHeight(compConfig.computeSize(r.width, SWT.DEFAULT, true).y);
+
+				// Set scrolling speed on the vertical scrollbar
+				ScrollBar sb = scConfig.getVerticalBar();
+				if (sb != null) {
+					sb.setPageIncrement(sb.getThumb());
+					sb.setIncrement(Math.max(1, sb.getThumb() / 15));
+				}
 			}
 		});
 
 		scBehaviour.addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
+				// Recalculate height in case the resize makes texts
+				// wrap or things happen that require it
 				Rectangle r = scBehaviour.getClientArea();
 				scBehaviour.setMinHeight(compBehaviour.computeSize(r.width, SWT.DEFAULT).y);
+
+				// Set scrolling speed on the vertical scrollbar
+				ScrollBar sb = scBehaviour.getVerticalBar();
+				if (sb != null) {
+					sb.setPageIncrement(sb.getThumb());
+					sb.setIncrement(Math.max(1, sb.getThumb() / 15));
+				}
 			}
 		});
 
+		// List keys that cannot be bound
 		final ArrayList<Integer> blacklistedKeys = new ArrayList<Integer>();
+		blacklistedKeys.add(SWT.COMMAND);
 		blacklistedKeys.add(SWT.SHIFT);
 		blacklistedKeys.add(SWT.CTRL);
 		blacklistedKeys.add(SWT.ALT);
@@ -388,6 +416,7 @@ public class SettingsDialog {
 				if (currentBinding != null && !blacklistedKeys.contains(e.keyCode)) {
 					Hotkey newHotkey = new Hotkey(Manager.getHotkey(currentBinding));
 					newHotkey.setEnabled(true);
+					newHotkey.setCommand((e.stateMask & SWT.COMMAND) == SWT.COMMAND);
 					newHotkey.setShift((e.stateMask & SWT.SHIFT) == SWT.SHIFT);
 					newHotkey.setCtrl((e.stateMask & SWT.CTRL) == SWT.CTRL);
 					newHotkey.setAlt((e.stateMask & SWT.ALT) == SWT.ALT);
@@ -404,7 +433,7 @@ public class SettingsDialog {
 		display.addFilter(SWT.KeyDown, keyListener);
 
 		shell.setMinimumSize(400, 300);
-		shell.setSize(400, 300);
+		shell.setSize(550, 400);
 
 		Point size = shell.getSize();
 		Point parSize = parent.getSize();
