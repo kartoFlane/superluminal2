@@ -1,11 +1,15 @@
 Changelog
 
-2.0.3b beta:
+2.0.4 beta:
 - Fixed shift-dragging the ship origin
 - Fixed a bug with messed up numbering when reordering game objects via ShipOverview, and then
   adding new objects of the same type
 - Added support for Mac's Command key in hotkeys (untested)
 - Fixed application name on Mac
+- Fixed a bug that would cause the editor to crash during mount-gib or door linking
+- Fixed value of angular velocity constant in the editor's database (was 10 times too big), which
+  was causing gibs to spin wildly
+- Added ship death animation simulation -- animates both gibs and weapon mounts attached to them
 
 2.0.3a beta:
 - Fixed a bug that would cause the editor to crash when you tried to open the editor without
