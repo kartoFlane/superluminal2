@@ -57,13 +57,13 @@ public class Database {
 	public static final int GIB_DEATH_ANIM_TIME = 4;
 
 	/**
-	 * Amount of pixels a gib moves in 1 second with linear velocity of 1.
+	 * Amount of pixels a gib with linear velocity of 1 moves in 1 second.
 	 */
 	public static final int GIB_LINEAR_SPEED = 30;
 
 	/**
-	 * The angle that a gib gets rotated by with angular velocity of 1, in radians.<br>
-	 * Id est, a gib with anuglar velocity of 10 does a full rotation.
+	 * The angle that a gib with angular velocity of 1 gets rotated by in 1 second, in radians.<br>
+	 * A gib with angular velocity of 10 does a full rotation over the course of death animation.
 	 */
 	public static final double GIB_ANGULAR_SPEED = Math.PI / 20;
 
