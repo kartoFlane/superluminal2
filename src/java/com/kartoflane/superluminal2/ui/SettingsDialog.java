@@ -200,9 +200,9 @@ public class SettingsDialog {
 				Hotkeys.DOOR_TOOL, Hotkeys.MOUNT_TOOL, Hotkeys.STATION_TOOL
 		};
 		Hotkeys[] commands = {
-				Hotkeys.DELETE, Hotkeys.PIN, Hotkeys.NEW_SHIP, Hotkeys.LOAD_SHIP,
-				Hotkeys.SAVE_SHIP, Hotkeys.CLOSE_SHIP, Hotkeys.MANAGE_MOD, Hotkeys.SETTINGS,
-				Hotkeys.UNDO, Hotkeys.REDO, Hotkeys.CLOAK
+				Hotkeys.DELETE, Hotkeys.PIN, Hotkeys.NEW_SHIP, Hotkeys.LOAD_SHIP, Hotkeys.SAVE_SHIP,
+				Hotkeys.SAVE_SHIP_AS, Hotkeys.CLOSE_SHIP, Hotkeys.LOAD_LEGACY, Hotkeys.MANAGE_MOD,
+				Hotkeys.SETTINGS, Hotkeys.UNDO, Hotkeys.REDO, Hotkeys.CLOAK, Hotkeys.ANIMATE
 		};
 		Hotkeys[] view = {
 				Hotkeys.TOGGLE_GRID, Hotkeys.TOGGLE_HANGAR, Hotkeys.SHOW_ANCHOR,

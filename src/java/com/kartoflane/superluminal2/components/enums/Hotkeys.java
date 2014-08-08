@@ -18,12 +18,15 @@ public enum Hotkeys {
 	NEW_SHIP,
 	LOAD_SHIP,
 	SAVE_SHIP,
+	SAVE_SHIP_AS,
 	CLOSE_SHIP,
+	LOAD_LEGACY,
 	MANAGE_MOD,
 	SETTINGS,
 	UNDO,
 	REDO,
 	CLOAK,
+	ANIMATE,
 
 	// View
 	TOGGLE_GRID,
@@ -70,8 +73,12 @@ public enum Hotkeys {
 				return "Load Ship";
 			case SAVE_SHIP:
 				return "Save Ship";
+			case SAVE_SHIP_AS:
+				return "Save Ship As";
 			case CLOSE_SHIP:
 				return "Close Ship";
+			case LOAD_LEGACY:
+				return "Load .shp";
 			case MANAGE_MOD:
 				return "Mod Management";
 			case SETTINGS:
@@ -82,6 +89,8 @@ public enum Hotkeys {
 				return "Redo";
 			case CLOAK:
 				return "View Cloaked Appearance";
+			case ANIMATE:
+				return "Animate Gibs";
 
 			case TOGGLE_GRID:
 				return "Show Grid";

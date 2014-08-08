@@ -539,12 +539,6 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ShipContainer container = Manager.getCurrentShip();
-				// Prevent Ctrl+S spammers from overstressing the program...
-				if (container.isSaved()) {
-					log.trace("Ship already saved - aborting.");
-					return;
-				}
-
 				if (!promptSaveShip(container, false))
 					log.trace("User exited save dialog, ship was not saved.");
 			}
@@ -841,10 +835,18 @@ public class EditorWindow {
 		h = Manager.getHotkey(Hotkeys.LOAD_SHIP);
 		if (h.isEnabled())
 			UIUtils.addHotkeyText(mntmLoadShip, h.toString());
+		mntmConvertShp.setText("Open .shp");
+		h = Manager.getHotkey(Hotkeys.LOAD_LEGACY);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmConvertShp, h.toString());
 		mntmSaveShip.setText("Save Ship");
 		h = Manager.getHotkey(Hotkeys.SAVE_SHIP);
 		if (h.isEnabled())
 			UIUtils.addHotkeyText(mntmSaveShip, h.toString());
+		mntmSaveShipAs.setText("Save Ship As");
+		h = Manager.getHotkey(Hotkeys.SAVE_SHIP_AS);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmSaveShipAs, h.toString());
 		mntmModMan.setText("Mod Management");
 		h = Manager.getHotkey(Hotkeys.MANAGE_MOD);
 		if (h.isEnabled())
@@ -933,6 +935,8 @@ public class EditorWindow {
 		tltmManager.setToolTipText("Overview" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
 		h = Manager.getHotkey(Hotkeys.CLOAK);
 		tltmCloak.setToolTipText("View Cloaked Appearance" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
+		h = Manager.getHotkey(Hotkeys.ANIMATE);
+		tltmAnimate.setToolTipText("Animate Gibs" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
 	}
 
 	public void updateUndoButtons() {
@@ -1292,6 +1296,14 @@ public class EditorWindow {
 		h.addNotifyAction(mntmSaveShip, true);
 		Manager.hookHotkey(shell, h);
 
+		h = Manager.getHotkey(Hotkeys.SAVE_SHIP_AS);
+		h.addNotifyAction(mntmSaveShipAs, true);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.LOAD_LEGACY);
+		h.addNotifyAction(mntmConvertShp, true);
+		Manager.hookHotkey(shell, h);
+
 		h = Manager.getHotkey(Hotkeys.MANAGE_MOD);
 		h.addNotifyAction(mntmModMan, true);
 		Manager.hookHotkey(shell, h);
@@ -1382,6 +1394,10 @@ public class EditorWindow {
 
 		h = Manager.getHotkey(Hotkeys.CLOAK);
 		h.addNotifyAndToggleAction(tltmCloak, true);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.ANIMATE);
+		h.addNotifyAndToggleAction(tltmAnimate, true);
 		Manager.hookHotkey(shell, h);
 
 		// Creation Tool hotkeys
@@ -1555,11 +1571,13 @@ public class EditorWindow {
 		if (animate) {
 			Cache.checkInImage(this, "cpath:/assets/stop.png");
 			tltmAnimate.setImage(Cache.checkOutImage(this, "cpath:/assets/play.png"));
-			tltmAnimate.setToolTipText("Animate Gibs");
+			Hotkey h = Manager.getHotkey(Hotkeys.ANIMATE);
+			tltmAnimate.setToolTipText("Animate Gibs" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
 		} else {
 			Cache.checkInImage(this, "cpath:/assets/play.png");
 			tltmAnimate.setImage(Cache.checkOutImage(this, "cpath:/assets/stop.png"));
-			tltmAnimate.setToolTipText("Stop Gib Animation");
+			Hotkey h = Manager.getHotkey(Hotkeys.ANIMATE);
+			tltmAnimate.setToolTipText("Stop Gib Animation" + (h.isEnabled() ? String.format(" (%s)", h.toString()) : ""));
 		}
 	}
 }
