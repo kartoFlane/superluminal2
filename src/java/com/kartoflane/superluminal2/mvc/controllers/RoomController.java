@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Tuple;
+import com.kartoflane.superluminal2.components.enums.Orientations;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Grid;
@@ -304,18 +305,40 @@ public class RoomController extends ObjectController implements Indexable, Compa
 
 					CursorController.getInstance().updateView();
 				} else if (moving) {
-					Point p = Grid.getInstance().snapToGrid(e.x - clickOffset.x - getW() / 2, e.y - clickOffset.y - getH() / 2, Snapmodes.CROSS);
-					Rectangle checkBounds = new Rectangle(p.x, p.y, getW(), getH());
+					// Decide direction for mono-directional dragging
+					if (monoDirectionalDrag && lockDragTo == null) {
+						int d = Utils.distance(getX() + clickOffset.x, getY() + clickOffset.y, e.x, e.y);
+						// Have the user drag more than 2px away from click point to determine the direction
+						// Not noticeable to the user, but increases the chance of correct detection
+						if (d > 2) {
+							Point click = new Point(getX() + clickOffset.x, getY() + clickOffset.y);
+							Point cursor = new Point(e.x, e.y);
+							double angle = (Utils.angle(click, cursor) + 90) % 360;
+							if ((angle >= 315 || angle < 45) || (angle >= 135 && angle < 225)) {
+								lockDragTo = Orientations.HORIZONTAL;
+							} else {
+								lockDragTo = Orientations.VERTICAL;
+							}
+						}
+					} else {
+						Point p = Grid.getInstance().snapToGrid(e.x - clickOffset.x - getW() / 2, e.y - clickOffset.y - getH() / 2, Snapmodes.CROSS);
+						Rectangle checkBounds = new Rectangle(p.x, p.y, getW(), getH());
 
-					p = Grid.getInstance().snapToGrid(checkBounds.x + getW() / 2, checkBounds.y + getH() / 2, snapmode);
-					// proceed only if the position actually changed
-					if (p.x != getX() || p.y != getY()) {
-						reposition(p.x, p.y);
-						updateView();
-						updateFollowOffset();
+						p = Grid.getInstance().snapToGrid(checkBounds.x + getW() / 2, checkBounds.y + getH() / 2, snapmode);
+						if (lockDragTo == Orientations.HORIZONTAL) {
+							p.y = getY();
+						} else if (lockDragTo == Orientations.VERTICAL) {
+							p.x = getX();
+						}
+						// proceed only if the position actually changed
+						if (p.x != getX() || p.y != getY()) {
+							reposition(p.x, p.y);
+							updateView();
+							updateFollowOffset();
 
-						container.getParent().updateSidebarContent();
-						container.updateBoundingArea();
+							container.getParent().updateSidebarContent();
+							container.updateBoundingArea();
+						}
 					}
 				}
 			}

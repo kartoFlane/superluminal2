@@ -634,6 +634,8 @@ public class ShipContainer implements Disposable, SLListener {
 		if (controller instanceof ObjectController) {
 			eventHandler.sendEvent(new SLEvent(SLEvent.ADD_OBJECT, this, controller));
 		}
+
+		addListener(SLEvent.MOD_SHIFT, controller);
 	}
 
 	public void remove(AbstractController controller) {
@@ -662,6 +664,8 @@ public class ShipContainer implements Disposable, SLListener {
 		if (controller instanceof ObjectController) {
 			eventHandler.sendEvent(new SLEvent(SLEvent.REM_OBJECT, this, controller));
 		}
+
+		removeListener(SLEvent.MOD_SHIFT, controller);
 	}
 
 	public void store(AbstractController controller) {

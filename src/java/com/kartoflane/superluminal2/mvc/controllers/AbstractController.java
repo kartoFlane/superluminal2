@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.EventHandler;
+import com.kartoflane.superluminal2.components.enums.Orientations;
 import com.kartoflane.superluminal2.components.interfaces.Boundable;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
 import com.kartoflane.superluminal2.components.interfaces.Deletable;
@@ -63,7 +64,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	protected boolean containsMouse = false;
 	protected boolean followableActive = true;
 	protected boolean deleted = false;
+	protected boolean monoDirectionalDrag = false;
 
+	protected Orientations lockDragTo = null;
 	protected Snapmodes snapmode = Snapmodes.FREE;
 	protected Point clickOffset = new Point(0, 0);
 
@@ -650,6 +653,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void mouseUp(MouseEvent e) {
 		if (Manager.getSelectedToolId() == Tools.POINTER) {
 			if (e.button == 1) {
+				lockDragTo = null;
+
 				if (!contains(e.x, e.y) && !contains(getX() + clickOffset.x, getY() + clickOffset.y) && selected)
 					Manager.setSelected(null);
 				setMoving(false);
@@ -663,12 +668,34 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	public void mouseMove(MouseEvent e) {
 		if (Manager.getSelectedToolId() == Tools.POINTER) {
 			if (selected && moving) {
-				Point p = Grid.getInstance().snapToGrid(e.x - clickOffset.x, e.y - clickOffset.y, snapmode);
-				if (p.x != getX() || p.y != getY()) {
-					reposition(p.x, p.y);
-					updateFollowOffset();
+				// Decide direction for mono-directional dragging
+				if (monoDirectionalDrag && lockDragTo == null) {
+					int d = Utils.distance(getX() + clickOffset.x, getY() + clickOffset.y, e.x, e.y);
+					// Have the user drag more than 2px away from click point to determine the direction
+					// Not noticeable to the user, but increases the chance of correct detection
+					if (d > 2) {
+						Point click = new Point(getX() + clickOffset.x, getY() + clickOffset.y);
+						Point cursor = new Point(e.x, e.y);
+						double angle = (Utils.angle(click, cursor) + 90) % 360;
+						if ((angle >= 315 || angle < 45) || (angle >= 135 && angle < 225)) {
+							lockDragTo = Orientations.HORIZONTAL;
+						} else {
+							lockDragTo = Orientations.VERTICAL;
+						}
+					}
+				} else {
+					Point p = Grid.getInstance().snapToGrid(e.x - clickOffset.x, e.y - clickOffset.y, snapmode);
+					if (lockDragTo == Orientations.HORIZONTAL) {
+						p.y = getY();
+					} else if (lockDragTo == Orientations.VERTICAL) {
+						p.x = getX();
+					}
+					if (p.x != getX() || p.y != getY()) {
+						reposition(p.x, p.y);
+						updateFollowOffset();
 
-					((DataComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+						((DataComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+					}
 				}
 			}
 		}
@@ -935,6 +962,10 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		} else if (e.type == SLEvent.VISIBLE) {
 			if (e.source == getParent())
 				setVisible((Boolean) e.data);
+		} else if (e.type == SLEvent.MOD_SHIFT) {
+			monoDirectionalDrag = (Boolean) e.data;
+			if (!monoDirectionalDrag)
+				lockDragTo = null;
 		}
 	}
 
