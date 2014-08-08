@@ -433,8 +433,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 				if (ship.isPlayerShip()) {
 					if (spWeaponSlots.getSelection() > 4 && ship.getWeaponSlots() <= 4 && !Manager.shownSlotWarning) {
 						String msg = "Giving a ship more than 4 weapon slots will cause ingame UI to break.\n" +
-								"While it's possible for a ship to have any number of weapon slots, this\n" +
-								"option should only be used by experienced modders.";
+								"On top of that, toggling autofire on weapons assigned to slots >4 will crash the game.\n" +
+								"While it's possible for a ship to have any number of weapon slots, the\n" +
+								"option to have more than 4 should only be used by experienced modders.";
 						UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, msg);
 						Manager.shownSlotWarning = true;
 					}
