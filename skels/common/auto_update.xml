@@ -1,7 +1,7 @@
 <versions>
-	<latest id="2.0.5 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.4 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
-		<version id="2.0.5 beta">
+		<version id="2.0.4 beta">
 			<change>Added mono-directional dragging</change>
 			<change>Added simulation of ship death animation (gib & mount animation)</change>
 			<change>Added support for Mac Command key in hotkeys (untested)</change>
