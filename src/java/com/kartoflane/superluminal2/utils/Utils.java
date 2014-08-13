@@ -102,6 +102,20 @@ public class Utils {
 	}
 
 	/**
+	 * A = [0,1] = (x, y)<br>
+	 * B = [2,3] = (x + w, y)<br>
+	 * C = [4,5] = (x, y + h)<br>
+	 * D = [6,7] = (x + w, y + h)<br>
+	 * <br>
+	 * The result is a Z-like shape:
+	 * 
+	 * <pre>
+	 * A--B
+	 *   /
+	 *  /
+	 * C--D
+	 * </pre>
+	 * 
 	 * @return int array of length 8, containing alternating x and y coordinates,
 	 *         describing the corners of the given rectangle.
 	 */
@@ -111,6 +125,26 @@ public class Utils {
 				rect.x + rect.width, rect.y,
 				rect.x, rect.y + rect.height,
 				rect.x + rect.width, rect.y + rect.height
+		};
+	}
+
+	/**
+	 * The same as {@link #toArray(Rectangle)}, but 4th and 6th indices are swapped.<br>
+	 * The result is a rectangle-like shape:
+	 * 
+	 * <pre>
+	 * A--B
+	 *    |
+	 * D--C
+	 * </pre>
+	 * 
+	 */
+	public static int[] toArrayPolygon(Rectangle rect) {
+		return new int[] {
+				rect.x, rect.y,
+				rect.x + rect.width, rect.y,
+				rect.x + rect.width, rect.y + rect.height,
+				rect.x, rect.y + rect.height
 		};
 	}
 
@@ -134,9 +168,8 @@ public class Utils {
 			b.width = b.height;
 			b.height = a;
 		} else {
-			Point c = new Point(b.x + b.width / 2, b.y + b.height / 2);
-			Polygon p = new Polygon(toArray(b));
-			p.rotate((float) Math.toRadians(rotation), c.x, c.y);
+			Polygon p = new Polygon(toArrayPolygon(b));
+			p.rotate((float) Math.toRadians(rotation));
 			b = p.getBounds();
 		}
 		return b;

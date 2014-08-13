@@ -56,6 +56,7 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - weapon mount tool -> select direction NONE, move the mouse -> arrow becomes visible (works correctly on already placed weapon mounts)
 	 * - artillery
 	 * - undo system
 	 * == various properties undos
@@ -64,7 +65,6 @@ public class Superluminal {
 	 * 
 	 * MEDIUM:
 	 * - glow placement modification
-	 * - figure out a better way to represent weapon stats in weapon selection dialog
 	 * - ship overview sometimes messes up invisible object detection (grays out items incorrectly)
 	 * 
 	 * LOW:
