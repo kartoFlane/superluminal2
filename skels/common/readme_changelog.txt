@@ -1,6 +1,12 @@
 Changelog
 
-2.0.5 beta:
+2.0.6 beta:
+- Improved stats display in weapon & drone selection dialogs
+- Added 'Follow Hull' button to Mount Tool -- when checked, newly created weapon mounts
+  will follow hull
+- Several minor UI tweaks
+
+2.0.5 beta (which was actually 2.0.4...):
 - Fixed shift-dragging the ship origin to set the offset
 - Fixed a bug with messed up numbering when reordering game objects via ShipOverview, and then
   adding new objects of the same type
