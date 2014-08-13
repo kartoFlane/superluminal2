@@ -187,64 +187,43 @@ public class Hotkey {
 		if (command)
 			msg += "⌘+";
 
-		if (key == SWT.SPACE)
-			msg += "Spacebar";
-		else if (key == SWT.KEYPAD_CR || key == SWT.CR)
-			msg += "Enter";
-		else if (key == SWT.BS)
-			msg += "Backspace";
-		else if (key == SWT.TAB)
-			msg += "Tab";
-		else if (key == SWT.F1)
-			msg += "F1";
-		else if (key == SWT.F2)
-			msg += "F2";
-		else if (key == SWT.F3)
-			msg += "F3";
-		else if (key == SWT.F4)
-			msg += "F4";
-		else if (key == SWT.F5)
-			msg += "F5";
-		else if (key == SWT.F6)
-			msg += "F6";
-		else if (key == SWT.F7)
-			msg += "F7";
-		else if (key == SWT.F8)
-			msg += "F8";
-		else if (key == SWT.F9)
-			msg += "F9";
-		else if (key == SWT.F10)
-			msg += "F10";
-		else if (key == SWT.F11)
-			msg += "F11";
-		else if (key == SWT.F12)
-			msg += "F12";
-		else if (key == SWT.CAPS_LOCK)
-			msg += "Caps Lock";
-		else if (key == SWT.NUM_LOCK)
-			msg += "Num Lock";
-		else if (key == SWT.SCROLL_LOCK)
-			msg += "Scroll Lock";
-		else if (key == SWT.PRINT_SCREEN)
-			msg += "Print Screen";
-		else if (key == SWT.PAUSE)
-			msg += "Pause";
-		else if (key == SWT.BREAK)
-			msg += "Break";
-		else if (key == SWT.INSERT)
-			msg += "Insert";
-		else if (key == SWT.DEL)
-			msg += "Delete";
-		else if (key == SWT.HOME)
-			msg += "Home";
-		else if (key == SWT.END)
-			msg += "End";
-		else if (key == SWT.PAGE_UP)
-			msg += "Page Up";
-		else if (key == SWT.PAGE_DOWN)
-			msg += "Page Down";
-		else
-			msg += getKeyString().toUpperCase();
+		// @formatter:off
+		switch (key) {
+			case SWT.SPACE:         msg += "Spacebar"; break;
+			case SWT.KEYPAD_CR:
+			case SWT.CR:            msg += "Enter"; break;
+			case SWT.BS:            msg += "Backspace"; break;
+			case SWT.TAB:           msg += "Tab"; break;
+
+			case SWT.F1:            msg += "F1"; break;
+			case SWT.F2:            msg += "F2"; break;
+			case SWT.F3:            msg += "F3"; break;
+			case SWT.F4:            msg += "F4"; break;
+			case SWT.F5:            msg += "F5"; break;
+			case SWT.F6:            msg += "F6"; break;
+			case SWT.F7:            msg += "F7"; break;
+			case SWT.F8:            msg += "F8"; break;
+			case SWT.F9:            msg += "F9"; break;
+			case SWT.F10:           msg += "F10"; break;
+			case SWT.F11:           msg += "F11"; break;
+			case SWT.F12:           msg += "F12"; break;
+
+			case SWT.CAPS_LOCK:     msg += "Caps Lock"; break;
+			case SWT.NUM_LOCK:      msg += "Num Lock"; break;
+			case SWT.SCROLL_LOCK:   msg += "Scroll Lock"; break;
+			case SWT.PRINT_SCREEN:  msg += "Print Screen"; break;
+			case SWT.PAUSE:         msg += "Pause"; break;
+			case SWT.BREAK:         msg += "Break"; break;
+			case SWT.INSERT:        msg += "Insert"; break;
+			case SWT.DEL:           msg += "Delete"; break;
+			case SWT.HOME:          msg += "Home"; break;
+			case SWT.END:           msg += "End"; break;
+			case SWT.PAGE_UP:       msg += "Page Up"; break;
+			case SWT.PAGE_DOWN:     msg += "Page Down"; break;
+
+			default:                msg += getKeyString().toUpperCase();
+		}
+		// @formatter:on
 
 		return msg;
 	}
