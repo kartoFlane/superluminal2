@@ -23,8 +23,10 @@ import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLAddEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
+import com.kartoflane.superluminal2.events.SLRemoveEvent;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -632,7 +634,7 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 
 		if (controller instanceof ObjectController) {
-			eventHandler.sendEvent(new SLEvent(SLEvent.ADD_OBJECT, this, controller));
+			eventHandler.sendEvent(new SLAddEvent(this, controller));
 		}
 
 		addListener(SLEvent.MOD_SHIFT, controller);
@@ -662,7 +664,7 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 
 		if (controller instanceof ObjectController) {
-			eventHandler.sendEvent(new SLEvent(SLEvent.REM_OBJECT, this, controller));
+			eventHandler.sendEvent(new SLRemoveEvent(this, controller));
 		}
 
 		removeListener(SLEvent.MOD_SHIFT, controller);

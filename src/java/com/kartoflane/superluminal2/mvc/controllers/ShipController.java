@@ -11,11 +11,12 @@ import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.interfaces.Collidable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
 import com.kartoflane.superluminal2.core.Grid;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
+import com.kartoflane.superluminal2.events.SLModShiftEvent;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.controllers.props.OffsetPropController;
@@ -321,7 +322,7 @@ public class ShipController extends ObjectController {
 
 	@Override
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.MOD_SHIFT) {
+		if (e instanceof SLModShiftEvent) {
 			boolean pressed = (Boolean) e.data;
 			setFollowActive(!pressed);
 			if (pressed) {

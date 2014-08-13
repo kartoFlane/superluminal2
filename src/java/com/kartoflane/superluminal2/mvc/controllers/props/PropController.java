@@ -8,6 +8,7 @@ import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.Shapes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.events.SLVisibilityEvent;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.props.PropView;
@@ -124,7 +125,7 @@ public class PropController extends AbstractController implements Identifiable {
 	}
 
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.VISIBLE) {
+		if (e instanceof SLVisibilityEvent) {
 			if (inheritVisibility)
 				setVisible((Boolean) e.data);
 		} else {

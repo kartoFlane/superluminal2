@@ -29,8 +29,17 @@ import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLDeleteEvent;
+import com.kartoflane.superluminal2.events.SLDeselectionEvent;
+import com.kartoflane.superluminal2.events.SLDisposeEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
+import com.kartoflane.superluminal2.events.SLModShiftEvent;
+import com.kartoflane.superluminal2.events.SLMoveEvent;
+import com.kartoflane.superluminal2.events.SLResizeEvent;
+import com.kartoflane.superluminal2.events.SLRestoreEvent;
+import com.kartoflane.superluminal2.events.SLSelectionEvent;
+import com.kartoflane.superluminal2.events.SLVisibilityEvent;
 import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.Model;
 import com.kartoflane.superluminal2.mvc.View;
@@ -142,7 +151,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		}
 
 		if (eventHandler != null && eventHandler.hooks(SLEvent.MOVE))
-			eventHandler.sendEvent(new SLEvent(SLEvent.MOVE, this, getLocation()));
+			eventHandler.sendEvent(new SLMoveEvent(this, getLocation()));
 		return true;
 	}
 
@@ -193,7 +202,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		}
 
 		if (eventHandler != null && eventHandler.hooks(SLEvent.MOVE))
-			eventHandler.sendEvent(new SLEvent(SLEvent.MOVE, this, getLocation()));
+			eventHandler.sendEvent(new SLMoveEvent(this, getLocation()));
 		return true;
 	}
 
@@ -212,7 +221,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		model.setSize(w, h);
 
 		if (eventHandler != null && eventHandler.hooks(SLEvent.RESIZE))
-			eventHandler.sendEvent(new SLEvent(SLEvent.RESIZE, this, getSize()));
+			eventHandler.sendEvent(new SLResizeEvent(this, getSize()));
 		return true;
 	}
 
@@ -426,7 +435,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		redraw();
 
 		if (eventHandler != null && eventHandler.hooks(SLEvent.SELECT))
-			eventHandler.sendEvent(new SLEvent(SLEvent.SELECT, this, this));
+			eventHandler.sendEvent(new SLSelectionEvent(this));
 	}
 
 	/**
@@ -442,7 +451,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		redraw();
 
 		if (eventHandler != null && eventHandler.hooks(SLEvent.DESELECT))
-			eventHandler.sendEvent(new SLEvent(SLEvent.DESELECT, this, this));
+			eventHandler.sendEvent(new SLDeselectionEvent(this));
 	}
 
 	@Override
@@ -589,7 +598,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		redraw();
 
 		if (eventHandler != null)
-			eventHandler.sendEvent(new SLEvent(SLEvent.VISIBLE, this, vis));
+			eventHandler.sendEvent(new SLVisibilityEvent(this, vis));
 	}
 
 	public boolean isVisible() {
@@ -840,7 +849,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			return;
 
 		if (eventHandler != null)
-			eventHandler.sendEvent(new SLEvent(SLEvent.DISPOSE, this, this));
+			eventHandler.sendEvent(new SLDisposeEvent(this));
 
 		model.dispose();
 		view.dispose();
@@ -885,7 +894,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		setVisible(false);
 
 		if (eventHandler != null && eventHandler.hooks(SLEvent.DELETE))
-			eventHandler.sendEvent(new SLEvent(SLEvent.DELETE, this, this));
+			eventHandler.sendEvent(new SLDeleteEvent(this));
 
 		for (PropController prop : getProps()) {
 			prop.removeFromPainter();
@@ -900,7 +909,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		setVisible(true);
 
 		if (eventHandler != null && eventHandler.hooks(SLEvent.RESTORE))
-			eventHandler.sendEvent(new SLEvent(SLEvent.RESTORE, this, this));
+			eventHandler.sendEvent(new SLRestoreEvent(this));
 
 		for (PropController prop : getProps()) {
 			prop.setView(prop.getView());
@@ -949,20 +958,20 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.MOVE) {
+		if (e instanceof SLMoveEvent) {
 			Point p = (Point) e.data;
 			notifyLocationChanged(p.x, p.y);
-		} else if (e.type == SLEvent.RESIZE) {
+		} else if (e instanceof SLResizeEvent) {
 			Point p = (Point) e.data;
 			notifySizeChanged(p.x, p.y);
-		} else if (e.type == SLEvent.DISPOSE) {
+		} else if (e instanceof SLDisposeEvent) {
 			if (eventHandler != null && e.data != null && e.data instanceof SLListener) {
 				eventHandler.unhook((SLListener) e.data);
 			}
-		} else if (e.type == SLEvent.VISIBLE) {
+		} else if (e instanceof SLVisibilityEvent) {
 			if (e.source == getParent())
 				setVisible((Boolean) e.data);
-		} else if (e.type == SLEvent.MOD_SHIFT) {
+		} else if (e instanceof SLModShiftEvent) {
 			monoDirectionalDrag = (Boolean) e.data;
 			if (!monoDirectionalDrag)
 				lockDragTo = null;

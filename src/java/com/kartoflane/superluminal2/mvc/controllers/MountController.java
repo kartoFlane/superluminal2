@@ -8,6 +8,7 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.events.SLDeleteEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
@@ -226,7 +227,7 @@ public class MountController extends ObjectController implements Indexable, Comp
 
 	@Override
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.DELETE) {
+		if (e instanceof SLDeleteEvent) {
 			if (e.data instanceof GibController) {
 				setGib(Database.DEFAULT_GIB_OBJ);
 			}

@@ -9,6 +9,7 @@ import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLDeleteEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
@@ -231,7 +232,7 @@ public class DoorController extends ObjectController {
 
 	@Override
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.DELETE) {
+		if (e instanceof SLDeleteEvent) {
 			if (e.data instanceof RoomController) {
 				if (container.getController(getLeftRoom()) == e.data)
 					setLeftRoom(null);

@@ -6,6 +6,7 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.events.SLVisibilityEvent;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -155,7 +156,7 @@ public class StationController extends ObjectController implements Controller {
 
 	@Override
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.VISIBLE) {
+		if (e instanceof SLVisibilityEvent) {
 			RoomController room = (RoomController) container.getController(system.getRoom());
 			if (e.source == getParent())
 				setVisible((Boolean) e.data && (room == null || room.canContainSlotId(getSlotId())));

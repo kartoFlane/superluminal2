@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.mvc.controllers.props;
 
 import org.eclipse.swt.graphics.Rectangle;
 
+import com.kartoflane.superluminal2.events.SLDisposeEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
@@ -98,7 +99,7 @@ public class TracerPropController extends PropController {
 
 	@Override
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.DISPOSE)
+		if (e instanceof SLDisposeEvent)
 			setVisible(false);
 		super.handleEvent(e);
 	}

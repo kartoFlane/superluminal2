@@ -42,6 +42,7 @@ import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.NotDeletableException;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.Modifiers;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
@@ -50,8 +51,11 @@ import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
-import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
+import com.kartoflane.superluminal2.events.SLModAltEvent;
+import com.kartoflane.superluminal2.events.SLModCommandEvent;
+import com.kartoflane.superluminal2.events.SLModControlEvent;
+import com.kartoflane.superluminal2.events.SLModShiftEvent;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
@@ -1446,19 +1450,25 @@ public class EditorWindow {
 		h = new Hotkey();
 		h.setKey(SWT.SHIFT);
 		h.setShift(true);
-		addModifierAction(h, SLEvent.MOD_SHIFT);
+		addModifierAction(h, Modifiers.SHIFT);
 		Manager.hookHotkey(shell, h);
 
 		h = new Hotkey();
 		h.setKey(SWT.CTRL);
 		h.setCtrl(true);
-		addModifierAction(h, SLEvent.MOD_CTRL);
+		addModifierAction(h, Modifiers.CONTROL);
 		Manager.hookHotkey(shell, h);
 
 		h = new Hotkey();
 		h.setKey(SWT.ALT);
 		h.setAlt(true);
-		addModifierAction(h, SLEvent.MOD_ALT);
+		addModifierAction(h, Modifiers.ALT);
+		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setKey(SWT.COMMAND);
+		h.setCommand(true);
+		addModifierAction(h, Modifiers.COMMAND);
 		Manager.hookHotkey(shell, h);
 
 		// Arrow hotkeys
@@ -1549,17 +1559,59 @@ public class EditorWindow {
 		});
 	}
 
-	private void addModifierAction(Hotkey h, final int modifier) {
-		h.setOnPress(new Action() {
-			public void execute() {
-				eventHandler.sendEvent(new SLEvent(modifier, EditorWindow.this, true));
-			}
-		});
-		h.setOnRelease(new Action() {
-			public void execute() {
-				eventHandler.sendEvent(new SLEvent(modifier, EditorWindow.this, false));
-			}
-		});
+	private void addModifierAction(Hotkey h, Modifiers modifier) {
+		switch (modifier) {
+			case SHIFT:
+				h.setOnPress(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModShiftEvent(EditorWindow.this, true));
+					}
+				});
+				h.setOnRelease(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModShiftEvent(EditorWindow.this, false));
+					}
+				});
+				break;
+			case CONTROL:
+				h.setOnPress(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModControlEvent(EditorWindow.this, true));
+					}
+				});
+				h.setOnRelease(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModControlEvent(EditorWindow.this, false));
+					}
+				});
+				break;
+			case ALT:
+				h.setOnPress(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModAltEvent(EditorWindow.this, true));
+					}
+				});
+				h.setOnRelease(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModAltEvent(EditorWindow.this, false));
+					}
+				});
+				break;
+			case COMMAND:
+				h.setOnPress(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModCommandEvent(EditorWindow.this, true));
+					}
+				});
+				h.setOnRelease(new Action() {
+					public void execute() {
+						eventHandler.sendEvent(new SLModCommandEvent(EditorWindow.this, false));
+					}
+				});
+				break;
+			default:
+				break;
+		}
 	}
 
 	/**
