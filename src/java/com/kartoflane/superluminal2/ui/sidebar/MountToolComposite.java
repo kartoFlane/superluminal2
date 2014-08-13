@@ -29,6 +29,8 @@ public class MountToolComposite extends Composite implements DataComposite {
 	private Label lblDirection;
 	private Label lblDirHelp;
 	private DirectionCombo cmbDirection;
+	private Button btnFollowHull;
+	private Label lblFollowHelp;
 
 	public MountToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -57,6 +59,27 @@ public class MountToolComposite extends Composite implements DataComposite {
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+
+		btnFollowHull = new Button(this, SWT.CHECK);
+		btnFollowHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		btnFollowHull.setText("Follow Hull");
+
+		lblFollowHelp = new Label(this, SWT.NONE);
+		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblFollowHelp.setImage(helpImage);
+		msg = "When checked, newly placed mounts will follow the hull\n" +
+				"when it is moved.";
+		UIUtils.addTooltip(lblFollowHelp, "", msg);
+
+		btnFollowHull.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				tool.setFollowHull(btnFollowHull.getSelection());
+			}
+		});
+
+		new Label(this, SWT.NONE);
+		new Label(this, SWT.NONE);
 
 		btnRotated = new Button(this, SWT.CHECK);
 		btnRotated.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));

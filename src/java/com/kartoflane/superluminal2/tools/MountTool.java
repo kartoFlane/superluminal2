@@ -7,9 +7,10 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.core.Grid;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
@@ -21,6 +22,7 @@ import com.kartoflane.superluminal2.undo.UndoableCreateEdit;
 public class MountTool extends Tool {
 
 	private boolean canCreate = false;
+	private boolean followHull = true;
 	private MountController toolMount = null;
 
 	public MountTool(EditorWindow window) {
@@ -90,6 +92,14 @@ public class MountTool extends Tool {
 		return toolMount.getDirection();
 	}
 
+	public void setFollowHull(boolean follow) {
+		followHull = follow;
+	}
+
+	public boolean getFollowHull() {
+		return followHull;
+	}
+
 	@Override
 	public MountToolComposite getToolComposite(Composite parent) {
 		return (MountToolComposite) super.getToolComposite(parent);
@@ -122,6 +132,10 @@ public class MountTool extends Tool {
 			mount.setRotated(isRotated());
 			mount.setMirrored(isMirrored());
 			mount.setDirection(getDirection());
+			if (getFollowHull())
+				mount.setParent(Manager.getCurrentShip().getImageController(Images.HULL));
+			else
+				mount.setParent(Manager.getCurrentShip().getShipController());
 			mount.updateFollowOffset();
 
 			container.add(mount);
