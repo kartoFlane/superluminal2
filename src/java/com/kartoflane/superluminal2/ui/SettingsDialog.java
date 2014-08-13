@@ -303,6 +303,7 @@ public class SettingsDialog {
 				for (Hotkeys id : modifiedHotkeys.keySet()) {
 					Hotkey keybind = Manager.getHotkey(id);
 					Hotkey h = modifiedHotkeys.get(id);
+					keybind.setCommand(h.getCommand());
 					keybind.setShift(h.getShift());
 					keybind.setCtrl(h.getCtrl());
 					keybind.setAlt(h.getAlt());
@@ -416,7 +417,9 @@ public class SettingsDialog {
 		blacklistedKeys.add(SWT.CTRL);
 		blacklistedKeys.add(SWT.ALT);
 		blacklistedKeys.add((int) SWT.DEL);
-		blacklistedKeys.add((int) '\r');
+		blacklistedKeys.add((int) SWT.CR);
+		blacklistedKeys.add((int) SWT.KEYPAD_CR);
+		blacklistedKeys.add((int) SWT.LF);
 		blacklistedKeys.add(SWT.TRAVERSE_ESCAPE);
 		blacklistedKeys.add(SWT.TRAVERSE_RETURN);
 		blacklistedKeys.add(SWT.TRAVERSE_TAB_NEXT);
