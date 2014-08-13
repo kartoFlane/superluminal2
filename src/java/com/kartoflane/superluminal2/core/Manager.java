@@ -355,6 +355,10 @@ public abstract class Manager {
 		hotkey.setKey('c');
 		hotkey.setShift(true);
 
+		getHotkey(Hotkeys.ANIMATE).setEnabled(false);
+		getHotkey(Hotkeys.LOAD_LEGACY).setEnabled(false);
+		getHotkey(Hotkeys.SAVE_SHIP_AS).setEnabled(false);
+
 		// View hotkeys
 		getHotkey(Hotkeys.TOGGLE_GRID).setKey('g');
 		getHotkey(Hotkeys.TOGGLE_HANGAR).setKey('h');
