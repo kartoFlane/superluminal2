@@ -69,7 +69,7 @@ public class DroneSelectionDialog {
 
 	private Shell shell = null;
 	private Text txtDesc;
-	private Text txtStats;
+	private StatTable statTable;
 	private Button btnCancel;
 	private Button btnConfirm;
 	private Tree tree;
@@ -114,24 +114,19 @@ public class DroneSelectionDialog {
 		gl_compData.marginWidth = 0;
 		compData.setLayout(gl_compData);
 
-		Label lblStats = new Label(compData, SWT.NONE);
-		lblStats.setText("Stats:");
-
-		txtStats = new Text(compData, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		GridData gd_txtStats = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-		gd_txtStats.heightHint = 80;
-		txtStats.setLayoutData(gd_txtStats);
-
 		Label lblDescription = new Label(compData, SWT.NONE);
 		lblDescription.setText("Description:");
 
 		txtDesc = new Text(compData, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		GridData gd_txtDesc = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+		GridData gd_txtDesc = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
 		gd_txtDesc.heightHint = 60;
 		txtDesc.setLayoutData(gd_txtDesc);
 		scrolledComposite.setContent(compData);
 		scrolledComposite.setMinSize(compData.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		sashForm.setWeights(new int[] { minTreeWidth, defaultDataWidth });
+
+		statTable = new StatTable(compData);
+		statTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		Composite compButtons = new Composite(shell, SWT.NONE);
 		GridLayout gl_compButtons = new GridLayout(3, false);
@@ -290,7 +285,7 @@ public class DroneSelectionDialog {
 		ControlAdapter resizer = new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
-				final int BORDER_OFFSET = 5;
+				final int BORDER_OFFSET = tree.getBorderWidth();
 				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
 					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
@@ -493,19 +488,19 @@ public class DroneSelectionDialog {
 
 	private void updateData() {
 		if (result != null) {
-			StringBuilder buf = new StringBuilder();
+			statTable.setVisible(false);
+			statTable.clear();
 			for (DroneStats stat : DroneStats.values()) {
+				if (!stat.doesApply(result.getType()))
+					continue;
 				float value = result.getStat(stat);
-				if (value != 0) {
-					if (buf.length() != 0)
-						buf.append("\n");
-					buf.append(stat.toString() + ": " + value);
-				}
+				statTable.addEntry(stat.toString(), stat.formatValue(value));
 			}
-			txtStats.setText(buf.toString());
+			statTable.setVisible(true);
+			statTable.updateColumnWidth();
 			txtDesc.setText(result.getDescription());
 		} else {
-			txtStats.setText("");
+			statTable.clear();
 			txtDesc.setText("");
 		}
 	}

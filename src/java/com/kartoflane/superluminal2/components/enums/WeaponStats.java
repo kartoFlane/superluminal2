@@ -17,8 +17,16 @@ public enum WeaponStats {
 	BREACH_CHANCE,
 	/** Chance to stun all hostile crew in hit rooms */
 	STUN_CHANCE,
+	/** How long hit crewmembers will be stunned */
+	STUN,
+	/** The blueprint's rarity */
+	RARITY,
 	/** How many times the weapon shoots */
 	SHOTS,
+	/** How fast the weapon's projecile moves */
+	SPEED,
+	/** Beam length */
+	LENGTH,
 	/** How many power bars the weapon reserves when active */
 	POWER_COST,
 	/** How much the weapon costs to buy */
@@ -58,8 +66,74 @@ public enum WeaponStats {
 				return "missiles";
 			case HULL_BUST:
 				return "hullBust";
+			case STUN:
+				return "stun";
 			default:
 				return name().toLowerCase();
+		}
+	}
+
+	public String formatValue(float value) {
+		switch (this) {
+			case DAMAGE:
+			case ION_DAMAGE:
+			case PERS_DAMAGE:
+			case SYS_DAMAGE:
+			case PIERCING:
+			case POWER_COST:
+			case SCRAP_COST:
+			case MISSILE_COST:
+			case SHOTS:
+			case RADIUS:
+			case SPEED:
+			case LENGTH:
+			case STUN:
+				return "" + (int) value;
+			case FIRE_CHANCE:
+			case BREACH_CHANCE:
+			case STUN_CHANCE:
+				return "" + (((int) value) * 10) + "%";
+			case HULL_BUST:
+			case LOCKDOWN:
+				return "" + (((int) value) == 1 ? "Yes" : "No");
+			case RARITY:
+				int r = (int) value;
+				switch (r) {
+					case 0:
+						return "Unobtainable (0)";
+					case 1:
+						return "Common (1)";
+					case 2:
+						return "Uncommon (2)";
+					case 3:
+						return "Unusual (3)";
+					case 4:
+						return "Rare (4)";
+					case 5:
+						return "Very Rare (5)";
+					default:
+						throw new IllegalArgumentException("Incorrect rarity value: " + value);
+				}
+			default:
+				return "" + value;
+		}
+	}
+
+	public boolean doesApply(WeaponTypes type) {
+		switch (this) {
+			case PIERCING:
+			case SPEED:
+				return type != WeaponTypes.BOMB;
+			case SHOTS:
+				return type != WeaponTypes.BEAM && type != WeaponTypes.BURST;
+			case MISSILE_COST:
+				return type != WeaponTypes.BEAM;
+			case RADIUS:
+				return type == WeaponTypes.BURST;
+			case LENGTH:
+				return type == WeaponTypes.BEAM;
+			default:
+				return true;
 		}
 	}
 
@@ -67,19 +141,19 @@ public enum WeaponStats {
 	public String toString() {
 		switch (this) {
 			case ION_DAMAGE:
-				return "Ion damage";
+				return "Ion Damage";
 			case PERS_DAMAGE:
-				return "Bio damage";
+				return "Bio Damage";
 			case SYS_DAMAGE:
-				return "System damage";
+				return "System Damage";
 			case PIERCING:
-				return "Shield piercing";
+				return "Shield Piercing";
 			case FIRE_CHANCE:
-				return "Fire chance";
+				return "Fire Chance";
 			case BREACH_CHANCE:
-				return "Breach chance";
+				return "Breach Chance";
 			case STUN_CHANCE:
-				return "Stun chance";
+				return "Stun Chance";
 			case POWER_COST:
 				return "Power";
 			case SCRAP_COST:
@@ -87,7 +161,9 @@ public enum WeaponStats {
 			case MISSILE_COST:
 				return "Missiles";
 			case HULL_BUST:
-				return "Hull bust";
+				return "Hull Bust";
+			case STUN:
+				return "Stun Duration";
 			default:
 				String s = getTagName();
 				s = s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();

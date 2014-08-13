@@ -53,7 +53,7 @@ public class WeaponSelectionDialog {
 	private static final int defaultBlueTabWidth = 200;
 	private static final int defaultNameTabWidth = 150;
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
-	private static final int defaultDataWidth = 200;
+	private static final int defaultDataWidth = 250;
 	private static final Predicate<WeaponObject> defaultFilter = new Predicate<WeaponObject>() {
 		public boolean accept(WeaponObject object) {
 			return true;
@@ -75,7 +75,7 @@ public class WeaponSelectionDialog {
 
 	private Shell shell = null;
 	private Text txtDesc;
-	private Text txtStats;
+	private StatTable statTable;
 	private Button btnCancel;
 	private Button btnConfirm;
 	private Tree tree;
@@ -132,24 +132,19 @@ public class WeaponSelectionDialog {
 		preview.setDrawBackground(true);
 		canvas.addPaintListener(preview);
 
-		Label lblStats = new Label(compData, SWT.NONE);
-		lblStats.setText("Stats:");
-
-		txtStats = new Text(compData, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		GridData gd_txtStats = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-		gd_txtStats.heightHint = 80;
-		txtStats.setLayoutData(gd_txtStats);
-
 		Label lblDescription = new Label(compData, SWT.NONE);
 		lblDescription.setText("Description:");
 
 		txtDesc = new Text(compData, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		GridData gd_txtDesc = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+		GridData gd_txtDesc = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
 		gd_txtDesc.heightHint = 60;
 		txtDesc.setLayoutData(gd_txtDesc);
 		scrolledComposite.setContent(compData);
 		scrolledComposite.setMinSize(compData.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		sashForm.setWeights(new int[] { minTreeWidth, defaultDataWidth });
+
+		statTable = new StatTable(compData);
+		statTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		Composite compButtons = new Composite(shell, SWT.NONE);
 		GridLayout gl_compButtons = new GridLayout(3, false);
@@ -320,7 +315,7 @@ public class WeaponSelectionDialog {
 		ControlAdapter resizer = new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
-				final int BORDER_OFFSET = 5;
+				final int BORDER_OFFSET = tree.getBorderWidth();
 				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
 					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
@@ -331,6 +326,7 @@ public class WeaponSelectionDialog {
 
 		shell.setMinimumSize(minTreeWidth + defaultDataWidth, 300);
 		shell.pack();
+		shell.setSize(600, 400);
 		Point size = shell.getSize();
 		shell.setSize(size.x + 5, size.y);
 		Point parSize = parent.getSize();
@@ -516,20 +512,20 @@ public class WeaponSelectionDialog {
 			preview.setImage(path);
 			preview.setSize(frameSize.x, frameSize.y);
 
-			StringBuilder buf = new StringBuilder();
+			statTable.setVisible(false);
+			statTable.clear();
 			for (WeaponStats stat : WeaponStats.values()) {
+				if (!stat.doesApply(result.getType()))
+					continue;
 				float value = result.getStat(stat);
-				if (value != 0) {
-					if (buf.length() != 0)
-						buf.append("\n");
-					buf.append(stat.toString() + ": " + value);
-				}
+				statTable.addEntry(stat.toString(), stat.formatValue(value));
 			}
-			txtStats.setText(buf.toString());
+			statTable.setVisible(true);
+			statTable.updateColumnWidth();
 			txtDesc.setText(result.getDescription());
 		} else {
 			preview.setImage(null);
-			txtStats.setText("");
+			statTable.clear();
 			txtDesc.setText("");
 		}
 
