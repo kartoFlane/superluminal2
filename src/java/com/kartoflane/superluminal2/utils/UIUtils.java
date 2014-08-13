@@ -450,7 +450,7 @@ public class UIUtils {
 		c.addListener(SWT.MouseHover, new Listener() {
 			public void handleEvent(Event e) {
 				Point p = c.toDisplay(e.x, e.y);
-				tip.setLocation(p.x, p.y + 15);
+				tip.setLocation(p.x, p.y + 20);
 				tip.setVisible(true);
 			}
 		});
