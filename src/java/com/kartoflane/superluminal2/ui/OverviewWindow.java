@@ -281,7 +281,7 @@ public class OverviewWindow {
 		ControlAdapter resizer = new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
-				final int BORDER_OFFSET = 5;
+				final int BORDER_OFFSET = tree.getBorderWidth();
 				if (trclmnName.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
 					trclmnName.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnAlias.setWidth(tree.getClientArea().width - trclmnName.getWidth() - BORDER_OFFSET);

@@ -310,7 +310,7 @@ public class ShipLoaderDialog {
 		ControlAdapter resizer = new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
-				final int BORDER_OFFSET = 5;
+				final int BORDER_OFFSET = tree.getBorderWidth();
 				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
 					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
 				trclmnClass.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
