@@ -126,6 +126,7 @@ public enum WeaponStats {
 				return type != WeaponTypes.BOMB;
 			case SHOTS:
 				return type != WeaponTypes.BEAM && type != WeaponTypes.BURST;
+			case LOCKDOWN:
 			case MISSILE_COST:
 				return type != WeaponTypes.BEAM;
 			case RADIUS:
