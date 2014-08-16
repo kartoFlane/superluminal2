@@ -509,6 +509,13 @@ public class EditorWindow {
 			}
 		});
 
+		shell.addListener(SWT.Close, new Listener() {
+			@Override
+			public void handleEvent(Event e) {
+				e.doit = Manager.closeShip();
+			}
+		});
+
 		mntmNewShip.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
