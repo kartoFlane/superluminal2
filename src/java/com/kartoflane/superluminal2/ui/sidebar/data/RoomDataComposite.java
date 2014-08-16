@@ -16,6 +16,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
+import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
@@ -33,6 +35,7 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class RoomDataComposite extends Composite implements DataComposite {
 
@@ -84,7 +87,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				"- The editor only shows one system at a time -- you can bring\n" +
 				"  one of the other assigned systems into focus by clicking on\n" +
 				"  'Select' in the system's submenu.";
-		UIUtils.addTooltip(lblHelp, "", msg);
+		UIUtils.addTooltip(lblHelp, msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -106,7 +109,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		lblStartHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblStartHelp.setImage(helpImage);
 		msg = "This determines whether the ship starts with this system already installed.";
-		UIUtils.addTooltip(lblStartHelp, "", msg);
+		UIUtils.addTooltip(lblStartHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		lblSysLevel = new Label(this, SWT.NONE);
 		lblSysLevel.setText("Starting Level:");

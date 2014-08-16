@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Cache;
@@ -55,6 +56,7 @@ import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class OverviewWindow {
 
@@ -103,7 +105,7 @@ public class OverviewWindow {
 		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHelp.setImage(helpImage);
 		String msg = "Alias is a short name to help you distinguish between objects.";
-		UIUtils.addTooltip(lblHelp, "", msg);
+		UIUtils.addTooltip(lblHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		tltmAlias = new ToolItem(toolBar, SWT.NONE);
 		tltmAlias.setToolTipText("Set Alias");

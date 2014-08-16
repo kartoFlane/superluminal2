@@ -19,8 +19,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class SaveOptionsDialog {
 	private static SaveOptionsDialog instance = null;
@@ -62,9 +64,9 @@ public class SaveOptionsDialog {
 		lblDirectoryHelp = new Label(grpSaveAs, SWT.NONE);
 		lblDirectoryHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblDirectoryHelp.setImage(helpImage);
-		String msg = "Saves the ship as a series of folders mirroring the internal\n" +
+		String msg = "Saves the ship as a series of folders mirroring the internal " +
 				"structure of the game's files -- source code for your mod, so to say.";
-		UIUtils.addTooltip(lblDirectoryHelp, "", msg);
+		UIUtils.addTooltip(lblDirectoryHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		btnFTL = new Button(grpSaveAs, SWT.RADIO);
 		btnFTL.setText("FTL file");
@@ -73,7 +75,7 @@ public class SaveOptionsDialog {
 		lblArchiveHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblArchiveHelp.setImage(helpImage);
 		msg = "Saves the ship as a ready-to-install .ftl archive.";
-		UIUtils.addTooltip(lblArchiveHelp, "", msg);
+		UIUtils.addTooltip(lblArchiveHelp, msg);
 
 		lblSaveLocation = new Label(shell, SWT.NONE);
 		lblSaveLocation.setText("Save location:");

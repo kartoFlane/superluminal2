@@ -70,7 +70,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		gd_btnSelectLeft.widthHint = 35;
 		btnSelectLeft.setLayoutData(gd_btnSelectLeft);
 		btnSelectLeft.setText(">");
-		UIUtils.addTooltip(btnSelectLeft, "", "Select the linked room");
+		UIUtils.addTooltip(btnSelectLeft, "Select the linked room");
 
 		lblIdRight = new Label(this, SWT.NONE);
 		lblIdRight.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -85,7 +85,7 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		gd_btnSelectRight.widthHint = 35;
 		btnSelectRight.setLayoutData(gd_btnSelectRight);
 		btnSelectRight.setText(">");
-		UIUtils.addTooltip(btnSelectRight, "", "Select the linked room");
+		UIUtils.addTooltip(btnSelectRight, "Select the linked room");
 
 		btnHorizontal.addSelectionListener(new SelectionAdapter() {
 			@Override

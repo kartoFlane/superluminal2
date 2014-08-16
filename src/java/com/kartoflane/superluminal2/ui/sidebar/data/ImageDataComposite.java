@@ -9,12 +9,15 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ImageController;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class ImageDataComposite extends Composite implements DataComposite {
 
@@ -45,9 +48,9 @@ public class ImageDataComposite extends Composite implements DataComposite {
 		lblFollowHelp = new Label(this, SWT.NONE);
 		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblFollowHelp.setImage(Cache.checkOutImage(this, "cpath:/assets/help.png"));
-		String msg = "When checked, this object will follow the hull image, so that\n" +
+		String msg = "When checked, this object will follow the hull image, so that " +
 				"when hull is moved, this object is moved as well.";
-		UIUtils.addTooltip(lblFollowHelp, "", msg);
+		UIUtils.addTooltip(lblFollowHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		btnFollowHull.addSelectionListener(new SelectionAdapter() {
 			@Override

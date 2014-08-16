@@ -10,11 +10,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class StationToolComposite extends Composite {
 
@@ -44,7 +47,7 @@ public class StationToolComposite extends Composite {
 				"- Holding down Shift while left-clicking changes\n" +
 				"  the direction of the station.\n" +
 				"- Right-clicking removes the station.";
-		UIUtils.addTooltip(lblHelp, "", msg);
+		UIUtils.addTooltip(lblHelp, msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
@@ -56,7 +59,7 @@ public class StationToolComposite extends Composite {
 		lblPlaceHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblPlaceHelp.setImage(helpImage);
 		msg = "Allows you to change position of the station.";
-		UIUtils.addTooltip(lblPlaceHelp, "", msg);
+		UIUtils.addTooltip(lblPlaceHelp, msg);
 
 		Button btnDirection = new Button(this, SWT.RADIO);
 		btnDirection.setText("Direction");
@@ -65,7 +68,7 @@ public class StationToolComposite extends Composite {
 		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblDirHelp.setImage(helpImage);
 		msg = "Allows you to change the station's facing.";
-		UIUtils.addTooltip(lblDirHelp, "", msg);
+		UIUtils.addTooltip(lblDirHelp, msg);
 
 		final DirectionCombo cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, false);
 		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
@@ -80,10 +83,10 @@ public class StationToolComposite extends Composite {
 		lblRemHelp = new Label(this, SWT.NONE);
 		lblRemHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblRemHelp.setImage(helpImage);
-		msg = "Allows you to remove the station.\n" +
-				"Removing the station means that crew\n" +
+		msg = "Allows you to remove the station. " +
+				"Removing the station means that crew " +
 				"will not be able to man the system.";
-		UIUtils.addTooltip(lblRemHelp, "", msg);
+		UIUtils.addTooltip(lblRemHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		cmbDirection.addSelectionListener(new SelectionAdapter() {
 			@Override

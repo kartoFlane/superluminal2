@@ -13,6 +13,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 
+import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
@@ -23,6 +25,7 @@ import com.kartoflane.superluminal2.ui.GibPropContainer;
 import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class GibDataComposite extends Composite implements DataComposite {
 
@@ -61,7 +64,7 @@ public class GibDataComposite extends Composite implements DataComposite {
 		String msg = "- Click on the controls button to open controls selection menu\n" +
 				"- Alternatively, right-click on the gib to open the menu\n" +
 				"- You can drag the controls around to modify the selected property";
-		UIUtils.addTooltip(lblHelp, "", msg);
+		UIUtils.addTooltip(lblHelp, msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -87,9 +90,9 @@ public class GibDataComposite extends Composite implements DataComposite {
 		Label lblShowHelp = new Label(this, SWT.NONE);
 		lblShowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblShowHelp.setImage(helpImage);
-		msg = "Displays a set of advanced widgets containing raw data, allowing you to\n" +
+		msg = "Displays a set of advanced widgets containing raw data, allowing you to " +
 				"directly modify each value without having to use the graphical controls.";
-		UIUtils.addTooltip(lblShowHelp, "", msg);
+		UIUtils.addTooltip(lblShowHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		grpValueControls = new Group(this, SWT.NONE);
 		grpValueControls.setLayout(new GridLayout(2, false));
@@ -128,7 +131,7 @@ public class GibDataComposite extends Composite implements DataComposite {
 		lblLinHelp.setImage(helpImage);
 		msg = String.format("1.00 = %s pixels per second%n(Death animation lasts %s seconds)",
 				Database.GIB_LINEAR_SPEED, Database.GIB_DEATH_ANIM_TIME);
-		UIUtils.addTooltip(lblLinHelp, "", msg);
+		UIUtils.addTooltip(lblLinHelp, msg);
 
 		spLinMax = new Spinner(grpValueControls, SWT.BORDER);
 		spLinMax.setMaximum(500);
@@ -153,7 +156,7 @@ public class GibDataComposite extends Composite implements DataComposite {
 		lblAngHelp.setImage(helpImage);
 		msg = String.format("1.00 = %s degrees per second%n(Death animation lasts %s seconds)",
 				Math.round(Math.toDegrees(Database.GIB_ANGULAR_SPEED)), Database.GIB_DEATH_ANIM_TIME);
-		UIUtils.addTooltip(lblAngHelp, "", msg);
+		UIUtils.addTooltip(lblAngHelp, msg);
 
 		spAngMax = new Spinner(grpValueControls, SWT.BORDER);
 		spAngMax.setDigits(2);

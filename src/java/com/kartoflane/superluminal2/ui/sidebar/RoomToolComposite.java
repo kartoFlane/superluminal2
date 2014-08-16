@@ -31,7 +31,7 @@ public class RoomToolComposite extends Composite {
 				"- Right-click to cancel.\n" +
 				"- Rooms cannot be placed on top of each other, or beyond\n" +
 				"  the ship's origin.";
-		UIUtils.addTooltip(lblHelp, "", msg);
+		UIUtils.addTooltip(lblHelp, msg);
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));

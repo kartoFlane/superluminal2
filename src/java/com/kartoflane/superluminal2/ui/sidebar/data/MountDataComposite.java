@@ -11,7 +11,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
@@ -24,6 +26,7 @@ import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class MountDataComposite extends Composite implements DataComposite {
 
@@ -71,9 +74,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblFollowHelp = new Label(this, SWT.NONE);
 		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblFollowHelp.setImage(helpImage);
-		String msg = "When checked, this object will follow the hull image, so that\n" +
+		String msg = "When checked, this object will follow the hull image, so that " +
 				"when hull is moved, this object is moved as well.";
-		UIUtils.addTooltip(lblFollowHelp, "", msg);
+		UIUtils.addTooltip(lblFollowHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		btnFollowHull.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -97,9 +100,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblRotHelp = new Label(this, SWT.NONE);
 		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblRotHelp.setImage(helpImage);
-		msg = "This determines the direction the weapon is going to face,\n" +
+		msg = "This determines the direction the weapon is going to face, " +
 				"and in which it's going to shoot.";
-		UIUtils.addTooltip(lblRotHelp, "", msg);
+		UIUtils.addTooltip(lblRotHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		btnMirrored = new Button(this, SWT.CHECK);
 		btnMirrored.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
@@ -109,7 +112,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblMirHelp.setImage(helpImage);
 		msg = "Flips the weapon along X or Y axis, depending on rotation.";
-		UIUtils.addTooltip(lblMirHelp, "", msg);
+		UIUtils.addTooltip(lblMirHelp, msg);
 
 		Label lblDirection = new Label(this, SWT.NONE);
 		lblDirection.setText("Power-up Direction:");
@@ -117,9 +120,9 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblDirHelp = new Label(this, SWT.NONE);
 		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblDirHelp.setImage(helpImage);
-		msg = "This determines the direction in which the weapon\n" +
+		msg = "This determines the direction in which the weapon " +
 				"will 'slide' when it is powered up.";
-		UIUtils.addTooltip(lblDirHelp, "", msg);
+		UIUtils.addTooltip(lblDirHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, true);
 		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
@@ -133,10 +136,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblGibInfo = new Label(this, SWT.NONE);
 		lblGibInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblGibInfo.setImage(helpImage);
-		msg = "This determines the gib to which this mount is attached.\n" +
-				"When the ship explodes, the mount will float along with the gib.\n" +
+		msg = "This determines the gib to which this mount is attached. " +
+				"When the ship explodes, the mount will float along with the gib. " +
 				"If no gib is specified, the mount will simply disappear.";
-		UIUtils.addTooltip(lblGibInfo, "", msg);
+		UIUtils.addTooltip(lblGibInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		btnLinkedGib = new Button(this, SWT.TOGGLE);
 		btnLinkedGib.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -147,7 +150,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 		gd_btnSelectGib.widthHint = 35;
 		btnSelectGib.setLayoutData(gd_btnSelectGib);
 		btnSelectGib.setText(">");
-		UIUtils.addTooltip(btnSelectGib, "", "Select the linked gib");
+		UIUtils.addTooltip(btnSelectGib, "Select the linked gib");
 
 		Label lblWeapon = new Label(this, SWT.NONE);
 		lblWeapon.setText("Displayed Weapon:");
@@ -155,10 +158,10 @@ public class MountDataComposite extends Composite implements DataComposite {
 		lblWeaponInfo = new Label(this, SWT.NONE);
 		lblWeaponInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblWeaponInfo.setImage(helpImage);
-		msg = "This setting is only cosmetic, and allows\n" +
-				"you to view how a given weapon would look,\n" +
+		msg = "This setting is only cosmetic, and allows " +
+				"you to view how a given weapon would look, " +
 				"were it placed on this mount.";
-		UIUtils.addTooltip(lblWeaponInfo, "", msg);
+		UIUtils.addTooltip(lblWeaponInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		btnWeapon = new Button(this, SWT.NONE);
 		btnWeapon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));

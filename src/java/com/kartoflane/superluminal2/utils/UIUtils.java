@@ -430,6 +430,18 @@ public class UIUtils {
 	}
 
 	/**
+	 * @param c
+	 *            the control to which the tooltip will be added
+	 * @param message
+	 *            tooltip's message
+	 * 
+	 * @see #addTooltip(Control, String, String)
+	 */
+	public static void addTooltip(Control c, String message) {
+		addTooltip(c, message);
+	}
+
+	/**
 	 * Adds a tooltip to the given control.<br>
 	 * The tooltip will appear once the user hovers over the control, and will remain
 	 * visible until the user moves the cursor away.

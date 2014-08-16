@@ -23,7 +23,9 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.core.Cache;
@@ -45,6 +47,7 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class PropertiesToolComposite extends Composite implements DataComposite {
 
@@ -143,10 +146,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 		if (ship.isPlayerShip()) {
 			lblBlueprint.setText("Replaced Ship:");
-			String msg = "This determines which ship your ship is going to replace.\n" +
-					"Currently, there is no way to add new player ships, so you\n" +
+			String msg = "This determines which ship your ship is going to replace. " +
+					"Currently, there is no way to add new player ships, so you " +
 					"have to replace one that already exists.";
-			UIUtils.addTooltip(lblBlueprintHelp, "", msg);
+			UIUtils.addTooltip(lblBlueprintHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 			cmbShips = new Combo(compGeneral, SWT.READ_ONLY);
 			cmbShips.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -176,10 +179,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			});
 		} else {
 			lblBlueprint.setText("Blueprint Name:");
-			String msg = "This determines your ship's blueprint name.\n" +
-					"Blueprint name is a unique identifier of the\n" +
+			String msg = "This determines your ship's blueprint name. " +
+					"Blueprint name is a unique identifier of the " +
 					"ship, that the game uses internally.";
-			UIUtils.addTooltip(lblBlueprintHelp, "", msg);
+			UIUtils.addTooltip(lblBlueprintHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 			txtBlueprint = new Text(compGeneral, SWT.BORDER);
 			txtBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -231,9 +234,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblLayoutInfo = new Label(compGeneral, SWT.NONE);
 		lblLayoutInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1));
 		lblLayoutInfo.setImage(helpImage);
-		String msg = "This field specifies the name of the ship's layout files,\n" +
+		String msg = "This field specifies the name of the ship's layout files, " +
 				"like kestral.txt and kestral.xml";
-		UIUtils.addTooltip(lblLayoutInfo, "", msg);
+		UIUtils.addTooltip(lblLayoutInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		txtLayout = new Text(compGeneral, SWT.BORDER);
 		txtLayout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -251,9 +254,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblImageHelp = new Label(compGeneral, SWT.NONE);
 		lblImageHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1));
 		lblImageHelp.setImage(helpImage);
-		msg = "This field specifies the name of the ship's image files,\n" +
+		msg = "This field specifies the name of the ship's image files, " +
 				"like kestral_base.png";
-		UIUtils.addTooltip(lblImageHelp, "", msg);
+		UIUtils.addTooltip(lblImageHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		txtImage = new Text(compGeneral, SWT.BORDER);
 		txtImage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
@@ -285,9 +288,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblHullHelp = new Label(compGeneral, SWT.NONE);
 		lblHullHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblHullHelp.setImage(helpImage);
-		msg = "This defines the amount of health your ship starts with.\n" +
+		msg = "This defines the amount of health your ship starts with. " +
 				"The default is 30 for a player ship.";
-		UIUtils.addTooltip(lblHullHelp, "", msg);
+		UIUtils.addTooltip(lblHullHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		Label lblReactor = new Label(compGeneral, SWT.NONE);
 		lblReactor.setText("Reactor Power:");
@@ -309,11 +312,11 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		lblReactorInfo = new Label(compGeneral, SWT.NONE);
 		lblReactorInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblReactorInfo.setImage(helpImage);
-		msg = "This sets the amount of power the ship starts with.\n" +
-				"The reactor can only be upgraded to level 25 ingame,\n" +
-				"but can be set to a higher value when creating your\n" +
+		msg = "This sets the amount of power the ship starts with. " +
+				"The reactor can only be upgraded to level 25 ingame, " +
+				"but can be set to a higher value when creating your " +
 				"ship in this editor.";
-		UIUtils.addTooltip(lblReactorInfo, "", msg);
+		UIUtils.addTooltip(lblReactorInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 		if (!ship.isPlayerShip()) {
 			Label lblMinSector = new Label(compGeneral, SWT.NONE);
@@ -337,7 +340,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			Label lblMinSecInfo = new Label(compGeneral, SWT.NONE);
 			lblMinSecInfo.setImage(helpImage);
 			msg = "This determines the minimum sector in which the enemy can be encountered.";
-			UIUtils.addTooltip(lblMinSecInfo, "", msg);
+			UIUtils.addTooltip(lblMinSecInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 			Label lblMaxSector = new Label(compGeneral, SWT.NONE);
 			lblMaxSector.setText("Max Sector:");
@@ -360,7 +363,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			Label lblMaxSecInfo = new Label(compGeneral, SWT.NONE);
 			lblMaxSecInfo.setImage(helpImage);
 			msg = "This determines the maximum sector in which the enemy can be encountered.";
-			UIUtils.addTooltip(lblMaxSecInfo, "", msg);
+			UIUtils.addTooltip(lblMaxSecInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 
 			Label lblBoardingAI = new Label(compGeneral, SWT.NONE);
 			lblBoardingAI.setText("Boarding AI:");
@@ -382,7 +385,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			lblBoardingAIInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			lblBoardingAIInfo.setImage(helpImage);
 			msg = "This determines the strategy that the ship's crew is going to use when boarding.";
-			UIUtils.addTooltip(lblBoardingAIInfo, "", msg);
+			UIUtils.addTooltip(lblBoardingAIInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
 		}
 
 		/*
