@@ -12,6 +12,12 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -133,6 +139,7 @@ public class EditorWindow {
 	private MenuItem mntmReloadDb;
 	private MenuItem mntmHangar;
 	private ToolItem tltmAnimate;
+	private DropTarget dropTarget;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -795,6 +802,75 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Superluminal.checkForUpdates(true); // Manually checking for updates
+			}
+		});
+
+		Transfer[] dropTypes = new Transfer[] { FileTransfer.getInstance() };
+		dropTarget = new DropTarget(shell, DND.DROP_MOVE | DND.DROP_DEFAULT);
+		dropTarget.setTransfer(dropTypes);
+
+		dropTarget.addDropListener(new DropTargetAdapter() {
+			@Override
+			public void dragOver(DropTargetEvent e) {
+				e.detail = DND.DROP_MOVE;
+				e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
+				Object object = FileTransfer.getInstance().nativeToJava(e.currentDataType);
+				if (object instanceof String[]) {
+					String fileList[] = (String[]) object;
+					for (String path : fileList) {
+						if (!path.endsWith(".ftl") && !path.endsWith(".zip")) {
+							e.detail = DND.DROP_NONE;
+							e.feedback = DND.FEEDBACK_NONE;
+							break;
+						}
+					}
+				} else {
+					e.detail = DND.DROP_NONE;
+					e.feedback = DND.FEEDBACK_NONE;
+				}
+			}
+
+			@Override
+			public void drop(DropTargetEvent e) {
+				Object object = FileTransfer.getInstance().nativeToJava(e.currentDataType);
+
+				if (Manager.getCurrentShip() == null) {
+					if (object instanceof String[]) {
+						final String fileList[] = (String[]) object;
+
+						final Database db = Database.getInstance();
+						if (db == null) {
+							String msg = "Database not found -- mods cannot be loaded.\n" +
+									"In order to create database, point the editor to FTL installation.";
+							UIUtils.showWarningDialog(shell, null, msg);
+							return;
+						}
+
+						// Already ensured that all items are .ftl or .zip
+						UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new Action() {
+							public void execute() {
+								for (String path : fileList) {
+									DatabaseEntry de;
+									try {
+										de = new DatabaseEntry(new File(path));
+										DatabaseEntry[] dbEntries = db.getEntries();
+										if (de == db.getCore())
+											continue;
+										if (!Utils.contains(dbEntries, de))
+											db.addEntry(de);
+									} catch (Exception ex) {
+										log.warn(String.format("Could not create a database entry for file '%s': ", path), ex);
+									}
+								}
+								db.cacheAnimations();
+							}
+						});
+					}
+				} else {
+					String msg = "Mods cannot be loaded while a ship is opened.\n" +
+							"Please close the ship, then try again.";
+					UIUtils.showInfoDialog(shell, null, msg);
+				}
 			}
 		});
 
