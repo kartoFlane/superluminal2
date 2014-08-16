@@ -7,6 +7,10 @@ Changelog
 - Several minor UI tweaks
 - Mac Command key support should now work correctly (tested)
 - .ftl files can now be dropped onto the main editor frame to load them
+- The editor can now open .ftl and .zip files by dragging them onto the .exe, or by using
+  the "Open With..." option in the mod files' context menu
+- Added "Unsaved Changes" warning when closing the application
+- Added artillery modification & display
 
 2.0.5 beta (which was actually 2.0.4...):
 - Fixed shift-dragging the ship origin to set the offset
