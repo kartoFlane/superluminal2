@@ -5,6 +5,8 @@ Changelog
 - Added 'Follow Hull' button to Mount Tool -- when checked, newly created weapon mounts
   will follow hull
 - Several minor UI tweaks
+- Mac Command key support should now work correctly (tested)
+- .ftl files can now be dropped onto the main editor frame to load them
 
 2.0.5 beta (which was actually 2.0.4...):
 - Fixed shift-dragging the ship origin to set the offset
