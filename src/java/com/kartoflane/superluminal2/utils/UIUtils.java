@@ -438,7 +438,7 @@ public class UIUtils {
 	 * @see #addTooltip(Control, String, String)
 	 */
 	public static void addTooltip(Control c, String message) {
-		addTooltip(c, message);
+		addTooltip(c, "", message);
 	}
 
 	/**
