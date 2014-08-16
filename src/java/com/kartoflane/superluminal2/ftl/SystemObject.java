@@ -20,7 +20,7 @@ public class SystemObject extends GameObject implements Alias {
 	/** Only used by systems with a mannable station */
 	private GlowSet glowSet;
 	/** Only used by artillery systems */
-	private WeaponObject weapon = Database.DEFAULT_WEAPON_OBJ;
+	private WeaponObject weapon = null;
 
 	private String interiorNamespace = null;
 	private String interiorPath = null;
@@ -78,6 +78,10 @@ public class SystemObject extends GameObject implements Alias {
 		if (canContainGlow()) {
 			setGlowSet(Database.DEFAULT_GLOW_SET);
 		}
+
+		Database db = Database.getInstance();
+		if (db != null && systemId == Systems.ARTILLERY)
+			weapon = db.getWeapon("ARTILLERY_FED");
 	}
 
 	public void update() {

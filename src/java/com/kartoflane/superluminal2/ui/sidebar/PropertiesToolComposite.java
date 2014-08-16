@@ -90,8 +90,6 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private Text txtLayout;
 	private Text txtImage;
 	private Group grpAugments;
-	private TabItem tbtmArtillery;
-	private Composite compArtillery;
 	private CrewMenu crewMenu;
 	private Label lblHullHelp;
 	private Label lblReactorInfo;
@@ -99,7 +97,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private Label lblImageHelp;
 	private Label lblBlueprintHelp;
 	private Combo cmbBoardingAI;
-	private Label lblArtillerySlots;
+	private Group grpArtillery;
 	private Spinner spArtillerySlots;
 
 	public PropertiesToolComposite(Composite parent) {
@@ -406,6 +404,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		tbtmArmaments.setControl(compArm);
 		compArm.setLayout(new GridLayout(1, false));
 
+		/*
+		 * =========================================================================
+		 * XXX: Weapons
+		 * =========================================================================
+		 */
+
 		grpWeapons = new Group(compArm, SWT.NONE);
 		grpWeapons.setLayout(new GridLayout(2, false));
 		grpWeapons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
@@ -485,6 +489,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			});
 		}
 
+		/*
+		 * =========================================================================
+		 * XXX: Drones
+		 * =========================================================================
+		 */
+
 		grpDrones = new Group(compArm, SWT.NONE);
 		grpDrones.setLayout(new GridLayout(2, false));
 		grpDrones.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
@@ -562,6 +572,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			});
 		}
 
+		/*
+		 * =========================================================================
+		 * XXX: Augments
+		 * =========================================================================
+		 */
+
 		grpAugments = new Group(compArm, SWT.NONE);
 		grpAugments.setLayout(new GridLayout(1, false));
 		grpAugments.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
@@ -602,21 +618,19 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 		/*
 		 * =========================================================================
-		 * XXX: Artillery tab
+		 * XXX: Artillery
 		 * =========================================================================
 		 */
 
-		tbtmArtillery = new TabItem(tabFolder, SWT.NONE);
-		tbtmArtillery.setText("Artillery");
+		grpArtillery = new Group(compArm, SWT.NONE);
+		grpArtillery.setLayout(new GridLayout(2, false));
+		grpArtillery.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		grpArtillery.setText("Artillery");
 
-		compArtillery = new Composite(tabFolder, SWT.NONE);
-		tbtmArtillery.setControl(compArtillery);
-		compArtillery.setLayout(new GridLayout(2, false));
+		Label lblArtillerySlots = new Label(grpArtillery, SWT.NONE);
+		lblArtillerySlots.setText("Slots:");
 
-		lblArtillerySlots = new Label(compArtillery, SWT.NONE);
-		lblArtillerySlots.setText("Artillery Slots:");
-
-		spArtillerySlots = new Spinner(compArtillery, SWT.BORDER);
+		spArtillerySlots = new Spinner(grpArtillery, SWT.BORDER);
 		spArtillerySlots.setMaximum(8);
 		spArtillerySlots.setMinimum(1);
 		GridData gd_spArtillerySlots = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
@@ -842,11 +856,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		count = 0;
 		for (SystemObject system : ship.getSystems(Systems.ARTILLERY)) {
 			WeaponObject weapon = system.getWeapon();
-			if (weapon == Database.DEFAULT_WEAPON_OBJ) {
-				btnArtilleries.get(count).setText("<Default to ARTILLERY_FED>");
-			} else {
-				btnArtilleries.get(count).setText(weapon.toString());
-			}
+			btnArtilleries.get(count).setText(weapon.toString());
 			count++;
 		}
 
@@ -884,7 +894,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		for (Button b : btnArtilleries)
 			b.dispose();
 		btnArtilleries.clear();
-		compArtillery.layout();
+		compArm.layout();
 	}
 
 	private void createWeaponSlots(int n) {
@@ -976,6 +986,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 					WeaponObject neu = dialog.open(current);
 
 					if (neu != null) {
+						// If no weapon was selected, default to ARTILLERY_FED
+						Database db = Database.getInstance();
+						if (neu == Database.DEFAULT_WEAPON_OBJ && db != null) {
+							neu = db.getWeapon("ARTILLERY_FED");
+						}
+
 						system.setWeapon(neu);
 						updateData();
 						container.updateMounts();
@@ -985,14 +1001,14 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		};
 
 		for (int i = 0; i < n; i++) {
-			Button btn = new Button(compArtillery, SWT.NONE);
+			Button btn = new Button(grpArtillery, SWT.NONE);
 			btn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 			btn.setText("<artillery slot>");
 			btn.addSelectionListener(listener);
 			btnArtilleries.add(btn);
 		}
 
-		compArtillery.layout();
+		compArm.layout();
 	}
 
 	@Override
