@@ -223,6 +223,7 @@ public class ShipContainer implements Disposable, SLListener {
 			}
 		}
 
+		updateMounts();
 		updateBoundingArea();
 		updateChildBoundingAreas();
 
@@ -764,13 +765,25 @@ public class ShipContainer implements Disposable, SLListener {
 
 	public void updateMounts() {
 		int i = 0;
-		WeaponObject[] weapons = shipController.getGameObject().getWeapons();
+		ShipObject ship = shipController.getGameObject();
+		WeaponObject[] weapons = ship.getWeapons();
+		ArrayList<SystemObject> artilleries = ship.getSystems(Systems.ARTILLERY);
+		int slots = ship.getWeaponSlots();
+
 		for (MountController mount : mountControllers) {
 			mount.setId(i);
-			if (i < weapons.length)
+			if (i < slots) {
 				mount.setWeapon(weapons[i]);
-			else
-				mount.setWeapon(Database.DEFAULT_WEAPON_OBJ);
+			} else {
+				// Artillery starts taking up mounts after the weapons, or 4th slot if the
+				// ship has less than 4 slots. As such, a dummy mount is required
+				int j = i - Math.max(4, slots);
+				if (j >= 0 && j < artilleries.size()) {
+					mount.setWeapon(artilleries.get(j).getWeapon());
+				} else {
+					mount.setWeapon(Database.DEFAULT_WEAPON_OBJ);
+				}
+			}
 			i++;
 		}
 	}

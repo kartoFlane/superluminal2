@@ -69,7 +69,6 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
-	 * - artillery
 	 * - undo system
 	 * == various properties undos
 	 * == offset undo (save both fine and thick)
@@ -85,19 +84,6 @@ public class Superluminal {
 	 * beneath hull/other rooms
 	 * - rework the layered painter to allow more freedom in arranging stuff's ordering -> single views
 	 * consisting of primitive subviews placed on different layers?
-	 * 
-	 * - artillery weapon UI idea:
-	 * Additionally, when placing artillery room(s), there should be a separate category under
-	 * Armaments for Artillery weapons, and the selection of such for each. The best way, in my
-	 * opinion, is to have the categories Weapons, Drones, Artillery, and Augments. Under Artillery,
-	 * a number of slot selector should be added (with a warning that having more than one artillery
-	 * weapon will prevent the second, third, etc weapons from being accessed/disabled/enabled
-	 * during play), to allow the builder to select the weapons for the artillery. From my
-	 * understanding, any weapon in the game can be used in an artillery slot, but can only fire
-	 * based on the artillery cooldown. In addition, for each slot that a person wants to set up
-	 * artillery for, a Power selector (max 4 - though can it be exceeded? If so, add it. :P) should
-	 * be added to the right of each Artillery weapon choice, so that way it will make adding
-	 * multiple-artillery setups to AI (or human-controlled) ships much easier.
 	 * 
 	 * Suggestions:
 	 * - detachable toolbar?
@@ -173,6 +159,7 @@ public class Superluminal {
 		Manager.allowDoorOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP_DOOR));
 		Manager.resetDoorLinksOnMove = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.RESET_LINKS));
 		Manager.shownSlotWarning = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SLOT_WARNING));
+		Manager.shownArtilleryWarning = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ARTILLERY_WARNING));
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();

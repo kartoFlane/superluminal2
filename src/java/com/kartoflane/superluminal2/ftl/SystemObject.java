@@ -20,7 +20,7 @@ public class SystemObject extends GameObject implements Alias {
 	/** Only used by systems with a mannable station */
 	private GlowSet glowSet;
 	/** Only used by artillery systems */
-	private WeaponObject weapon;
+	private WeaponObject weapon = Database.DEFAULT_WEAPON_OBJ;
 
 	private String interiorNamespace = null;
 	private String interiorPath = null;

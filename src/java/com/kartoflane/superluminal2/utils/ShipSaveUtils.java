@@ -410,7 +410,7 @@ public class ShipSaveUtils {
 						WeaponObject weapon = system.getWeapon();
 
 						// If none set, default to ARTILLERY_FED
-						if (weapon == null) {
+						if (weapon == Database.DEFAULT_WEAPON_OBJ) {
 							sysEl.setAttribute("weapon", "ARTILLERY_FED");
 						} else {
 							sysEl.setAttribute("weapon", weapon.getBlueprintName());

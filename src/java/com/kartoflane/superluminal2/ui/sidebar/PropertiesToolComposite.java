@@ -28,6 +28,7 @@ import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Races;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
@@ -35,10 +36,12 @@ import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
+import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.ui.AugmentSelectionDialog;
 import com.kartoflane.superluminal2.ui.CrewMenu;
 import com.kartoflane.superluminal2.ui.DroneSelectionDialog;
@@ -68,6 +71,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private ArrayList<Button> btnWeapons = new ArrayList<Button>();
 	private ArrayList<Button> btnDrones = new ArrayList<Button>();
 	private ArrayList<Button> btnAugments = new ArrayList<Button>();
+	private ArrayList<Button> btnArtilleries = new ArrayList<Button>();
 	private ArrayList<Button> btnCrewMembers = new ArrayList<Button>();
 	private HashMap<Races, Spinner> spCrewMin = new HashMap<Races, Spinner>();
 	private HashMap<Races, Spinner> spCrewMax = new HashMap<Races, Spinner>();
@@ -88,7 +92,6 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private Group grpAugments;
 	private TabItem tbtmArtillery;
 	private Composite compArtillery;
-	private Label label;
 	private CrewMenu crewMenu;
 	private Label lblHullHelp;
 	private Label lblReactorInfo;
@@ -96,6 +99,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private Label lblImageHelp;
 	private Label lblBlueprintHelp;
 	private Combo cmbBoardingAI;
+	private Label lblArtillerySlots;
+	private Spinner spArtillerySlots;
 
 	public PropertiesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -606,11 +611,59 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 		compArtillery = new Composite(tabFolder, SWT.NONE);
 		tbtmArtillery.setControl(compArtillery);
-		compArtillery.setLayout(new GridLayout(1, false));
+		compArtillery.setLayout(new GridLayout(2, false));
 
-		label = new Label(compArtillery, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
-		label.setText("(not yet implemented)");
+		lblArtillerySlots = new Label(compArtillery, SWT.NONE);
+		lblArtillerySlots.setText("Artillery Slots:");
+
+		spArtillerySlots = new Spinner(compArtillery, SWT.BORDER);
+		spArtillerySlots.setMaximum(8);
+		spArtillerySlots.setMinimum(1);
+		GridData gd_spArtillerySlots = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		gd_spArtillerySlots.widthHint = 25;
+		spArtillerySlots.setLayoutData(gd_spArtillerySlots);
+		spArtillerySlots.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ArrayList<SystemObject> systems = ship.getSystems(Systems.ARTILLERY);
+				int slots = spArtillerySlots.getSelection();
+
+				if (slots > 1 && systems.size() <= 1 && !Manager.shownArtilleryWarning) {
+					String msg = "The player can only control power of the first artillery system.\n" +
+							"All the other artillery systems will be permanently powered, and cannot be upgraded.";
+					UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, msg);
+					Manager.shownArtilleryWarning = true;
+				}
+
+				if (systems.size() < slots) {
+					for (int i = systems.size(); i < slots; i++) {
+						SystemObject system = new SystemObject(Systems.ARTILLERY, ship);
+						system.setAlias("#" + (i + 1));
+						SystemController sysC = SystemController.newInstance(container, system);
+						ship.add(system);
+						container.add(sysC);
+						container.store(sysC);
+					}
+				} else {
+					for (int i = systems.size() - 1; i >= slots; i--) {
+						SystemObject system = systems.get(i);
+						SystemController sysC = (SystemController) container.getController(system);
+						container.unassign(system);
+						container.remove(sysC);
+						container.dispose(sysC);
+						ship.remove(system);
+					}
+				}
+
+				clearArtillerySlots();
+				createArtillerySlots(slots);
+				updateData();
+				container.updateMounts();
+
+				EditorWindow.getInstance().updateSidebarScroll();
+			}
+		});
+		createArtillerySlots(ship.getSystems(Systems.ARTILLERY).size());
 
 		/*
 		 * =========================================================================
@@ -785,6 +838,18 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			count++;
 		}
 
+		spArtillerySlots.setSelection(ship.getSystems(Systems.ARTILLERY).size());
+		count = 0;
+		for (SystemObject system : ship.getSystems(Systems.ARTILLERY)) {
+			WeaponObject weapon = system.getWeapon();
+			if (weapon == Database.DEFAULT_WEAPON_OBJ) {
+				btnArtilleries.get(count).setText("<Default to ARTILLERY_FED>");
+			} else {
+				btnArtilleries.get(count).setText(weapon.toString());
+			}
+			count++;
+		}
+
 		// Crew tab
 
 		if (ship.isPlayerShip()) {
@@ -813,6 +878,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			b.dispose();
 		btnDrones.clear();
 		compArm.layout();
+	}
+
+	private void clearArtillerySlots() {
+		for (Button b : btnArtilleries)
+			b.dispose();
+		btnArtilleries.clear();
+		compArtillery.layout();
 	}
 
 	private void createWeaponSlots(int n) {
@@ -887,6 +959,40 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		}
 
 		compArm.layout();
+	}
+
+	private void createArtillerySlots(int n) {
+		SelectionAdapter listener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int i = btnArtilleries.indexOf(e.getSource());
+
+				if (i != -1) {
+					ShipObject ship = container.getShipController().getGameObject();
+					SystemObject system = ship.getSystems(Systems.ARTILLERY).get(i);
+					WeaponObject current = system.getWeapon();
+
+					WeaponSelectionDialog dialog = new WeaponSelectionDialog(EditorWindow.getInstance().getShell());
+					WeaponObject neu = dialog.open(current);
+
+					if (neu != null) {
+						system.setWeapon(neu);
+						updateData();
+						container.updateMounts();
+					}
+				}
+			}
+		};
+
+		for (int i = 0; i < n; i++) {
+			Button btn = new Button(compArtillery, SWT.NONE);
+			btn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			btn.setText("<artillery slot>");
+			btn.addSelectionListener(listener);
+			btnArtilleries.add(btn);
+		}
+
+		compArtillery.layout();
 	}
 
 	@Override

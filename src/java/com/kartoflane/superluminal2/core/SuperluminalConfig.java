@@ -25,6 +25,7 @@ public class SuperluminalConfig {
 	public static final String ALLOW_OVERLAP_DOOR = "allowDoorOverlap";
 	public static final String RESET_LINKS = "resetDoorLinksOnMove";
 	public static final String SLOT_WARNING = "shownSlotWarning";
+	public static final String ARTILLERY_WARNING = "shownArtilleryWarning";
 
 	public SuperluminalConfig(Properties config, File configFile) {
 		this.config = config;
@@ -97,6 +98,7 @@ public class SuperluminalConfig {
 		config.setProperty(ALLOW_OVERLAP_DOOR, "false");
 		config.setProperty(RESET_LINKS, "false");
 		config.setProperty(SLOT_WARNING, "false");
+		config.setProperty(ARTILLERY_WARNING, "false");
 	}
 
 	/**
@@ -113,6 +115,7 @@ public class SuperluminalConfig {
 		config.setProperty(ALLOW_OVERLAP_DOOR, "" + Manager.allowDoorOverlap);
 		config.setProperty(RESET_LINKS, "" + Manager.resetDoorLinksOnMove);
 		config.setProperty(SLOT_WARNING, "" + Manager.shownSlotWarning);
+		config.setProperty(ARTILLERY_WARNING, "" + Manager.shownArtilleryWarning);
 		if (Manager.rememberGeometry && !Manager.startMaximised)
 			config.setProperty(GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 	}
