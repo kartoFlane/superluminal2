@@ -13,6 +13,7 @@ import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
+import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -24,6 +25,7 @@ public class MountTool extends Tool {
 	private boolean canCreate = false;
 	private boolean followHull = true;
 	private MountController toolMount = null;
+	private PropController toolProp = null;
 
 	public MountTool(EditorWindow window) {
 		super(window);
@@ -35,7 +37,7 @@ public class MountTool extends Tool {
 			MountObject object = new MountObject();
 			toolMount = MountController.newInstance(Manager.getCurrentShip(), object);
 			toolMount.setSelectable(false);
-			toolMount.getProp(MountController.ARROW_PROP_ID).setInheritVisibility(true);
+			toolProp = toolMount.getProp(MountController.ARROW_PROP_ID);
 		}
 
 		cursor.setSnapMode(Snapmodes.FREE);
@@ -47,6 +49,7 @@ public class MountTool extends Tool {
 		setDirection(toolMount.getDirection());
 		toolMount.setParent(cursor);
 		toolMount.setVisible(cursor.isVisible());
+		toolProp.setVisible(cursor.isVisible() && toolMount.getDirection() != Directions.NONE);
 
 		cursor.resize(MountController.DEFAULT_WIDTH, MountController.DEFAULT_HEIGHT);
 
@@ -63,6 +66,7 @@ public class MountTool extends Tool {
 		cursor.setVisible(false);
 		toolMount.setParent(null);
 		toolMount.setVisible(false);
+		toolProp.setVisible(false);
 
 		CreationTool ctool = (CreationTool) Manager.getTool(Tools.CREATOR);
 		ctool.getToolComposite(null).clearDataContainer();
@@ -175,6 +179,7 @@ public class MountTool extends Tool {
 		if (cursor.isVisible() && e.button == 1) {
 			cursor.setVisible(false);
 			toolMount.setVisible(false);
+			toolProp.setVisible(false);
 		}
 	}
 
@@ -188,6 +193,7 @@ public class MountTool extends Tool {
 			if (e.button == 1) {
 				cursor.setVisible(true);
 				toolMount.setVisible(true);
+				toolProp.setVisible(toolMount.getDirection() != Directions.NONE);
 			}
 
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
@@ -207,9 +213,11 @@ public class MountTool extends Tool {
 			Point p = Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode());
 			cursor.reposition(p.x, p.y);
 			toolMount.setVisible(cursor.isVisible());
+			toolProp.setVisible(cursor.isVisible() && toolMount.getDirection() != Directions.NONE);
 		} else if (cursor.isVisible()) {
 			cursor.setVisible(false);
 			toolMount.setVisible(false);
+			toolProp.setVisible(false);
 		}
 	}
 
@@ -217,12 +225,14 @@ public class MountTool extends Tool {
 	public void mouseEnter(MouseEvent e) {
 		cursor.setVisible(!Manager.leftMouseDown);
 		toolMount.setVisible(!Manager.leftMouseDown);
+		toolProp.setVisible(!Manager.leftMouseDown && toolMount.getDirection() != Directions.NONE);
 	}
 
 	@Override
 	public void mouseExit(MouseEvent e) {
 		cursor.setVisible(false);
 		toolMount.setVisible(false);
+		toolProp.setVisible(false);
 	}
 
 	@Override
