@@ -28,6 +28,7 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
@@ -36,6 +37,7 @@ import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
@@ -49,6 +51,14 @@ public class Superluminal {
 	public static final String HOTKEYS_FILE = "hotkeys.xml";
 	public static final String CONFIG_FILE = "editor.cfg";
 
+	/** Length of a single row of text */
+	public static final int WRAP_WIDTH = 55;
+	/**
+	 * How many characters beyond the limit set by WRAP_WIDTH can be
+	 * accepted before splitting up the word / moving it to next line
+	 */
+	public static final int WRAP_TOLERANCE = 9;
+
 	/**
 	 * settings ideas:
 	 * --------
@@ -56,7 +66,8 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
-	 * - weapon mount tool -> select direction NONE, move the mouse -> arrow becomes visible (works correctly on already placed weapon mounts)
+	 * - finish tooltip wrapping -> go through with it or just allow mac to do its shit?
+	 * 
 	 * - artillery
 	 * - undo system
 	 * == various properties undos
@@ -108,19 +119,19 @@ public class Superluminal {
 		} catch (Throwable t) {
 			log.error("Failed to retrieve display - wrong version of the editor has been downloaded.");
 
-			String os = getOS();
-			if (os == null)
+			OS os = Utils.identifyOS();
+			if (os.isUnknown())
 				log.error(String.format("Your system (%s %s) was not recognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model")));
 			else
-				log.error("You should download version for " + os);
+				log.error("You should download version for " + os.toString());
 
 			String msg = "";
 			msg += "You have downloaded a wrong version of the editor for your system.\n";
 			msg += "\n";
-			if (os == null) {
+			if (os.isUnknown()) {
 				msg += String.format("Your system (%s %s) was not recognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model"));
 			} else {
-				msg += "You should download version for: " + os;
+				msg += "You should download version for: " + os.toString();
 			}
 
 			UIUtils.showSwingDialog(APP_NAME + " - Wrong version", msg);
@@ -195,7 +206,7 @@ public class Superluminal {
 			String msg = "An error has occured while creating the editor's GUI:\n" +
 					e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n" +
 					"Check the log for details.";
-			UIUtils.showErrorDialog(null, null, msg);
+			UIUtils.showErrorDialog(null, null, Utils.wrap(msg, 50, 5));
 			System.exit(1);
 		}
 
@@ -279,7 +290,7 @@ public class Superluminal {
 			log.error("An error has occured and the editor was forced to terminate.", t);
 
 			String msg = APP_NAME + " has encountered a problem and needs to close.\n\n" +
-					"Please check editor-log.txt in the editor's directory, and post\n" +
+					"Please check editor-log.txt in the editor's directory, and post " +
 					"it in the editor's thread at the FTL forums.";
 			UIUtils.showErrorDialog(editorWindow.getShell(), null, msg);
 		}
@@ -535,27 +546,5 @@ public class Superluminal {
 		} catch (IOException e) {
 			log.error("An error occured while saving hotkeys file: ", e);
 		}
-	}
-
-	private static String getOS() {
-		String result = "";
-
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("win"))
-			result = "Windows ";
-		else if (os.contains("mac"))
-			result = "Mac ";
-		else if (os.contains("linux") || os.contains("nix"))
-			result = "Linux ";
-		else
-			return null; // Unsupported OS, or not recognized
-
-		String javaArch = System.getProperty("sun.arch.data.model");
-		if (javaArch.contains("64"))
-			result += "64-bit";
-		else
-			result += "32-bit";
-
-		return result;
 	}
 }

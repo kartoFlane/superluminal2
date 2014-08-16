@@ -1,10 +1,14 @@
 package com.kartoflane.superluminal2.utils;
 
+import java.util.Arrays;
+import java.util.Scanner;
+
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.Polygon;
+import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 /**
@@ -49,6 +53,14 @@ public class Utils {
 
 	public static int min(int a, int b, int c) {
 		return Math.min(a, Math.min(b, c));
+	}
+
+	public static int max(int a, int b, int c) {
+		return Math.max(a, Math.max(b, c));
+	}
+
+	public static int limit(int min, int number, int max) {
+		return Math.max(min, Math.min(number, max));
 	}
 
 	public static int sign(int x) {
@@ -265,5 +277,161 @@ public class Utils {
 		tinted.blue = (int) (((1 - alpha) * tinted.blue + alpha * overlay.blue));
 
 		return tinted;
+	}
+
+	/**
+	 * For systems specified in the argument, wraps the string using the given settings.
+	 * For all others, just returns the same string (under assumption that they wrap the text themselves)
+	 * 
+	 * @see #wrapOSNot(String, int, int, OS...)
+	 * @see #wrap(String, int, int)
+	 */
+	public static String wrapOS(String msg, int wrapWidth, int wrapTolerance, OS... wrapFor) {
+		OS os = identifyOS();
+
+		if (Arrays.asList(wrapFor).contains(os)) {
+			return wrap(msg, wrapWidth, wrapTolerance);
+		} else {
+			return msg;
+		}
+	}
+
+	/**
+	 * Exactly the same as {@link #wrapOS(String, int, int, OS...)}, except with inverted logic,
+	 * ie. for systems specified in the argument, the method <b>won't</b> wrap the string, but
+	 * will for all others.
+	 * 
+	 * @see #wrapOS(String, int, int, OS...)
+	 * @see #wrap(String, int, int)
+	 */
+	public static String wrapOSNot(String msg, int wrapWidth, int wrapTolerance, OS... dontWrapFor) {
+		OS os = identifyOS();
+
+		if (Arrays.asList(dontWrapFor).contains(os)) {
+			return msg;
+		} else {
+			return wrap(msg, wrapWidth, wrapTolerance);
+		}
+	}
+
+	/**
+	 * Attempts to wrap the supplied string with the given width.
+	 * 
+	 * @param msg
+	 *            the message to be wrapped
+	 * @param wrapWidth
+	 *            the maximum width of a single row of text.
+	 *            Defaults to 50 if negative number or 0.
+	 * @param wrapTolerance
+	 *            how many characters over the limit words can go.
+	 *            Defaults to 5 if negative number.
+	 * @return wrapped string
+	 * 
+	 * @see #wrapOS(String, int, int, OS...)
+	 * @see #wrapOSNot(String, int, int, OS...)
+	 */
+	public static String wrap(String msg, int wrapWidth, int wrapTolerance) {
+		if (msg == null)
+			throw new IllegalArgumentException("Argument must not be null.");
+		if (wrapWidth <= 0)
+			wrapWidth = 50;
+		if (wrapTolerance < 0)
+			wrapTolerance = 5;
+		StringBuilder buf = new StringBuilder();
+		Scanner sc = new Scanner(msg);
+
+		int currentWidth = 0;
+		while (sc.hasNext()) {
+			String token = sc.next();
+			int newWidth = currentWidth + token.length();
+			if (currentWidth >= wrapWidth) {
+				// Even without the new token it's already outside -- move to new line
+				buf.append("\n");
+				buf.append(token);
+				currentWidth = token.length();
+			} else if (newWidth > wrapWidth + wrapTolerance) {
+				// Falls outside of the allowed wrap width -- split
+				String[] split = _split(token, wrapWidth - currentWidth - 1);
+				if (!split[0].isEmpty()) {
+					buf.append(" ");
+					buf.append(split[0]);
+				}
+				buf.append(split[0].isEmpty() || split[1].isEmpty() ? "\n" : "-\n");
+				buf.append(split[1]);
+				currentWidth = split[1].length();
+			} else {
+				// Fits within the wrap width -- append to current line
+				if (currentWidth > 0)
+					buf.append(" ");
+				buf.append(token);
+				currentWidth += token.length() + 1;
+			}
+		}
+
+		return buf.toString();
+	}
+
+	private static String[] _split(String word, int splitIndex) {
+		String[] result = new String[2];
+		if (splitIndex == 0) {
+			result[0] = "";
+			result[1] = word;
+			return result;
+		} else if (splitIndex == word.length()) {
+			result[0] = word;
+			result[1] = "";
+			return result;
+		}
+
+		int i = _findIndexOfClosestVowel(word, splitIndex);
+
+		if (i < 0) {
+			result[0] = word;
+			result[1] = "";
+		} else {
+			result[0] = word.substring(0, i);
+			result[1] = word.substring(i);
+		}
+
+		return result;
+	}
+
+	private static int _findIndexOfClosestVowel(String word, int splitIndex) {
+		char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'y' };
+		int result = -word.length();
+		for (char vowel : vowels) {
+			int indexFrom = word.indexOf(vowel, splitIndex);
+			int indexTo = word.substring(0, splitIndex - 1).indexOf(vowel);
+			// Determine which one is closer
+			int candidate = Math.abs(splitIndex - indexFrom) < Math.abs(splitIndex - indexTo) ?
+					indexFrom :
+					indexTo;
+			result = Math.abs(splitIndex - result) < Math.abs(splitIndex - candidate) ?
+					result :
+					candidate;
+		}
+		return result;
+	}
+
+	public static OS identifyOS() {
+		String javaArch = System.getProperty("sun.arch.data.model");
+		boolean bit64 = javaArch.contains("64");
+
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("win"))
+			return bit64 ? OS.WINDOWS64 : OS.WINDOWS32;
+		else if (os.contains("mac"))
+			return bit64 ? OS.MACOSX64 : OS.MACOSX32;
+		else if (os.contains("linux") || os.contains("nix"))
+			return bit64 ? OS.LINUX64 : OS.LINUX32;
+		else
+			return OS.UNKNOWN;
+	}
+
+	public static boolean contains(Object[] array, Object object) {
+		for (Object o : array)
+			if (o.equals(object))
+				return true;
+		return false;
 	}
 }
