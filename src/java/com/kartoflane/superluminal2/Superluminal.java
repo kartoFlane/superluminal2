@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
@@ -31,6 +33,7 @@ import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
@@ -66,8 +69,6 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
-	 * - finish tooltip wrapping -> go through with it or just allow mac to do its shit?
-	 * 
 	 * - artillery
 	 * - undo system
 	 * == various properties undos
@@ -234,9 +235,11 @@ public class Superluminal {
 			}
 		}
 
-		// Exit program if dats were not found, or load them if they were
+		// Show a warning if no dats were selected, or load them if they were
 		if (datsDir == null) {
-			UIUtils.showWarningDialog(editorWindow.getShell(), null, "FTL resources were not found.\nThe editor will not be able to load any data from the game,\nand may crash unexpectedly.");
+			UIUtils.showWarningDialog(editorWindow.getShell(), null, "FTL resources were not found.\n" +
+					"The editor will not be able to load any data from the game,\n" +
+					"and may crash unexpectedly.");
 			log.debug("No FTL dats path found - creating empty Database.");
 			new Database();
 		} else {
@@ -248,12 +251,30 @@ public class Superluminal {
 				FTLPack resource = new FTLPack(resourceFile, "r");
 
 				final Database db = new Database(data, resource);
+				final List<String> argsList = Arrays.asList(args);
 
 				log.trace("Loading database...");
 
 				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new Action() {
 					public void execute() {
 						db.getCore().load();
+
+						for (String arg : argsList) {
+							File f = new File(arg);
+							if (f.exists() && (arg.endsWith(".ftl") || arg.endsWith(".zip"))) {
+								try {
+									DatabaseEntry de = new DatabaseEntry(f);
+									DatabaseEntry[] dbEntries = db.getEntries();
+									if (de == db.getCore())
+										continue;
+									if (!Utils.contains(dbEntries, de))
+										db.addEntry(de);
+								} catch (Exception e) {
+									log.warn(String.format("Could not create a database entry for file '%s': ", arg), e);
+								}
+							}
+						}
+
 						db.cacheAnimations();
 					}
 				});
