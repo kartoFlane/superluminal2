@@ -41,12 +41,15 @@ import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.utils.UIUtils;
+import com.kartoflane.superluminal2.utils.Utils;
 
 public class ModManagementDialog {
 	private static final Logger log = LogManager.getLogger(ModManagementDialog.class);
 
 	private static ModManagementDialog instance = null;
 	private static String prevPath = null;
+
+	private ArrayList<DatabaseEntry> entries = null;
 
 	private TreeItem dragItem = null;
 	private DatabaseEntry dragData = null;
@@ -67,8 +70,8 @@ public class ModManagementDialog {
 			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
 
-		final ArrayList<DatabaseEntry> entries = new ArrayList<DatabaseEntry>();
 		final Database db = Database.getInstance();
+		entries = new ArrayList<DatabaseEntry>();
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		shell.setText(Superluminal.APP_NAME + " - Mod Management");
@@ -86,8 +89,6 @@ public class ModManagementDialog {
 		rgb.blue = (int) (0.85 * rgb.blue);
 		disabledColor = Cache.checkOutColor(this, rgb);
 		trtmCore.setBackground(disabledColor);
-
-		entries.add(db.getCore());
 
 		// Need to specify a transfer type, even if it's not used, because
 		// otherwise it's not even possible to initiate drag and drop...
@@ -166,21 +167,19 @@ public class ModManagementDialog {
 				if (dragItem != null) {
 					Point p = tree.toControl(e.x, e.y);
 					TreeItem item = tree.getItem(p);
-					if (item == null) {
-						e.detail = DND.DROP_NONE;
-						e.feedback = DND.FEEDBACK_NONE;
-					} else {
-						Rectangle bounds = item.getBounds();
-						if (p.y < bounds.y + bounds.height / 2) {
-							if (item == trtmCore) {
-								e.detail = DND.DROP_NONE;
-								e.feedback = DND.FEEDBACK_NONE;
-							} else {
-								e.feedback |= DND.FEEDBACK_INSERT_BEFORE;
-							}
+					if (item == null)
+						item = tree.getItem(tree.getItemCount() - 1);
+
+					Rectangle bounds = item.getBounds();
+					if (p.y < bounds.y + bounds.height / 2) {
+						if (item == trtmCore) {
+							e.detail = DND.DROP_NONE;
+							e.feedback = DND.FEEDBACK_NONE;
 						} else {
-							e.feedback |= DND.FEEDBACK_INSERT_AFTER;
+							e.feedback |= DND.FEEDBACK_INSERT_BEFORE;
 						}
+					} else {
+						e.feedback |= DND.FEEDBACK_INSERT_AFTER;
 					}
 				} else {
 					Object object = FileTransfer.getInstance().nativeToJava(e.currentDataType);
@@ -208,16 +207,7 @@ public class ModManagementDialog {
 						String fileList[] = (String[]) object;
 						// Already ensured that all items are .ftl or .zip
 						for (String path : fileList) {
-							File file = new File(path);
-							try {
-								DatabaseEntry de = new DatabaseEntry(file);
-								if (!entries.contains(de)) {
-									createTreeItem(de);
-									entries.add(de);
-								}
-							} catch (IOException ex) {
-								log.warn(String.format("An error has occured while loading mod file '%s': ", file.getName(), ex));
-							}
+							addEntry(new File(path));
 						}
 					}
 				} else if (dragData != db.getCore()) {
@@ -226,24 +216,27 @@ public class ModManagementDialog {
 					} else {
 						Point p = tree.toControl(e.x, e.y);
 						TreeItem item = tree.getItem(p);
-						if (item != null) {
-							Rectangle bounds = item.getBounds();
-							TreeItem[] items = tree.getItems();
-							int index = indexOf(items, item);
+						if (item == null)
+							item = tree.getItem(tree.getItemCount() - 1);
 
-							if (p.y < bounds.y + bounds.height / 2) {
-								if (item != trtmCore) {
-									dragItem.setData(null);
-									createTreeItem(dragData, index);
-									entries.remove(dragData);
-									entries.add(index - 1, dragData);
-								}
-							} else {
+						Rectangle bounds = item.getBounds();
+						TreeItem[] items = tree.getItems();
+						int index = indexOf(items, item);
+
+						if (p.y < bounds.y + bounds.height / 2) {
+							if (item != trtmCore) {
 								dragItem.setData(null);
-								createTreeItem(dragData, index + 1);
+								createTreeItem(dragData, index);
 								entries.remove(dragData);
-								entries.add(index, dragData);
+								entries.add(index - 1, dragData);
 							}
+						} else {
+							if (index == items.length)
+								index--;
+							dragItem.setData(null);
+							createTreeItem(dragData, index + 1);
+							entries.remove(dragData);
+							entries.add(Utils.limit(0, index - 1, items.length), dragData);
 						}
 					}
 				}
@@ -253,7 +246,7 @@ public class ModManagementDialog {
 		tree.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (contains(tree.getSelection(), trtmCore))
+				if (Utils.contains(tree.getSelection(), trtmCore))
 					tree.deselect(trtmCore);
 				btnRemove.setEnabled(tree.getSelectionCount() > 0);
 			}
@@ -322,21 +315,27 @@ public class ModManagementDialog {
 						// Load added entries
 						DatabaseEntry[] dbEntries = db.getEntries();
 						for (DatabaseEntry de : entries) {
-							if (!contains(dbEntries, de))
+							if (de == db.getCore())
+								continue;
+							if (!Utils.contains(dbEntries, de))
 								db.addEntry(de);
 						}
 						// Unload deleted entries
 						for (DatabaseEntry de : db.getEntries()) {
+							if (de == db.getCore())
+								continue;
 							if (!entries.contains(de))
 								db.removeEntry(de);
 						}
 						// Reorder entries to match user input
 						for (DatabaseEntry de : entries) {
-							db.reorderEntry(de, entries.indexOf(de));
+							if (de == db.getCore())
+								continue;
+							db.reorderEntry(de, entries.indexOf(de) + 1);
 						}
+						db.cacheAnimations();
 					}
 				});
-				db.cacheAnimations();
 				dispose();
 			}
 		});
@@ -364,7 +363,7 @@ public class ModManagementDialog {
 
 		// Register hotkeys
 		Hotkey h = new Hotkey();
-		h.setKey('\r');
+		h.setKey(SWT.CR);
 		h.addNotifyAction(btnConfirm, true);
 		Manager.hookHotkey(shell, h);
 
@@ -386,6 +385,21 @@ public class ModManagementDialog {
 
 	public void open() {
 		shell.open();
+	}
+
+	public void addEntry(File file) {
+		if (!file.getAbsolutePath().endsWith(".ftl") && !file.getAbsolutePath().endsWith(".zip"))
+			throw new IllegalArgumentException("Argument must be a .zip or .ftl file.");
+
+		try {
+			DatabaseEntry de = new DatabaseEntry(file);
+			if (!entries.contains(de)) {
+				createTreeItem(de);
+				entries.add(de);
+			}
+		} catch (IOException ex) {
+			log.warn(String.format("An error has occured while loading mod file '%s': ", file.getName(), ex));
+		}
 	}
 
 	public void dispose() {
@@ -423,12 +437,5 @@ public class ModManagementDialog {
 				result = i;
 		}
 		return result;
-	}
-
-	private boolean contains(Object[] array, Object object) {
-		for (Object o : array)
-			if (o.equals(object))
-				return true;
-		return false;
 	}
 }
