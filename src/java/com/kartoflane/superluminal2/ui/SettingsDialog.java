@@ -545,7 +545,7 @@ public class SettingsDialog {
 	private boolean hotkeyCollides(Hotkey newHotkey) {
 		for (Hotkeys h : Hotkeys.values()) {
 			Hotkey hotkey = getHotkey(h);
-			if (hotkey.isEnabled() && hotkey.collides(newHotkey))
+			if (h != currentBinding && hotkey.isEnabled() && hotkey.collides(newHotkey))
 				return true;
 		}
 		return false;
