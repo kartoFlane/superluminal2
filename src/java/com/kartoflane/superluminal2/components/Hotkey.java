@@ -153,7 +153,16 @@ public class Hotkey {
 	 */
 	public boolean passes(boolean shift, boolean ctrl, boolean alt, boolean cmd, int keyCode) {
 		return this.shift == shift && this.ctrl == ctrl && this.alt == alt && this.command == cmd &&
-				Character.toLowerCase(key) == Character.toLowerCase(keyCode);
+				_compareKeyCodes(key, keyCode);
+	}
+
+	private boolean _compareKeyCodes(int key1, int key2) {
+		if ((key1 == SWT.CR || key1 == SWT.LF || key1 == SWT.KEYPAD_CR) &&
+				(key2 == SWT.CR || key2 == SWT.LF || key2 == SWT.KEYPAD_CR)) {
+			return true;
+		} else {
+			return Character.toLowerCase(key1) == Character.toLowerCase(key2);
+		}
 	}
 
 	/**
@@ -162,7 +171,7 @@ public class Hotkey {
 	 * Basically a customised {@link #equals(Object)}.
 	 */
 	public boolean collides(Hotkey h) {
-		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && command == h.command && key == h.key;
+		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && command == h.command && _compareKeyCodes(key, h.key);
 	}
 
 	public boolean equals(Object o) {
@@ -191,7 +200,8 @@ public class Hotkey {
 		switch (key) {
 			case SWT.SPACE:         msg += "Spacebar"; break;
 			case SWT.KEYPAD_CR:
-			case SWT.CR:            msg += "Enter"; break;
+			case SWT.CR:
+			case SWT.LF:            msg += "Enter"; break;
 			case SWT.BS:            msg += "Backspace"; break;
 			case SWT.TAB:           msg += "Tab"; break;
 
