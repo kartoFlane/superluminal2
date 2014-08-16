@@ -229,6 +229,7 @@ public class Database {
 			throw new IndexOutOfBoundsException();
 		dataEntries.remove(de);
 		dataEntries.add(index, de);
+		log.trace(String.format("%s reordered to position %s", de, index));
 	}
 
 	/**
