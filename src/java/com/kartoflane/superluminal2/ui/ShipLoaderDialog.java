@@ -340,7 +340,7 @@ public class ShipLoaderDialog {
 				}
 			}
 		});
-		h.setKey('\r');
+		h.setKey(SWT.CR);
 		Manager.hookHotkey(shell, h);
 
 		loadShipList();

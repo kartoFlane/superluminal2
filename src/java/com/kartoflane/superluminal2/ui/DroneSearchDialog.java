@@ -174,7 +174,7 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject> {
 
 		// Register hotkeys
 		Hotkey h = new Hotkey();
-		h.setKey('\r');
+		h.setKey(SWT.CR);
 		h.addNotifyAction(btnConfirm, true);
 		Manager.hookHotkey(shell, h);
 	}

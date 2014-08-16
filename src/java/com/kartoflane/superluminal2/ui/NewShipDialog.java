@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.core.Manager;
 
 public class NewShipDialog {
 
@@ -94,6 +96,12 @@ public class NewShipDialog {
 		Point parSize = parentShell.getSize();
 		Point parLoc = parentShell.getLocation();
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+
+		// Register hotkeys
+		Hotkey h = new Hotkey();
+		h.addNotifyAction(btnConfirm, true);
+		h.setKey(SWT.CR);
+		Manager.hookHotkey(shell, h);
 	}
 
 	/**
