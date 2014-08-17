@@ -1199,6 +1199,10 @@ public class ShipContainer implements Disposable, SLListener {
 		eventHandler.unhook(eventType, listener);
 	}
 
+	public void removeListener(SLListener listener) {
+		eventHandler.unhook(listener);
+	}
+
 	@Override
 	public void handleEvent(SLEvent e) {
 		// Send the event over to controllers

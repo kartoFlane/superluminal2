@@ -48,6 +48,11 @@ import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLDeleteEvent;
+import com.kartoflane.superluminal2.events.SLDisposeEvent;
+import com.kartoflane.superluminal2.events.SLEvent;
+import com.kartoflane.superluminal2.events.SLListener;
+import com.kartoflane.superluminal2.events.SLRestoreEvent;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
@@ -58,9 +63,9 @@ import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
-public class OverviewWindow {
+public class OverviewWindow implements SLListener {
 
-	private static OverviewWindow instance = null;
+	private static final OverviewWindow _instance = new OverviewWindow();
 
 	private ShipContainer ship;
 	private ObjectController highlightedController = null;
@@ -87,11 +92,10 @@ public class OverviewWindow {
 	private DragSource dragSource;
 	private DropTarget dropTarget;
 
-	public OverviewWindow(Shell parent) {
-		if (instance != null)
-			throw new IllegalStateException("Previous instance has not been disposed!");
+	private OverviewWindow() {
+	}
 
-		instance = this;
+	public void init(Shell parent) {
 		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE);
@@ -272,14 +276,6 @@ public class OverviewWindow {
 			}
 		});
 
-		shell.addListener(SWT.FocusIn, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				update();
-				tree.setFocus();
-			}
-		});
-
 		ControlAdapter resizer = new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
@@ -291,13 +287,6 @@ public class OverviewWindow {
 		};
 		tree.addControlListener(resizer);
 		trclmnName.addControlListener(resizer);
-
-		tree.addListener(SWT.FocusIn, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				update();
-			}
-		});
 
 		tree.addListener(SWT.MouseMove, new Listener() {
 			@Override
@@ -338,7 +327,7 @@ public class OverviewWindow {
 					controller = (ObjectController) item.getData();
 				}
 
-				if (Manager.getSelectedToolId() == Tools.POINTER)
+				if (Manager.getSelectedToolId() == Tools.POINTER && (controller == null || controller.isVisible()))
 					Manager.setSelected(controller);
 
 				tltmAlias.setEnabled(controller != null);
@@ -474,7 +463,7 @@ public class OverviewWindow {
 		}
 
 		String alias = null;
-		if (prevSelection != null && prevSelection instanceof Alias)
+		if (prevSelection != null && !prevSelection.isDisposed() && prevSelection instanceof Alias)
 			alias = ((Alias) prevSelection).getAlias();
 		tltmAlias.setEnabled(prevSelection != null);
 		tltmRemove.setEnabled(prevSelection != null && alias != null && !alias.equals(""));
@@ -486,13 +475,13 @@ public class OverviewWindow {
 			throw new IllegalArgumentException("Argument must not be null.");
 
 		TreeItem item = controllerMap.get(controller);
-		if (item == null) {
+
+		if (item == null && !controller.isDeleted()) {
 			item = createItem(controller);
-			controllerMap.put(controller, item);
 			return; // No need to update, since we've already created a new item
 		}
-
-		update(item);
+		if (item != null)
+			update(item);
 	}
 
 	private void update(TreeItem item) {
@@ -501,30 +490,35 @@ public class OverviewWindow {
 
 		ObjectController oc = (ObjectController) item.getData();
 
-		if (oc instanceof RoomController) {
-			RoomController controller = (RoomController) oc;
-			item.setText(0, controller.getGameObject().toStringNoAlias());
-		} else if (oc instanceof DoorController) {
-			DoorController controller = (DoorController) oc;
-			item.setText(0, "Door " + (controller.isHorizontal() ? "H" : "V"));
-		} else if (oc instanceof MountController) {
-			MountController controller = (MountController) oc;
-			item.setText(0, "Mount " + controller.getId());
-		} else if (oc instanceof GibController) {
-			GibController controller = (GibController) oc;
-			item.setText(0, "Gib " + controller.getId());
-		}
+		if (oc.isDeleted()) {
+			item.dispose();
+			controllerMap.remove(oc);
+		} else {
+			if (oc instanceof RoomController) {
+				RoomController controller = (RoomController) oc;
+				item.setText(0, controller.getGameObject().toStringNoAlias());
+			} else if (oc instanceof DoorController) {
+				DoorController controller = (DoorController) oc;
+				item.setText(0, "Door " + (controller.isHorizontal() ? "H" : "V"));
+			} else if (oc instanceof MountController) {
+				MountController controller = (MountController) oc;
+				item.setText(0, "Mount " + controller.getId());
+			} else if (oc instanceof GibController) {
+				GibController controller = (GibController) oc;
+				item.setText(0, "Gib " + controller.getId());
+			}
 
-		String alias = oc.getAlias();
-		item.setText(1, alias == null ? "" : alias);
+			String alias = oc.getAlias();
+			item.setText(1, alias == null ? "" : alias);
 
-		item.setBackground(oc.isVisible() ? null : disabledColor);
+			item.setBackground(oc.isVisible() ? null : disabledColor);
 
-		if (oc.isSelected()) {
-			tree.select(item);
-			Rectangle b = item.getBounds();
-			if (!tree.getClientArea().contains(b.x, b.y))
-				tree.setTopItem(item);
+			if (oc.isSelected()) {
+				tree.select(item);
+				Rectangle b = item.getBounds();
+				if (!tree.getClientArea().contains(b.x, b.y))
+					tree.setTopItem(item);
+			}
 		}
 
 		tltmAlias.setEnabled(oc != null);
@@ -536,8 +530,8 @@ public class OverviewWindow {
 	 * Updates the overview window if it exists, or does nothing if it does not.
 	 */
 	public static void staticUpdate() {
-		if (instance != null && !instance.shell.isDisposed()) {
-			instance.update();
+		if (_instance != null && !_instance.isDisposed()) {
+			_instance.update();
 		}
 	}
 
@@ -545,13 +539,13 @@ public class OverviewWindow {
 	 * Updates the overview window if it exists, or does nothing if it does not.
 	 */
 	public static void staticUpdate(ObjectController controller) {
-		if (instance != null && !instance.shell.isDisposed()) {
-			instance.update(controller);
+		if (_instance != null && !_instance.isDisposed()) {
+			_instance.update(controller);
 		}
 	}
 
 	public static OverviewWindow getInstance() {
-		return instance;
+		return _instance;
 	}
 
 	public void setEnabled(boolean b) {
@@ -569,7 +563,7 @@ public class OverviewWindow {
 	}
 
 	public boolean isDisposed() {
-		return shell.isDisposed();
+		return shell == null || shell.isDisposed();
 	}
 
 	private boolean canDrop(TreeItem newParent, ObjectController data) {
@@ -643,6 +637,22 @@ public class OverviewWindow {
 		Cache.checkInImage(this, "cpath:/assets/noalias.png");
 		Cache.checkInImage(this, "cpath:/assets/cloak.png");
 		shell.dispose();
-		instance = null;
+
+		controllerMap.clear();
+	}
+
+	@Override
+	public void handleEvent(SLEvent e) {
+		if (e.data instanceof ObjectController) {
+			ObjectController data = (ObjectController) e.data;
+			if (e instanceof SLDeleteEvent || e instanceof SLRestoreEvent) {
+				if (data instanceof RoomController || data instanceof DoorController ||
+						data instanceof MountController || data instanceof GibController) {
+					update(data);
+				}
+			} else if (e instanceof SLDisposeEvent) {
+				data.removeListener(this);
+			}
+		}
 	}
 }

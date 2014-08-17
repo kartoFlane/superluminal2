@@ -91,7 +91,6 @@ public class DoorDataComposite extends Composite implements DataComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				controller.setHorizontal(btnHorizontal.getSelection());
-				OverviewWindow.staticUpdate(controller);
 				updateData();
 			}
 		});
@@ -174,6 +173,8 @@ public class DoorDataComposite extends Composite implements DataComposite {
 
 		lblIdLeft.pack();
 		lblIdRight.pack();
+
+		OverviewWindow.staticUpdate(controller);
 	}
 
 	@Override

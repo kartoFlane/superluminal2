@@ -17,6 +17,7 @@ import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.MountView;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.MountDataComposite;
@@ -56,6 +57,11 @@ public class MountController extends ObjectController implements Indexable, Comp
 		controller.setDirection(object.getDirection());
 		controller.setRotated(object.isRotated());
 		controller.setMirrored(object.isMirrored());
+
+		OverviewWindow ow = OverviewWindow.getInstance();
+		controller.addListener(SLEvent.DELETE, ow);
+		controller.addListener(SLEvent.RESTORE, ow);
+		controller.addListener(SLEvent.DISPOSE, ow);
 
 		return controller;
 	}

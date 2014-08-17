@@ -6,12 +6,14 @@ import org.eclipse.swt.widgets.Composite;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.GibView;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.GibControlsMenu;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
@@ -42,6 +44,11 @@ public class GibController extends ImageController implements Indexable, Compara
 		GibController controller = new GibController(shipContainer, model, view);
 
 		controller.setImage(gib.getImagePath());
+
+		OverviewWindow ow = OverviewWindow.getInstance();
+		controller.addListener(SLEvent.DELETE, ow);
+		controller.addListener(SLEvent.RESTORE, ow);
+		controller.addListener(SLEvent.DISPOSE, ow);
 
 		return controller;
 	}

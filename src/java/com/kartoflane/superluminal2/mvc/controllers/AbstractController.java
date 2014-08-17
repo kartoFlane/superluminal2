@@ -669,6 +669,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 				setMoving(false);
 
 				undoFinalize();
+				EditorWindow.getInstance().updateSidebarContent();
 			}
 		}
 	}
@@ -702,8 +703,6 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 					if (p.x != getX() || p.y != getY()) {
 						reposition(p.x, p.y);
 						updateFollowOffset();
-
-						((DataComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
 					}
 				}
 			}
@@ -953,8 +952,14 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	public void removeListener(int eventType, SLListener listener) {
 		if (eventHandler == null)
-			eventHandler = new EventHandler();
+			return;
 		eventHandler.unhook(eventType, listener);
+	}
+
+	public void removeListener(SLListener listener) {
+		if (eventHandler == null)
+			return;
+		eventHandler.unhook(listener);
 	}
 
 	public void handleEvent(SLEvent e) {

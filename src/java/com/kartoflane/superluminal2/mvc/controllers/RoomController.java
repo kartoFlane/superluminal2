@@ -16,15 +16,16 @@ import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.RoomView;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
-import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.RoomDataComposite;
 import com.kartoflane.superluminal2.undo.UndoableResizeEdit;
@@ -75,6 +76,11 @@ public class RoomController extends ObjectController implements Indexable, Compa
 		ObjectModel model = new ObjectModel(object);
 		RoomView view = new RoomView();
 		RoomController controller = new RoomController(container, model, view);
+
+		OverviewWindow ow = OverviewWindow.getInstance();
+		controller.addListener(SLEvent.DELETE, ow);
+		controller.addListener(SLEvent.RESTORE, ow);
+		controller.addListener(SLEvent.DISPOSE, ow);
 
 		return controller;
 	}
@@ -229,7 +235,6 @@ public class RoomController extends ObjectController implements Indexable, Compa
 					setResizing(false);
 
 					if (canResize) {
-						setVisible(false);
 						// If the area is clear, resize and reposition the room
 						Point resLoc = CursorController.getInstance().getLocation();
 						Point resSize = CursorController.getInstance().getSize();
@@ -245,14 +250,15 @@ public class RoomController extends ObjectController implements Indexable, Compa
 						edit.setOld(new Tuple<Point, Point>(getLocation(), getSize()));
 						edit.setCurrent(new Tuple<Point, Point>(resLoc, resSize));
 
+						setVisible(false);
 						setSize(resSize);
 						setLocation(resLoc);
+						setVisible(true);
 
 						setFollowOffset(getX() - getParent().getX(), getY() - getParent().getY());
-						((ManipulationToolComposite) container.getParent().getSidebarContent()).updateData();
 
+						container.getParent().updateSidebarContent();
 						container.updateBoundingArea();
-						setVisible(true);
 
 						Action a = new Action() {
 							public void execute() {
@@ -266,6 +272,7 @@ public class RoomController extends ObjectController implements Indexable, Compa
 					}
 					updateView();
 				}
+				container.getParent().updateSidebarContent();
 			} else if (e.button == 3) {
 				if (!isSelected())
 					Manager.setSelected(this);
@@ -336,7 +343,6 @@ public class RoomController extends ObjectController implements Indexable, Compa
 							updateView();
 							updateFollowOffset();
 
-							container.getParent().updateSidebarContent();
 							container.updateBoundingArea();
 						}
 					}

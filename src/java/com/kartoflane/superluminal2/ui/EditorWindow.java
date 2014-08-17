@@ -361,8 +361,8 @@ public class EditorWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				OverviewWindow window = OverviewWindow.getInstance();
-				if (window == null || window.isDisposed())
-					window = new OverviewWindow(shell);
+				if (window.isDisposed())
+					window.init(shell);
 				window.open();
 			}
 		});

@@ -23,6 +23,7 @@ import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.ui.GibControlsMenu;
 import com.kartoflane.superluminal2.ui.GibPropContainer;
 import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -263,6 +264,8 @@ public class GibDataComposite extends Composite implements DataComposite {
 		spLinMax.setMinimum(spLinMin.getSelection());
 		spAngMin.setSelection((int) Math.round(controller.getAngularVelocityMin() * 100));
 		spAngMax.setSelection((int) Math.round(controller.getAngularVelocityMax() * 100));
+
+		OverviewWindow.staticUpdate(controller);
 	}
 
 	@Override

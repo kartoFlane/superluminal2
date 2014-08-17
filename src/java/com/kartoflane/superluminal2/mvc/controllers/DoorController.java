@@ -17,7 +17,7 @@ import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 import com.kartoflane.superluminal2.mvc.views.DoorView;
-import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.DoorDataComposite;
@@ -53,6 +53,11 @@ public class DoorController extends ObjectController {
 		controller.setHorizontal(controller.getGameObject().isHorizontal());
 		controller.setLeftRoom(object.getLeftRoom());
 		controller.setRightRoom(object.getRightRoom());
+
+		OverviewWindow ow = OverviewWindow.getInstance();
+		controller.addListener(SLEvent.DELETE, ow);
+		controller.addListener(SLEvent.RESTORE, ow);
+		controller.addListener(SLEvent.DISPOSE, ow);
 
 		return controller;
 	}
@@ -208,7 +213,7 @@ public class DoorController extends ObjectController {
 		if (Manager.resetDoorLinksOnMove && (oldX != getX() || oldY != getY())) {
 			setLeftRoom(null);
 			setRightRoom(null);
-			((DataComposite) EditorWindow.getInstance().getSidebarContent()).updateData();
+			container.getParent().updateSidebarContent();
 		}
 	}
 

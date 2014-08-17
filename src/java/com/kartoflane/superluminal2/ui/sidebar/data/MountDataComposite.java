@@ -24,6 +24,7 @@ import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -257,6 +258,8 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnLinkedGib.setSelection(false);
 
 		btnSelectGib.setEnabled(gib != Database.DEFAULT_GIB_OBJ);
+
+		OverviewWindow.staticUpdate(controller);
 	}
 
 	@Override
