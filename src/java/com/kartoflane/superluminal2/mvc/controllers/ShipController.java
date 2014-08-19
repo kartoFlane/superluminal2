@@ -26,6 +26,7 @@ import com.kartoflane.superluminal2.mvc.views.ShipView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.ShipDataComposite;
+import com.kartoflane.superluminal2.undo.UndoableOffsetEdit;
 
 public class ShipController extends ObjectController {
 
@@ -68,7 +69,8 @@ public class ShipController extends ObjectController {
 		return controller;
 	}
 
-	private void createProps() {
+	@Override
+	protected void createProps() {
 		OffsetPropController opc = new OffsetPropController(this, OFFSET_FINE_X_PROP_ID);
 		opc.setPolygon(new Polygon(new int[] {
 				0, 0,
@@ -330,15 +332,29 @@ public class ShipController extends ObjectController {
 				setBoundingPoints(0, 0,
 						getX() + ship.getXOffset() * ShipContainer.CELL_SIZE,
 						getY() + ship.getYOffset() * ShipContainer.CELL_SIZE);
+
+				currentEdit = new UndoableOffsetEdit(container);
+				undoInit();
 			} else {
 				Point offset = container.findShipOffset();
 				offset.x /= ShipContainer.CELL_SIZE;
 				offset.y /= ShipContainer.CELL_SIZE;
 				container.setShipOffset(offset.x, offset.y);
 				container.updateBoundingArea();
+
+				undoFinalize();
 			}
 		} else {
 			super.handleEvent(e);
+		}
+	}
+
+	@Override
+	public void mouseDown(MouseEvent e) {
+		super.mouseDown(e);
+		if ((e.stateMask & SWT.SHIFT) == SWT.SHIFT) {
+			currentEdit = new UndoableOffsetEdit(container);
+			undoInit();
 		}
 	}
 
@@ -351,7 +367,27 @@ public class ShipController extends ObjectController {
 			container.setShipOffset(offset.x, offset.y);
 			updateProps();
 		}
+		undoFinalize();
 		super.mouseUp(e);
 	}
 
+	@Override
+	protected void undoInit() {
+		if (currentEdit instanceof UndoableOffsetEdit) {
+			UndoableOffsetEdit edit = (UndoableOffsetEdit) currentEdit;
+			edit.setOld(getLocation());
+		} else {
+			super.undoInit();
+		}
+	}
+
+	@Override
+	protected void undoFinalize() {
+		if (currentEdit instanceof UndoableOffsetEdit) {
+			UndoableOffsetEdit edit = (UndoableOffsetEdit) currentEdit;
+			edit.setCurrent(getLocation());
+		}
+
+		super.undoFinalize();
+	}
 }

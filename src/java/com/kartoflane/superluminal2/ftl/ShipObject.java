@@ -267,6 +267,10 @@ public class ShipObject extends GameObject {
 		return yOffset;
 	}
 
+	public Point getOffsetThick() {
+		return new Point(xOffset, yOffset);
+	}
+
 	/**
 	 * Sets the X offset of the ship's origin, in pixels.
 	 */
@@ -293,6 +297,10 @@ public class ShipObject extends GameObject {
 	 */
 	public int getVertical() {
 		return vertical;
+	}
+
+	public Point getOffsetFine() {
+		return new Point(horizontal, vertical);
 	}
 
 	/**
