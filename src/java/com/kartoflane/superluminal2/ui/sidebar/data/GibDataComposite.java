@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
@@ -45,6 +46,8 @@ public class GibDataComposite extends Composite implements DataComposite {
 	private Spinner spLinMax;
 	private Spinner spAngMin;
 	private Spinner spAngMax;
+	private Button btnFollowHull;
+	private Label lblFollowHelp;
 
 	public GibDataComposite(Composite parent, GibController control) {
 		super(parent, SWT.NONE);
@@ -69,6 +72,33 @@ public class GibDataComposite extends Composite implements DataComposite {
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+
+		btnFollowHull = new Button(this, SWT.CHECK);
+		btnFollowHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+		btnFollowHull.setText("Follow Hull");
+
+		lblFollowHelp = new Label(this, SWT.NONE);
+		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblFollowHelp.setImage(helpImage);
+		msg = "When checked, this object will follow the hull image, so that " +
+				"when hull is moved, this object is moved as well.";
+		UIUtils.addTooltip(lblFollowHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+
+		btnFollowHull.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (btnFollowHull.getSelection()) {
+					controller.setParent(Manager.getCurrentShip().getImageController(Images.HULL));
+				} else {
+					controller.setParent(Manager.getCurrentShip().getShipController());
+				}
+				controller.updateFollowOffset();
+			}
+		});
+
+		new Label(this, SWT.NONE);
+		new Label(this, SWT.NONE);
+		new Label(this, SWT.NONE);
 
 		Label lblShowControls = new Label(this, SWT.NONE);
 		lblShowControls.setText("Show Controls:");
@@ -250,6 +280,8 @@ public class GibDataComposite extends Composite implements DataComposite {
 	public void updateData() {
 		String alias = controller.getAlias();
 		label.setText("Gib #" + controller.getId() + (alias == null ? "" : " (" + alias + ")"));
+
+		btnFollowHull.setSelection(controller.getParent() == Manager.getCurrentShip().getImageController(Images.HULL));
 
 		btnControls.setText(Manager.getCurrentShip().getGibContainer().getShownControls().toString());
 		spDirMin.setSelection(controller.getDirectionMin());
