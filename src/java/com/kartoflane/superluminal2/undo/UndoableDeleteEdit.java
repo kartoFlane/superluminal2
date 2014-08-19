@@ -10,16 +10,18 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 @SuppressWarnings("serial")
 public class UndoableDeleteEdit extends AbstractUndoableEdit {
 
+	private int index;
 	private AbstractController data = null;
 	private boolean disposeOnDie = true;
 
-	public UndoableDeleteEdit(AbstractController ac) {
+	public UndoableDeleteEdit(AbstractController ac, int index) {
 		if (ac == null)
 			throw new IllegalArgumentException("Argument must not be null.");
 		if (!ac.isDeletable())
 			throw new IllegalArgumentException("The controller is not deletable.");
 
 		data = ac;
+		this.index = index;
 	}
 
 	@Override
@@ -30,7 +32,7 @@ public class UndoableDeleteEdit extends AbstractUndoableEdit {
 	@Override
 	public void undo() throws CannotUndoException {
 		super.undo();
-		Manager.getCurrentShip().restore(data);
+		Manager.getCurrentShip().restore(data, index);
 		disposeOnDie = false;
 	}
 

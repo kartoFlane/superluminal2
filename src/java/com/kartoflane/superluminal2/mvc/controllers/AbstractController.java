@@ -37,7 +37,6 @@ import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.events.SLModShiftEvent;
 import com.kartoflane.superluminal2.events.SLMoveEvent;
 import com.kartoflane.superluminal2.events.SLResizeEvent;
-import com.kartoflane.superluminal2.events.SLRestoreEvent;
 import com.kartoflane.superluminal2.events.SLSelectionEvent;
 import com.kartoflane.superluminal2.events.SLVisibilityEvent;
 import com.kartoflane.superluminal2.mvc.Controller;
@@ -898,22 +897,21 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		for (PropController prop : getProps()) {
 			prop.removeFromPainter();
 			prop.redraw();
+			prop.delete();
+			prop.dispose();
 		}
+		if (props != null)
+			props.clear();
 	}
 
 	@Override
 	public void restore() {
+		monoDirectionalDrag = false;
 		deleted = false;
 		setView(view);
 		setVisible(true);
 
-		if (eventHandler != null && eventHandler.hooks(SLEvent.RESTORE))
-			eventHandler.sendEvent(new SLRestoreEvent(this));
-
-		for (PropController prop : getProps()) {
-			prop.setView(prop.getView());
-			prop.redraw();
-		}
+		createProps();
 	}
 
 	public boolean isDeleted() {
@@ -1097,5 +1095,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			Manager.getCurrentShip().postEdit(currentEdit);
 
 		currentEdit = null;
+	}
+
+	protected void createProps() {
 	}
 }

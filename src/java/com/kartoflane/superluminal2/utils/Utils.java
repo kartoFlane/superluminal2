@@ -434,4 +434,12 @@ public class Utils {
 				return true;
 		return false;
 	}
+
+	public static int indexOf(Object[] array, Object object) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i].equals(object))
+				return i;
+		}
+		return -1;
+	}
 }

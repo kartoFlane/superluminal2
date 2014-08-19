@@ -60,7 +60,6 @@ public class MountController extends ObjectController implements Indexable, Comp
 
 		OverviewWindow ow = OverviewWindow.getInstance();
 		controller.addListener(SLEvent.DELETE, ow);
-		controller.addListener(SLEvent.RESTORE, ow);
 		controller.addListener(SLEvent.DISPOSE, ow);
 
 		return controller;
@@ -223,12 +222,14 @@ public class MountController extends ObjectController implements Indexable, Comp
 		prop.removeFromPainter();
 	}
 
-	private void createProps() {
+	@Override
+	protected void createProps() {
 		PropController prop = new PropController(this, ARROW_PROP_ID);
 		prop.setImage("cpath:/assets/arrow.png");
 		prop.setAlpha(255);
 		prop.addToPainter(Layers.MOUNT);
 		addProp(prop);
+		setDirection(getDirection());
 	}
 
 	@Override

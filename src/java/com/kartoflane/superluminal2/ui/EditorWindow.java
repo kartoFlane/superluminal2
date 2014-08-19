@@ -64,6 +64,10 @@ import com.kartoflane.superluminal2.events.SLModControlEvent;
 import com.kartoflane.superluminal2.events.SLModShiftEvent;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
+import com.kartoflane.superluminal2.mvc.controllers.DoorController;
+import com.kartoflane.superluminal2.mvc.controllers.GibController;
+import com.kartoflane.superluminal2.mvc.controllers.MountController;
+import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.DoorTool;
@@ -681,12 +685,23 @@ public class EditorWindow {
 				AbstractController selected = Manager.getSelected();
 				if (selected != null) {
 					try {
+						int index = -1;
+						if (selected instanceof RoomController) {
+							index = ((RoomController) selected).getId();
+						} else if (selected instanceof DoorController) {
+							index = Utils.indexOf(Manager.getCurrentShip().getDoorControllers(), selected);
+						} else if (selected instanceof MountController) {
+							index = ((MountController) selected).getId();
+						} else if (selected instanceof GibController) {
+							index = ((GibController) selected).getId();
+						}
+
 						Manager.getCurrentShip().delete(selected);
 						selected.redraw();
 
 						Manager.setSelected(null);
 
-						Manager.getCurrentShip().postEdit(new UndoableDeleteEdit(selected));
+						Manager.getCurrentShip().postEdit(new UndoableDeleteEdit(selected, index));
 					} catch (NotDeletableException ex) {
 						log.trace("Selected object is not deletable: " + selected.getClass().getSimpleName());
 					}

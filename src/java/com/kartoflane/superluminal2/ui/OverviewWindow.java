@@ -418,6 +418,9 @@ public class OverviewWindow implements SLListener {
 	}
 
 	public void update() {
+		if (isDisposed())
+			return;
+
 		ship = Manager.getCurrentShip();
 
 		AbstractController prevSelection = Manager.getSelected();
@@ -436,18 +439,18 @@ public class OverviewWindow implements SLListener {
 
 		if (ship != null) {
 			for (RoomController r : ship.getRoomControllers())
-				createItem(r);
+				createItem(r, -1);
 			trtmRooms.setText(String.format("Rooms (%s)", trtmRooms.getItemCount()));
 			for (DoorController d : ship.getDoorControllers())
-				createItem(d);
+				createItem(d, -1);
 			trtmDoors.setText(String.format("Doors (%s)", trtmDoors.getItemCount()));
 			for (MountController m : ship.getMountControllers())
-				createItem(m);
+				createItem(m, -1);
 			trtmMounts.setText(String.format("Mounts (%s)", trtmMounts.getItemCount()));
 			for (int i = 1; i <= ship.getGibControllers().length; i++) {
 				GibController g = ship.getGibControllerById(i);
 				if (g != null)
-					createItem(g);
+					createItem(g, -1);
 			}
 			trtmGibs.setText(String.format("Gibs (%s)", trtmGibs.getItemCount()));
 		}
@@ -477,11 +480,10 @@ public class OverviewWindow implements SLListener {
 		TreeItem item = controllerMap.get(controller);
 
 		if (item == null && !controller.isDeleted()) {
-			item = createItem(controller);
-			return; // No need to update, since we've already created a new item
-		}
-		if (item != null)
+			item = createItem(controller, -1);
+		} else {
 			update(item);
+		}
 	}
 
 	private void update(TreeItem item) {
@@ -559,7 +561,7 @@ public class OverviewWindow implements SLListener {
 	}
 
 	public boolean isActive() {
-		return !shell.isDisposed() && tree.isFocusControl();
+		return !isDisposed() && tree.isFocusControl();
 	}
 
 	public boolean isDisposed() {
@@ -607,26 +609,36 @@ public class OverviewWindow implements SLListener {
 		array[from].setId(oldId);
 	}
 
-	private TreeItem createItem(AbstractController controller) {
-		TreeItem parent = null;
-		if (controller instanceof RoomController)
-			parent = trtmRooms;
-		else if (controller instanceof DoorController)
-			parent = trtmDoors;
-		else if (controller instanceof MountController)
-			parent = trtmMounts;
-		else if (controller instanceof GibController)
-			parent = trtmGibs;
-		else
+	private TreeItem createItem(AbstractController controller, int index) {
+		TreeItem parent = identifyParent(controller);
+		if (parent == null)
 			return null;
 
-		TreeItem item = new TreeItem(parent, SWT.NONE);
+		TreeItem item = null;
+		if (index < 0 || parent.getItemCount() >= index) {
+			item = new TreeItem(parent, SWT.NONE);
+		} else {
+			item = new TreeItem(parent, SWT.NONE, index);
+		}
 		item.setData(controller);
 
 		update(item);
 
 		controllerMap.put(controller, item);
 		return item;
+	}
+
+	private TreeItem identifyParent(AbstractController controller) {
+		if (controller instanceof RoomController)
+			return trtmRooms;
+		else if (controller instanceof DoorController)
+			return trtmDoors;
+		else if (controller instanceof MountController)
+			return trtmMounts;
+		else if (controller instanceof GibController)
+			return trtmGibs;
+		else
+			return null;
 	}
 
 	public void dispose() {
@@ -645,11 +657,10 @@ public class OverviewWindow implements SLListener {
 	public void handleEvent(SLEvent e) {
 		if (e.data instanceof ObjectController) {
 			ObjectController data = (ObjectController) e.data;
-			if (e instanceof SLDeleteEvent || e instanceof SLRestoreEvent) {
-				if (data instanceof RoomController || data instanceof DoorController ||
-						data instanceof MountController || data instanceof GibController) {
-					update(data);
-				}
+			if (e instanceof SLDeleteEvent) {
+				update(data);
+			} else if (e instanceof SLRestoreEvent) {
+				update();
 			} else if (e instanceof SLDisposeEvent) {
 				data.removeListener(this);
 			}

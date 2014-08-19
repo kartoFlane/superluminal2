@@ -27,6 +27,7 @@ import com.kartoflane.superluminal2.events.SLAddEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.events.SLRemoveEvent;
+import com.kartoflane.superluminal2.events.SLRestoreEvent;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -113,6 +114,9 @@ public class ShipContainer implements Disposable, SLListener {
 				}
 			}
 		};
+
+		addListener(SLEvent.RESTORE, OverviewWindow.getInstance());
+		addListener(SLEvent.RESTORE, hangarListener);
 	}
 
 	public ShipContainer(EditorWindow window, ShipObject ship) {
@@ -458,6 +462,12 @@ public class ShipContainer implements Disposable, SLListener {
 		return Grid.getInstance().snapToGrid(mx, my, Snapmodes.CROSS);
 	}
 
+	/**
+	 * Calculates the optimal values for the X_OFFSET and Y_OFFSET ship layout properties,
+	 * so that the ship will be centered in the game screen.
+	 * 
+	 * @return point containing the calculated values; x holds x_offset, y holds y_offset
+	 */
 	public Point findOptimalThickOffset() {
 		if (roomControllers.size() == 0)
 			return new Point(0, 0);
@@ -483,6 +493,12 @@ public class ShipContainer implements Disposable, SLListener {
 		return result;
 	}
 
+	/**
+	 * Calculates the optimal values for the HORIZONTAL and VERTICAL ship layout properties,
+	 * so that the ship will be centered in the game screen.
+	 * 
+	 * @return point containing the calculated values; x holds horizontal, y holds vertical
+	 */
 	public Point findOptimalFineOffset() {
 		if (roomControllers.size() == 0)
 			return new Point(0, 0);
@@ -602,6 +618,44 @@ public class ShipContainer implements Disposable, SLListener {
 		return false;
 	}
 
+	public void add(AbstractController controller, int index) {
+		if (index < 0) {
+			add(controller);
+			return;
+		}
+
+		if (controller instanceof RoomController) {
+			RoomController room = (RoomController) controller;
+			room.setId(index);
+			roomControllers.add(index, room);
+			shipController.getGameObject().add(room.getGameObject());
+
+			room.addListener(SLEvent.MOVE, hangarListener);
+			room.addListener(SLEvent.RESIZE, hangarListener);
+			room.addListener(SLEvent.DELETE, hangarListener);
+		} else if (controller instanceof DoorController) {
+			DoorController door = (DoorController) controller;
+			doorControllers.add(index, door);
+			shipController.getGameObject().add(door.getGameObject());
+		} else if (controller instanceof MountController) {
+			MountController mount = (MountController) controller;
+			mount.setId(index);
+			mountControllers.add(index, mount);
+			shipController.getGameObject().add(mount.getGameObject());
+			updateMounts();
+		} else if (controller instanceof GibController) {
+			GibController gib = (GibController) controller;
+			gibControllers.add(index, gib);
+			shipController.getGameObject().add(gib.getGameObject());
+		}
+
+		if (controller instanceof ObjectController) {
+			eventHandler.sendEvent(new SLAddEvent(this, controller));
+		}
+
+		addListener(SLEvent.MOD_SHIFT, controller);
+	}
+
 	public void add(AbstractController controller) {
 		if (controller instanceof RoomController) {
 			RoomController room = (RoomController) controller;
@@ -613,7 +667,6 @@ public class ShipContainer implements Disposable, SLListener {
 			room.addListener(SLEvent.MOVE, hangarListener);
 			room.addListener(SLEvent.RESIZE, hangarListener);
 			room.addListener(SLEvent.DELETE, hangarListener);
-			room.addListener(SLEvent.RESTORE, hangarListener);
 		} else if (controller instanceof DoorController) {
 			DoorController door = (DoorController) controller;
 			doorControllers.add(door);
@@ -805,7 +858,7 @@ public class ShipContainer implements Disposable, SLListener {
 	/**
 	 * Restores the deleted controller.
 	 */
-	public void restore(AbstractController controller) {
+	public void restore(AbstractController controller, int index) {
 		if (controller == null)
 			throw new IllegalArgumentException("Argument must not be null.");
 		if (!controller.isDeletable())
@@ -814,8 +867,11 @@ public class ShipContainer implements Disposable, SLListener {
 			throw new IllegalArgumentException("The controller has not been deleted.");
 
 		controller.restore();
-		add(controller);
+		add(controller, index);
 		updateBoundingArea();
+
+		if (eventHandler.hooks(SLEvent.RESTORE))
+			eventHandler.sendEvent(new SLRestoreEvent(controller));
 	}
 
 	@Override

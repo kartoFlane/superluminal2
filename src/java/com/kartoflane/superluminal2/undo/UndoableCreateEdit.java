@@ -37,7 +37,7 @@ public class UndoableCreateEdit extends AbstractUndoableEdit {
 	@Override
 	public void redo() throws CannotRedoException {
 		super.redo();
-		Manager.getCurrentShip().restore(data);
+		Manager.getCurrentShip().restore(data, -1);
 		disposeOnDie = false;
 	}
 

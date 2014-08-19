@@ -56,7 +56,6 @@ public class DoorController extends ObjectController {
 
 		OverviewWindow ow = OverviewWindow.getInstance();
 		controller.addListener(SLEvent.DELETE, ow);
-		controller.addListener(SLEvent.RESTORE, ow);
 		controller.addListener(SLEvent.DISPOSE, ow);
 
 		return controller;
