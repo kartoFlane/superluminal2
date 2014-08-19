@@ -14,9 +14,9 @@ About
 Requirements
 
 	Java (1.6 or higher)
-		http://www.java.com/en/download/
+	  http://www.java.com/en/download/
 	FTL: AE (1.5.10, Windows/OSX/Linux, Steam/GOG/Standalone)
-		http://www.ftlgame.com/
+	  http://www.ftlgame.com/
 
 
 Setup
@@ -33,3 +33,11 @@ Setup
 	
 	The editor reads data directly from the game's files, so any mods you
 	have installed will show up in the editor.
+
+
+Troubleshooting
+
+	In case of problems, consult the FAQ:
+	  http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78739#p78739
+	Or in the editor's thread at the FTL forums:
+	  http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901
