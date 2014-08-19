@@ -424,6 +424,8 @@ public class OverviewWindow implements SLListener {
 		ship = Manager.getCurrentShip();
 
 		AbstractController prevSelection = Manager.getSelected();
+		if (!controllerMap.containsKey(prevSelection))
+			prevSelection = null;
 		if (Manager.getSelectedToolId() != Tools.POINTER && tree.getSelectionCount() == 1 && tree.getSelection()[0] != null)
 			prevSelection = (AbstractController) tree.getSelection()[0].getData();
 
@@ -466,10 +468,10 @@ public class OverviewWindow implements SLListener {
 		}
 
 		String alias = null;
-		if (prevSelection != null && !prevSelection.isDisposed() && prevSelection instanceof Alias)
+		if (controllerMap.containsKey(prevSelection))
 			alias = ((Alias) prevSelection).getAlias();
 		tltmAlias.setEnabled(prevSelection != null);
-		tltmRemove.setEnabled(prevSelection != null && alias != null && !alias.equals(""));
+		tltmRemove.setEnabled(alias != null && !alias.equals(""));
 		tltmToggleVis.setEnabled(prevSelection != null);
 	}
 
