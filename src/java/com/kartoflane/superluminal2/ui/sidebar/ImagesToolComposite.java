@@ -351,9 +351,13 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 							gib.setId(container.getGibControllers().length + 1);
 							gib.setImagePath("file:" + path);
 							GibController gc = GibController.newInstance(container, gib);
+							gc.updateFollower();
+							gc.setParent(container.getImageController(Images.HULL));
+							gc.updateFollowOffset();
+							gc.redraw();
+
 							container.add(gc);
 							container.store(gc);
-							gc.updateFollower();
 
 							createGibWidgets(gib);
 							compGibsWidgets.layout();
