@@ -625,6 +625,10 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 
 		if (controller instanceof RoomController) {
+			if (index >= roomControllers.size()) {
+				add(controller);
+				return;
+			}
 			RoomController room = (RoomController) controller;
 			room.setId(index);
 			roomControllers.add(index, room);
@@ -633,20 +637,37 @@ public class ShipContainer implements Disposable, SLListener {
 			room.addListener(SLEvent.MOVE, hangarListener);
 			room.addListener(SLEvent.RESIZE, hangarListener);
 			room.addListener(SLEvent.DELETE, hangarListener);
+
 		} else if (controller instanceof DoorController) {
+			if (index >= doorControllers.size()) {
+				add(controller);
+				return;
+			}
 			DoorController door = (DoorController) controller;
 			doorControllers.add(index, door);
 			shipController.getGameObject().add(door.getGameObject());
+
 		} else if (controller instanceof MountController) {
+			if (index >= mountControllers.size()) {
+				add(controller);
+				return;
+			}
 			MountController mount = (MountController) controller;
 			mount.setId(index);
 			mountControllers.add(index, mount);
 			shipController.getGameObject().add(mount.getGameObject());
 			updateMounts();
+
 		} else if (controller instanceof GibController) {
+			if (index >= gibControllers.size()) {
+				add(controller);
+				return;
+			}
 			GibController gib = (GibController) controller;
+			gib.setId(index);
 			gibControllers.add(index, gib);
 			shipController.getGameObject().add(gib.getGameObject());
+			sort();
 		}
 
 		if (controller instanceof ObjectController) {
@@ -682,6 +703,7 @@ public class ShipContainer implements Disposable, SLListener {
 			GibController gib = (GibController) controller;
 			gibControllers.add(gib);
 			shipController.getGameObject().add(gib.getGameObject());
+			sort();
 		} else if (controller instanceof SystemController) {
 			SystemController system = (SystemController) controller;
 			systemControllers.add(system);
@@ -800,10 +822,6 @@ public class ShipContainer implements Disposable, SLListener {
 
 	private int getNextMountId() {
 		return shipController.getGameObject().getNextMountId();
-	}
-
-	public void coalesceRooms() {
-		shipController.getGameObject().coalesceRooms();
 	}
 
 	public void changeWeapon(int index, WeaponObject neu) {

@@ -148,6 +148,7 @@ public class ShipSaveUtils {
 
 		container.updateGameObjects();
 		ship.coalesceRooms();
+		ship.coalesceGibs();
 
 		// Remember door links and recover them later -- linking doors automatically persists after saving
 		// is completed, which can cause bugs when the user moves the doors/rooms around and saves again

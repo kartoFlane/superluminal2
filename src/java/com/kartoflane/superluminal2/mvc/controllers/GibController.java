@@ -60,7 +60,7 @@ public class GibController extends ImageController implements Indexable, Compara
 	public void setView(View view) {
 		super.setView(view);
 		removeFromPainter();
-		addToPainter(Layers.GIBS);
+		addToPainterBottom(Layers.GIBS);
 		updateView();
 	}
 

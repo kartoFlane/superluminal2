@@ -69,13 +69,15 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - link doors/gibs via Ship Overview
 	 * - undo system
 	 * == various properties undos
-	 * == offset undo (save both fine and thick)
+	 * == create undo
 	 * == reorder undo
 	 * 
 	 * MEDIUM:
 	 * - glow placement modification
+	 * - room tool doesn't work sometimes? -- as per SleeperService
 	 * - ship overview sometimes messes up invisible object detection (grays out items incorrectly)
 	 * 
 	 * LOW:

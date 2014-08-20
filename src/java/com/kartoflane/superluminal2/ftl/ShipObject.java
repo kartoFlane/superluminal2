@@ -1073,7 +1073,6 @@ public class ShipObject extends GameObject {
 			mounts.remove(object);
 		} else if (object instanceof GibObject) {
 			gibs.remove(object);
-			coalesceGibs();
 		} else if (object instanceof AugmentObject) {
 			augments.remove(object);
 		} else if (object instanceof SystemObject) {
@@ -1100,7 +1099,7 @@ public class ShipObject extends GameObject {
 	/**
 	 * Coalesces the gibs, removing gaps in gib numbering.
 	 */
-	private void coalesceGibs() {
+	public void coalesceGibs() {
 		// Gibs are 1-relative
 		int id = 1;
 		GibObject[] gibArray = getGibs();

@@ -483,7 +483,7 @@ public class OverviewWindow implements SLListener {
 
 		if (item == null && !controller.isDeleted()) {
 			item = createItem(controller, -1);
-		} else {
+		} else if (item != null) {
 			update(item);
 		}
 	}
