@@ -1,7 +1,7 @@
 package com.kartoflane.superluminal2.ui.sidebar;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,6 +23,7 @@ import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.GibWidget;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
@@ -63,20 +64,13 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 	private Composite compImages;
 	private Composite compGibs;
 	private Button btnNew;
-	private Composite compGibsWidgets;
-	private ArrayList<Label> lblGibs;
-	private ArrayList<Button> btnGibViews;
-	private ArrayList<Button> btnGibBrowses;
-	private ArrayList<Text> txtGibs;
+	private HashMap<GibController, GibWidget> gibWidgetMap;
 
 	public ImagesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		setLayout(new GridLayout(4, false));
 
-		lblGibs = new ArrayList<Label>();
-		btnGibViews = new ArrayList<Button>();
-		btnGibBrowses = new ArrayList<Button>();
-		txtGibs = new ArrayList<Text>();
+		gibWidgetMap = new HashMap<GibController, GibWidget>();
 
 		container = Manager.getCurrentShip();
 		ShipObject ship = container.getShipController().getGameObject();
@@ -141,13 +135,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 						prevImagesPath = path;
 						File temp = new File(path);
 						if (temp.exists()) {
-							if (type == null && btnGibBrowses.contains(e.getSource())) {
-								// Indices are 0-relative, gibs are 1-relative
-								int id = btnGibBrowses.indexOf(e.getSource()) + 1;
-								container.getGibControllerById(id).setImage("file:" + path);
-							} else {
-								container.setImage(type, "file:" + path);
-							}
+							container.setImage(type, "file:" + path);
 							updateData();
 							exit = true;
 						} else {
@@ -324,10 +312,10 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 		compGibs = new Composite(tabFolder, SWT.NONE);
 		tbtmGibs.setControl(compGibs);
-		compGibs.setLayout(new GridLayout(2, false));
+		compGibs.setLayout(new GridLayout(1, false));
 
 		btnNew = new Button(compGibs, SWT.NONE);
-		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		btnNew.setText("New Gib");
 
 		btnNew.addSelectionListener(new SelectionAdapter() {
@@ -359,8 +347,10 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 							container.add(gc);
 							container.store(gc);
 
-							createGibWidgets(gib);
-							compGibsWidgets.layout();
+							GibWidget gw = new GibWidget(compGibs, gc);
+							gibWidgetMap.put(gc, gw);
+
+							compGibs.layout();
 
 							exit = true;
 						} else {
@@ -373,15 +363,9 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 			}
 		});
 
-		compGibsWidgets = new Composite(compGibs, SWT.NONE);
-		GridLayout gl_compGibsWidgets = new GridLayout(3, false);
-		gl_compGibsWidgets.marginWidth = 0;
-		gl_compGibsWidgets.marginHeight = 0;
-		compGibsWidgets.setLayout(gl_compGibsWidgets);
-		compGibsWidgets.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-
-		for (GibObject gib : ship.getGibs()) {
-			createGibWidgets(gib);
+		for (GibController gc : container.getGibControllers()) {
+			GibWidget gw = new GibWidget(compGibs, gc);
+			gibWidgetMap.put(gc, gw);
 		}
 
 		pack();
@@ -428,17 +412,8 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 			btnMiniView.setEnabled(content != null);
 		}
 
-		for (GibObject gib : ship.getGibs()) {
-			int id = gib.getId() - 1;
-
-			String str = "Gib #" + gib.getId();
-			String alias = gib.getAlias();
-			if (alias != null && !alias.equals(""))
-				str += ": " + alias;
-			lblGibs.get(id).setText(str);
-
-			str = gib.getImagePath();
-			txtGibs.get(id).setText(str == null ? "" : IOUtils.trimProtocol(str));
+		for (GibWidget gw : gibWidgetMap.values()) {
+			gw.updateData();
 		}
 	}
 
@@ -449,74 +424,11 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 	public void reloadController() {
 	}
 
-	private void createGibWidgets(GibObject gib) {
-		Label label = new Label(compGibsWidgets, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		String msg = "Gib #" + gib.getId();
-		String alias = gib.getAlias();
-		if (alias != null && !alias.equals(""))
-			msg += ": " + alias;
-		label.setText(msg);
-		lblGibs.add(label);
+	public static void setPrevGibsPath(String path) {
+		prevGibsPath = path;
+	}
 
-		Button btn = new Button(compGibsWidgets, SWT.NONE);
-		btn.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-		btn.setText("View");
-		btnGibViews.add(btn);
-		btn.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// Indices are 0-relative, gibs are 1-relative
-				int id = btnGibViews.indexOf(e.getSource()) + 1;
-				String path = container.getGibControllerById(id).getImage();
-
-				if (path != null) {
-					ImageViewerDialog dialog = new ImageViewerDialog(EditorWindow.getInstance().getShell());
-					dialog.open(path);
-				}
-			}
-		});
-
-		btn = new Button(compGibsWidgets, SWT.NONE);
-		btn.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		btn.setText("Browse");
-		btnGibBrowses.add(btn);
-		btn.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
-				dialog.setFilterExtensions(new String[] { "*.png" });
-				dialog.setFilterPath(prevGibsPath);
-				dialog.setFileName(prevGibsPath);
-
-				boolean exit = false;
-				while (!exit) {
-					String path = dialog.open();
-
-					// path == null only when user cancels
-					if (path != null) {
-						prevGibsPath = path;
-						File temp = new File(path);
-						if (temp.exists()) {
-							// Indices are 0-relative, gibs are 1-relative
-							int id = btnGibBrowses.indexOf(e.getSource()) + 1;
-							container.getGibControllerById(id).setImage("file:" + path);
-							updateData();
-							exit = true;
-						} else {
-							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
-						}
-					} else {
-						exit = true;
-					}
-				}
-			}
-		});
-
-		Text text = new Text(compGibsWidgets, SWT.BORDER | SWT.READ_ONLY);
-		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-		String path = gib.getImagePath();
-		text.setText(path == null ? "" : IOUtils.trimProtocol(path));
-		txtGibs.add(text);
+	public static String getPrevGibsPath() {
+		return prevGibsPath;
 	}
 }
