@@ -4,13 +4,17 @@ Changelog
 - Improved stats display in weapon & drone selection dialogs
 - Added 'Follow Hull' button to Mount Tool -- when checked, newly created weapon mounts
   will follow hull
+- Added 'Follow Hull' button to gibs
+- Newly created gibs now correctly follow hull by default
 - Several minor UI tweaks
 - Mac Command key support should now work correctly (tested)
 - .ftl files can now be dropped onto the main editor frame to load them
 - The editor can now open .ftl and .zip files by dragging them onto the .exe, or by using
   the "Open With..." option in the mod files' context menu
 - Added "Unsaved Changes" warning when closing the application
-- Added artillery modification & display
+- Added artillery modification & display (moved to Armaments tab)
+- Fixed undo of offset that was modified by shift-dragging
+- When undoing deletion of elements, the editor now attempts to reinsert them at their old index
 
 2.0.5 beta (which was actually 2.0.4...):
 - Fixed shift-dragging the ship origin to set the offset
