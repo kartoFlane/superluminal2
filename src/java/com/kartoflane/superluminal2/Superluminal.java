@@ -69,7 +69,6 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
-	 * - link doors/gibs via Ship Overview
 	 * - undo system
 	 * == various properties undos
 	 * == reorder undo

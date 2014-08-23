@@ -10,6 +10,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.components.Polygon;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+import com.kartoflane.superluminal2.components.interfaces.Indexable;
 
 /**
  * This class contains various utility methods that didn't fit in the other util classes.
@@ -441,5 +442,40 @@ public class Utils {
 				return i;
 		}
 		return -1;
+	}
+
+	/**
+	 * Reorders elements of the Indexable array, updating their IDs.<br>
+	 * ID of an indexable elements does not necessarily correspond to its index in the array.
+	 * 
+	 * @param array
+	 *            an array of Indexable objects
+	 * @param from
+	 *            index of the element that is to be moved
+	 * @param to
+	 *            destination index
+	 */
+	public static void reorder(Indexable[] array, int from, int to) {
+		if (from < 0 || from >= array.length)
+			throw new IndexOutOfBoundsException("" + from);
+		if (to < 0 || to >= array.length)
+			throw new IndexOutOfBoundsException("" + to);
+		if (to == from)
+			return;
+
+		int dir = from > to ? 1 : -1;
+		int oldId = array[to].getId();
+		/*
+		 * Update IDs of elements between the two indices
+		 * 
+		 * The loop needs to go on as long as
+		 * (from > to && i < from) || (from < to && i > from) is true
+		 * Let's say A = (from > to); B = (i < from), then the above becomes:
+		 * (A && B) || (!A && !B)
+		 * Hence the simplified condition is A == B
+		 */
+		for (int i = to; from > to == i < from; i += dir)
+			array[i].setId(array[Math.max(0, i + dir)].getId());
+		array[from].setId(oldId);
 	}
 }

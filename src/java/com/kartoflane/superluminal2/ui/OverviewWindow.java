@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
@@ -61,6 +63,7 @@ import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.undo.UndoableOrderEdit;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
@@ -259,7 +262,12 @@ public class OverviewWindow implements SLListener {
 									array[i] = (Indexable) items[i].getData();
 								}
 
-								insert(array, from, to);
+								UndoableOrderEdit edit = new UndoableOrderEdit(array.clone());
+								edit.setOld(from);
+								edit.setCurrent(to);
+								container.postEdit(edit);
+
+								Utils.reorder(array, from, to);
 								container.sort();
 								update();
 							}
@@ -414,6 +422,8 @@ public class OverviewWindow implements SLListener {
 				}
 			}
 		});
+
+		registerHotkeys();
 
 		shell.setSize(300, 600);
 		Point size = shell.getSize();
@@ -601,28 +611,6 @@ public class OverviewWindow implements SLListener {
 		return result;
 	}
 
-	private void insert(Indexable[] array, int from, int to) {
-		if (from < 0 || from >= array.length)
-			throw new IndexOutOfBoundsException("" + from);
-		if (to < 0 || to >= array.length)
-			throw new IndexOutOfBoundsException("" + to);
-		if (to == from)
-			return;
-
-		int dir = from > to ? 1 : -1;
-		int oldId = array[to].getId();
-		/*
-		 * The loop needs to go on as long as
-		 * (from > to && i < from) || (from < to && i > from) is true
-		 * Let's say A = (from > to); B = (i < from), then the above becomes:
-		 * (A && B) || (!A && !B)
-		 * Hence the simplified condition is A == B
-		 */
-		for (int i = to; from > to == i < from; i += dir)
-			array[i].setId(array[i + dir < 0 ? 0 : i + dir].getId());
-		array[from].setId(oldId);
-	}
-
 	private TreeItem createItem(AbstractController controller, int index) {
 		TreeItem parent = identifyParent(controller);
 		if (parent == null)
@@ -662,6 +650,8 @@ public class OverviewWindow implements SLListener {
 		Cache.checkInImage(this, "cpath:/assets/alias.png");
 		Cache.checkInImage(this, "cpath:/assets/noalias.png");
 		Cache.checkInImage(this, "cpath:/assets/cloak.png");
+
+		Manager.unhookHotkeys(shell);
 		shell.dispose();
 
 		controllerMap.clear();
@@ -687,5 +677,13 @@ public class OverviewWindow implements SLListener {
 		if (controller != null && !controller.isHighlighted())
 			controller.setHighlighted(true);
 		highlightedController = controller;
+	}
+
+	private void registerHotkeys() {
+		Hotkey h = Manager.getHotkey(Hotkeys.UNDO);
+		Manager.hookHotkey(shell, h);
+
+		h = Manager.getHotkey(Hotkeys.REDO);
+		Manager.hookHotkey(shell, h);
 	}
 }
