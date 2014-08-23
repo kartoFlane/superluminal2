@@ -54,6 +54,7 @@ import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.events.SLRestoreEvent;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
+import com.kartoflane.superluminal2.mvc.controllers.CursorController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
@@ -297,11 +298,7 @@ public class OverviewWindow implements SLListener {
 					if (item != null && item.getData() != null)
 						controller = (ObjectController) item.getData();
 
-					if (highlightedController != null && highlightedController != controller && highlightedController.isHighlighted())
-						highlightedController.setHighlighted(false);
-					if (controller != null && !controller.isHighlighted())
-						controller.setHighlighted(true);
-					highlightedController = controller;
+					_highlightController(controller);
 				}
 			}
 		});
@@ -309,11 +306,7 @@ public class OverviewWindow implements SLListener {
 		tree.addListener(SWT.MouseExit, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				if (Manager.getSelectedToolId() == Tools.POINTER) {
-					if (highlightedController != null)
-						highlightedController.setHighlighted(false);
-					highlightedController = null;
-				}
+				_highlightController(null);
 			}
 		});
 
@@ -327,8 +320,27 @@ public class OverviewWindow implements SLListener {
 					controller = (ObjectController) item.getData();
 				}
 
-				if (Manager.getSelectedToolId() == Tools.POINTER && (controller == null || controller.isVisible()))
-					Manager.setSelected(controller);
+				if (Manager.getSelectedToolId() == Tools.POINTER) {
+					if (controller == null) {
+						Manager.setSelected(null);
+					} else if (controller.isVisible()) {
+						Event ev = new Event();
+						ev.display = UIUtils.getDisplay();
+						ev.widget = tree;
+						ev.button = 1;
+						ev.count = 1;
+						ev.x = controller.getX();
+						ev.y = controller.getY();
+						MouseEvent me = new MouseEvent(ev);
+
+						Manager.getSelectedTool().mouseDown(me);
+						Manager.getSelectedTool().mouseUp(me);
+
+						AbstractController ac = Manager.getSelected();
+						if (ac != null && ac != controller)
+							CursorController.getInstance().setVisible(false);
+					}
+				}
 
 				tltmAlias.setEnabled(controller != null);
 				tltmRemove.setEnabled(controller != null && controller.getAlias() != null && !controller.getAlias().equals(""));
@@ -667,5 +679,13 @@ public class OverviewWindow implements SLListener {
 				data.removeListener(this);
 			}
 		}
+	}
+
+	private void _highlightController(ObjectController controller) {
+		if (highlightedController != null && highlightedController != controller && highlightedController.isHighlighted())
+			highlightedController.setHighlighted(false);
+		if (controller != null && !controller.isHighlighted())
+			controller.setHighlighted(true);
+		highlightedController = controller;
 	}
 }
