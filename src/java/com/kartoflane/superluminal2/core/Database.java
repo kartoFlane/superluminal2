@@ -29,8 +29,7 @@ import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class Database {
-
-	public static final Logger log = LogManager.getLogger(Database.class);
+	private static final Logger log = LogManager.getLogger(Database.class);
 
 	public static final AugmentObject DEFAULT_AUGMENT_OBJ = new AugmentObject();
 	public static final AnimationObject DEFAULT_ANIM_OBJ = new AnimationObject();

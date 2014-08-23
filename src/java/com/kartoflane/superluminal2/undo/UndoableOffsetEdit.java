@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.undo;
 
 import org.eclipse.swt.graphics.Point;
 
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
@@ -34,11 +35,15 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 			throw new IllegalStateException("Old offset is null!");
 
 		ShipController shipC = data.getShipController();
+		// Disable Bounded state to prevent the undo from bugging out,
+		// since sometimes the bounding area doesn't get updated correctlyF
 		shipC.setBounded(false);
+		// ShipController.select() modifies its children's collidablity
 		shipC.select();
+		// Temporarily prevent the object from updating its Followers
 		shipC.setFollowActive(false);
+
 		shipC.reposition(old);
-		shipC.setBounded(true);
 
 		Point offset = data.findShipOffset();
 		offset.x /= ShipContainer.CELL_SIZE;
@@ -46,8 +51,11 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 		data.setShipOffset(offset.x, offset.y);
 		data.updateBoundingArea();
 
-		shipC.deselect();
+		shipC.setBounded(true);
 		shipC.setFollowActive(true);
+		// Don't deselect if it was actually selected by the user
+		if (Manager.getSelected() != shipC)
+			shipC.deselect();
 	}
 
 	@Override
@@ -56,11 +64,15 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 			throw new IllegalStateException("Current offset is null!");
 
 		ShipController shipC = data.getShipController();
+		// Disable Bounded state to prevent the undo from bugging out,
+		// since sometimes the bounding area doesn't get updated correctlyF
 		shipC.setBounded(false);
+		// ShipController.select() modifies its children's collidablity
 		shipC.select();
+		// Temporarily prevent the object from updating its Followers
 		shipC.setFollowActive(false);
+
 		shipC.reposition(cur);
-		shipC.setBounded(true);
 
 		Point offset = data.findShipOffset();
 		offset.x /= ShipContainer.CELL_SIZE;
@@ -68,7 +80,10 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 		data.setShipOffset(offset.x, offset.y);
 		data.updateBoundingArea();
 
-		shipC.deselect();
+		shipC.setBounded(true);
 		shipC.setFollowActive(true);
+		// Don't deselect if it was actually selected by the user
+		if (Manager.getSelected() != shipC)
+			shipC.deselect();
 	}
 }

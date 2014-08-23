@@ -11,10 +11,10 @@ import com.kartoflane.superluminal2.ui.sidebar.CreationToolComposite;
 /**
  * "Dummy" tool, used to create the sidebar toolkit when clicked.
  * 
- * @see {@link RoomTool}<br>
- *      {@link DoorTool}<br>
- *      {@link MountTool}<br>
- *      {@link StationTool}
+ * @see {@link RoomTool}
+ * @see {@link DoorTool}
+ * @see {@link MountTool}
+ * @see {@link StationTool}
  * @author kartoFlane
  * 
  */

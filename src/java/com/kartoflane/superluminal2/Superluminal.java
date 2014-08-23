@@ -72,7 +72,6 @@ public class Superluminal {
 	 * - link doors/gibs via Ship Overview
 	 * - undo system
 	 * == various properties undos
-	 * == create undo
 	 * == reorder undo
 	 * 
 	 * MEDIUM:

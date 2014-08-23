@@ -50,7 +50,7 @@ public class Grid {
 		CORNER_BR;
 	}
 
-	private static final Grid instance = new Grid();
+	private static final Grid _instance = new Grid();
 
 	private boolean drawGrid = true;
 	private Rectangle bounds = null;
@@ -62,11 +62,19 @@ public class Grid {
 	}
 
 	public static Grid getInstance() {
-		return instance;
+		return _instance;
 	}
 
-	public void setCells(int x, int y) {
-		updateBounds(x * ShipContainer.CELL_SIZE, y * ShipContainer.CELL_SIZE);
+	/**
+	 * Updates the grid to the desired dimensions.
+	 * 
+	 * @param w
+	 *            width of the grid, in grid cells
+	 * @param h
+	 *            height of the grid, in grid cells
+	 */
+	public void setCells(int w, int h) {
+		updateBounds(w * ShipContainer.CELL_SIZE, h * ShipContainer.CELL_SIZE);
 	}
 
 	/**
@@ -99,10 +107,16 @@ public class Grid {
 		}
 	}
 
+	/**
+	 * @return the rectangle describing the grid's area relative to the canvas, in pixels.
+	 */
 	public Rectangle getBounds() {
 		return new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 
+	/**
+	 * @return size of the grid, in pixels
+	 */
 	public Point getSize() {
 		return new Point(bounds.width, bounds.height);
 	}
@@ -187,8 +201,10 @@ public class Grid {
 		y = Math.min(Math.max(y, 0), bounds.height);
 
 		Point p = new Point(x, y);
+		// Try to find a cell at the given coordinates
 		CellController c = getCellAt(x, y);
 
+		// If none is found (ie. point is outside of grid area), try to find the closest one
 		if (c == null || !c.isVisible())
 			c = getClosestCell(x, y);
 
@@ -298,6 +314,9 @@ public class Grid {
 		return snapToGrid(p.x, p.y, snapmode);
 	}
 
+	/**
+	 * Disposes of the grid, clearing all cells and lists.
+	 */
 	public void dispose() {
 		for (ArrayList<CellController> list : cells) {
 			for (CellController c : list)
