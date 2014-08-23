@@ -44,36 +44,52 @@ public class KeybindHandler {
 		return keyMap.containsKey(shell);
 	}
 
-	public void notifyPressed(Shell shell, boolean shift, boolean ctrl, boolean alt, boolean cmd, int key) {
+	/**
+	 * Notifies the handler that the specified key combination has been pressed, thus triggering the
+	 * hotkey associated with the combination.
+	 * 
+	 * @return true if a hotkey was triggered due to the event call, false otherwise
+	 */
+	public boolean notifyPressed(Shell shell, boolean shift, boolean ctrl, boolean alt, boolean cmd, int key) {
 		if (shell == null)
 			throw new IllegalArgumentException("Shell must not be null.");
 		if (keyMap == null)
-			return;
+			return false;
 		if (!hooks(shell))
-			return;
+			return false;
 
 		for (Hotkey h : keyMap.get(shell)) {
 			if (h.isEnabled() && h.passes(shift, ctrl, alt, cmd, key)) {
 				h.executePress();
-				break;
+				return true;
 			}
 		}
+
+		return false;
 	}
 
-	public void notifyReleased(Shell shell, boolean shift, boolean ctrl, boolean alt, boolean cmd, int key) {
+	/**
+	 * Notifies the handler that the specified key combination has been pressed, thus triggering the
+	 * hotkey associated with the combination.
+	 * 
+	 * @return true if a hotkey was triggered due to the event call, false otherwise
+	 */
+	public boolean notifyReleased(Shell shell, boolean shift, boolean ctrl, boolean alt, boolean cmd, int key) {
 		if (shell == null)
 			throw new IllegalArgumentException("Shell must not be null.");
 		if (keyMap == null)
-			return;
+			return false;
 		if (!hooks(shell))
-			return;
+			return false;
 
 		for (Hotkey h : keyMap.get(shell)) {
 			if (h.isEnabled() && h.passes(shift, ctrl, alt, cmd, key)) {
 				h.executeRelease();
-				break;
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	public int size() {

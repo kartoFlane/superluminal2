@@ -385,8 +385,11 @@ public abstract class Manager {
 		if (execute) {
 			Shell shell = c.getShell();
 
-			if (shell != null)
-				keyHandler.notifyPressed(shell, checkShift(e), checkCtrl(e), checkAlt(e), checkCommand(e), e.keyCode);
+			if (shell != null) {
+				// Consume the event if the key event triggered a hotkey
+				e.doit = !keyHandler.notifyPressed(shell, checkShift(e), checkCtrl(e),
+						checkAlt(e), checkCommand(e), e.keyCode);
+			}
 		}
 	}
 
@@ -401,8 +404,11 @@ public abstract class Manager {
 		if (execute) {
 			Shell shell = c.getShell();
 
-			if (shell != null)
-				keyHandler.notifyReleased(shell, checkShift(e), checkCtrl(e), checkAlt(e), checkCommand(e), e.keyCode);
+			if (shell != null) {
+				// Consume the event if the key event triggered a hotkey
+				e.doit = !keyHandler.notifyReleased(shell, checkShift(e), checkCtrl(e),
+						checkAlt(e), checkCommand(e), e.keyCode);
+			}
 		}
 	}
 
