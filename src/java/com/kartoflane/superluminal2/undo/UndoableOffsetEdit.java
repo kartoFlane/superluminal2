@@ -34,8 +34,11 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 			throw new IllegalStateException("Old offset is null!");
 
 		ShipController shipC = data.getShipController();
+		shipC.setBounded(false);
+		shipC.select();
 		shipC.setFollowActive(false);
 		shipC.reposition(old);
+		shipC.setBounded(true);
 
 		Point offset = data.findShipOffset();
 		offset.x /= ShipContainer.CELL_SIZE;
@@ -43,6 +46,7 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 		data.setShipOffset(offset.x, offset.y);
 		data.updateBoundingArea();
 
+		shipC.deselect();
 		shipC.setFollowActive(true);
 	}
 
@@ -52,8 +56,11 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 			throw new IllegalStateException("Current offset is null!");
 
 		ShipController shipC = data.getShipController();
+		shipC.setBounded(false);
+		shipC.select();
 		shipC.setFollowActive(false);
 		shipC.reposition(cur);
+		shipC.setBounded(true);
 
 		Point offset = data.findShipOffset();
 		offset.x /= ShipContainer.CELL_SIZE;
@@ -61,6 +68,7 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 		data.setShipOffset(offset.x, offset.y);
 		data.updateBoundingArea();
 
+		shipC.deselect();
 		shipC.setFollowActive(true);
 	}
 }

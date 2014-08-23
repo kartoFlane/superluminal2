@@ -26,6 +26,7 @@ import com.kartoflane.superluminal2.mvc.views.ShipView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.ui.sidebar.data.ShipDataComposite;
+import com.kartoflane.superluminal2.undo.UndoableMoveEdit;
 import com.kartoflane.superluminal2.undo.UndoableOffsetEdit;
 
 public class ShipController extends ObjectController {
@@ -325,6 +326,9 @@ public class ShipController extends ObjectController {
 	@Override
 	public void handleEvent(SLEvent e) {
 		if (e instanceof SLModShiftEvent) {
+			// Finalize any other operations that may be currently in progress
+			undoFinalize();
+
 			boolean pressed = (Boolean) e.data;
 			setFollowActive(!pressed);
 			if (pressed) {
@@ -342,7 +346,8 @@ public class ShipController extends ObjectController {
 				container.setShipOffset(offset.x, offset.y);
 				container.updateBoundingArea();
 
-				undoFinalize();
+				currentEdit = new UndoableMoveEdit(this);
+				undoInit();
 			}
 		} else {
 			super.handleEvent(e);

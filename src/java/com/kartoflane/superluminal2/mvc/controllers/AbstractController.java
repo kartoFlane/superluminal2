@@ -1073,9 +1073,6 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	protected void undoInit() {
-		if (currentEdit == null)
-			return;
-
 		if (currentEdit instanceof UndoableMoveEdit) {
 			UndoableMoveEdit move = (UndoableMoveEdit) currentEdit;
 			move.setOld(getLocation());
