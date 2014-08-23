@@ -539,8 +539,10 @@ public class ShipContainer implements Disposable, SLListener {
 		ShipObject ship = shipController.getGameObject();
 		for (Follower fol : shipController.getFollowers()) {
 			if (fol instanceof PropController == false && fol != hangarC) {
-				AbstractController ac = (AbstractController) fol;
-				ac.updateFollowOffset();
+				Point old = fol.getFollowOffset();
+				fol.setFollowOffset(old.x + (x - ship.getXOffset()) * CELL_SIZE,
+						old.y + (y - ship.getYOffset()) * CELL_SIZE);
+				fol.updateFollower();
 			}
 		}
 
