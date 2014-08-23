@@ -7,8 +7,8 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 @SuppressWarnings("serial")
 public class UndoableDoorLinkEdit extends ValueUndoableEdit<RoomObject> {
 
-	private DoorController data = null;
-	private boolean left = true;
+	private final DoorController data;
+	private final boolean left;
 
 	public UndoableDoorLinkEdit(DoorController dc, boolean left) {
 		if (dc == null)

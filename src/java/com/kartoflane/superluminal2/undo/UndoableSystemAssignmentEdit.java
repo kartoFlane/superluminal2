@@ -7,7 +7,7 @@ import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 @SuppressWarnings("serial")
 public class UndoableSystemAssignmentEdit extends ValueUndoableEdit<RoomController> {
 
-	private SystemController data = null;
+	private final SystemController data;
 
 	/**
 	 * Constructs a new UndoableSystemAssignmentEdit.

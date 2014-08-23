@@ -8,7 +8,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 @SuppressWarnings("serial")
 public class UndoableMoveEdit extends ValueUndoableEdit<Point> {
 
-	private AbstractController data = null;
+	private final AbstractController data;
 
 	/**
 	 * Constructs a new UndoableMoveEdit.

@@ -18,7 +18,7 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 @SuppressWarnings("serial")
 public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 
-	private ShipContainer data = null;
+	private final ShipContainer data;
 
 	/**
 	 * Constructs a new UndoableOffsetEdit.<br>

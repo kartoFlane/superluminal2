@@ -14,8 +14,8 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 @SuppressWarnings("serial")
 public class UndoableSystemEmptyEdit extends AbstractUndoableEdit {
 
-	private RoomController data = null;
-	private ArrayList<SystemObject> systems = null;
+	private final RoomController data;
+	private final ArrayList<SystemObject> systems;
 
 	/**
 	 * Constructs a new UndoableSystemEmptyEdit.

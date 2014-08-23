@@ -9,7 +9,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 @SuppressWarnings("serial")
 public class UndoableResizeEdit extends ValueUndoableEdit<Tuple<Point, Point>> {
 
-	private AbstractController data = null;
+	private final AbstractController data;
 
 	/**
 	 * Constructs a new UndoableMoveEdit.

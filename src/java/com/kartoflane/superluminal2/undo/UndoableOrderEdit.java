@@ -8,7 +8,7 @@ import com.kartoflane.superluminal2.utils.Utils;
 @SuppressWarnings("serial")
 public class UndoableOrderEdit extends ValueUndoableEdit<Integer> {
 
-	private Indexable[] data = null;
+	private final Indexable[] data;
 
 	/**
 	 * Constructs a new UndoableMoveEdit.

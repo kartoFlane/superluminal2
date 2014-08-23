@@ -7,7 +7,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
 @SuppressWarnings("serial")
 public class UndoableGibLinkEdit extends ValueUndoableEdit<GibObject> {
 
-	private MountController data = null;
+	private final MountController data;
 
 	public UndoableGibLinkEdit(MountController mc) {
 		if (mc == null)

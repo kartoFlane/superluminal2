@@ -10,8 +10,8 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 @SuppressWarnings("serial")
 public class UndoableDeleteEdit extends AbstractUndoableEdit {
 
-	private int index;
-	private AbstractController data = null;
+	private final int index;
+	private final AbstractController data;
 	private boolean disposeOnDie = true;
 
 	public UndoableDeleteEdit(AbstractController ac, int index) {

@@ -10,7 +10,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 @SuppressWarnings("serial")
 public class UndoableCreateEdit extends AbstractUndoableEdit {
 
-	private AbstractController data = null;
+	private final AbstractController data;
 	private boolean disposeOnDie = false;
 
 	public UndoableCreateEdit(AbstractController ac) {
