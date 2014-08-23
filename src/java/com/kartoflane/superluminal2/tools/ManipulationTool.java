@@ -164,6 +164,11 @@ public class ManipulationTool extends Tool {
 				}
 			}
 
+			if (Manager.getSelected() instanceof DoorController == false) {
+				setStateManipulate();
+				return;
+			}
+
 			RoomController roomC = control instanceof RoomController ? (RoomController) control : null;
 			DoorController doorC = (DoorController) Manager.getSelected();
 
@@ -196,6 +201,11 @@ public class ManipulationTool extends Tool {
 					if (control != null && control instanceof GibController)
 						break;
 				}
+			}
+
+			if (Manager.getSelected() instanceof MountController == false) {
+				setStateManipulate();
+				return;
 			}
 
 			GibController gibC = control instanceof GibController ? (GibController) control : null;
