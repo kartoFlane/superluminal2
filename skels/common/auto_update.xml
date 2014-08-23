@@ -1,5 +1,5 @@
 <versions>
-	<latest id="2.0.4 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.6 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
 		<version id="2.0.6 beta">
 			<change>Improved stats display in weapon & drone selection dialogs</change>
