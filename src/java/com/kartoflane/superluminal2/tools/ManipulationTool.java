@@ -20,6 +20,7 @@ import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.ManipulationToolComposite;
 import com.kartoflane.superluminal2.undo.UndoableDoorLinkEdit;
+import com.kartoflane.superluminal2.undo.UndoableGibLinkEdit;
 
 public class ManipulationTool extends Tool {
 
@@ -153,7 +154,7 @@ public class ManipulationTool extends Tool {
 			cursor.reposition(room.getLocation());
 
 		} else if (state == States.DOOR_LINK_LEFT || state == States.DOOR_LINK_RIGHT) {
-			// get the controller at the mouse click pos, and if found, notify it about mouseDown event
+			// get the controller at the mouse click pos
 			AbstractController control = null;
 			for (int i = selectableLayerIds.length - 1; i >= 0; i--) {
 				if (selectableLayerIds[i] != null) {
@@ -171,14 +172,14 @@ public class ManipulationTool extends Tool {
 				if (state == States.DOOR_LINK_LEFT) {
 					UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, true);
 					edit.setOld(doorC.getLeftRoom());
-					edit.setCurrent(roomC == null ? null : roomC.getGameObject());
 					doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
+					edit.setCurrent(doorC.getLeftRoom());
 					Manager.getCurrentShip().postEdit(edit);
 				} else {
 					UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, false);
 					edit.setOld(doorC.getRightRoom());
-					edit.setCurrent(roomC == null ? null : roomC.getGameObject());
 					doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
+					edit.setCurrent(doorC.getRightRoom());
 					Manager.getCurrentShip().postEdit(edit);
 				}
 			}
@@ -201,8 +202,13 @@ public class ManipulationTool extends Tool {
 			MountController mountC = (MountController) Manager.getSelected();
 
 			// Can be null if the the user hides the mount/mount layer during linking
-			if (mountC != null)
+			if (mountC != null) {
+				UndoableGibLinkEdit edit = new UndoableGibLinkEdit(mountC);
+				edit.setOld(mountC.getGib());
 				mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
+				edit.setCurrent(mountC.getGib());
+				Manager.getCurrentShip().postEdit(edit);
+			}
 
 			EditorWindow.getInstance().updateSidebarContent();
 			setStateManipulate();
