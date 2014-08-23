@@ -46,6 +46,7 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.NotDeletableException;
+import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Modifiers;
@@ -81,6 +82,7 @@ import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
+import com.kartoflane.superluminal2.undo.UndoableOffsetsEdit;
 import com.kartoflane.superluminal2.utils.SHPUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -670,12 +672,20 @@ public class EditorWindow {
 				Point offset = container.findOptimalThickOffset();
 				Point fineOffset = container.findOptimalFineOffset();
 
+				UndoableOffsetsEdit edit = new UndoableOffsetsEdit(container);
+				edit.setOld(new Tuple<Point, Point>(container.getShipOffset(), container.getShipFineOffset()));
+
 				shipC.select();
 				container.setShipFineOffset(fineOffset.x, fineOffset.y);
 				container.setShipOffset(offset.x, offset.y);
 
 				shipC.updateProps();
-				shipC.deselect();
+				// Don't deselect if it was actually selected by the user
+				if (Manager.getSelected() != shipC)
+					shipC.deselect();
+
+				edit.setCurrent(new Tuple<Point, Point>(container.getShipOffset(), container.getShipFineOffset()));
+				container.postEdit(edit);
 			}
 		});
 

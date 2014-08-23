@@ -550,6 +550,11 @@ public class ShipContainer implements Disposable, SLListener {
 		ship.setYOffset(y);
 	}
 
+	public Point getShipOffset() {
+		ShipObject ship = shipController.getGameObject();
+		return ship.getOffsetThick();
+	}
+
 	/**
 	 * Horizontal:<br>
 	 * - positive values move the ship to the right (hangar to the left relative to the ship)<br>
@@ -572,6 +577,11 @@ public class ShipContainer implements Disposable, SLListener {
 
 		ship.setHorizontal(x);
 		ship.setVertical(y);
+	}
+
+	public Point getShipFineOffset() {
+		ShipObject ship = shipController.getGameObject();
+		return ship.getOffsetFine();
 	}
 
 	public void assign(SystemObject sys, RoomController room) {

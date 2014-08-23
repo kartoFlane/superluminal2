@@ -6,13 +6,25 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
+/**
+ * An undoable edit that represents modification of the ship's thick offset by shift-dragging the origin.<br>
+ * <br>
+ * This edit's {@link #setOld(Point) old} and {@link #setCurrent(Point) current} values
+ * are the ShipController's <b>location</b> before and after the edit has happened.
+ * 
+ * @author kartoFlane
+ *
+ */
 @SuppressWarnings("serial")
 public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 
 	private ShipContainer data = null;
 
 	/**
-	 * Constructs a new UndoableOffsetEdit.
+	 * Constructs a new UndoableOffsetEdit.<br>
+	 * <br>
+	 * This edit's {@link #setOld(Point) old} and {@link #setCurrent(Point) current} values
+	 * are the ShipController's <b>location</b> before and after the edit has happened.
 	 * 
 	 * @param ac
 	 *            the controller whom this edit concerns
@@ -26,7 +38,7 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 
 	@Override
 	public String getPresentationName() {
-		return String.format("modify offset");
+		return "modify offset";
 	}
 
 	@Override
