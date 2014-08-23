@@ -3,7 +3,6 @@ package com.kartoflane.superluminal2.ui;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.kartoflane.superluminal2.components.DefaultSearchResult;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 
 /**
@@ -26,14 +25,18 @@ import com.kartoflane.superluminal2.components.interfaces.Predicate;
 public abstract class AbstractSearchDialog<T> {
 
 	/**
-	 * Indicates that no changes should be made to the filter as a result of this dialog.
-	 */
-	public static final Predicate<?> RESULT_UNCHANGED = new DefaultSearchResult();
-
-	/**
 	 * Indicates that the default filter should be used.
 	 */
-	public static final Predicate<?> RESULT_DEFAULT = new DefaultSearchResult();
+	public static final Predicate<?> RESULT_DEFAULT = new Predicate<Object>() {
+		public boolean accept(Object object) {
+			return false;
+		}
+	};
+
+	/**
+	 * Indicates that no changes should be made to the filter as a result of this dialog.
+	 */
+	public static final Predicate<?> RESULT_UNCHANGED = RESULT_DEFAULT;
 
 	private Predicate<?> result = RESULT_DEFAULT;
 
