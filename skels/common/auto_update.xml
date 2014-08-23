@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.0.6 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.6a beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.0.6a beta">
+			<change>Fixed a bug that would prevent gibs from being selectable via ShipOverview</change>
+			<change>Attempt to fix a crash related to door and gib linking</change>
+		</version>
 		<version id="2.0.6 beta">
 			<change>Improved stats display in weapon & drone selection dialogs</change>
 			<change>Doors and mounts can now be linekd via Ship Overview</change>

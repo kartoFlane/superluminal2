@@ -1,5 +1,9 @@
 Changelog
 
+2.0.6a beta:
+- Fixed a bug that prevented gibs from being selectable via Ship Overview
+- Added a potential fix for crashes related to door & gib linking
+
 2.0.6 beta:
 - Improved stats display in weapon & drone selection dialogs
 - Added 'Follow Hull' button to Mount Tool -- when checked, newly created weapon mounts
