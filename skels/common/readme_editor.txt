@@ -39,5 +39,5 @@ Troubleshooting
 
 	In case of problems, consult the FAQ:
 	  http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78739#p78739
-	Or in the editor's thread at the FTL forums:
+	Or post in the editor's thread at the FTL forums:
 	  http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901

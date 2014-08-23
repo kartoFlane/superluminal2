@@ -14,6 +14,9 @@ Changelog
 - Added "Unsaved Changes" warning when closing the application
 - Added artillery modification & display (moved to Armaments tab)
 - Fixed undo of offset that was modified by shift-dragging
+- Added undo of reordering objects via Ship Overview
+- Calculate Optimal Offset is now undoable
+- Doors/Rooms and Mounts/Gibs can now be linked via ShipOverview
 - When undoing deletion of elements, the editor now attempts to reinsert them at their old index
 
 2.0.5 beta (which was actually 2.0.4...):

@@ -1,6 +1,13 @@
 <versions>
 	<latest id="2.0.4 beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.0.6 beta">
+			<change>Improved stats display in weapon & drone selection dialogs</change>
+			<change>Doors and mounts can now be linekd via Ship Overview</change>
+			<change>Added artillery modification & display</change>
+			<change>Fixed Mac Command key in hotkeys</change>
+			<change>Numerous tweaks & fixes, more things are now undoable</change>
+		</version>
 		<version id="2.0.4 beta">
 			<change>Added mono-directional dragging</change>
 			<change>Added simulation of ship death animation (gib & mount animation)</change>
