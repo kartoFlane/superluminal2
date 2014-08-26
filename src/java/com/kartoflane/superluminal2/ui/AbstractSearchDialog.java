@@ -36,7 +36,11 @@ public abstract class AbstractSearchDialog<T> {
 	/**
 	 * Indicates that no changes should be made to the filter as a result of this dialog.
 	 */
-	public static final Predicate<?> RESULT_UNCHANGED = RESULT_DEFAULT;
+	public static final Predicate<?> RESULT_UNCHANGED = new Predicate<Object>() {
+		public boolean accept(Object object) {
+			return false;
+		}
+	};
 
 	private Predicate<?> result = RESULT_DEFAULT;
 
