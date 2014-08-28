@@ -587,7 +587,7 @@ public class OverviewWindow implements SLListener {
 	}
 
 	public boolean isEnabled() {
-		return tree.isEnabled();
+		return !isDisposed() && tree.isEnabled();
 	}
 
 	public boolean isActive() {

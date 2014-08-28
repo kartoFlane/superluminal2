@@ -1283,9 +1283,8 @@ public class EditorWindow {
 
 		// Toggle the overview window, if it is currently opened
 		OverviewWindow w = OverviewWindow.getInstance();
-		if (w != null) {
+		if (!w.isDisposed())
 			w.setEnabled(interactable);
-		}
 
 		// Toggle tool
 		Manager.setSelected(null);
