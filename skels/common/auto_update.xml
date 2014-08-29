@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.0.6a beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.0.6b beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.0.6b beta">
+			<change>Fixed gib animation sometimes crashing the editor</change>
+			<change>Fixed gib linking via Ship Overview not working</change>
+		</version>
 		<version id="2.0.6a beta">
 			<change>Fixed a bug that would prevent gibs from being selectable via ShipOverview</change>
 			<change>Attempt to fix a crash related to door and gib linking</change>
