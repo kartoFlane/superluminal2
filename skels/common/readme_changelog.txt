@@ -1,5 +1,10 @@
 Changelog
 
+2.0.6b beta:
+- Fixed a crash related to the Overview Window & gib animation
+- Fixed 'Cancel' button in search dialogs not working correctly
+- Fixed gib linking via Ship Overview not really working
+
 2.0.6a beta:
 - Fixed a bug that prevented gibs from being selectable via Ship Overview
 - Added a potential fix for crashes related to door & gib linking
