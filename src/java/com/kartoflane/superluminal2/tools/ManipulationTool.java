@@ -164,33 +164,7 @@ public class ManipulationTool extends Tool {
 				}
 			}
 
-			if (Manager.getSelected() instanceof DoorController == false) {
-				setStateManipulate();
-				return;
-			}
-
-			RoomController roomC = control instanceof RoomController ? (RoomController) control : null;
-			DoorController doorC = (DoorController) Manager.getSelected();
-
-			// Can be null if the the user hides the door/door layer during linking
-			if (doorC != null) {
-				if (state == States.DOOR_LINK_LEFT) {
-					UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, true);
-					edit.setOld(doorC.getLeftRoom());
-					doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
-					edit.setCurrent(doorC.getLeftRoom());
-					Manager.getCurrentShip().postEdit(edit);
-				} else {
-					UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, false);
-					edit.setOld(doorC.getRightRoom());
-					doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
-					edit.setCurrent(doorC.getRightRoom());
-					Manager.getCurrentShip().postEdit(edit);
-				}
-			}
-
-			EditorWindow.getInstance().updateSidebarContent();
-			setStateManipulate();
+			linkDoor(selected, control);
 
 		} else if (state == States.MOUNT_GIB_LINK) {
 			// get the controller at the mouse click pos, and if found, notify it about mouseDown event
@@ -203,25 +177,7 @@ public class ManipulationTool extends Tool {
 				}
 			}
 
-			if (Manager.getSelected() instanceof MountController == false) {
-				setStateManipulate();
-				return;
-			}
-
-			GibController gibC = control instanceof GibController ? (GibController) control : null;
-			MountController mountC = (MountController) Manager.getSelected();
-
-			// Can be null if the the user hides the mount/mount layer during linking
-			if (mountC != null) {
-				UndoableGibLinkEdit edit = new UndoableGibLinkEdit(mountC);
-				edit.setOld(mountC.getGib());
-				mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
-				edit.setCurrent(mountC.getGib());
-				Manager.getCurrentShip().postEdit(edit);
-			}
-
-			EditorWindow.getInstance().updateSidebarContent();
-			setStateManipulate();
+			linkGib(selected, control);
 		}
 
 		// handle cursor
@@ -393,5 +349,58 @@ public class ManipulationTool extends Tool {
 				controller = LayeredPainter.getInstance().getSelectableControllerAt(x, y, selectableLayerIds[i]);
 		}
 		return controller;
+	}
+
+	public void linkDoor(AbstractController door, AbstractController room) {
+		if (door instanceof DoorController == false) {
+			setStateManipulate();
+			return;
+		}
+
+		DoorController doorC = (DoorController) door;
+		RoomController roomC = null;
+		if (room instanceof RoomController)
+			roomC = (RoomController) room;
+
+		if (state == States.DOOR_LINK_LEFT) {
+			UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, true);
+			edit.setOld(doorC.getLeftRoom());
+			doorC.setLeftRoom(roomC == null ? null : roomC.getGameObject());
+			edit.setCurrent(doorC.getLeftRoom());
+			Manager.getCurrentShip().postEdit(edit);
+		} else {
+			UndoableDoorLinkEdit edit = new UndoableDoorLinkEdit(doorC, false);
+			edit.setOld(doorC.getRightRoom());
+			doorC.setRightRoom(roomC == null ? null : roomC.getGameObject());
+			edit.setCurrent(doorC.getRightRoom());
+			Manager.getCurrentShip().postEdit(edit);
+		}
+
+		EditorWindow.getInstance().updateSidebarContent();
+		setStateManipulate();
+	}
+
+	public void linkGib(AbstractController mount, AbstractController gib) {
+		if (mount instanceof MountController == false) {
+			setStateManipulate();
+			return;
+		}
+
+		MountController mountC = (MountController) mount;
+		GibController gibC = null;
+		if (gib instanceof GibController)
+			gibC = (GibController) gib;
+
+		// Can be null if the the user hides the mount/mount layer during linking
+		if (mountC != null) {
+			UndoableGibLinkEdit edit = new UndoableGibLinkEdit(mountC);
+			edit.setOld(mountC.getGib());
+			mountC.setGib(gibC == null ? Database.DEFAULT_GIB_OBJ : gibC.getGameObject());
+			edit.setCurrent(mountC.getGib());
+			Manager.getCurrentShip().postEdit(edit);
+		}
+
+		EditorWindow.getInstance().updateSidebarContent();
+		setStateManipulate();
 	}
 }

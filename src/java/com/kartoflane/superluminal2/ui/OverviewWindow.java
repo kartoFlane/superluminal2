@@ -330,29 +330,17 @@ public class OverviewWindow implements SLListener {
 				}
 
 				if (Manager.getSelectedToolId() == Tools.POINTER) {
-					if (controller == null) {
-						Manager.setSelected(null);
-					} else if (controller.isVisible()) {
-						ManipulationTool tool = (ManipulationTool) Manager.getSelectedTool();
-						if (!tool.isStateManipulate()) {
-							Event ev = new Event();
-							ev.display = UIUtils.getDisplay();
-							ev.widget = tree;
-							ev.button = 1;
-							ev.count = 1;
-							ev.x = controller.getX();
-							ev.y = controller.getY();
-							MouseEvent me = new MouseEvent(ev);
-
-							tool.mouseDown(me);
-							tool.mouseUp(me);
-
-							AbstractController ac = Manager.getSelected();
-							if (ac != null && ac != controller)
-								CursorController.getInstance().setVisible(false);
-						} else {
-							Manager.setSelected(controller);
-						}
+					ManipulationTool tool = (ManipulationTool) Manager.getSelectedTool();
+					if (tool.isStateManipulate() && (controller == null || controller.isVisible())) {
+						Manager.setSelected(controller);
+					} else {
+						AbstractController selected = Manager.getSelected();
+						if (tool.isStateDoorLinkLeft() || tool.isStateDoorLinkRight())
+							tool.linkDoor(selected, controller);
+						else if (tool.isStateMountGibLink())
+							tool.linkGib(selected, controller);
+						if (selected != null && selected != controller)
+							CursorController.getInstance().setVisible(false);
 					}
 				}
 
