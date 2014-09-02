@@ -198,6 +198,9 @@ public class ShipContainer implements Disposable, SLListener {
 			mc.setFollowOffset(totalX, totalY);
 			mc.updateFollower();
 
+			mc.setParent(getImageController(Images.HULL));
+			mc.updateFollowOffset();
+
 			add(mc);
 			store(mc);
 		}
