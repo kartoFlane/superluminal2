@@ -22,8 +22,9 @@ import com.kartoflane.superluminal2.undo.UndoableCreateEdit;
 
 public class MountTool extends Tool {
 
+	private static boolean followHull = false;
+
 	private boolean canCreate = false;
-	private boolean followHull = true;
 	private MountController toolMount = null;
 	private PropController toolProp = null;
 

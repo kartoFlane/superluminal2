@@ -66,6 +66,7 @@ public class MountToolComposite extends Composite implements DataComposite {
 		btnFollowHull = new Button(this, SWT.CHECK);
 		btnFollowHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		btnFollowHull.setText("Follow Hull");
+		btnFollowHull.setSelection(tool.getFollowHull());
 
 		lblFollowHelp = new Label(this, SWT.NONE);
 		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
