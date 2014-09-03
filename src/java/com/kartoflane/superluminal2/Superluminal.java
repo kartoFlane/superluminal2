@@ -69,12 +69,12 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - glow placement modification
 	 * - undo system
 	 * == various properties undos
 	 * == reorder undo
 	 * 
 	 * MEDIUM:
-	 * - glow placement modification
 	 * - room tool doesn't work sometimes? -- as per SleeperService
 	 * - ship overview sometimes messes up invisible object detection (grays out items incorrectly)
 	 * 
@@ -99,7 +99,7 @@ public class Superluminal {
 
 		try {
 			// Display#setAppName() allows to set the name of the application on OSX
-			// However, in order to work, it has to be called before any instance of Display is created
+			// However, in order to work, it has to be called before any instance of Display is created (via Display#getCurrent() or #getDefault())
 			// Also tests whether the correct version of the editor is installed (since SWT code is platform-specific)
 			Display.setAppName(APP_NAME);
 			Display.setAppVersion(APP_VERSION.toString());
@@ -248,17 +248,25 @@ public class Superluminal {
 
 						for (String arg : argsList) {
 							File f = new File(arg);
-							if (f.exists() && (arg.endsWith(".ftl") || arg.endsWith(".zip"))) {
-								try {
-									DatabaseEntry de = new DatabaseEntry(f);
-									DatabaseEntry[] dbEntries = db.getEntries();
-									if (de == db.getCore())
-										continue;
-									if (!Utils.contains(dbEntries, de))
-										db.addEntry(de);
-								} catch (Exception e) {
-									log.warn(String.format("Could not create a database entry for file '%s': ", arg), e);
-								}
+
+							if (!f.exists()) {
+								log.warn(String.format("'%s' was not loaded because the specified file could not be found.", arg));
+								continue;
+							}
+							if (!arg.endsWith(".ftl") && !arg.endsWith(".zip")) {
+								log.warn(String.format("'%s' was not loaded because the specified file is not a .zip or .ftl.", f.getName()));
+								continue;
+							}
+
+							try {
+								DatabaseEntry de = new DatabaseEntry(f);
+								DatabaseEntry[] dbEntries = db.getEntries();
+								if (de == db.getCore())
+									continue;
+								if (!Utils.contains(dbEntries, de))
+									db.addEntry(de);
+							} catch (Exception e) {
+								log.warn(String.format("Could not create a database entry for file '%s': ", arg), e);
 							}
 						}
 
