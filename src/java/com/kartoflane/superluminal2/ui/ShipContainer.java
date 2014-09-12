@@ -602,6 +602,9 @@ public class ShipContainer implements Disposable, SLListener {
 
 		setActiveSystem(room.getGameObject(), sys);
 		system.notifySizeChanged(room.getW(), room.getH());
+
+		if (system.getSystemId() == Systems.ARTILLERY)
+			updateMounts();
 	}
 
 	public void unassign(SystemObject system) {
@@ -620,6 +623,9 @@ public class ShipContainer implements Disposable, SLListener {
 		}
 
 		systemC.unassign();
+
+		if (system.getSystemId() == Systems.ARTILLERY)
+			updateMounts();
 	}
 
 	public boolean isAssigned(Systems sys) {
@@ -862,7 +868,7 @@ public class ShipContainer implements Disposable, SLListener {
 				// Artillery starts taking up mounts after the weapons, or 4th slot if the
 				// ship has less than 4 slots. As such, a dummy mount is required
 				int j = i - Math.max(4, slots);
-				if (j >= 0 && j < artilleries.size()) {
+				if (j >= 0 && j < artilleries.size() && artilleries.get(j).isAssigned()) {
 					mount.setWeapon(artilleries.get(j).getWeapon());
 				} else {
 					mount.setWeapon(Database.DEFAULT_WEAPON_OBJ);
