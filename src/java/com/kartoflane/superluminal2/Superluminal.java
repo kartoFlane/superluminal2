@@ -70,6 +70,7 @@ public class Superluminal {
 	 * 
 	 * IMMEDIATE:
 	 * - glow placement modification
+	 * == bind stations to within a single/half grid cell from the tile's center?
 	 * - undo system
 	 * == various properties undos
 	 * == reorder undo
@@ -106,7 +107,7 @@ public class Superluminal {
 		} catch (Throwable t) {
 			log.error("Failed to retrieve display - wrong version of the editor has been downloaded.");
 
-			OS os = Utils.identifyOS();
+			OS os = OS.identifyOS();
 			if (os.isUnknown())
 				log.error(String.format("Your system (%s %s) was not recognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model")));
 			else

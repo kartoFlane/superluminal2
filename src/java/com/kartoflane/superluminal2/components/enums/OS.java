@@ -68,4 +68,19 @@ public enum OS {
 		result += is32Bit() ? "32-bit" : "64-bit";
 		return result;
 	}
+
+	public static OS identifyOS() {
+		String javaArch = System.getProperty("sun.arch.data.model");
+		boolean bit64 = javaArch.contains("64");
+
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("win"))
+			return bit64 ? OS.WINDOWS64 : OS.WINDOWS32;
+		else if (os.contains("mac"))
+			return bit64 ? OS.MACOSX64 : OS.MACOSX32;
+		else if (os.contains("linux") || os.contains("nix"))
+			return bit64 ? OS.LINUX64 : OS.LINUX32;
+		else
+			return OS.UNKNOWN;
+	}
 }

@@ -288,7 +288,7 @@ public class Utils {
 	 * @see #wrap(String, int, int)
 	 */
 	public static String wrapOS(String msg, int wrapWidth, int wrapTolerance, OS... wrapFor) {
-		OS os = identifyOS();
+		OS os = OS.identifyOS();
 
 		if (Arrays.asList(wrapFor).contains(os)) {
 			return wrap(msg, wrapWidth, wrapTolerance);
@@ -306,7 +306,7 @@ public class Utils {
 	 * @see #wrap(String, int, int)
 	 */
 	public static String wrapOSNot(String msg, int wrapWidth, int wrapTolerance, OS... dontWrapFor) {
-		OS os = identifyOS();
+		OS os = OS.identifyOS();
 
 		if (Arrays.asList(dontWrapFor).contains(os)) {
 			return msg;
@@ -412,21 +412,6 @@ public class Utils {
 					candidate;
 		}
 		return result;
-	}
-
-	public static OS identifyOS() {
-		String javaArch = System.getProperty("sun.arch.data.model");
-		boolean bit64 = javaArch.contains("64");
-
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("win"))
-			return bit64 ? OS.WINDOWS64 : OS.WINDOWS32;
-		else if (os.contains("mac"))
-			return bit64 ? OS.MACOSX64 : OS.MACOSX32;
-		else if (os.contains("linux") || os.contains("nix"))
-			return bit64 ? OS.LINUX64 : OS.LINUX32;
-		else
-			return OS.UNKNOWN;
 	}
 
 	public static boolean contains(Object[] array, Object object) {
