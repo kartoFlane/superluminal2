@@ -562,8 +562,9 @@ public abstract class Manager {
 					if (innerPath == null || innerPath.equals(""))
 						throw new IllegalArgumentException("Path doesn't have an inner path: " + path);
 
+					ZipFile zf = null;
 					try {
-						ZipFile zf = new ZipFile(zipPath);
+						zf = new ZipFile(zipPath);
 						ZipEntry ze = zf.getEntry(innerPath);
 						if (ze == null)
 							throw new IllegalArgumentException(String.format("Inner path '%s' was not found in archive '%s'", innerPath, zipPath));
@@ -572,9 +573,11 @@ public abstract class Manager {
 						// Copy the stream so that it's possible to access the file
 						// without having to keep the archive open
 						result = IOUtils.cloneStream(zf.getInputStream(ze));
-						zf.close();
 					} catch (ZipException e) {
 						log.warn(String.format("File is not a zip archive: '%s'", zipPath));
+					} finally {
+						if (zf != null)
+							zf.close();
 					}
 				} else {
 					log.warn(String.format("Path was wrongly formatted: '%s'", loadPath));
