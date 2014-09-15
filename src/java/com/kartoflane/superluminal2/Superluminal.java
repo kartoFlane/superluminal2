@@ -69,6 +69,7 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
 	 * - glow placement modification
 	 * == bind stations to within a single/half grid cell from the tile's center?
 	 * - undo system

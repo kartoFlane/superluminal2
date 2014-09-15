@@ -18,6 +18,8 @@ import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -32,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -84,6 +87,7 @@ import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
 import com.kartoflane.superluminal2.undo.UndoableOffsetsEdit;
 import com.kartoflane.superluminal2.utils.SHPUtils;
+import com.kartoflane.superluminal2.utils.SWTFontUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
@@ -146,6 +150,7 @@ public class EditorWindow {
 	private MenuItem mntmHangar;
 	private ToolItem tltmAnimate;
 	private DropTarget dropTarget;
+	private Label lblCursorLoc;
 
 	public EditorWindow(Display display) {
 		instance = this;
@@ -399,10 +404,15 @@ public class EditorWindow {
 			}
 		});
 
-		// Info container - mouse position, etc
+		// Info container - mouse position
 		Composite infoContainer = new Composite(toolContainer, SWT.NONE);
 		infoContainer.setLayout(new GridLayout(1, false));
 		infoContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
+
+		lblCursorLoc = new Label(infoContainer, SWT.NONE);
+		lblCursorLoc.setAlignment(SWT.RIGHT);
+		lblCursorLoc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		lblCursorLoc.setFont(SWTFontUtils.getMonospacedFont(display));
 
 		// Editor container - canvas, sidebar
 		editorContainer = new SashForm(mainContainer, SWT.SMOOTH);
@@ -912,6 +922,13 @@ public class EditorWindow {
 		canvas.addMouseListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseMoveListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseTrackListener(MouseInputDispatcher.getInstance());
+
+		canvas.addMouseMoveListener(new MouseMoveListener() {
+			public void mouseMove(MouseEvent e) {
+				lblCursorLoc.setText(String.format("%-4s, %-4s | %-2s, %-2s", e.x, e.y,
+						e.x / ShipContainer.CELL_SIZE, e.y / ShipContainer.CELL_SIZE));
+			}
+		});
 
 		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
 
