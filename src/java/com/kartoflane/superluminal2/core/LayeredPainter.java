@@ -19,8 +19,8 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
  * The class governs when and in what order controllers are drawn.
  * Also implements several methods for selection.
  * 
+ * The first controller in a layer is the bottom-most one.
  * The last controller in a layer is the topmost one.
- * The first view in a layer is the bottom-most one.
  * 
  * @author kartoFlane
  * 

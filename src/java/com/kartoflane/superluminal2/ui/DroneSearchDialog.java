@@ -25,7 +25,7 @@ import com.kartoflane.superluminal2.ftl.DroneObject;
 
 public class DroneSearchDialog extends AbstractSearchDialog<DroneObject> {
 
-	private static final int _defaultWidth = 400;
+	private static final int defaultWidth = 400;
 
 	private DroneTypes type = null;
 
@@ -166,7 +166,7 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject> {
 		});
 
 		shell.pack();
-		shell.setSize(_defaultWidth, shell.getSize().y);
+		shell.setSize(defaultWidth, shell.getSize().y);
 		Point s = shell.getSize();
 		Point p = parent.getSize();
 		shell.setMinimumSize(s);

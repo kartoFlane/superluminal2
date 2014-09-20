@@ -62,9 +62,9 @@ public abstract class Manager {
 	 * - Those characters then have to be terminated by a period<br>
 	 * - After that, a non-zero number of any characters other than a forward slash
 	 */
-	private static final Pattern _filePattern = Pattern.compile(".+\\.[^/]+");
-	private static final HashMap<Hotkeys, Hotkey> _hotkeyMap = new HashMap<Hotkeys, Hotkey>();
-	private static final HashMap<Tools, Tool> _toolMap = new HashMap<Tools, Tool>();
+	private static final Pattern filePattern = Pattern.compile(".+\\.[^/]+");
+	private static final HashMap<Hotkeys, Hotkey> hotkeyMap = new HashMap<Hotkeys, Hotkey>();
+	private static final HashMap<Tools, Tool> toolMap = new HashMap<Tools, Tool>();
 
 	// Config variables
 	public static boolean sidebarOnRightSide = true;
@@ -250,13 +250,13 @@ public abstract class Manager {
 		EditorWindow window = EditorWindow.getInstance();
 
 		if (selectedTool != null)
-			_toolMap.get(selectedTool).deselect();
+			toolMap.get(selectedTool).deselect();
 
 		selectedTool = tool;
 		if (tool != null) {
-			MouseInputDispatcher.getInstance().setCurrentTool(_toolMap.get(tool));
+			MouseInputDispatcher.getInstance().setCurrentTool(toolMap.get(tool));
 			window.selectTool(tool);
-			_toolMap.get(tool).select();
+			toolMap.get(tool).select();
 		} else {
 			MouseInputDispatcher.getInstance().setCurrentTool(null);
 			window.selectTool(null);
@@ -269,17 +269,17 @@ public abstract class Manager {
 	}
 
 	public static Tool getSelectedTool() {
-		return _toolMap.get(selectedTool);
+		return toolMap.get(selectedTool);
 	}
 
 	public static Tool getTool(Tools tool) {
-		return _toolMap.get(tool);
+		return toolMap.get(tool);
 	}
 
 	public static void putTool(Tools id, Tool tool) {
 		if (id == null || tool == null)
 			throw new IllegalArgumentException("Argument must not be null.");
-		_toolMap.put(id, tool);
+		toolMap.put(id, tool);
 	}
 
 	/*
@@ -289,13 +289,13 @@ public abstract class Manager {
 	 */
 
 	public static Hotkey getHotkey(Hotkeys key) {
-		return _hotkeyMap.get(key);
+		return hotkeyMap.get(key);
 	}
 
 	public static void putHotkey(Hotkeys key, Hotkey h) {
 		if (key == null || h == null)
 			throw new IllegalArgumentException("Argument must not be null.");
-		_hotkeyMap.put(key, h);
+		hotkeyMap.put(key, h);
 	}
 
 	/** Loads the default hotkey values, which are later overridden by config or the user. */
@@ -554,7 +554,7 @@ public abstract class Manager {
 				result = new FileInputStream(new File(loadPath));
 			} else if (protocol.equals("zip:")) {
 				// Refers to file in a zip archive
-				Matcher m = _filePattern.matcher(loadPath);
+				Matcher m = filePattern.matcher(loadPath);
 				if (m.find()) {
 					String zipPath = m.group(1);
 					String innerPath = loadPath.replace(zipPath + "/", "");

@@ -352,7 +352,7 @@ public class Utils {
 				currentWidth = token.length();
 			} else if (newWidth > wrapWidth + wrapTolerance) {
 				// Falls outside of the allowed wrap width -- split
-				String[] split = _split(token, wrapWidth - currentWidth - 1);
+				String[] split = split(token, wrapWidth - currentWidth - 1);
 				if (!split[0].isEmpty()) {
 					buf.append(" ");
 					buf.append(split[0]);
@@ -372,7 +372,7 @@ public class Utils {
 		return buf.toString();
 	}
 
-	private static String[] _split(String word, int splitIndex) {
+	private static String[] split(String word, int splitIndex) {
 		String[] result = new String[2];
 		if (splitIndex == 0) {
 			result[0] = "";
@@ -384,7 +384,7 @@ public class Utils {
 			return result;
 		}
 
-		int i = _findIndexOfClosestVowel(word, splitIndex);
+		int i = findIndexOfClosestVowel(word, splitIndex);
 
 		if (i < 0) {
 			result[0] = word;
@@ -397,7 +397,7 @@ public class Utils {
 		return result;
 	}
 
-	private static int _findIndexOfClosestVowel(String word, int splitIndex) {
+	private static int findIndexOfClosestVowel(String word, int splitIndex) {
 		char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'y' };
 		int result = -word.length();
 		for (char vowel : vowels) {

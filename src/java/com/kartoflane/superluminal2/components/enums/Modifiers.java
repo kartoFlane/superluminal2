@@ -19,18 +19,18 @@ public enum Modifiers {
 	COMMAND (1 << 22);
 	// @formatter:on
 
-	private final int _id;
+	private final int id;
 
 	private Modifiers(int id) {
-		_id = id;
+		this.id = id;
 	}
 
 	public int id() {
-		return _id;
+		return id;
 	}
 
 	public int getSWTMask() {
-		return _id;
+		return id;
 	}
 
 	@Override

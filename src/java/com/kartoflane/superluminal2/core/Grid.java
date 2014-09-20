@@ -50,7 +50,7 @@ public class Grid {
 		CORNER_BR;
 	}
 
-	private static final Grid _instance = new Grid();
+	private static final Grid instance = new Grid();
 
 	private boolean drawGrid = true;
 	private Rectangle bounds = null;
@@ -62,7 +62,7 @@ public class Grid {
 	}
 
 	public static Grid getInstance() {
-		return _instance;
+		return instance;
 	}
 
 	/**

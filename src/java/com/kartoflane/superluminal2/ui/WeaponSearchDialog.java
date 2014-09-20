@@ -25,7 +25,7 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject> {
 
-	private static final int _defaultWidth = 400;
+	private static final int defaultWidth = 400;
 
 	private WeaponTypes type = null;
 
@@ -166,7 +166,7 @@ public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject> {
 		});
 
 		shell.pack();
-		shell.setSize(_defaultWidth, shell.getSize().y);
+		shell.setSize(defaultWidth, shell.getSize().y);
 		Point s = shell.getSize();
 		Point p = parent.getSize();
 		shell.setMinimumSize(s);

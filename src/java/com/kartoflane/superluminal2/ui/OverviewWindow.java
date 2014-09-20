@@ -70,7 +70,7 @@ import com.kartoflane.superluminal2.utils.Utils;
 
 public class OverviewWindow implements SLListener {
 
-	private static final OverviewWindow _instance = new OverviewWindow();
+	private static final OverviewWindow instance = new OverviewWindow();
 
 	private ShipContainer ship;
 	private ObjectController highlightedController = null;
@@ -307,7 +307,7 @@ public class OverviewWindow implements SLListener {
 					if (item != null && item.getData() != null)
 						controller = (ObjectController) item.getData();
 
-					_highlightController(controller);
+					highlightController(controller);
 				}
 			}
 		});
@@ -315,7 +315,7 @@ public class OverviewWindow implements SLListener {
 		tree.addListener(SWT.MouseExit, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				_highlightController(null);
+				highlightController(null);
 			}
 		});
 
@@ -550,8 +550,8 @@ public class OverviewWindow implements SLListener {
 	 * Updates the overview window if it exists, or does nothing if it does not.
 	 */
 	public static void staticUpdate() {
-		if (_instance != null && !_instance.isDisposed()) {
-			_instance.update();
+		if (instance != null && !instance.isDisposed()) {
+			instance.update();
 		}
 	}
 
@@ -559,13 +559,13 @@ public class OverviewWindow implements SLListener {
 	 * Updates the overview window if it exists, or does nothing if it does not.
 	 */
 	public static void staticUpdate(ObjectController controller) {
-		if (_instance != null && !_instance.isDisposed()) {
-			_instance.update(controller);
+		if (instance != null && !instance.isDisposed()) {
+			instance.update(controller);
 		}
 	}
 
 	public static OverviewWindow getInstance() {
-		return _instance;
+		return instance;
 	}
 
 	public void setEnabled(boolean b) {
@@ -665,7 +665,7 @@ public class OverviewWindow implements SLListener {
 		}
 	}
 
-	private void _highlightController(ObjectController controller) {
+	private void highlightController(ObjectController controller) {
 		if (highlightedController != null && highlightedController != controller && highlightedController.isHighlighted())
 			highlightedController.setHighlighted(false);
 		if (controller != null && !controller.isHighlighted())

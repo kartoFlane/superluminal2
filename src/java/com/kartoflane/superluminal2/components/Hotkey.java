@@ -153,10 +153,10 @@ public class Hotkey {
 	 */
 	public boolean passes(boolean shift, boolean ctrl, boolean alt, boolean cmd, int keyCode) {
 		return this.shift == shift && this.ctrl == ctrl && this.alt == alt && this.command == cmd &&
-				_compareKeyCodes(key, keyCode);
+				compareKeyCodes(key, keyCode);
 	}
 
-	private boolean _compareKeyCodes(int key1, int key2) {
+	private boolean compareKeyCodes(int key1, int key2) {
 		if ((key1 == SWT.CR || key1 == SWT.LF || key1 == SWT.KEYPAD_CR) &&
 				(key2 == SWT.CR || key2 == SWT.LF || key2 == SWT.KEYPAD_CR)) {
 			return true;
@@ -171,7 +171,7 @@ public class Hotkey {
 	 * Basically a customised {@link #equals(Object)}.
 	 */
 	public boolean collides(Hotkey h) {
-		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && command == h.command && _compareKeyCodes(key, h.key);
+		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && command == h.command && compareKeyCodes(key, h.key);
 	}
 
 	public boolean equals(Object o) {

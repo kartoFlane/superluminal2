@@ -8,7 +8,7 @@ import com.kartoflane.superluminal2.events.SLListener;
  */
 public class EventHandler {
 
-	private static final int _growSize = 4;
+	private static final int growSize = 4;
 
 	// Lazily instantiated arrays
 	private int[] types;
@@ -57,9 +57,9 @@ public class EventHandler {
 	 */
 	public void hook(int eventType, SLListener listener) {
 		if (types == null)
-			types = new int[_growSize];
+			types = new int[growSize];
 		if (listeners == null)
-			listeners = new SLListener[_growSize];
+			listeners = new SLListener[growSize];
 
 		int length = types.length;
 		int index = length - 1;
@@ -72,11 +72,11 @@ public class EventHandler {
 		index++;
 
 		if (index == length) {
-			int[] newTypes = new int[length + _growSize];
+			int[] newTypes = new int[length + growSize];
 			System.arraycopy(types, 0, newTypes, 0, length);
 			types = newTypes;
 
-			SLListener[] newListeners = new SLListener[length + _growSize];
+			SLListener[] newListeners = new SLListener[length + growSize];
 			System.arraycopy(listeners, 0, newListeners, 0, length);
 			listeners = newListeners;
 		}
