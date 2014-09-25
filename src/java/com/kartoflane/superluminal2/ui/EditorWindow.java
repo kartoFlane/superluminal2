@@ -169,6 +169,19 @@ public class EditorWindow {
 		displaySize.width = (displaySize.width / 5) * 4;
 		displaySize.height = (displaySize.height / 5) * 4;
 
+		// Instantiate quasi-singletons
+		new MouseInputDispatcher();
+		CursorController.newInstance();
+
+		Manager.putTool(Tools.POINTER, new ManipulationTool(this));
+		Manager.putTool(Tools.CREATOR, new CreationTool(this));
+		Manager.putTool(Tools.IMAGES, new ImagesTool(this));
+		Manager.putTool(Tools.CONFIG, new PropertyTool(this));
+		Manager.putTool(Tools.ROOM, new RoomTool(this));
+		Manager.putTool(Tools.DOOR, new DoorTool(this));
+		Manager.putTool(Tools.WEAPON, new MountTool(this));
+		Manager.putTool(Tools.STATION, new StationTool(this));
+
 		// Menu bar
 		Menu menu = new Menu(shell, SWT.BAR);
 		shell.setMenuBar(menu);
@@ -416,7 +429,7 @@ public class EditorWindow {
 		canvasColor = Cache.checkOutColor(this, canvasRGB);
 		canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
 		canvas.setBackground(canvasColor);
-		canvas.addPaintListener(new LayeredPainter(canvas));
+		canvas.addPaintListener(LayeredPainter.getInstance());
 
 		sideContainer = new ScrolledComposite(shell, SWT.BORDER | SWT.V_SCROLL);
 		sideContainer.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
@@ -916,19 +929,6 @@ public class EditorWindow {
 				}
 			}
 		});
-
-		// Instantiate quasi-singletons
-		new MouseInputDispatcher();
-		CursorController.newInstance();
-
-		Manager.putTool(Tools.POINTER, new ManipulationTool(this));
-		Manager.putTool(Tools.CREATOR, new CreationTool(this));
-		Manager.putTool(Tools.IMAGES, new ImagesTool(this));
-		Manager.putTool(Tools.CONFIG, new PropertyTool(this));
-		Manager.putTool(Tools.ROOM, new RoomTool(this));
-		Manager.putTool(Tools.DOOR, new DoorTool(this));
-		Manager.putTool(Tools.WEAPON, new MountTool(this));
-		Manager.putTool(Tools.STATION, new StationTool(this));
 
 		canvas.addMouseListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseMoveListener(MouseInputDispatcher.getInstance());

@@ -10,7 +10,6 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Canvas;
 
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
@@ -42,7 +41,7 @@ public class LayeredPainter implements PaintListener {
 		CURSOR
 	}
 
-	private static LayeredPainter instance;
+	private static final LayeredPainter instance = new LayeredPainter();
 
 	/** Specifies the layer order for selection and highlighting purposes. */
 	private static final Layers[] selectionOrder = { Layers.BACKGROUND, Layers.GRID, Layers.GIBS,
@@ -53,9 +52,7 @@ public class LayeredPainter implements PaintListener {
 	private final TreeMap<Layers, ArrayList<AbstractController>> layerMap = new TreeMap<Layers, ArrayList<AbstractController>>();
 	private final HashMap<Layers, Boolean> drawLayerMap = new HashMap<Layers, Boolean>();
 
-	public LayeredPainter(Canvas canvas) {
-		instance = this;
-
+	public LayeredPainter() {
 		for (Layers layer : Layers.values()) {
 			// Add a bunch of empty lists to hold layers.
 			layerMap.put(layer, new ArrayList<AbstractController>());
