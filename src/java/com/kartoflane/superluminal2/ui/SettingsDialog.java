@@ -218,7 +218,7 @@ public class SettingsDialog {
 				Hotkeys.SETTINGS, Hotkeys.UNDO, Hotkeys.REDO, Hotkeys.CLOAK, Hotkeys.ANIMATE
 		};
 		Hotkeys[] view = {
-				Hotkeys.TOGGLE_GRID, Hotkeys.TOGGLE_HANGAR, Hotkeys.SHOW_ANCHOR,
+				Hotkeys.OPEN_ZOOM, Hotkeys.TOGGLE_GRID, Hotkeys.TOGGLE_HANGAR, Hotkeys.SHOW_ANCHOR,
 				Hotkeys.SHOW_MOUNTS, Hotkeys.SHOW_ROOMS, Hotkeys.SHOW_DOORS, Hotkeys.SHOW_STATIONS,
 				Hotkeys.SHOW_HULL, Hotkeys.SHOW_FLOOR, Hotkeys.SHOW_SHIELD, Hotkeys.SHOW_GIBS
 		};

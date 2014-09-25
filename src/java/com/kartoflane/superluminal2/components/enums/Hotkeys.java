@@ -29,6 +29,7 @@ public enum Hotkeys {
 	ANIMATE,
 
 	// View
+	OPEN_ZOOM,
 	TOGGLE_GRID,
 	TOGGLE_HANGAR,
 	SHOW_ANCHOR,
@@ -92,6 +93,8 @@ public enum Hotkeys {
 			case ANIMATE:
 				return "Animate Gibs";
 
+			case OPEN_ZOOM:
+				return "Open Zoom Window";
 			case TOGGLE_GRID:
 				return "Show Grid";
 			case TOGGLE_HANGAR:

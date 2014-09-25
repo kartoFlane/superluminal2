@@ -10,6 +10,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Canvas;
 
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.components.interfaces.Selectable;
@@ -41,7 +42,7 @@ public class LayeredPainter implements PaintListener {
 		CURSOR
 	}
 
-	private static final LayeredPainter instance = new LayeredPainter();
+	private static LayeredPainter instance;
 
 	/** Specifies the layer order for selection and highlighting purposes. */
 	private static final Layers[] selectionOrder = { Layers.BACKGROUND, Layers.GRID, Layers.GIBS,
@@ -49,10 +50,12 @@ public class LayeredPainter implements PaintListener {
 			Layers.PROP, Layers.SHIP_ORIGIN, Layers.CURSOR };
 
 	/** Specifies the order in which the layers are drawn. */
-	private TreeMap<Layers, ArrayList<AbstractController>> layerMap = new TreeMap<Layers, ArrayList<AbstractController>>();
-	private HashMap<Layers, Boolean> drawLayerMap = new HashMap<Layers, Boolean>();
+	private final TreeMap<Layers, ArrayList<AbstractController>> layerMap = new TreeMap<Layers, ArrayList<AbstractController>>();
+	private final HashMap<Layers, Boolean> drawLayerMap = new HashMap<Layers, Boolean>();
 
-	public LayeredPainter() {
+	public LayeredPainter(Canvas canvas) {
+		instance = this;
+
 		for (Layers layer : Layers.values()) {
 			// Add a bunch of empty lists to hold layers.
 			layerMap.put(layer, new ArrayList<AbstractController>());
@@ -64,6 +67,12 @@ public class LayeredPainter implements PaintListener {
 	public static LayeredPainter getInstance() {
 		return instance;
 	}
+
+	/*
+	 * ==================================
+	 * XXX: Layering manipulation methods
+	 * ==================================
+	 */
 
 	public void setLayerDrawn(Layers layer, boolean draw) {
 		if (layer == null)
@@ -125,6 +134,12 @@ public class LayeredPainter implements PaintListener {
 		return layerMap.get(layer).remove(controller);
 	}
 
+	/*
+	 * ===================================
+	 * XXX: Helper, get & location methods
+	 * ===================================
+	 */
+
 	public boolean contains(AbstractController controller) {
 		if (controller == null)
 			throw new IllegalArgumentException("Controller is null.");
@@ -166,6 +181,7 @@ public class LayeredPainter implements PaintListener {
 				}
 			}
 		}
+
 		e.gc.dispose();
 	}
 

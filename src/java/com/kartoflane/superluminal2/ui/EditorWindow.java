@@ -97,10 +97,11 @@ public class EditorWindow {
 	public static final int SIDEBAR_MIN_WIDTH = 290;
 	public static final int CANVAS_MIN_SIZE = 400;
 
+	private static final RGB canvasRGB = new RGB(164, 164, 164);
+
 	private static EditorWindow instance;
 
 	private final HashMap<Tools, ToolItem> toolItemMap = new HashMap<Tools, ToolItem>();
-	private final RGB canvasRGB = new RGB(164, 164, 164);
 
 	private int sidebarWidth = SIDEBAR_MIN_WIDTH;
 	private Color canvasColor = null;
@@ -148,6 +149,7 @@ public class EditorWindow {
 	private MenuItem mntmOptimalOffset;
 	private MenuItem mntmReloadDb;
 	private MenuItem mntmHangar;
+	private MenuItem mntmZoom;
 	private ToolItem tltmAnimate;
 	private DropTarget dropTarget;
 	private Label lblCursorLoc;
@@ -166,19 +168,6 @@ public class EditorWindow {
 		Rectangle displaySize = m.getClientArea();
 		displaySize.width = (displaySize.width / 5) * 4;
 		displaySize.height = (displaySize.height / 5) * 4;
-
-		// Instantiate quasi-singletons
-		new MouseInputDispatcher();
-		CursorController.newInstance();
-
-		Manager.putTool(Tools.POINTER, new ManipulationTool(this));
-		Manager.putTool(Tools.CREATOR, new CreationTool(this));
-		Manager.putTool(Tools.IMAGES, new ImagesTool(this));
-		Manager.putTool(Tools.CONFIG, new PropertyTool(this));
-		Manager.putTool(Tools.ROOM, new RoomTool(this));
-		Manager.putTool(Tools.DOOR, new DoorTool(this));
-		Manager.putTool(Tools.WEAPON, new MountTool(this));
-		Manager.putTool(Tools.STATION, new StationTool(this));
 
 		// Menu bar
 		Menu menu = new Menu(shell, SWT.BAR);
@@ -251,6 +240,10 @@ public class EditorWindow {
 
 		Menu menuView = new Menu(mntmView);
 		mntmView.setMenu(menuView);
+
+		mntmZoom = new MenuItem(menuView, SWT.NONE);
+
+		new MenuItem(menuView, SWT.SEPARATOR);
 
 		mntmGrid = new MenuItem(menuView, SWT.CHECK);
 		mntmGrid.setSelection(true);
@@ -423,7 +416,7 @@ public class EditorWindow {
 		canvasColor = Cache.checkOutColor(this, canvasRGB);
 		canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
 		canvas.setBackground(canvasColor);
-		canvas.addPaintListener(LayeredPainter.getInstance());
+		canvas.addPaintListener(new LayeredPainter(canvas));
 
 		sideContainer = new ScrolledComposite(shell, SWT.BORDER | SWT.V_SCROLL);
 		sideContainer.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
@@ -737,6 +730,14 @@ public class EditorWindow {
 			}
 		});
 
+		mntmZoom.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ZoomWindow zoom = new ZoomWindow(shell, canvas);
+				zoom.open();
+			}
+		});
+
 		mntmGrid.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -916,8 +917,18 @@ public class EditorWindow {
 			}
 		});
 
-		registerHotkeys();
-		updateHotkeyTooltips();
+		// Instantiate quasi-singletons
+		new MouseInputDispatcher();
+		CursorController.newInstance();
+
+		Manager.putTool(Tools.POINTER, new ManipulationTool(this));
+		Manager.putTool(Tools.CREATOR, new CreationTool(this));
+		Manager.putTool(Tools.IMAGES, new ImagesTool(this));
+		Manager.putTool(Tools.CONFIG, new PropertyTool(this));
+		Manager.putTool(Tools.ROOM, new RoomTool(this));
+		Manager.putTool(Tools.DOOR, new DoorTool(this));
+		Manager.putTool(Tools.WEAPON, new MountTool(this));
+		Manager.putTool(Tools.STATION, new StationTool(this));
 
 		canvas.addMouseListener(MouseInputDispatcher.getInstance());
 		canvas.addMouseMoveListener(MouseInputDispatcher.getInstance());
@@ -929,6 +940,9 @@ public class EditorWindow {
 						e.x / ShipContainer.CELL_SIZE, e.y / ShipContainer.CELL_SIZE));
 			}
 		});
+
+		registerHotkeys();
+		updateHotkeyTooltips();
 
 		shell.setMinimumSize(SIDEBAR_MIN_WIDTH + CANVAS_MIN_SIZE, CANVAS_MIN_SIZE + toolContainer.getSize().y * 2);
 
@@ -1004,6 +1018,10 @@ public class EditorWindow {
 			UIUtils.addHotkeyText(mntmSettings, h.toString());
 
 		// View
+		mntmZoom.setText("Open Zoom Window");
+		h = Manager.getHotkey(Hotkeys.OPEN_ZOOM);
+		if (h.isEnabled())
+			UIUtils.addHotkeyText(mntmZoom, h.toString());
 		mntmGrid.setText("Show Grid");
 		h = Manager.getHotkey(Hotkeys.TOGGLE_GRID);
 		if (h.isEnabled())
@@ -1450,6 +1468,10 @@ public class EditorWindow {
 		Manager.hookHotkey(shell, h);
 
 		// View
+		h = Manager.getHotkey(Hotkeys.OPEN_ZOOM);
+		h.addNotifyAndToggleAction(mntmZoom, true);
+		Manager.hookHotkey(shell, h);
+
 		h = Manager.getHotkey(Hotkeys.TOGGLE_GRID);
 		h.addNotifyAndToggleAction(mntmGrid, true);
 		Manager.hookHotkey(shell, h);
