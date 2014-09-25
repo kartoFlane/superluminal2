@@ -82,6 +82,7 @@ public abstract class Manager {
 
 	// Runtime variables
 	public static boolean leftMouseDown = false;
+	public static boolean midMouseDown = false;
 	public static boolean rightMouseDown = false;
 
 	private static AbstractController selectedController;

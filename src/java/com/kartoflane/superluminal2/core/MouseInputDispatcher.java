@@ -32,6 +32,8 @@ public class MouseInputDispatcher implements MouseInputListener {
 	public void mouseDown(MouseEvent e) {
 		if (e.button == 1)
 			Manager.leftMouseDown = true;
+		if (e.button == 2)
+			Manager.midMouseDown = true;
 		if (e.button == 3)
 			Manager.rightMouseDown = true;
 
@@ -43,6 +45,8 @@ public class MouseInputDispatcher implements MouseInputListener {
 	public void mouseUp(MouseEvent e) {
 		if (e.button == 1)
 			Manager.leftMouseDown = false;
+		if (e.button == 2)
+			Manager.midMouseDown = false;
 		if (e.button == 3)
 			Manager.rightMouseDown = false;
 
