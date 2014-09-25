@@ -9,65 +9,53 @@ import java.util.Properties;
 
 import org.eclipse.swt.graphics.Point;
 
-public class SuperluminalConfig {
-	private Properties config;
+@SuppressWarnings("serial")
+public class SuperluminalConfig extends Properties {
+
 	private File configFile;
 
+	// @formatter:off
 	// All keys the config can save
-	public static final String FTL_RESOURCE = "ftlResourcePath";
-	public static final String SAVE_GEOMETRY = "rememberGeometry";
-	public static final String SIDEBAR_SIDE = "sidebarRightSide";
-	public static final String START_MAX = "startMaximized";
-	public static final String CLOSE_LOADER = "closeLoaderAfterLoading";
-	public static final String GEOMETRY = "geometry";
-	public static final String CHECK_UPDATES = "checkUpdatesOnStartup";
-	public static final String ALLOW_OVERLAP = "allowRoomOverlap";
-	public static final String ALLOW_OVERLAP_DOOR = "allowDoorOverlap";
-	public static final String RESET_LINKS = "resetDoorLinksOnMove";
-	public static final String SLOT_WARNING = "shownSlotWarning";
-	public static final String ARTILLERY_WARNING = "shownArtilleryWarning";
+	public static final String FTL_RESOURCE =			"ftlResourcePath";
+	public static final String SAVE_GEOMETRY =			"rememberGeometry";
+	public static final String GEOMETRY =				"geometry";
 
-	public SuperluminalConfig(Properties config, File configFile) {
-		this.config = config;
+	public static final String SIDEBAR_SIDE =			"sidebarRightSide";
+	public static final String START_MAX =				"startMaximized";
+	public static final String CLOSE_LOADER =			"closeLoaderAfterLoading";
+	public static final String CHECK_UPDATES =			"checkUpdatesOnStartup";
+	public static final String ALLOW_OVERLAP =			"allowRoomOverlap";
+	public static final String ALLOW_OVERLAP_DOOR =		"allowDoorOverlap";
+	public static final String RESET_LINKS =			"resetDoorLinksOnMove";
+
+	public static final String SLOT_WARNING =			"shownSlotWarning";
+	public static final String ARTILLERY_WARNING =		"shownArtilleryWarning";
+	// @formatter:on
+
+	public SuperluminalConfig(File configFile) {
+		super();
 		this.configFile = configFile;
-
-		setDefaults();
 	}
 
 	/**
 	 * Returns a copy of an existing Config object.
 	 */
 	public SuperluminalConfig(SuperluminalConfig srcConfig) {
-		this.configFile = srcConfig.getConfigFile();
-		this.config = new Properties();
-		this.config.putAll(srcConfig.getConfig());
-	}
-
-	public Properties getConfig() {
-		return config;
+		super();
+		configFile = srcConfig.getConfigFile();
+		putAll(srcConfig);
 	}
 
 	public File getConfigFile() {
 		return configFile;
 	}
 
-	public Object setProperty(String key, String value) {
-		return config.setProperty(key, value);
-	}
-
 	public int getPropertyAsInt(String key, int defaultValue) {
-		return parseStringAsInt(config.getProperty(key), defaultValue);
-	}
-
-	private int parseStringAsInt(String s, int defaultValue) {
-		if (s != null && s.matches("^\\d+$"))
-			return Integer.parseInt(s);
-		else
-			return defaultValue;
+		return parseStringAsInt(getProperty(key), defaultValue);
 	}
 
 	public Point getPropertyAsPoint(String key, int defaultX, int defaultY) {
-		String s = config.getProperty(key);
+		String s = getProperty(key);
 		if (s != null && s.matches("^\\d+,\\d+$")) {
 			String[] words = s.split(",");
 			return new Point(parseStringAsInt(words[0], defaultX), parseStringAsInt(words[1], defaultY));
@@ -75,49 +63,32 @@ public class SuperluminalConfig {
 			return new Point(defaultX, defaultY);
 	}
 
-	public String getProperty(String key, String defaultValue) {
-		return config.getProperty(key, defaultValue);
-	}
-
-	public String getProperty(String key) {
-		return config.getProperty(key);
-	}
-
-	/**
-	 * Resets the config properties to their default values.
-	 */
-	public void setDefaults() {
-		config.setProperty(FTL_RESOURCE, "");
-		config.setProperty(SAVE_GEOMETRY, "true");
-		config.setProperty(SIDEBAR_SIDE, "false");
-		config.setProperty(START_MAX, "false");
-		config.setProperty(CLOSE_LOADER, "false");
-		config.setProperty(GEOMETRY, "");
-		config.setProperty(CHECK_UPDATES, "true");
-		config.setProperty(ALLOW_OVERLAP, "false");
-		config.setProperty(ALLOW_OVERLAP_DOOR, "false");
-		config.setProperty(RESET_LINKS, "false");
-		config.setProperty(SLOT_WARNING, "false");
-		config.setProperty(ARTILLERY_WARNING, "false");
+	public boolean getPropertyAsBoolean(String key, boolean defaultValue) {
+		String s = getProperty(key);
+		try {
+			return Boolean.parseBoolean(s);
+		} catch (Exception e) {
+			return defaultValue;
+		}
 	}
 
 	/**
 	 * Updates the config properties with the current runtime values.
 	 */
 	public void setCurrent() {
-		config.setProperty(FTL_RESOURCE, Manager.resourcePath);
-		config.setProperty(SAVE_GEOMETRY, "" + Manager.rememberGeometry);
-		config.setProperty(START_MAX, "" + Manager.startMaximised);
-		config.setProperty(SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
-		config.setProperty(CHECK_UPDATES, "" + Manager.checkUpdates);
-		config.setProperty(CLOSE_LOADER, "" + Manager.closeLoader);
-		config.setProperty(ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
-		config.setProperty(ALLOW_OVERLAP_DOOR, "" + Manager.allowDoorOverlap);
-		config.setProperty(RESET_LINKS, "" + Manager.resetDoorLinksOnMove);
-		config.setProperty(SLOT_WARNING, "" + Manager.shownSlotWarning);
-		config.setProperty(ARTILLERY_WARNING, "" + Manager.shownArtilleryWarning);
+		setProperty(FTL_RESOURCE, Manager.resourcePath);
+		setProperty(SAVE_GEOMETRY, "" + Manager.rememberGeometry);
+		setProperty(START_MAX, "" + Manager.startMaximised);
+		setProperty(SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
+		setProperty(CHECK_UPDATES, "" + Manager.checkUpdates);
+		setProperty(CLOSE_LOADER, "" + Manager.closeLoader);
+		setProperty(ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
+		setProperty(ALLOW_OVERLAP_DOOR, "" + Manager.allowDoorOverlap);
+		setProperty(RESET_LINKS, "" + Manager.resetDoorLinksOnMove);
+		setProperty(SLOT_WARNING, "" + Manager.shownSlotWarning);
+		setProperty(ARTILLERY_WARNING, "" + Manager.shownArtilleryWarning);
 		if (Manager.rememberGeometry && !Manager.startMaximised)
-			config.setProperty(GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
+			setProperty(GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 	}
 
 	public void writeConfig() throws IOException {
@@ -139,7 +110,7 @@ public class SuperluminalConfig {
 			configComments += "\n";
 
 			OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
-			config.store(writer, configComments);
+			store(writer, configComments);
 			writer.flush();
 		} finally {
 			try {
@@ -148,5 +119,12 @@ public class SuperluminalConfig {
 			} catch (IOException e) {
 			}
 		}
+	}
+
+	private int parseStringAsInt(String s, int defaultValue) {
+		if (s != null && s.matches("^\\d+$"))
+			return Integer.parseInt(s);
+		else
+			return defaultValue;
 	}
 }

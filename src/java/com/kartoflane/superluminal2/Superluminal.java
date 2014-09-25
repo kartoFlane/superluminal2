@@ -12,7 +12,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
 import net.vhati.modmanager.core.ComparableVersion;
@@ -69,9 +68,11 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - make floor generation accessible and usable
 	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
 	 * - glow placement modification
 	 * == bind stations to within a single/half grid cell from the tile's center?
+	 * 
 	 * - undo system
 	 * == various properties undos
 	 * == reorder undo
@@ -129,8 +130,7 @@ public class Superluminal {
 
 		Display display = Display.getDefault();
 		File configFile = new File(CONFIG_FILE);
-		Properties config = new Properties();
-		SuperluminalConfig appConfig = new SuperluminalConfig(config, configFile);
+		SuperluminalConfig appConfig = new SuperluminalConfig(configFile);
 
 		// Read the config file
 		InputStreamReader reader = null;
@@ -138,7 +138,7 @@ public class Superluminal {
 			if (configFile.exists()) {
 				log.trace("Loading properties from config file...");
 				reader = new InputStreamReader(new FileInputStream(configFile), "UTF-8");
-				config.load(reader);
+				appConfig.load(reader);
 			}
 		} catch (IOException e) {
 			log.error("Error loading config.", e);
@@ -152,16 +152,16 @@ public class Superluminal {
 		}
 
 		// Read config values
-		Manager.sidebarOnRightSide = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SIDEBAR_SIDE));
-		Manager.rememberGeometry = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SAVE_GEOMETRY));
-		Manager.checkUpdates = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CHECK_UPDATES));
-		Manager.startMaximised = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.START_MAX));
-		Manager.closeLoader = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.CLOSE_LOADER));
-		Manager.allowRoomOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP));
-		Manager.allowDoorOverlap = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ALLOW_OVERLAP_DOOR));
-		Manager.resetDoorLinksOnMove = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.RESET_LINKS));
-		Manager.shownSlotWarning = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.SLOT_WARNING));
-		Manager.shownArtilleryWarning = Boolean.parseBoolean(config.getProperty(SuperluminalConfig.ARTILLERY_WARNING));
+		Manager.sidebarOnRightSide = appConfig.getPropertyAsBoolean(SuperluminalConfig.SIDEBAR_SIDE, false);
+		Manager.rememberGeometry = appConfig.getPropertyAsBoolean(SuperluminalConfig.SAVE_GEOMETRY, true);
+		Manager.checkUpdates = appConfig.getPropertyAsBoolean(SuperluminalConfig.CHECK_UPDATES, true);
+		Manager.startMaximised = appConfig.getPropertyAsBoolean(SuperluminalConfig.START_MAX, false);
+		Manager.closeLoader = appConfig.getPropertyAsBoolean(SuperluminalConfig.CLOSE_LOADER, false);
+		Manager.allowRoomOverlap = appConfig.getPropertyAsBoolean(SuperluminalConfig.ALLOW_OVERLAP, false);
+		Manager.allowDoorOverlap = appConfig.getPropertyAsBoolean(SuperluminalConfig.ALLOW_OVERLAP_DOOR, false);
+		Manager.resetDoorLinksOnMove = appConfig.getPropertyAsBoolean(SuperluminalConfig.RESET_LINKS, true);
+		Manager.shownSlotWarning = appConfig.getPropertyAsBoolean(SuperluminalConfig.SLOT_WARNING, false);
+		Manager.shownArtilleryWarning = appConfig.getPropertyAsBoolean(SuperluminalConfig.ARTILLERY_WARNING, false);
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
 
 		initHotkeys();
@@ -173,7 +173,7 @@ public class Superluminal {
 
 		// Read FTL resources path
 		File datsDir = null;
-		Manager.resourcePath = config.getProperty(SuperluminalConfig.FTL_RESOURCE, "");
+		Manager.resourcePath = appConfig.getProperty(SuperluminalConfig.FTL_RESOURCE, "");
 
 		if (Manager.resourcePath.length() > 0) {
 			log.info("Using FTL dats path from config: " + Manager.resourcePath);
@@ -219,7 +219,7 @@ public class Superluminal {
 
 			if (datsDir != null) {
 				Manager.resourcePath = datsDir.getAbsolutePath();
-				config.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
+				appConfig.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
 				log.info("FTL dats located at: " + Manager.resourcePath);
 			}
 		}
