@@ -190,7 +190,8 @@ public abstract class Manager {
 
 		if (undoManager.canUndo() && !currentShip.isSaved()) {
 			String msg = "Your ship has unsaved changes. Do you wish to save them?";
-			int response = UIUtils.showYesNoCancelDialog(null, Superluminal.APP_NAME + " - Save Changes?", msg);
+			int response = UIUtils.showYesNoCancelDialog(EditorWindow.getInstance().getShell(),
+					Superluminal.APP_NAME + " - Save Changes?", msg);
 
 			if (response == SWT.YES) {
 				if (!EditorWindow.getInstance().promptSaveShip(currentShip, false))

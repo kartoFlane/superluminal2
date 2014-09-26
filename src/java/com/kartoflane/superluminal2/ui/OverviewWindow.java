@@ -100,6 +100,9 @@ public class OverviewWindow implements SLListener {
 	private OverviewWindow() {
 	}
 
+	/**
+	 * @wbp.parser.entryPoint
+	 */
 	public void init(Shell parent) {
 		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
 

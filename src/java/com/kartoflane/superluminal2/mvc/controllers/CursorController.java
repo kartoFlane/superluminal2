@@ -81,20 +81,4 @@ public class CursorController extends AbstractController {
 		mouseX = e.x;
 		mouseY = e.y;
 	}
-
-	@Override
-	public void mouseDoubleClick(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseEnter(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseExit(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseHover(MouseEvent e) {
-	}
 }

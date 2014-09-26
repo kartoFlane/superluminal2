@@ -536,6 +536,7 @@ public class ShipLoadUtils {
 				} catch (IllegalArgumentException e) {
 					try {
 						Integer.parseInt(line);
+						continue;
 					} catch (NumberFormatException ex) {
 						// Not a number
 						throw new IllegalArgumentException(fileName + " contained an unknown layout object: " + line);
