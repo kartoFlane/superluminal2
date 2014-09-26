@@ -746,7 +746,9 @@ public class EditorWindow {
 		mntmZoom.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ZoomWindow zoom = new ZoomWindow(shell, canvas);
+				ZoomWindow zoom = ZoomWindow.getInstance();
+				if (zoom == null)
+					zoom = new ZoomWindow(shell, canvas);
 				zoom.open();
 			}
 		});
