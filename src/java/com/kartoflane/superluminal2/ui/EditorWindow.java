@@ -150,6 +150,7 @@ public class EditorWindow {
 	private MenuItem mntmReloadDb;
 	private MenuItem mntmHangar;
 	private MenuItem mntmZoom;
+	private MenuItem mntmGenerateFloor;
 	private ToolItem tltmAnimate;
 	private DropTarget dropTarget;
 	private Label lblCursorLoc;
@@ -238,6 +239,9 @@ public class EditorWindow {
 
 		mntmOptimalOffset = new MenuItem(menuEdit, SWT.NONE);
 		mntmOptimalOffset.setText("Calculate Optimal Offset");
+
+		mntmGenerateFloor = new MenuItem(menuEdit, SWT.NONE);
+		mntmGenerateFloor.setText("Generate Floor Image");
 
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 
@@ -702,6 +706,13 @@ public class EditorWindow {
 
 				edit.setCurrent(new Tuple<Point, Point>(container.getShipOffset(), container.getShipFineOffset()));
 				container.postEdit(edit);
+			}
+		});
+
+		mntmGenerateFloor.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Manager.getCurrentShip().generateFloorImage();
 			}
 		});
 
@@ -1254,6 +1265,7 @@ public class EditorWindow {
 		mntmRedo.setEnabled(enable && Manager.canRedo());
 		mntmResetLinks.setEnabled(enable);
 		mntmOptimalOffset.setEnabled(enable);
+		mntmGenerateFloor.setEnabled(enable);
 		mntmDelete.setEnabled(enable);
 
 		// View

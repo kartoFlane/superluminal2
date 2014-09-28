@@ -1,18 +1,25 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import javax.imageio.ImageIO;
 import javax.swing.undo.AbstractUndoableEdit;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
+import com.kartoflane.ftl.floorgen.FloorImageFactory;
+import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.NotDeletableException;
+import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
@@ -50,6 +57,7 @@ import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -585,6 +593,64 @@ public class ShipContainer implements Disposable, SLListener {
 	public Point getShipFineOffset() {
 		ShipObject ship = shipController.getGameObject();
 		return ship.getOffsetFine();
+	}
+
+	public void generateFloorImage() {
+		ShipObject ship = shipController.getGameObject();
+
+		if (ship.getRooms().length == 0) {
+			UIUtils.showInfoDialog(null, null, "Unable to generate floor image, because the ship has no rooms.");
+			return;
+		}
+
+		// Prepare the ship data
+		updateGameObjects();
+		ship.coalesceRooms();
+
+		// Remember door links and recover them later -- linking doors automatically persists after saving
+		// is completed, which can cause bugs when the user moves the doors/rooms around and saves again
+		HashMap<DoorObject, Tuple<RoomObject, RoomObject>> doorLinkMap = new HashMap<DoorObject, Tuple<RoomObject, RoomObject>>();
+		for (DoorObject d : ship.getDoors())
+			doorLinkMap.put(d, new Tuple<RoomObject, RoomObject>(d.getLeftRoom(), d.getRightRoom()));
+		ship.linkDoors();
+
+		// Generate the image
+		FloorImageFactory fif = new FloorImageFactory();
+		String content = ShipSaveUtils.generateLayoutTXT(ship);
+		InputStream is = null;
+
+		try {
+			is = IOUtils.encodeText(content, "UTF-8", null);
+			BufferedImage floorImage = fif.generateFloorImage(is);
+			// Save the image to a file, since that's how the editor handles images...
+			ImageIO.write(floorImage, "PNG", new File("floor_image.png"));
+
+			setImage(Images.FLOOR, null);
+			setImage(Images.FLOOR, "file:floor_image.png");
+			ImageController floorC = getImageController(Images.FLOOR);
+			floorC.setVisible(true);
+		} catch (Exception ex) {
+			StringBuilder buf = new StringBuilder();
+			buf.append(Superluminal.APP_NAME);
+			buf.append(" has encountered an error while generating the floor image:\n\n");
+			buf.append(ex.getMessage());
+			buf.append("\n\nCheck log for details.");
+
+			Superluminal.log.warn("Error while generating floor image:", ex);
+			UIUtils.showWarningDialog(null, null, buf.toString());
+		} finally {
+			// Recover door links
+			for (DoorObject d : ship.getDoors()) {
+				d.setLeftRoom(doorLinkMap.get(d).getKey());
+				d.setRightRoom(doorLinkMap.get(d).getValue());
+			}
+
+			try {
+				if (is != null)
+					is.close();
+			} catch (IOException ex) {
+			}
+		}
 	}
 
 	public void assign(SystemObject sys, RoomController room) {
