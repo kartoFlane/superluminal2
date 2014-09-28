@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A simple point graph to hold the shape of the room layout in a more usable fashion.
+ * A simple undirected point graph to hold the shape of the room layout in a more usable fashion.
+ * 
+ * The graph is symmetric, irreflexive and not transitive.
  */
 class Graph implements Iterable<Point> {
 	private Map<Point, List<Point>> adj;
@@ -66,21 +68,29 @@ class Graph implements Iterable<Point> {
 		return adj.get(v).size();
 	}
 
+	/**
+	 * Prints the graph in the form of a table. Each row represents a point in the graph,
+	 * and numbers listed in that row indicate points that row is connected to.
+	 */
 	public String toString() {
+		int f = 1, s = adj.keySet().size();
+		while (s > 0) {
+			s /= 10;
+			f += 1;
+		}
+
 		StringBuilder buf = new StringBuilder();
 		int i = 1;
+
 		for (Point v : adj.keySet()) {
-			buf.append(i);
-			buf.append(" ");
-			buf.append(v);
+			buf.append(String.format("%-" + f + "s", i));
+			buf.append(String.format("%11s", toString(v)));
+			buf.append(": ");
 			List<Point> l = adj.get(v);
 			int j = 1;
 			for (Point w : adj.keySet()) {
 				if (l.contains(w)) {
-					buf.append("x ");
-				} else {
-					buf.append(j);
-					buf.append(" ");
+					buf.append(String.format("%" + f + "s", j));
 				}
 				j++;
 			}
@@ -88,6 +98,10 @@ class Graph implements Iterable<Point> {
 			i++;
 		}
 		return buf.toString();
+	}
+
+	private String toString(Point v) {
+		return "{ " + v.x + ", " + v.y + " }";
 	}
 
 	/*
