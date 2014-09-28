@@ -239,15 +239,12 @@ public class ShipSaveUtils {
 				}
 			}
 
-			for (GlowObject object : newGlows) {
-				GlowSet set = object.getGlowSet();
-				String path = set.getImage(Glows.CLOAK);
+			SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
+			GlowSet cloakSet = cloaking.getGlowSet();
+			if (cloakSet != Database.DEFAULT_GLOW_SET) {
+				String path = cloakSet.getImage(Glows.CLOAK);
 
-				if (path != null) {
-					if (isImageCorrupt(path))
-						continue;
-
-					SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
+				if (path != null && !isImageCorrupt(path)) {
 					InputStream is = null;
 					try {
 						is = Manager.getInputStream(path);
@@ -259,25 +256,29 @@ public class ShipSaveUtils {
 						if (is != null)
 							is.close();
 					}
-				} else {
-					for (Glows glowId : Glows.getGlows()) {
-						path = set.getImage(glowId);
+				}
+			}
 
-						if (path != null) {
-							if (isImageCorrupt(path))
-								continue;
+			for (GlowObject object : newGlows) {
+				GlowSet set = object.getGlowSet();
 
-							InputStream is = null;
-							try {
-								is = Manager.getInputStream(path);
-								fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
-								fileMap.put(fileName, IOUtils.readStream(is));
-							} catch (FileNotFoundException e) {
-								log.warn(String.format("File for %s's %s glow image could not be found: %s", object.getIdentifier(), glowId, path));
-							} finally {
-								if (is != null)
-									is.close();
-							}
+				for (Glows glowId : Glows.getGlows()) {
+					String path = set.getImage(glowId);
+
+					if (path != null) {
+						if (isImageCorrupt(path))
+							continue;
+
+						InputStream is = null;
+						try {
+							is = Manager.getInputStream(path);
+							fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
+							fileMap.put(fileName, IOUtils.readStream(is));
+						} catch (FileNotFoundException e) {
+							log.warn(String.format("File for %s's %s glow image could not be found: %s", object.getIdentifier(), glowId, path));
+						} finally {
+							if (is != null)
+								is.close();
 						}
 					}
 				}

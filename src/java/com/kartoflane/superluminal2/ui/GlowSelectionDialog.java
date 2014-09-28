@@ -130,6 +130,7 @@ public class GlowSelectionDialog {
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				result = null;
 				dispose();
 			}
 		});

@@ -352,6 +352,12 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				txtInterior.selectAll();
 				txtInterior.clearSelection();
 
+				if (system.getSystemId() == Systems.CLOAKING) {
+					lblGlow.setText("Activation glow:");
+				} else {
+					lblGlow.setText("Manning glow:");
+				}
+
 				btnGlow.setEnabled(system.canContainGlow());
 				if (system.canContainGlow()) {
 					btnGlow.setText(system.getGameObject().getGlowSet().getIdentifier());

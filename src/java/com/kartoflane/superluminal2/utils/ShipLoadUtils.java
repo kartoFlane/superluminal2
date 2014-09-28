@@ -28,6 +28,7 @@ import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -260,10 +261,16 @@ public class ShipLoadUtils {
 				if (system.canContainGlow()) {
 					if (attr == null)
 						attr = sys.getDefaultInteriorNamespace();
-					attr = attr.replace("room_", "");
-					GlowObject glowObject = db.getGlow(attr);
-					if (glowObject != null) {
-						system.setGlowSet(glowObject.getGlowSet());
+
+					if (system.getSystemId() == Systems.CLOAKING) {
+						GlowSet glowSet = db.getGlowSet(attr);
+						system.setGlowSet(glowSet);
+					} else {
+						attr = attr.replace("room_", "");
+						GlowObject glowObject = db.getGlow(attr);
+						if (glowObject != null) {
+							system.setGlowSet(glowObject.getGlowSet());
+						}
 					}
 				}
 
