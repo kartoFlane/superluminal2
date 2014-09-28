@@ -436,6 +436,7 @@ public class FloorImageFactory {
 					continue;
 				} catch (NumberFormatException ex) {
 					// Not a layout object or integer value - syntax error
+					// Intercept the exception to throw a more meaningful one...
 					throw new IllegalArgumentException("TXT layout syntax error on line: \n" + line);
 				}
 			}
@@ -475,10 +476,8 @@ public class FloorImageFactory {
 	}
 
 	private Rectangle getTile(Rectangle[][] matrix, int x, int y) {
-		try {
-			return matrix[x][y];
-		} catch (IndexOutOfBoundsException e) {
+		if (x < 0 || x >= matrix.length || y < 0 || y >= matrix[x].length)
 			return null;
-		}
+		return matrix[x][y];
 	}
 }
