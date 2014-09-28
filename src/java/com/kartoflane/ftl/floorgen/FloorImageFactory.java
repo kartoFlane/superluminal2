@@ -256,6 +256,18 @@ public class FloorImageFactory {
 						if (layout.hasAirlockAt(x, y, false)) {
 							int cx = tile.x;
 							int cy = tile.y;
+
+							// Two airlocks at a dent get drawn correctly, but leave empty space between their
+							// corners. Fill that area with color
+							if (layout.hasAirlockAt(x - 1, y, true)) {
+								gc.setColor(floorColor);
+								gc.fillRect(cx - floorMargin, cy, floorMargin, floorMargin);
+							}
+							if (layout.hasAirlockAt(x - 1, y + 1, true)) {
+								gc.setColor(floorColor);
+								gc.fillRect(cx - floorMargin, cy + tile.height - floorMargin, floorMargin, floorMargin);
+							}
+
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x - 1, y - 1) != null)
 								cy += floorMargin;
@@ -336,6 +348,18 @@ public class FloorImageFactory {
 						if (layout.hasAirlockAt(x + 1, y, false)) {
 							int cx = tile.x + tile.width;
 							int cy = tile.y;
+
+							// Two airlocks at a dent get drawn correctly, but leave empty space between their
+							// corners. Fill that area with color
+							if (layout.hasAirlockAt(x + 1, y, true)) {
+								gc.setColor(floorColor);
+								gc.fillRect(cx, cy, floorMargin, floorMargin);
+							}
+							if (layout.hasAirlockAt(x + 1, y + 1, true)) {
+								gc.setColor(floorColor);
+								gc.fillRect(cx, cy + tile.height - floorMargin, floorMargin, floorMargin);
+							}
+
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x + 1, y - 1) != null)
 								cy += floorMargin;

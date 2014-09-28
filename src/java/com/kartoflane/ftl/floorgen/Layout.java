@@ -38,6 +38,19 @@ class Layout {
 			}
 		}
 
+		// Remove airlocks that somehow are located between/inside rooms
+		Door[] doors = airlocks.toArray(new Door[0]);
+		for (Door d : doors) {
+			int x = d.getX(), y = d.getY();
+
+			// If the airlock is located on an edge that connects with
+			// a node with 8 connections, then it is between/inside a room
+			if (isInner(x, y) || (d.isHorizontal() && isInner(x + 1, y)) ||
+					(!d.isHorizontal() && isInner(x, y + 1))) {
+				airlocks.remove(d);
+			}
+		}
+
 		width = maxX - minX;
 		height = maxY - minY;
 
