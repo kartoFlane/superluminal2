@@ -58,7 +58,8 @@ public class ZoomWindow
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE);
 		shell.setLayout(new GridLayout(1, false));
-		String msg = "- Left-click and drag to move the viewport\n" +
+		String msg = "- Left-click and drag in this window to move the viewport\n" +
+				"- Hold down mouse scroll button and drag in the main window to move the viewport\n" +
 				"- Scroll with mouse scroll to zoom in or out";
 
 		lblInfo = new Label(shell, SWT.NONE);
