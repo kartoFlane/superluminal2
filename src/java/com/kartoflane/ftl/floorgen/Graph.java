@@ -65,7 +65,10 @@ class Graph implements Iterable<Point> {
 	}
 
 	public int countEdges(Point v) {
-		return adj.get(v).size();
+		if (adj.get(v) == null)
+			return 0;
+		else
+			return adj.get(v).size();
 	}
 
 	/**

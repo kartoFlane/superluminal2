@@ -224,16 +224,16 @@ public class FloorImageFactory {
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x - 1, y - 1) != null)
 								cx += floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x - 1, y, true))
+							// Don't draw if there's a neighbouring airlock, unless on a double dent
+							if (layout.isDoubleDent(x, y) || !layout.hasAirlockAt(x - 1, y, true))
 								drawTopRightCorner(gc, cx, cy);
 
 							cx = tile.x + tile.width;
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x + 1, y - 1) != null)
 								cx -= floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x + 1, y, true))
+							// Don't draw if there's a neighbouring airlock, unless on a double dent
+							if (layout.isDoubleDent(x + 1, y) || !layout.hasAirlockAt(x + 1, y, true))
 								drawTopLeftCorner(gc, cx, cy);
 						} else {
 							gc.setColor(borderColor);
@@ -271,16 +271,16 @@ public class FloorImageFactory {
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x - 1, y - 1) != null)
 								cy += floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x, y - 1, false))
+							// Don't draw if there's a neighbouring airlock, unless on a double denet
+							if (layout.isDoubleDent(x, y) || !layout.hasAirlockAt(x, y - 1, false))
 								drawBottomLeftCorner(gc, cx, cy);
 
 							cy = tile.y + tile.height;
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x - 1, y + 1) != null)
 								cy -= floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x, y + 1, false))
+							// Don't draw if there's a neighbouring airlock, unless on a double dent
+							if (layout.isDoubleDent(x, y + 1) || !layout.hasAirlockAt(x, y + 1, false))
 								drawTopLeftCorner(gc, cx, cy);
 						} else {
 							boolean isDent = layout.isDent(x, y) || layout.isDoubleDent(x, y);
@@ -315,16 +315,16 @@ public class FloorImageFactory {
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x - 1, y + 1) != null)
 								cx += floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x - 1, y + 1, true))
+							// Don't draw if there's a neighbouring airlock, unless on a double dent
+							if (layout.isDoubleDent(x, y + 1) || !layout.hasAirlockAt(x - 1, y + 1, true))
 								drawBottomRightCorner(gc, cx, cy);
 
 							cx = tile.x + tile.width;
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x + 1, y + 1) != null)
 								cx -= floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x + 1, y + 1, true))
+							// Don't draw if there's a neighbouring airlock, unless on a double dent
+							if (layout.isDoubleDent(x + 1, y + 1) || !layout.hasAirlockAt(x + 1, y + 1, true))
 								drawBottomLeftCorner(gc, cx, cy);
 
 						} else {
@@ -363,16 +363,16 @@ public class FloorImageFactory {
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x + 1, y - 1) != null)
 								cy += floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x + 1, y - 1, false))
+							// Don't draw if there's a neighbouring airlock, unless on a double dent
+							if (layout.isDoubleDent(x + 1, y) || !layout.hasAirlockAt(x + 1, y - 1, false))
 								drawBottomRightCorner(gc, cx, cy);
 
 							cy = tile.y + tile.height;
 							// If there's a wall, offset to prevent overlap
 							if (getTile(tiles, x + 1, y + 1) != null)
 								cy -= floorMargin;
-							// Don't draw if there's a neighbouring airlock
-							if (!layout.hasAirlockAt(x + 1, y + 1, false))
+							// Don't draw if there's a neighbouring airlock, unless on a double dent
+							if (layout.isDoubleDent(x + 1, y + 1) || !layout.hasAirlockAt(x + 1, y + 1, false))
 								drawTopRightCorner(gc, cx, cy);
 						} else {
 							gc.setColor(borderColor);
