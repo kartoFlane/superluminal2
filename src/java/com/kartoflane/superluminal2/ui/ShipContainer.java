@@ -1374,6 +1374,11 @@ public class ShipContainer implements Disposable, SLListener {
 	 */
 	public void triggerGibAnimation() {
 		if (!isGibAnimationInProgress()) {
+			if (gibControllers.size() == 0) {
+				UIUtils.showInfoDialog(null, null, "Unable to animte gibs because the ship has no gibs.");
+				return;
+			}
+
 			animateGibs = true;
 			window.updateGibAnimationButton(false);
 			window.setInteractable(false);
