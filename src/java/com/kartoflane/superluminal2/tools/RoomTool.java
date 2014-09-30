@@ -104,6 +104,16 @@ public class RoomTool extends Tool {
 				cursor.updateView();
 			}
 		} else if (e.button == 3) {
+			// room creation abort
+			if (creating) {
+				creating = false;
+				canCreate = canCreate(cursor.getDimensions());
+
+				cursor.updateView();
+				cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+				cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
+				cursor.setVisible(!Manager.leftMouseDown);
+			}
 		}
 	}
 
@@ -150,23 +160,12 @@ public class RoomTool extends Tool {
 
 				creating = false;
 				canCreate = canCreate(cursor.getDimensions());
-
-				cursor.updateView();
-				cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
-				cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
-				cursor.setVisible(true);
 			}
-		} else if (e.button == 3) {
-			// room creation abort
-			if (creating) {
-				creating = false;
-				canCreate = canCreate(cursor.getDimensions());
 
-				cursor.updateView();
-				cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
-				cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
-				cursor.setVisible(true);
-			}
+			cursor.updateView();
+			cursor.resize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
+			cursor.reposition(Grid.getInstance().snapToGrid(e.x, e.y, cursor.getSnapMode()));
+			cursor.setVisible(true);
 		}
 	}
 
