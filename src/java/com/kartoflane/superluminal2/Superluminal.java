@@ -45,7 +45,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.6b beta");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.7");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -68,7 +68,6 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
-	 * - make floor generation accessible and usable
 	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
 	 * - glow placement modification
 	 * == bind stations to within a single/half grid cell from the tile's center?
@@ -96,13 +95,15 @@ public class Superluminal {
 	public static void main(String[] args) {
 		log.debug(String.format("%s v%s", APP_NAME, APP_VERSION));
 		log.debug(String.format("%s %s", System.getProperty("os.name"), System.getProperty("os.version")));
-		log.debug(String.format("%s, %s, %s", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("os.arch")));
+		log.debug(String.format("%s, %s, %s", System.getProperty("java.vm.name"),
+				System.getProperty("java.version"), System.getProperty("os.arch")));
 		log.debug(String.format("SWT v%s", SWT.getVersion()));
 		System.out.println();
 
 		try {
 			// Display#setAppName() allows to set the name of the application on OSX
-			// However, in order to work, it has to be called before any instance of Display is created (via Display#getCurrent() or #getDefault())
+			// However, in order to work, it has to be called before any instance of
+			// Display is created (via Display#getCurrent() or #getDefault())
 			// Also tests whether the correct version of the editor is installed (since SWT code is platform-specific)
 			Display.setAppName(APP_NAME);
 			Display.setAppVersion(APP_VERSION.toString());
@@ -111,7 +112,8 @@ public class Superluminal {
 
 			OS os = OS.identifyOS();
 			if (os.isUnknown())
-				log.error(String.format("Your system (%s %s) was not recognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model")));
+				log.error(String.format("Your system (%s %s) was not recognized, or is not supported :(",
+						System.getProperty("os.name"), System.getProperty("sun.arch.data.model")));
 			else
 				log.error("You should download version for " + os.toString());
 
@@ -119,7 +121,8 @@ public class Superluminal {
 			msg += "You have downloaded a wrong version of the editor for your system.\n";
 			msg += "\n";
 			if (os.isUnknown()) {
-				msg += String.format("Your system (%s %s) was not recognized, or is not supported :(", System.getProperty("os.name"), System.getProperty("sun.arch.data.model"));
+				msg += String.format("Your system (%s %s) was not recognized, or is not supported :(",
+						System.getProperty("os.name"), System.getProperty("sun.arch.data.model"));
 			} else {
 				msg += "You should download version for: " + os.toString();
 			}
@@ -256,7 +259,8 @@ public class Superluminal {
 								continue;
 							}
 							if (!arg.endsWith(".ftl") && !arg.endsWith(".zip")) {
-								log.warn(String.format("'%s' was not loaded because the specified file is not a .zip or .ftl.", f.getName()));
+								log.warn(String.format("'%s' was not loaded because the specified file is not a .zip or .ftl.",
+										f.getName()));
 								continue;
 							}
 
@@ -345,45 +349,46 @@ public class Superluminal {
 		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
 		final ArrayList<String> changes = new ArrayList<String>();
 
-		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", "Checking for updates, please wait...", new Action() {
-			public void execute() {
-				InputStream is = null;
-				try {
-					URL url = new URL(APP_UPDATE_FETCH_URL);
-					is = url.openStream();
+		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...",
+				"Checking for updates, please wait...", new Action() {
+					public void execute() {
+						InputStream is = null;
+						try {
+							URL url = new URL(APP_UPDATE_FETCH_URL);
+							is = url.openStream();
 
-					Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
-					Element root = updateDoc.getRootElement();
-					Element latest = root.getChild("latest");
-					String id = latest.getAttributeValue("id");
+							Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
+							Element root = updateDoc.getRootElement();
+							Element latest = root.getChild("latest");
+							String id = latest.getAttributeValue("id");
 
-					downloadLink[0] = latest.getAttributeValue("url");
-					remoteVersion[0] = new ComparableVersion(id);
+							downloadLink[0] = latest.getAttributeValue("url");
+							remoteVersion[0] = new ComparableVersion(id);
 
-					Element changelog = root.getChild("changelog");
-					for (Element version : changelog.getChildren("version")) {
-						ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
-						if (vId.compareTo(APP_VERSION) > 0) {
-							for (Element change : version.getChildren("change")) {
-								changes.add(change.getValue());
+							Element changelog = root.getChild("changelog");
+							for (Element version : changelog.getChildren("version")) {
+								ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
+								if (vId.compareTo(APP_VERSION) > 0) {
+									for (Element change : version.getChildren("change")) {
+										changes.add(change.getValue());
+									}
+								}
+							}
+						} catch (UnknownHostException e) {
+							log.error("Update check failed -- connection to the repository could not be estabilished.");
+						} catch (JDOMException e) {
+							log.error("Udpate check failed -- an error has occured while parsing update file.", e);
+						} catch (Exception e) {
+							log.error("An error occured while checking for updates.", e);
+						} finally {
+							try {
+								if (is != null)
+									is.close();
+							} catch (IOException e) {
 							}
 						}
 					}
-				} catch (UnknownHostException e) {
-					log.error("Update check failed -- connection to the repository could not be estabilished.");
-				} catch (JDOMException e) {
-					log.error("Udpate check failed -- an error has occured while parsing update file.", e);
-				} catch (Exception e) {
-					log.error("An error occured while checking for updates.", e);
-				} finally {
-					try {
-						if (is != null)
-							is.close();
-					} catch (IOException e) {
-					}
-				}
-			}
-		});
+				});
 
 		if (remoteVersion[0] == null) {
 			// Version check failed, already logged by previous catches
@@ -391,7 +396,8 @@ public class Superluminal {
 			try {
 				log.info("Update is available, user version: " + APP_VERSION + ", remote version: " + remoteVersion[0]);
 
-				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(), SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(),
+						SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
 				box.setText(APP_NAME + " - Update Available");
 
 				StringBuilder buf = new StringBuilder();
@@ -517,9 +523,11 @@ public class Superluminal {
 					h.setCommand(cmd);
 					h.setKey(ch);
 				} catch (IllegalArgumentException e) {
-					log.warn("A keybind for action " + action.name() + " had invalid '" + loading + "' attribute, and was not loaded.");
+					log.warn(String.format("Keybind for action %s had invalid '%s' attribute and was not loaded.",
+							action.name(), loading));
 				} catch (NullPointerException e) {
-					log.warn("A keybind for action " + action.name() + " was missing attribute '" + loading + "', and was not loaded.");
+					log.warn(String.format("Keybind for action %s was missing '%s' attribute and was not loaded.",
+							action.name(), loading));
 				}
 			}
 		} catch (FileNotFoundException ex) {
