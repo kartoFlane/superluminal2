@@ -150,7 +150,7 @@ public class GlowSelectionDialog {
 				if (newGlow != null) {
 					Database.getInstance().getCore().store(newGlow);
 					TreeItem currentItem = updateTree(selectedSystem);
-					result = selectedSystem.getGlowSet();
+					result = selectedSystem.getGlow().getGlowSet();
 					updateData();
 					if (currentItem != null)
 						tree.setSelection(currentItem);
@@ -194,7 +194,7 @@ public class GlowSelectionDialog {
 
 		shell.open();
 
-		result = system.getGlowSet();
+		result = system.getGlow().getGlowSet();
 		updateData();
 
 		if (currentItem != null)
@@ -233,7 +233,7 @@ public class GlowSelectionDialog {
 			TreeItem trtm = new TreeItem(tree, SWT.NONE);
 			trtm.setText(glowSet.getIdentifier());
 			trtm.setData(glowSet);
-			if (glowSet.compareTo(system.getGlowSet()) == 0)
+			if (glowSet.compareTo(system.getGlow().getGlowSet()) == 0)
 				currentItem = trtm;
 		}
 		return currentItem;

@@ -33,6 +33,8 @@ public abstract class SLEvent {
 	public static final int DISPOSE      = 13;
 	/** Indicates that the sender's visibility has been changed. Data is a boolean. */
 	public static final int VISIBLE      = 14;
+	/** Indicates that the sender's direction has been changed. Data is a direction. */
+	public static final int DIRECTION    = 15;
 
 	// @formatter:on
 
@@ -82,6 +84,7 @@ public abstract class SLEvent {
 			case MOD_COMMAND:
 			case DISPOSE:
 			case VISIBLE:
+			case DIRECTION:
 				break;
 			default:
 				throw new IllegalArgumentException("Incorrect event type value: " + type);

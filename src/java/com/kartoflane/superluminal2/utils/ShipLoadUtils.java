@@ -264,12 +264,12 @@ public class ShipLoadUtils {
 
 					if (system.getSystemId() == Systems.CLOAKING) {
 						GlowSet glowSet = db.getGlowSet(attr);
-						system.setGlowSet(glowSet);
+						system.getGlow().setGlowSet(glowSet);
 					} else {
 						attr = attr.replace("room_", "");
 						GlowObject glowObject = db.getGlow(attr);
 						if (glowObject != null) {
-							system.setGlowSet(glowObject.getGlowSet());
+							system.setGlow(glowObject);
 						}
 					}
 				}

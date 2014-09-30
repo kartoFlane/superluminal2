@@ -9,7 +9,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
-import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Races;
@@ -1168,43 +1167,6 @@ public class ShipObject extends GameObject {
 		}
 
 		return Database.AIRLOCK_OBJECT;
-	}
-
-	/**
-	 * Iterates over all systems, checking if there already exists a glow object
-	 * for their interior image's namespace.<br>
-	 * If no such glow object is found, and the room/station combination needs one,
-	 * this function creates a new glow object for this system.
-	 * 
-	 * @return an array of all created glows
-	 */
-	public GlowObject[] createGlows() {
-		ArrayList<GlowObject> glows = new ArrayList<GlowObject>();
-
-		for (Systems sys : systemMap.keySet()) {
-			SystemObject system = getSystem(sys);
-			String namespace = system.getInteriorNamespace();
-			if (system.isAssigned() && sys.canContainStation() && sys.canContainGlow() &&
-					namespace != null && system.getGlowSet() == Database.DEFAULT_GLOW_SET) {
-				RoomObject room = system.getRoom();
-				StationObject station = system.getStation();
-
-				namespace = namespace.replace("room_", "");
-				GlowObject glow = Database.getInstance().getGlow(namespace);
-
-				if (glow == null && station.getSlotId() != -2 && station.getSlotDirection() != Directions.NONE) {
-					glow = new GlowObject(namespace);
-					glow.setData(room, station);
-					glow.setGlowSet(system.getGlowSet());
-					glows.add(glow);
-				} else if (glow != null && glow.getGlowSet() != system.getGlowSet()) {
-					glow.setGlowSet(system.getGlowSet());
-					glows.add(glow);
-				}
-			}
-		}
-
-		return glows.toArray(new GlowObject[0]);
 	}
 
 	public void sort() {

@@ -157,8 +157,6 @@ public class ShipSaveUtils {
 			doorLinkMap.put(d, new Tuple<RoomObject, RoomObject>(d.getLeftRoom(), d.getRightRoom()));
 		ship.linkDoors();
 
-		GlowObject[] newGlows = ship.createGlows();
-
 		HashMap<String, byte[]> fileMap = new HashMap<String, byte[]>();
 		String fileName = null;
 		byte[] bytes = null;
@@ -176,12 +174,9 @@ public class ShipSaveUtils {
 		bytes = IOUtils.readDocument(generateLayoutXML(ship)).getBytes();
 		fileMap.put(fileName, bytes);
 
-		// Create the rooms.xml.append file for glow locations
-		if (newGlows.length != 0) {
-			fileName = "data/rooms.xml.append";
-			bytes = IOUtils.readDocument(generateRoomsXML(newGlows)).getBytes();
-			fileMap.put(fileName, bytes);
-		}
+		fileName = "data/rooms.xml.append";
+		bytes = IOUtils.readDocument(generateRoomsXML(ship)).getBytes();
+		fileMap.put(fileName, bytes);
 
 		// Recover door links
 		for (DoorObject d : ship.getDoors()) {
@@ -236,11 +231,37 @@ public class ShipSaveUtils {
 								is.close();
 						}
 					}
+
+					if (sys.canContainGlow() && sys.canContainStation()) {
+						GlowObject glow = system.getGlow();
+						GlowSet set = glow.getGlowSet();
+
+						for (Glows glowId : Glows.getGlows()) {
+							path = set.getImage(glowId);
+
+							if (path != null) {
+								if (isImageCorrupt(path))
+									continue;
+
+								InputStream is = null;
+								try {
+									is = Manager.getInputStream(path);
+									fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
+									fileMap.put(fileName, IOUtils.readStream(is));
+								} catch (FileNotFoundException e) {
+									log.warn(String.format("File for %s's %s glow image could not be found: %s", glow.getIdentifier(), glowId, path));
+								} finally {
+									if (is != null)
+										is.close();
+								}
+							}
+						}
+					}
 				}
 			}
 
 			SystemObject cloaking = ship.getSystem(Systems.CLOAKING);
-			GlowSet cloakSet = cloaking.getGlowSet();
+			GlowSet cloakSet = cloaking.getGlow().getGlowSet();
 			if (cloakSet != Database.DEFAULT_GLOW_SET) {
 				String path = cloakSet.getImage(Glows.CLOAK);
 
@@ -255,31 +276,6 @@ public class ShipSaveUtils {
 					} finally {
 						if (is != null)
 							is.close();
-					}
-				}
-			}
-
-			for (GlowObject object : newGlows) {
-				GlowSet set = object.getGlowSet();
-
-				for (Glows glowId : Glows.getGlows()) {
-					String path = set.getImage(glowId);
-
-					if (path != null) {
-						if (isImageCorrupt(path))
-							continue;
-
-						InputStream is = null;
-						try {
-							is = Manager.getInputStream(path);
-							fileName = "img/ship/interior/" + set.getIdentifier() + glowId.getSuffix() + ".png";
-							fileMap.put(fileName, IOUtils.readStream(is));
-						} catch (FileNotFoundException e) {
-							log.warn(String.format("File for %s's %s glow image could not be found: %s", object.getIdentifier(), glowId, path));
-						} finally {
-							if (is != null)
-								is.close();
-						}
 					}
 				}
 			}
@@ -714,23 +710,28 @@ public class ShipSaveUtils {
 		return doc;
 	}
 
-	public static Document generateRoomsXML(GlowObject[] newGlows) {
+	public static Document generateRoomsXML(ShipObject ship) {
 		Document doc = new Document();
 		Element root = new Element("wrapper");
 
-		for (GlowObject glow : newGlows) {
-			Element glowEl = new Element("roomLayout");
-			glowEl.setAttribute("name", glow.getIdentifier());
+		for (Systems sys : Systems.getSystems()) {
+			SystemObject system = ship.getSystem(sys);
+			if (system.isAssigned() && sys.canContainGlow() && sys.canContainStation()) {
+				GlowObject glow = system.getGlow();
 
-			Element e = new Element("computerGlow");
-			if (!glow.getGlowSet().getIdentifier().equals("glow"))
-				e.setAttribute("name", glow.getGlowSet().getIdentifier());
-			e.setAttribute("x", "" + glow.getX());
-			e.setAttribute("y", "" + glow.getY());
-			e.setAttribute("dir", "" + glow.getDirection().name());
+				Element glowEl = new Element("roomLayout");
+				glowEl.setAttribute("name", glow.getIdentifier());
 
-			glowEl.addContent(e);
-			root.addContent(glowEl);
+				Element e = new Element("computerGlow");
+				if (!glow.getGlowSet().getIdentifier().equals("glow"))
+					e.setAttribute("name", glow.getGlowSet().getIdentifier());
+				e.setAttribute("x", "" + glow.getX());
+				e.setAttribute("y", "" + glow.getY());
+				e.setAttribute("dir", "" + glow.getDirection().name());
+
+				glowEl.addContent(e);
+				root.addContent(glowEl);
+			}
 		}
 
 		doc.setRootElement(root);

@@ -47,6 +47,7 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
+import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 import com.kartoflane.superluminal2.mvc.controllers.ImageController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.mvc.controllers.ObjectController;
@@ -222,6 +223,12 @@ public class ShipContainer implements Disposable, SLListener {
 				store(systemC);
 				if (sys.canContainStation()) {
 					StationController sc = StationController.newInstance(this, systemC, system.getStation());
+					if (sys.canContainGlow()) {
+						GlowController gc = GlowController.newInstance(sc, system.getGlow());
+						add(gc);
+						store(gc);
+					}
+
 					add(sc);
 					store(sc);
 				}
@@ -1233,6 +1240,7 @@ public class ShipContainer implements Disposable, SLListener {
 		painter.setLayerDrawn(Layers.ROOM, vis);
 		painter.setLayerDrawn(Layers.SYSTEM, vis);
 		painter.setLayerDrawn(Layers.STATION, vis && isStationsVisible());
+		painter.setLayerDrawn(Layers.GLOW, vis && isStationsVisible());
 		window.canvasRedraw();
 	}
 
@@ -1265,6 +1273,7 @@ public class ShipContainer implements Disposable, SLListener {
 	public void setStationsVisible(boolean vis) {
 		stationsVisible = vis;
 		LayeredPainter.getInstance().setLayerDrawn(Layers.STATION, vis && isRoomsVisible());
+		LayeredPainter.getInstance().setLayerDrawn(Layers.GLOW, vis && isRoomsVisible());
 		window.canvasRedraw();
 	}
 

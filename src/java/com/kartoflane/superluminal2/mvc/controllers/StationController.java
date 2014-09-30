@@ -5,17 +5,17 @@ import org.eclipse.swt.graphics.Point;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.events.SLDirectionEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLVisibilityEvent;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.StationView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
-public class StationController extends ObjectController implements Controller {
+public class StationController extends ObjectController {
 
 	private final ShipContainer container;
 	private final SystemObject system;
@@ -116,6 +116,9 @@ public class StationController extends ObjectController implements Controller {
 		}
 		updateFollowOffset();
 		updateView();
+
+		if (eventHandler != null && eventHandler.hooks(SLEvent.DIRECTION))
+			eventHandler.sendEvent(new SLDirectionEvent(this, getSlotDirection()));
 	}
 
 	public Directions getSlotDirection() {

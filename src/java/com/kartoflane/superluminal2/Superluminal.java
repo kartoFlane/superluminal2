@@ -68,9 +68,9 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - is it possible to add glows for sensors' and doors' stations?
+	 * - test when no glow image --> whether uses the /assets/ image correctly or whatever
 	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
-	 * - glow placement modification
-	 * == bind stations to within a single/half grid cell from the tile's center?
 	 * 
 	 * - undo system
 	 * == various properties undos
@@ -81,7 +81,6 @@ public class Superluminal {
 	 * - ship overview sometimes messes up invisible object detection (grays out items incorrectly)
 	 * 
 	 * LOW:
-	 * - generate floor image feature ??
 	 * - Rework highlight to be cursor based? --> allows to show mounts/rooms that are hidden
 	 * beneath hull/other rooms
 	 * - rework the layered painter to allow more freedom in arranging stuff's ordering -> single views

@@ -1,12 +1,10 @@
 package com.kartoflane.superluminal2.tools;
 
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolItem;
 
+import com.kartoflane.superluminal2.components.interfaces.MouseInputListener;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.mvc.controllers.CursorController;
@@ -23,7 +21,7 @@ import com.kartoflane.superluminal2.ui.EditorWindow;
  * @author kartoFlane
  * 
  */
-public abstract class Tool implements MouseListener, MouseMoveListener, MouseTrackListener {
+public abstract class Tool implements MouseInputListener {
 	public enum Tools {
 		POINTER,
 		CREATOR,

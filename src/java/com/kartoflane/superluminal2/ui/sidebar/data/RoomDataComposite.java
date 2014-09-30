@@ -24,6 +24,7 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
+import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
@@ -283,7 +284,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 					if (glowSet != null) {
 						btnGlow.setText(glowSet.getIdentifier());
-						systemObject.setGlowSet(glowSet);
+						GlowController gc = (GlowController) container.getController(systemObject.getGlow());
+						gc.setVisible(false);
+						gc.setGlowSet(glowSet);
+						gc.setVisible(true);
 					}
 				}
 			});
@@ -360,7 +364,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 				btnGlow.setEnabled(system.canContainGlow());
 				if (system.canContainGlow()) {
-					btnGlow.setText(system.getGameObject().getGlowSet().getIdentifier());
+					btnGlow.setText(system.getGameObject().getGlow().getGlowSet().getIdentifier());
 				} else {
 					btnGlow.setText("None");
 				}

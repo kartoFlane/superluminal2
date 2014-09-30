@@ -5,6 +5,8 @@ import org.eclipse.swt.graphics.Point;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 /**
@@ -13,10 +15,10 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
  * @author kartoFlane
  * 
  */
-public class GlowObject implements Comparable<GlowObject>, Identifiable {
+public class GlowObject extends GameObject implements Comparable<GlowObject>, Identifiable {
 
 	private final String identifier;
-	private GlowSet glowSet = null;
+	private GlowSet glowSet = Database.DEFAULT_GLOW_SET;
 
 	private int locX = 0;
 	private int locY = 0;
@@ -86,48 +88,19 @@ public class GlowObject implements Comparable<GlowObject>, Identifiable {
 		return direction;
 	}
 
-	/**
-	 * Sets the location and direction of the glow in accordance with the data
-	 * stored in the room and station supplied in argument.
-	 * 
-	 * @param room
-	 *            the room in which the station is placed
-	 * @param station
-	 *            the station to which the glow is assigned
-	 */
-	public void setData(RoomObject room, StationObject station) {
-		Point glowLoc = room.getSlotLocation(station.getSlotId());
-		glowLoc.x -= ShipContainer.CELL_SIZE / 2;
-		glowLoc.y -= ShipContainer.CELL_SIZE / 2;
-
-		switch (station.getSlotDirection()) {
-			case UP:
-				glowLoc.x += 5;
-				glowLoc.y += 0;
-				break;
-			case RIGHT:
-				glowLoc.x += 18;
-				glowLoc.y += 7;
-				break;
-			case DOWN:
-				glowLoc.x += 5;
-				glowLoc.y += 18;
-				break;
-			case LEFT:
-				glowLoc.x += 0;
-				glowLoc.y += 9;
-				break;
-			default:
-				break;
-		}
-
-		setDirection(station.getSlotDirection());
-		setX(glowLoc.x);
-		setY(glowLoc.y);
-	}
-
 	@Override
 	public int compareTo(GlowObject o) {
 		return identifier.compareTo(o.identifier);
+	}
+
+	@Override
+	public void update() {
+		// not enough information to update here
+		ShipContainer container = Manager.getCurrentShip();
+		GlowController glowC = (GlowController) container.getController(this);
+		Point glowLoc = glowC.getGlowLocRelativeToRoom();
+
+		setX(glowLoc.x);
+		setY(glowLoc.y);
 	}
 }

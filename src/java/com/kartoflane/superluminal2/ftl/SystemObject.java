@@ -4,6 +4,7 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 
 public class SystemObject extends GameObject implements Alias {
 
@@ -18,7 +19,7 @@ public class SystemObject extends GameObject implements Alias {
 	/** Only used by systems with a mannable station */
 	private StationObject station;
 	/** Only used by systems with a mannable station */
-	private GlowSet glowSet;
+	private GlowObject glowObject;
 	/** Only used by artillery systems */
 	private WeaponObject weapon = null;
 
@@ -75,8 +76,10 @@ public class SystemObject extends GameObject implements Alias {
 		if (canContainInterior())
 			setInteriorNamespace(getDefaultInteriorNamespace(systemId));
 
-		if (canContainGlow()) {
-			setGlowSet(Database.DEFAULT_GLOW_SET);
+		if (systemId == Systems.CLOAKING) {
+			glowObject = new GlowObject("cloaking");
+		} else if (canContainStation()) {
+			glowObject = Database.DEFAULT_GLOW_OBJ;
 		}
 
 		Database db = Database.getInstance();
@@ -128,24 +131,23 @@ public class SystemObject extends GameObject implements Alias {
 	}
 
 	/**
-	 * Sets the glow image associated with this system. Glow images appear when the station is manned.<br>
-	 * 
-	 * Only used by {@link Systems#canContainStation() mannable} systems.
-	 * 
-	 */
-	public void setGlowSet(GlowSet set) {
-		if (set == null)
-			throw new IllegalArgumentException("Glow set must not be null.");
-		glowSet = set;
-	}
-
-	/**
 	 * Only used by {@link Systems#canContainStation() mannable} systems.
 	 * 
 	 * @return the glow image associated with this system. Glow images appear when the station is manned.
 	 */
-	public GlowSet getGlowSet() {
-		return glowSet;
+	public GlowObject getGlow() {
+		return glowObject;
+	}
+
+	/**
+	 * Only used by {@link Systems#canContainGlow() systems that can contain glow}.<br>
+	 * <br>
+	 * <b>This method should ONLY be used during ship loading.</b> Use {@link GlowController#setGlowSet(GlowSet)} instead.
+	 */
+	public void setGlow(GlowObject glow) {
+		if (glow == null)
+			throw new IllegalArgumentException("Glow must not be null.");
+		glowObject = glow;
 	}
 
 	public void setInteriorNamespace(String namespace) {

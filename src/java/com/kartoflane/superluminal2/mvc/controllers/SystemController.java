@@ -10,13 +10,12 @@ import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.mvc.Controller;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
 import com.kartoflane.superluminal2.mvc.views.SystemView;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
-public class SystemController extends ObjectController implements Controller {
+public class SystemController extends ObjectController {
 
 	protected ShipContainer container = null;
 
