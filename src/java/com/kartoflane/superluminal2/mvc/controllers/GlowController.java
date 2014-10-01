@@ -31,8 +31,8 @@ public class GlowController extends ObjectController {
 
 		this.station = station.getGameObject();
 
-		setSelectable(false);
-		setLocModifiable(false);
+		setSelectable(true);
+		setLocModifiable(true);
 
 		setParent(station);
 		setBounded(true);
@@ -53,11 +53,8 @@ public class GlowController extends ObjectController {
 
 		controller.setVisible(false);
 		controller.updateView();
-
 		controller.setGlowSet(object.getGlowSet());
 		controller.applyGlowSettings();
-		controller.setSelectable(true);
-		controller.setLocModifiable(true);
 
 		return controller;
 	}
@@ -85,6 +82,7 @@ public class GlowController extends ObjectController {
 			result.x = glow.getX() - rel.x + getWDir() / 2;
 			result.y = glow.getY() - rel.y + getHDir() / 2;
 			setFollowOffset(result.x, result.y);
+			updateFollower();
 		}
 	}
 

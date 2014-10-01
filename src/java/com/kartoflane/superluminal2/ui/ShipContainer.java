@@ -657,9 +657,9 @@ public class ShipContainer implements Disposable, SLListener {
 
 	public void assign(SystemObject sys, RoomController room) {
 		if (sys == null)
-			throw new NullPointerException("System id must not be null.");
+			throw new IllegalArgumentException("System id must not be null.");
 		if (room == null)
-			throw new NullPointerException("Room controller is null. Use unassign() instead.");
+			throw new IllegalArgumentException("Room controller is null. Use unassign() instead.");
 
 		SystemController system = (SystemController) getController(sys);
 
@@ -671,13 +671,18 @@ public class ShipContainer implements Disposable, SLListener {
 		setActiveSystem(room.getGameObject(), sys);
 		system.notifySizeChanged(room.getW(), room.getH());
 
+		if (system.canContainGlow() && system.canContainStation()) {
+			GlowController glow = (GlowController) getController(sys.getGlow());
+			glow.applyGlowSettings();
+		}
+
 		if (system.getSystemId() == Systems.ARTILLERY)
 			updateMounts();
 	}
 
 	public void unassign(SystemObject system) {
 		if (system == null)
-			throw new NullPointerException("System must not be null.");
+			throw new IllegalArgumentException("System must not be null.");
 
 		SystemController systemC = (SystemController) getController(system);
 		RoomObject room = system.getRoom();

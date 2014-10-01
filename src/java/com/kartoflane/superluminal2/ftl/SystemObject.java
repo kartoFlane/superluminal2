@@ -29,7 +29,7 @@ public class SystemObject extends GameObject implements Alias {
 
 	public SystemObject(Systems systemId, ShipObject ship) {
 		if (systemId == null)
-			throw new NullPointerException("System id must not be null.");
+			throw new IllegalArgumentException("System id must not be null.");
 		id = systemId;
 
 		setDeletable(false);
@@ -78,6 +78,16 @@ public class SystemObject extends GameObject implements Alias {
 
 		if (systemId == Systems.CLOAKING) {
 			glowObject = new GlowObject("cloaking");
+		} else if (canContainGlow()) {
+			String glow = id.getDefaultInteriorNamespace();
+
+			glow = glow.replace("room_", "");
+			GlowObject obj = Database.getInstance().getGlow(glow);
+			if (obj != null) {
+				glowObject = obj;
+			} else {
+				glowObject = Database.DEFAULT_GLOW_OBJ;
+			}
 		} else if (canContainStation()) {
 			glowObject = Database.DEFAULT_GLOW_OBJ;
 		}
