@@ -86,11 +86,13 @@ import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
 import com.kartoflane.superluminal2.undo.UndoableOffsetsEdit;
+import com.kartoflane.superluminal2.undo.UndoableValueEdit;
 import com.kartoflane.superluminal2.utils.SHPUtils;
 import com.kartoflane.superluminal2.utils.SWTFontUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
+@SuppressWarnings("serial")
 public class EditorWindow {
 	static final Logger log = LogManager.getLogger(EditorWindow.class);
 
@@ -712,7 +714,31 @@ public class EditorWindow {
 		mntmGenerateFloor.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				final ShipContainer container = Manager.getCurrentShip();
+
+				if (container.getRoomControllers().length == 0) {
+					UIUtils.showInfoDialog(null, null, "Unable to generate floor image, because the ship has no rooms.");
+					return;
+				}
+
+				UndoableValueEdit<String> edit = new UndoableValueEdit<String>(container) {
+					public void callback(String arg) {
+						container.setImage(Images.FLOOR, arg);
+						updateSidebarContent();
+					}
+
+					@Override
+					public String getPresentationName() {
+						return "generate floor image";
+					}
+				};
+
+				edit.setOld(container.getImage(Images.FLOOR));
 				Manager.getCurrentShip().generateFloorImage();
+				edit.setCurrent(container.getImage(Images.FLOOR));
+
+				if (!edit.isValuesEqual())
+					Manager.postEdit(edit);
 			}
 		});
 
@@ -1384,6 +1410,21 @@ public class EditorWindow {
 	 */
 	public boolean forceFocus() {
 		return canvas.forceFocus();
+	}
+
+	public boolean isImageDrawn(Images type) {
+		switch (type) {
+			case HULL:
+				return mntmShowHull.getSelection();
+			case FLOOR:
+				return mntmShowFloor.getSelection();
+			case SHIELD:
+				return mntmShowShield.getSelection();
+			case CLOAK:
+				return tltmCloak.getSelection();
+			default:
+				return false;
+		}
 	}
 
 	public void dispose() {

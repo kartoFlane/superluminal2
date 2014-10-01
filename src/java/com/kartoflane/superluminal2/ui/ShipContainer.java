@@ -605,11 +605,6 @@ public class ShipContainer implements Disposable, SLListener {
 	public void generateFloorImage() {
 		ShipObject ship = shipController.getGameObject();
 
-		if (ship.getRooms().length == 0) {
-			UIUtils.showInfoDialog(null, null, "Unable to generate floor image, because the ship has no rooms.");
-			return;
-		}
-
 		// Prepare the ship data
 		updateGameObjects();
 		ship.coalesceRooms();
@@ -891,7 +886,7 @@ public class ShipContainer implements Disposable, SLListener {
 			ImageObject object = image.getGameObject();
 			object.setImagePath(path);
 		} else {
-			boolean vis = image.isVisible();
+			boolean vis = getParent().isImageDrawn(imageType);
 			image.setVisible(false);
 			image.setImage(path);
 			image.updateView();

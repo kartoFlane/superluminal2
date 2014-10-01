@@ -27,9 +27,11 @@ import com.kartoflane.superluminal2.ui.GibWidget;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
+import com.kartoflane.superluminal2.undo.UndoableValueEdit;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
+@SuppressWarnings("serial")
 public class ImagesToolComposite extends Composite implements DataComposite {
 
 	private static String prevImagesPath = System.getProperty("user.home");
@@ -135,9 +137,29 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 						prevImagesPath = path;
 						File temp = new File(path);
 						if (temp.exists()) {
+							final Images fType = type;
+							UndoableValueEdit<String> edit = new UndoableValueEdit<String>(container) {
+								public void callback(String arg) {
+									container.setImage(fType, arg);
+									if (!isDisposed())
+										updateData();
+								}
+
+								@Override
+								public String getPresentationName() {
+									return String.format("change %s image", fType.toString());
+								}
+							};
+
+							edit.setOld(container.getImage(type));
+							edit.setCurrent("file:" + path);
+
 							container.setImage(type, "file:" + path);
 							updateData();
 							exit = true;
+
+							if (!edit.isValuesEqual())
+								Manager.getCurrentShip().postEdit(edit);
 						} else {
 							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
 						}
@@ -162,8 +184,28 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 				else if (e.getSource() == btnMiniClear)
 					type = Images.THUMBNAIL;
 
+				final Images fType = type;
+				UndoableValueEdit<String> edit = new UndoableValueEdit<String>(container) {
+					public void callback(String arg) {
+						container.setImage(fType, arg);
+						if (!isDisposed())
+							updateData();
+					}
+
+					@Override
+					public String getPresentationName() {
+						return String.format("clear %s image", fType.toString());
+					}
+				};
+
+				edit.setOld(container.getImage(type));
+				edit.setCurrent(null);
+
 				container.setImage(type, null);
 				updateData();
+
+				if (!edit.isValuesEqual())
+					Manager.getCurrentShip().postEdit(edit);
 			}
 		};
 
