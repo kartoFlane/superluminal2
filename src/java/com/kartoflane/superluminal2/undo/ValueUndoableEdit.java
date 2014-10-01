@@ -6,8 +6,24 @@ import javax.swing.undo.CannotUndoException;
 
 import com.kartoflane.superluminal2.components.interfaces.Action;
 
+/**
+ * A base class for undoable operations that change a single value.
+ * Subclasses should override {@link #doUndo()} and {@link #doRedo()} in order
+ * to implement the undo/redo handling.<br>
+ * <br>
+ * After instantiation, use {@link #setOld(Object)} and {@link #setCurrent(Object)} to set up the values
+ * for before and after the operation, respectively. <br>
+ * <br>
+ * Optional callbacks can be added using {@link #setUndoCallback(Action)} and {@link #setRedoCallback(Action)}<br>
+ * to have the undo manager perform additional tasks once the undo/redo operation itself is completed.
+ * 
+ * @author kartoFlane
+ *
+ * @param <T>
+ *            type of the value that this edit handles
+ */
 @SuppressWarnings("serial")
-public class ValueUndoableEdit<T> extends AbstractUndoableEdit {
+public abstract class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 
 	private Action undoCallback = null;
 	private Action redoCallback = null;
