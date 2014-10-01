@@ -78,12 +78,14 @@ public class GlowController extends ObjectController {
 		setDirection(glow.getDirection());
 
 		RoomObject room = getRoom();
-		Point rel = room.getSlotLocation(station.getSlotId());
+		if (room != null) {
+			Point rel = room.getSlotLocation(station.getSlotId());
 
-		Point result = new Point(0, 0);
-		result.x = glow.getX() - rel.x + getWDir() / 2;
-		result.y = glow.getY() - rel.y + getHDir() / 2;
-		setFollowOffset(result.x, result.y);
+			Point result = new Point(0, 0);
+			result.x = glow.getX() - rel.x + getWDir() / 2;
+			result.y = glow.getY() - rel.y + getHDir() / 2;
+			setFollowOffset(result.x, result.y);
+		}
 	}
 
 	/**
