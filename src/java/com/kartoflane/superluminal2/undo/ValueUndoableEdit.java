@@ -104,4 +104,8 @@ public class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 	public void setRedoCallback(Action a) {
 		redoCallback = a;
 	}
+
+	public boolean isValuesEqual() {
+		return old == null ? cur == null : old.equals(cur);
+	}
 }

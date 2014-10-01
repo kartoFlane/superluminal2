@@ -1088,7 +1088,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 			move.setCurrent(getLocation());
 		}
 
-		if (!currentEdit.getOld().equals(currentEdit.getCurrent()))
+		if (!currentEdit.isValuesEqual())
 			Manager.getCurrentShip().postEdit(currentEdit);
 
 		currentEdit = null;
