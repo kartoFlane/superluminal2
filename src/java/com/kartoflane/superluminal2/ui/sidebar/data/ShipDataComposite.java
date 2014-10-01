@@ -13,14 +13,14 @@ public class ShipDataComposite extends Composite implements DataComposite {
 
 	public ShipDataComposite(Composite parent, ShipController controller) {
 		super(parent, SWT.NONE);
-		setLayout(new GridLayout(3, false));
+		setLayout(new GridLayout(1, false));
 
 		Label label = new Label(this, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1));
+		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
 		label.setText("Ship Origin");
 
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 	}
 
 	public void updateData() {
