@@ -70,7 +70,7 @@ public class Cache {
 		}
 
 		if (customer == null)
-			throw new NullPointerException("Customer is null.");
+			throw new IllegalArgumentException("Customer is null.");
 
 		// check whether the image has already been cached
 		image = cachedImageMap.get(path);
@@ -81,7 +81,7 @@ public class Cache {
 		}
 
 		if (path == null) {
-			throw new NullPointerException("Path is null.");
+			throw new IllegalArgumentException("Path is null.");
 		} else {
 			try {
 				if (image == null) {
@@ -142,7 +142,7 @@ public class Cache {
 		}
 
 		if (customer == null)
-			throw new NullPointerException("Customer is null.");
+			throw new IllegalArgumentException("Customer is null.");
 
 		// check whether the image has already been cached
 		color = cachedColorMap.get(rgb);
@@ -153,7 +153,7 @@ public class Cache {
 		}
 
 		if (rgb == null) {
-			throw new NullPointerException("RGB is null.");
+			throw new IllegalArgumentException("RGB is null.");
 		} else {
 			if (color == null) {
 				color = new Color(Display.getCurrent(), rgb);

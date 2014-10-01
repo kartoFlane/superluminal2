@@ -567,7 +567,7 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		updateBoundingArea();
 		Followable parent = getParent();
 		if (parent == null)
-			throw new NullPointerException("Parent is null.");
+			throw new IllegalArgumentException("Parent is null.");
 		Point offset = getFollowOffset();
 
 		reposition(parent.getX() + offset.x, parent.getY() + offset.y);

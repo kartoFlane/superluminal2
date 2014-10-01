@@ -68,6 +68,7 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - floor generation customization --> window with options?
 	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
 	 * 
 	 * - undo system
@@ -504,7 +505,7 @@ public class Superluminal {
 					loading = "char";
 					attr = bind.getAttributeValue(loading);
 					if (attr == null)
-						throw new IllegalArgumentException(action + " keybind is missing 'char' attribute.");
+						throw new NullPointerException();
 					if (attr.length() > 1)
 						throw new IllegalArgumentException(action + " keybind has invalid 'char' attribute: " + attr);
 					boolean enabled = attr.length() == 1;

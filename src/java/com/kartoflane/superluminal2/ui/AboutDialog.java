@@ -153,15 +153,15 @@ public class AboutDialog {
 
 	public void setMessage(String string) {
 		if (string == null)
-			throw new NullPointerException("Message cannot be null.");
+			throw new IllegalArgumentException("Message cannot be null.");
 		message = string;
 	}
 
 	public void setLink(URL link, String faceText) {
 		if (link == null)
-			throw new NullPointerException("URL cannot be null.");
+			throw new IllegalArgumentException("URL cannot be null.");
 		if (faceText == null)
-			throw new NullPointerException("Face text cannot be null.");
+			throw new IllegalArgumentException("Face text cannot be null.");
 		linkFaceText = faceText;
 		linkURL = link;
 	}

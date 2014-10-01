@@ -80,7 +80,7 @@ public class GlowObject extends GameObject implements Comparable<GlowObject>, Id
 
 	public void setDirection(Directions dir) {
 		if (dir == null)
-			throw new NullPointerException("Direction must not be null.");
+			throw new IllegalArgumentException("Direction must not be null.");
 		direction = dir;
 	}
 

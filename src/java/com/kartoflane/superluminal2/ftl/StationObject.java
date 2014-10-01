@@ -44,7 +44,7 @@ public class StationObject extends GameObject {
 
 	public void setSlotDirection(Directions dir) {
 		if (dir == null)
-			throw new NullPointerException("Direction must not be null.");
+			throw new IllegalArgumentException("Direction must not be null.");
 		slotDirection = dir;
 	}
 
