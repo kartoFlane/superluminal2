@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -38,7 +39,6 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.utils.DataUtils;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.IOUtils.DecodeResult;
-import com.kartoflane.superluminal2.utils.Utils;
 
 /**
  * A class representing a database entry that can be installed in the {@link com.kartoflane.superluminal2.core.Database Database} to modify its
@@ -58,14 +58,15 @@ public class DatabaseEntry {
 	private final FTLPack resource;
 
 	private ArrayList<ShipMetadata> shipMetadata = new ArrayList<ShipMetadata>();
-	private TreeSet<AnimationObject> animationObjects = new TreeSet<AnimationObject>();
-	private TreeSet<WeaponObject> weaponObjects = new TreeSet<WeaponObject>();
-	private TreeSet<DroneObject> droneObjects = new TreeSet<DroneObject>();
-	private TreeSet<AugmentObject> augmentObjects = new TreeSet<AugmentObject>();
-	private TreeSet<GlowObject> glowObjects = new TreeSet<GlowObject>();
-	private TreeSet<GlowSet> glowSets = new TreeSet<GlowSet>();
-	private TreeSet<WeaponList> weaponLists = new TreeSet<WeaponList>();
-	private TreeSet<DroneList> droneLists = new TreeSet<DroneList>();
+
+	private Map<String, AnimationObject> animationMap = new HashMap<String, AnimationObject>();
+	private Map<String, WeaponObject> weaponMap = new HashMap<String, WeaponObject>();
+	private Map<String, DroneObject> droneMap = new HashMap<String, DroneObject>();
+	private Map<String, AugmentObject> augmentMap = new HashMap<String, AugmentObject>();
+	private Map<String, GlowObject> glowMap = new HashMap<String, GlowObject>();
+	private Map<String, GlowSet> glowSetMap = new HashMap<String, GlowSet>();
+	private Map<String, WeaponList> weaponListMap = new HashMap<String, WeaponList>();
+	private Map<String, DroneList> droneListMap = new HashMap<String, DroneList>();
 	/** Temporary map to hold anim sheets, since they need to be loaded before weaponAnims, which reference them */
 	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
 
@@ -182,14 +183,14 @@ public class DatabaseEntry {
 	 */
 	public void clear() {
 		shipMetadata.clear();
-		animationObjects.clear();
-		weaponObjects.clear();
-		droneObjects.clear();
-		augmentObjects.clear();
-		glowObjects.clear();
-		glowSets.clear();
-		weaponLists.clear();
-		droneLists.clear();
+		animationMap.clear();
+		weaponMap.clear();
+		droneMap.clear();
+		augmentMap.clear();
+		glowMap.clear();
+		glowSetMap.clear();
+		weaponListMap.clear();
+		droneListMap.clear();
 		animSheetMap.clear();
 		System.gc();
 	}
@@ -211,59 +212,41 @@ public class DatabaseEntry {
 	}
 
 	public void store(AnimationObject anim) {
-		// Overwrite with the most recent object
-		animationObjects.remove(anim);
-		animationObjects.add(anim);
+		animationMap.put(anim.getIdentifier(), anim);
 	}
 
 	public void store(AugmentObject augment) {
-		// Overwrite with the most recent object
-		augmentObjects.remove(augment);
-		augmentObjects.add(augment);
+		augmentMap.put(augment.getIdentifier(), augment);
 	}
 
 	public void store(BlueprintList<?> list) {
 		if (list instanceof WeaponList) {
-			// Overwrite with the most recent object
-			weaponLists.remove(list);
-			weaponLists.add((WeaponList) list);
+			weaponListMap.put(list.getIdentifier(), (WeaponList) list);
 		} else if (list instanceof DroneList) {
-			// Overwrite with the most recent object
-			droneLists.remove(list);
-			droneLists.add((DroneList) list);
+			droneListMap.put(list.getIdentifier(), (DroneList) list);
 		} else {
 			// Not interested in any other lists
 		}
 	}
 
 	public void store(DroneObject drone) {
-		// Overwrite with the most recent object
-		droneObjects.remove(drone);
-		droneObjects.add(drone);
+		droneMap.put(drone.getIdentifier(), drone);
 	}
 
 	public void store(GlowObject glow) {
-		// Overwrite with the most recent object
-		glowObjects.remove(glow);
-		glowObjects.add(glow);
+		glowMap.put(glow.getIdentifier(), glow);
 	}
 
 	public void store(GlowSet set) {
-		// Overwrite with the most recent object
-		glowSets.remove(set);
-		glowSets.add(set);
+		glowSetMap.put(set.getIdentifier(), set);
 	}
 
 	public void store(ShipMetadata metadata) {
-		// Overwrite with the most recent object
-		shipMetadata.remove(metadata);
 		shipMetadata.add(metadata);
 	}
 
 	public void store(WeaponObject weapon) {
-		// Overwrite with the most recent object
-		weaponObjects.remove(weapon);
-		weaponObjects.add(weapon);
+		weaponMap.put(weapon.getIdentifier(), weapon);
 	}
 
 	/**
@@ -272,12 +255,7 @@ public class DatabaseEntry {
 	 * @return
 	 */
 	public AnimationObject getAnimation(String animName) {
-		AnimationObject[] anims = animationObjects.toArray(new AnimationObject[0]);
-		try {
-			return anims[Utils.binarySearch(anims, animName, 0, anims.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return animationMap.get(animName);
 	}
 
 	/**
@@ -286,26 +264,21 @@ public class DatabaseEntry {
 	 * @return the augment with the given blueprint, or null if not found
 	 */
 	public AugmentObject getAugment(String blueprint) {
-		AugmentObject[] augments = getAugments();
-		try {
-			return augments[Utils.binarySearch(augments, blueprint, 0, augments.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return augmentMap.get(blueprint);
 	}
 
 	/**
 	 * @return an array of all augments in this entry
 	 */
 	public AugmentObject[] getAugments() {
-		return augmentObjects.toArray(new AugmentObject[0]);
+		return augmentMap.values().toArray(new AugmentObject[0]);
 	}
 
 	/**
 	 * @return an array of all drone lists in this entry
 	 */
 	public DroneList[] getDroneLists() {
-		return droneLists.toArray(new DroneList[0]);
+		return droneListMap.values().toArray(new DroneList[0]);
 	}
 
 	/**
@@ -314,12 +287,7 @@ public class DatabaseEntry {
 	 * @return the blueprint list with the given name
 	 */
 	public DroneList getDroneList(String name) {
-		DroneList[] lists = getDroneLists();
-		try {
-			return lists[Utils.binarySearch(lists, name, 0, lists.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return droneListMap.get(name);
 	}
 
 	/**
@@ -328,12 +296,7 @@ public class DatabaseEntry {
 	 * @return the drone with the given blueprint name, or null if not found
 	 */
 	public DroneObject getDrone(String blueprint) {
-		DroneObject[] drones = droneObjects.toArray(new DroneObject[0]);
-		try {
-			return drones[Utils.binarySearch(drones, blueprint, 0, drones.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return droneMap.get(blueprint);
 	}
 
 	/**
@@ -343,7 +306,7 @@ public class DatabaseEntry {
 	 */
 	public ArrayList<DroneObject> getDronesByType(DroneTypes type) {
 		ArrayList<DroneObject> typeDrones = new ArrayList<DroneObject>();
-		for (DroneObject drone : droneObjects) {
+		for (DroneObject drone : droneMap.values()) {
 			if (drone.getType() == type)
 				typeDrones.add(drone);
 		}
@@ -357,19 +320,14 @@ public class DatabaseEntry {
 	 * @return the glow object wit the given name, or null if not found
 	 */
 	public GlowObject getGlow(String id) {
-		GlowObject[] glows = getGlows();
-		try {
-			return glows[Utils.binarySearch(glows, id, 0, glows.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return glowMap.get(id);
 	}
 
 	/**
 	 * @return an array of all glow objects in this entry
 	 */
 	public GlowObject[] getGlows() {
-		return glowObjects.toArray(new GlowObject[0]);
+		return glowMap.values().toArray(new GlowObject[0]);
 	}
 
 	/**
@@ -378,19 +336,14 @@ public class DatabaseEntry {
 	 * @return the glow image set with the given namespace, or null if not found
 	 */
 	public GlowSet getGlowSet(String id) {
-		GlowSet[] glowSets = getGlowSets();
-		try {
-			return glowSets[Utils.binarySearch(glowSets, id, 0, glowSets.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return glowSetMap.get(id);
 	}
 
 	/**
 	 * @return an array of all glow sets in this entry
 	 */
 	public GlowSet[] getGlowSets() {
-		return glowSets.toArray(new GlowSet[0]);
+		return glowSetMap.values().toArray(new GlowSet[0]);
 	}
 
 	/**
@@ -404,7 +357,7 @@ public class DatabaseEntry {
 	 * @return an array of all weapon lists in this entry
 	 */
 	public WeaponList[] getWeaponLists() {
-		return weaponLists.toArray(new WeaponList[0]);
+		return weaponListMap.values().toArray(new WeaponList[0]);
 	}
 
 	/**
@@ -413,12 +366,7 @@ public class DatabaseEntry {
 	 * @return the blueprint list with the given name
 	 */
 	public WeaponList getWeaponList(String name) {
-		WeaponList[] lists = getWeaponLists();
-		try {
-			return lists[Utils.binarySearch(lists, name, 0, lists.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return weaponListMap.get(name);
 	}
 
 	/**
@@ -427,12 +375,7 @@ public class DatabaseEntry {
 	 * @return the weapon with the given blueprint name, or null if not found
 	 */
 	public WeaponObject getWeapon(String blueprint) {
-		WeaponObject[] weapons = weaponObjects.toArray(new WeaponObject[0]);
-		try {
-			return weapons[Utils.binarySearch(weapons, blueprint, 0, weapons.length)];
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return weaponMap.get(blueprint);
 	}
 
 	/**
@@ -442,7 +385,7 @@ public class DatabaseEntry {
 	 */
 	public ArrayList<WeaponObject> getWeaponsByType(WeaponTypes type) {
 		ArrayList<WeaponObject> typeWeapons = new ArrayList<WeaponObject>();
-		for (WeaponObject weapon : weaponObjects) {
+		for (WeaponObject weapon : weaponMap.values()) {
 			if (weapon.getType() == type)
 				typeWeapons.add(weapon);
 		}
@@ -696,7 +639,7 @@ public class DatabaseEntry {
 				namespace = namespace.replace("img/ship/interior/", "");
 				GlowSet set = new GlowSet(namespace);
 				set.setImage(Glows.CLOAK, "db:" + s1);
-				glowSets.add(set);
+				glowSetMap.put(set.getIdentifier(), set);
 			} else if (s1.endsWith("1.png")) {
 				String namespace = s1.replaceAll("[0-9]\\.png", "");
 				String s2 = find(eligiblePaths, namespace + "2.png");
@@ -708,7 +651,7 @@ public class DatabaseEntry {
 					set.setImage(Glows.BLUE, "db:" + s1);
 					set.setImage(Glows.GREEN, "db:" + s2);
 					set.setImage(Glows.YELLOW, "db:" + s3);
-					glowSets.add(set);
+					glowSetMap.put(set.getIdentifier(), set);
 				}
 			}
 		}
