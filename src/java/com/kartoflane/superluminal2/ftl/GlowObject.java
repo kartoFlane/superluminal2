@@ -95,11 +95,11 @@ public class GlowObject extends GameObject implements Comparable<GlowObject>, Id
 
 	@Override
 	public void update() {
-		// not enough information to update here
 		ShipContainer container = Manager.getCurrentShip();
 		GlowController glowC = (GlowController) container.getController(this);
 		Point glowLoc = glowC.getGlowLocRelativeToRoom();
 
+		// direction updated by controller's setDirection()
 		setX(glowLoc.x);
 		setY(glowLoc.y);
 	}

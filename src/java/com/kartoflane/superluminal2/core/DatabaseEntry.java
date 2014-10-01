@@ -211,17 +211,25 @@ public class DatabaseEntry {
 	}
 
 	public void store(AnimationObject anim) {
+		// Overwrite with the most recent object
+		animationObjects.remove(anim);
 		animationObjects.add(anim);
 	}
 
 	public void store(AugmentObject augment) {
+		// Overwrite with the most recent object
+		augmentObjects.remove(augment);
 		augmentObjects.add(augment);
 	}
 
 	public void store(BlueprintList<?> list) {
 		if (list instanceof WeaponList) {
+			// Overwrite with the most recent object
+			weaponLists.remove(list);
 			weaponLists.add((WeaponList) list);
 		} else if (list instanceof DroneList) {
+			// Overwrite with the most recent object
+			droneLists.remove(list);
 			droneLists.add((DroneList) list);
 		} else {
 			// Not interested in any other lists
@@ -229,22 +237,32 @@ public class DatabaseEntry {
 	}
 
 	public void store(DroneObject drone) {
+		// Overwrite with the most recent object
+		droneObjects.remove(drone);
 		droneObjects.add(drone);
 	}
 
 	public void store(GlowObject glow) {
+		// Overwrite with the most recent object
+		glowObjects.remove(glow);
 		glowObjects.add(glow);
 	}
 
 	public void store(GlowSet set) {
+		// Overwrite with the most recent object
+		glowSets.remove(set);
 		glowSets.add(set);
 	}
 
 	public void store(ShipMetadata metadata) {
+		// Overwrite with the most recent object
+		shipMetadata.remove(metadata);
 		shipMetadata.add(metadata);
 	}
 
 	public void store(WeaponObject weapon) {
+		// Overwrite with the most recent object
+		weaponObjects.remove(weapon);
 		weaponObjects.add(weapon);
 	}
 
