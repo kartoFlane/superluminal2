@@ -123,9 +123,11 @@ public class GlowController extends ObjectController {
 	public Point getGlowLocRelativeToRoom() {
 		Point result = getFollowOffset();
 		RoomObject room = getRoom();
-		Point rel = room.getSlotLocation(station.getSlotId());
-		result.x += rel.x - getWDir() / 2;
-		result.y += rel.y - getHDir() / 2;
+		if (room != null) {
+			Point rel = room.getSlotLocation(station.getSlotId());
+			result.x += rel.x - getWDir() / 2;
+			result.y += rel.y - getHDir() / 2;
+		}
 
 		return result;
 	}
