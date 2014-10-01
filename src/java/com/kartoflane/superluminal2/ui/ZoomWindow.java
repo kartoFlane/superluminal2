@@ -2,8 +2,11 @@ package com.kartoflane.superluminal2.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -19,13 +22,14 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Slider;
 
 import com.kartoflane.superluminal2.components.interfaces.MouseInputListener;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class ZoomWindow
-		implements MouseInputListener, PaintListener, Listener {
+		implements MouseInputListener, MouseWheelListener, PaintListener, Listener {
 
 	private static final float scaleMin = 1.0f;
 	private static final float scaleMax = 6.0f;
@@ -52,24 +56,40 @@ public class ZoomWindow
 	private Shell shell;
 	private Canvas canvas;
 	private Label lblInfo;
+	private Label lblZoom;
+	private Slider slider;
 
 	public ZoomWindow(Shell parent, Control source) {
 		instance = this;
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE);
-		shell.setLayout(new GridLayout(1, false));
-		String msg = "- Left-click and drag in this window to move the viewport\n" +
-				"- Hold down mouse scroll button and drag in the main window to move the viewport\n" +
-				"- Scroll with mouse scroll to zoom in or out";
+		shell.setLayout(new GridLayout(3, false));
+
+		lblZoom = new Label(shell, SWT.NONE);
+		lblZoom.setText("Zoom:");
+
+		slider = new Slider(shell, SWT.NONE);
+		slider.setIncrement(10);
+		slider.setPageIncrement(100);
+		slider.setMaximum((int) scaleMax * 100 + 10);
+		slider.setMinimum((int) scaleMin * 100);
+		slider.setSelection(100);
 
 		lblInfo = new Label(shell, SWT.NONE);
 		lblInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
 		lblInfo.setImage(Cache.checkOutImage(this, "cpath:/assets/help.png"));
+		String msg = "- Left-click and drag in this window to move the viewport\n" +
+				"- Hold down mouse scroll button and drag in the main window to move the viewport\n" +
+				"- Scroll with mouse scroll to zoom in or out";
 		UIUtils.addTooltip(lblInfo, msg);
 
 		canvas = new Canvas(shell, SWT.BORDER | SWT.DOUBLE_BUFFERED);
-		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		canvas.setBackground(Cache.checkOutColor(this, canvasRGB));
+
+		canvas.addMouseListener(this);
+		canvas.addMouseMoveListener(this);
+		canvas.addMouseWheelListener(this);
 
 		transform = new Transform(shell.getDisplay());
 		transform.scale(scale, scale);
@@ -90,8 +110,16 @@ public class ZoomWindow
 			}
 		});
 
-		canvas.addMouseListener(this);
-		canvas.addMouseMoveListener(this);
+		slider.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int sel = slider.getSelection();
+				float newScale = sel / 100f;
+				setScale(newScale);
+			}
+		});
+
+		slider.addMouseWheelListener(this);
 
 		updateText();
 		setCopySource(source);
@@ -264,8 +292,11 @@ public class ZoomWindow
 
 	public void mouseScrolled(MouseEvent e) {
 		Object source = e.getSource();
-		if (source == canvas || source == EditorWindow.getInstance().getSidebarWidget())
-			setScale(scale + e.count / 5f);
+		if (source == slider || source == canvas || source == EditorWindow.getInstance().getSidebarWidget()) {
+			float newScale = scale + e.count / 5f;
+			slider.setSelection((int) newScale * 100);
+			setScale(newScale);
+		}
 	}
 
 	public void paintControl(PaintEvent e) {
@@ -273,7 +304,7 @@ public class ZoomWindow
 
 		// If the source widget is double buffered, then we need to redraw its area before we copy from it
 		// This is because the first paint event is sent when the image is painted to buffer,
-		// and the second event when the canvas itself gets painted
+		// and the second event when the widget itself gets painted (ie. our copySource)
 		if (!oddPaintEvent) {
 			if (isStyle(copySource.getStyle(), SWT.DOUBLE_BUFFERED)) {
 				copySource.redraw(copyOrigin.x, copyOrigin.y,
