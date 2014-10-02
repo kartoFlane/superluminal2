@@ -16,7 +16,7 @@ package com.kartoflane.superluminal2.undo;
  *            type of the value that this edit handles
  */
 @SuppressWarnings("serial")
-public abstract class UndoableValueEdit<T> extends ValueUndoableEdit<T> {
+public abstract class UndoablePropertyEdit<T> extends ValueUndoableEdit<T> {
 
 	protected final Object data;
 
@@ -29,7 +29,7 @@ public abstract class UndoableValueEdit<T> extends ValueUndoableEdit<T> {
 	 * @param ac
 	 *            the controller whom this edit concerns
 	 */
-	public UndoableValueEdit(Object ac) {
+	public UndoablePropertyEdit(Object ac) {
 		if (ac == null)
 			throw new IllegalArgumentException("Argument must not be null.");
 

@@ -27,7 +27,7 @@ import com.kartoflane.superluminal2.ui.GibWidget;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
-import com.kartoflane.superluminal2.undo.UndoableValueEdit;
+import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
@@ -138,7 +138,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 						File temp = new File(path);
 						if (temp.exists()) {
 							final Images fType = type;
-							UndoableValueEdit<String> edit = new UndoableValueEdit<String>(container) {
+							UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(container) {
 								public void callback(String arg) {
 									container.setImage(fType, arg);
 									if (!isDisposed())
@@ -185,7 +185,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 					type = Images.THUMBNAIL;
 
 				final Images fType = type;
-				UndoableValueEdit<String> edit = new UndoableValueEdit<String>(container) {
+				UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(container) {
 					public void callback(String arg) {
 						container.setImage(fType, arg);
 						if (!isDisposed())

@@ -86,7 +86,7 @@ import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
 import com.kartoflane.superluminal2.undo.UndoableOffsetsEdit;
-import com.kartoflane.superluminal2.undo.UndoableValueEdit;
+import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.utils.SHPUtils;
 import com.kartoflane.superluminal2.utils.SWTFontUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
@@ -721,7 +721,7 @@ public class EditorWindow {
 					return;
 				}
 
-				UndoableValueEdit<String> edit = new UndoableValueEdit<String>(container) {
+				UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(container) {
 					public void callback(String arg) {
 						container.setImage(Images.FLOOR, arg);
 						updateSidebarContent();
