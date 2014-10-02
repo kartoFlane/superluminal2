@@ -359,11 +359,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					lblGlow.setText("Manning glow:");
 				}
 
-				btnGlow.setEnabled(system.canContainGlow());
+				lblGlow.setVisible(system.canContainGlow());
+				btnGlow.setVisible(system.canContainGlow());
 				if (system.canContainGlow()) {
 					btnGlow.setText(system.getGameObject().getGlow().getGlowSet().getIdentifier());
-				} else {
-					btnGlow.setText("None");
 				}
 			} else {
 				scaleMaxLevel.setMaximum(system.getLevelCap());
@@ -384,8 +383,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				btnInteriorView.setEnabled(false);
 
 				txtInterior.setText("");
-				btnGlow.setText("None");
-				btnGlow.setEnabled(false);
+				lblGlow.setVisible(false);
+				btnGlow.setVisible(false);
 			} else {
 				scaleMaxLevel.setMaximum(2);
 				scaleMaxLevel.setSelection(1);
