@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
@@ -26,9 +27,11 @@ import com.kartoflane.superluminal2.ui.DirectionCombo;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.WeaponSelectionDialog;
+import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
+@SuppressWarnings("serial")
 public class MountDataComposite extends Composite implements DataComposite {
 
 	private static final String noLinkText = "Not linked";
@@ -91,6 +94,7 @@ public class MountDataComposite extends Composite implements DataComposite {
 			}
 		});
 
+		// Separator to make the sidebar appear less cluttered
 		new Label(this, SWT.NONE);
 		new Label(this, SWT.NONE);
 
@@ -171,27 +175,89 @@ public class MountDataComposite extends Composite implements DataComposite {
 		btnRotated.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>(controller) {
+					@Override
+					public void callback(Boolean arg) {
+						MountController controller = (MountController) data;
+						Rectangle oldBounds = controller.getBounds();
+						controller.setRotated(arg);
+						controller.redraw();
+						EditorWindow.getInstance().canvasRedraw(oldBounds);
+						EditorWindow.getInstance().updateSidebarContent();
+					}
+
+					@Override
+					public String getPresentationName() {
+						return "rotate mount";
+					}
+				};
+
+				edit.setOld(controller.isRotated());
+
 				Rectangle oldBounds = controller.getBounds();
 				controller.setRotated(btnRotated.getSelection());
 				controller.redraw();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
+
+				edit.setCurrent(controller.isRotated());
+				Manager.postEdit(edit);
 			}
 		});
 
 		btnMirrored.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>(controller) {
+					@Override
+					public void callback(Boolean arg) {
+						MountController controller = (MountController) data;
+						Rectangle oldBounds = controller.getBounds();
+						controller.setMirrored(arg);
+						controller.redraw();
+						EditorWindow.getInstance().canvasRedraw(oldBounds);
+						EditorWindow.getInstance().updateSidebarContent();
+					}
+
+					@Override
+					public String getPresentationName() {
+						return "mirror mount";
+					}
+				};
+
+				edit.setOld(controller.isMirrored());
+
 				Rectangle oldBounds = controller.getBounds();
 				controller.setMirrored(btnMirrored.getSelection());
 				controller.redraw();
 				EditorWindow.getInstance().canvasRedraw(oldBounds);
+
+				edit.setCurrent(controller.isMirrored());
+				Manager.postEdit(edit);
 			}
 		});
 
 		cmbDirection.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				UndoablePropertyEdit<Directions> edit = new UndoablePropertyEdit<Directions>(controller) {
+					@Override
+					public void callback(Directions arg) {
+						MountController controller = (MountController) data;
+						controller.setDirection(arg);
+						EditorWindow.getInstance().updateSidebarContent();
+					}
+
+					@Override
+					public String getPresentationName() {
+						return "change mount direction";
+					}
+				};
+
+				edit.setOld(controller.getDirection());
 				controller.setDirection(cmbDirection.getDirection());
+				edit.setCurrent(controller.getDirection());
+				if (!edit.isValuesEqual())
+					Manager.postEdit(edit);
 			}
 		});
 

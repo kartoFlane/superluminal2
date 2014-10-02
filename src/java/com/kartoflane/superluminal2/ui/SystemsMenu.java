@@ -21,10 +21,12 @@ import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.undo.UndoableSystemAssignmentEdit;
 import com.kartoflane.superluminal2.undo.UndoableSystemEmptyEdit;
 import com.kartoflane.superluminal2.undo.UndoableSystemEmptyEdit.NoSystemsException;
 
+@SuppressWarnings("serial")
 public class SystemsMenu {
 
 	private static SystemsMenu instance;
@@ -268,8 +270,28 @@ public class SystemsMenu {
 		mntmSelect.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				UndoablePropertyEdit<SystemObject> edit = new UndoablePropertyEdit<SystemObject>(controller) {
+					@Override
+					public void callback(SystemObject arg) {
+						RoomController controller = (RoomController) data;
+						container.setActiveSystem(controller.getGameObject(), arg);
+						EditorWindow.getInstance().updateSidebarContent();
+					}
+
+					@Override
+					public String getPresentationName() {
+						return "change active system";
+					}
+				};
+
+				edit.setOld(container.getActiveSystem(controller.getGameObject()));
+				edit.setCurrent(sys);
+
 				container.setActiveSystem(controller.getGameObject(), sys);
 				EditorWindow.getInstance().updateSidebarContent();
+
+				if (!edit.isValuesEqual())
+					Manager.postEdit(edit);
 			}
 		});
 

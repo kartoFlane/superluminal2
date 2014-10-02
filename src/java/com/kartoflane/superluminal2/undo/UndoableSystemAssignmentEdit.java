@@ -24,7 +24,7 @@ public class UndoableSystemAssignmentEdit extends ValueUndoableEdit<RoomControll
 
 	@Override
 	public String getPresentationName() {
-		return (cur == null ? "unassign" : "assign") + data.toString();
+		return (cur == null ? "unassign " : "assign ") + data.toString();
 	}
 
 	@Override

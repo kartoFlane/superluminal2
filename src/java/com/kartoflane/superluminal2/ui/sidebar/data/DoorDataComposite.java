@@ -16,8 +16,10 @@ import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
+import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
+@SuppressWarnings("serial")
 public class DoorDataComposite extends Composite implements DataComposite {
 
 	private static final String autolinkText = "Linked automatically";
@@ -92,6 +94,25 @@ public class DoorDataComposite extends Composite implements DataComposite {
 			public void widgetSelected(SelectionEvent e) {
 				controller.setHorizontal(btnHorizontal.getSelection());
 				updateData();
+
+				UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>(controller) {
+					@Override
+					public void callback(Boolean arg) {
+						DoorController dc = (DoorController) data;
+						dc.setHorizontal(arg);
+						if (!isDisposed())
+							updateData();
+					}
+
+					@Override
+					public String getPresentationName() {
+						return "change door orientation";
+					}
+				};
+
+				edit.setOld(!controller.isHorizontal());
+				edit.setCurrent(controller.isHorizontal());
+				Manager.postEdit(edit);
 			}
 		});
 

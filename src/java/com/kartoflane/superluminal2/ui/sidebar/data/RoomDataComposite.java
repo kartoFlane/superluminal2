@@ -35,10 +35,12 @@ import com.kartoflane.superluminal2.ui.ImageViewerDialog;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.ui.SystemsMenu;
+import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
+@SuppressWarnings("serial")
 public class RoomDataComposite extends Composite implements DataComposite {
 
 	private static String prevInteriorPath = System.getProperty("user.home");
@@ -167,14 +169,13 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				public void widgetSelected(SelectionEvent e) {
 					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
 					SystemController system = (SystemController) container.getController(sys);
+
 					system.setLevelMax(scaleMaxLevel.getSelection());
 					txtMaxLevel.setText("" + scaleMaxLevel.getSelection());
-					if (!container.isPlayerShip()) {
-						scaleSysLevel.setMaximum(scaleMaxLevel.getSelection());
-						scaleSysLevel.notifyListeners(SWT.Selection, null);
-						scaleSysLevel.setEnabled(scaleMaxLevel.getSelection() > 1);
-						scaleSysLevel.setSelection(Math.min(scaleSysLevel.getSelection(), scaleSysLevel.getMaximum()));
-					}
+					scaleSysLevel.setMaximum(scaleMaxLevel.getSelection());
+					scaleSysLevel.notifyListeners(SWT.Selection, null);
+					scaleSysLevel.setEnabled(scaleMaxLevel.getSelection() > 1);
+					scaleSysLevel.setSelection(Math.min(scaleSysLevel.getSelection(), scaleSysLevel.getMaximum()));
 				}
 			});
 		} else {
@@ -263,11 +264,35 @@ public class RoomDataComposite extends Composite implements DataComposite {
 							prevInteriorPath = path;
 							File temp = new File(path);
 							if (temp.exists()) {
+								UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(system) {
+									public void callback(String arg) {
+										SystemController system = (SystemController) data;
+										boolean vis = system.isVisible();
+										system.setVisible(false);
+										system.setInteriorPath(arg);
+										system.setVisible(vis);
+										if (!isDisposed())
+											updateData();
+									}
+
+									@Override
+									public String getPresentationName() {
+										SystemController system = (SystemController) data;
+										return String.format("change %s image", system.toString());
+									}
+								};
+
+								edit.setOld(system.getInteriorPath());
+								edit.setCurrent("file:" + path);
+
 								system.setVisible(false);
 								system.setInteriorPath("file:" + path);
 								updateData();
 								system.setVisible(true);
 								exit = true;
+
+								if (!edit.isValuesEqual())
+									Manager.postEdit(edit);
 							} else {
 								UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
 							}
@@ -285,8 +310,31 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
 					SystemController system = (SystemController) container.getController(sys);
 
+					UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(system) {
+						public void callback(String arg) {
+							SystemController system = (SystemController) data;
+							boolean vis = system.isVisible();
+							system.setVisible(false);
+							system.setInteriorPath(arg);
+							system.setVisible(vis);
+							if (!isDisposed())
+								updateData();
+						}
+
+						@Override
+						public String getPresentationName() {
+							SystemController system = (SystemController) data;
+							return String.format("clear %s image", system.toString());
+						}
+					};
+
+					edit.setOld(system.getInteriorPath());
 					system.setInteriorPath(null);
+					edit.setCurrent(system.getInteriorPath());
 					updateData();
+
+					if (!edit.isValuesEqual())
+						Manager.postEdit(edit);
 				}
 			};
 			btnInteriorClear.addSelectionListener(imageClearListener);
@@ -337,6 +385,28 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				SystemController system = (SystemController) container.getController(sys);
 				system.setAvailableAtStart(btnAvailable.getSelection());
 				roomC.redraw();
+
+				UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>(system) {
+					@Override
+					public void callback(Boolean arg) {
+						SystemController system = (SystemController) data;
+						system.setAvailableAtStart(arg);
+						system.redraw();
+						if (!isDisposed())
+							updateData();
+					}
+
+					@Override
+					public String getPresentationName() {
+						SystemController system = (SystemController) data;
+						return String.format("toggle %s availability", system.toString());
+					}
+				};
+
+				edit.setOld(!system.isAvailableAtStart());
+				edit.setCurrent(system.isAvailableAtStart());
+
+				Manager.postEdit(edit);
 			}
 		});
 
