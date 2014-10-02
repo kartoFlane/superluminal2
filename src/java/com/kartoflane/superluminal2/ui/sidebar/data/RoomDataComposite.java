@@ -26,7 +26,6 @@ import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
-import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GlowSelectionDialog;
@@ -69,7 +68,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
 		roomC = control;
 		container = Manager.getCurrentShip();
-		final ShipController shipC = container.getShipController();
 
 		label = new Label(this, SWT.NONE);
 		label.setAlignment(SWT.CENTER);
@@ -140,7 +138,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			}
 		});
 
-		if (!Manager.getCurrentShip().getShipController().isPlayerShip()) {
+		if (!container.isPlayerShip()) {
 			lblMaxLevel = new Label(this, SWT.NONE);
 			lblMaxLevel.setText("Max Level:");
 
@@ -166,7 +164,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					SystemController system = (SystemController) container.getController(sys);
 					system.setLevelMax(scaleMaxLevel.getSelection());
 					txtMaxLevel.setText("" + scaleMaxLevel.getSelection());
-					if (!shipC.isPlayerShip()) {
+					if (!container.isPlayerShip()) {
 						scaleSysLevel.setMaximum(scaleMaxLevel.getSelection());
 						scaleSysLevel.notifyListeners(SWT.Selection, null);
 						scaleSysLevel.setEnabled(scaleMaxLevel.getSelection() > 1);
@@ -324,8 +322,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 		SystemObject sys = container.getActiveSystem(roomC.getGameObject());
 		SystemController system = (SystemController) container.getController(sys);
-		ShipController shipController = container.getShipController();
-		boolean playerShip = shipController.isPlayerShip();
+		boolean playerShip = container.isPlayerShip();
 
 		String alias = roomC.getAlias();
 		label.setText("Room " + roomC.getId() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));

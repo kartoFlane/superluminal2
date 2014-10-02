@@ -116,7 +116,7 @@ public class ShipContainer implements Disposable, SLListener {
 		eventHandler = new EventHandler();
 		hangarListener = new SLListener() {
 			public void handleEvent(SLEvent e) {
-				if (!shipController.isPlayerShip() && e.source instanceof RoomController) {
+				if (!isPlayerShip() && e.source instanceof RoomController) {
 					ImageController hangar = getImageController(Images.HANGAR);
 					Point size = findShipSize();
 					hangar.setFollowOffset(size.x / 2, hangar.getFollowOffset().y);
@@ -137,7 +137,7 @@ public class ShipContainer implements Disposable, SLListener {
 		window.addListener(SLEvent.MOD_SHIFT, this);
 		addListener(SLEvent.MOD_SHIFT, shipController);
 
-		((CreationTool) Manager.getTool(Tools.CREATOR)).setEnabled(Tools.STATION, ship.isPlayerShip());
+		((CreationTool) Manager.getTool(Tools.CREATOR)).setEnabled(Tools.STATION, isPlayerShip());
 
 		Grid grid = Grid.getInstance();
 
@@ -223,7 +223,7 @@ public class ShipContainer implements Disposable, SLListener {
 				store(systemC);
 				if (sys.canContainStation()) {
 					StationController sc = StationController.newInstance(this, systemC, system.getStation());
-					if (ship.isPlayerShip() && sys.canContainGlow()) {
+					if (isPlayerShip() && sys.canContainGlow()) {
 						GlowController gc = GlowController.newInstance(sc, system.getGlow());
 						add(gc);
 						store(gc);
@@ -390,6 +390,10 @@ public class ShipContainer implements Disposable, SLListener {
 		return shipSaved;
 	}
 
+	public boolean isPlayerShip() {
+		return shipController.isPlayerShip();
+	}
+
 	public ShipController getShipController() {
 		return shipController;
 	}
@@ -493,7 +497,7 @@ public class ShipContainer implements Disposable, SLListener {
 		Point result = new Point(0, 0);
 		Point size = findShipSize();
 
-		if (shipController.isPlayerShip()) {
+		if (isPlayerShip()) {
 			int hangarWidth = 259;
 			int hangarHeight = 177;
 
@@ -524,7 +528,7 @@ public class ShipContainer implements Disposable, SLListener {
 		Point result = new Point(0, 0);
 		Point size = findShipSize();
 
-		if (shipController.isPlayerShip()) {
+		if (isPlayerShip()) {
 			int hangarWidth = 259;
 			int hangarHeight = 177;
 
@@ -671,7 +675,7 @@ public class ShipContainer implements Disposable, SLListener {
 		setActiveSystem(room.getGameObject(), sys);
 		system.notifySizeChanged(room.getW(), room.getH());
 
-		if (shipController.isPlayerShip() && system.canContainGlow() && system.canContainStation()) {
+		if (isPlayerShip() && system.canContainGlow() && system.canContainStation()) {
 			GlowController glow = (GlowController) getController(sys.getGlow());
 			glow.applyGlowSettings();
 		}
@@ -1074,7 +1078,7 @@ public class ShipContainer implements Disposable, SLListener {
 		// Load hangar image
 		imgObject = new ImageObject();
 		imgObject.setAlias("hangar");
-		imgObject.setImagePath(ship.isPlayerShip() ? HANGAR_IMG_PATH : ENEMY_IMG_PATH);
+		imgObject.setImagePath(isPlayerShip() ? HANGAR_IMG_PATH : ENEMY_IMG_PATH);
 		final ImageController hangar = ImageController.newInstance(shipController, imgObject);
 		hangar.setSelectable(false);
 		hangar.removeFromPainter();
@@ -1084,7 +1088,7 @@ public class ShipContainer implements Disposable, SLListener {
 		// For FTL hangar image: 365, 30
 		// For SL2 hangar image: 94, 56
 		// For enemy window image: 193, 239
-		if (ship.isPlayerShip()) {
+		if (isPlayerShip()) {
 			hangar.setFollowOffset(offset.x / 2 - 94, offset.y / 2 - 56);
 		} else {
 			// Not entirely clear correction; perhaps related to the difference between in-game enemy
@@ -1115,7 +1119,7 @@ public class ShipContainer implements Disposable, SLListener {
 		center.y = offset.y + center.y / 2;
 
 		shield.setFollowOffset(center.x + ship.getEllipseX(), center.y + ship.getEllipseY());
-		if (!ship.isPlayerShip()) {
+		if (!isPlayerShip()) {
 			shield.setSize(ship.getEllipseWidth() * 2, ship.getEllipseHeight() * 2);
 		}
 		shield.updateView();
@@ -1125,7 +1129,7 @@ public class ShipContainer implements Disposable, SLListener {
 		store(shield);
 		shield.setBounded(true);
 
-		if (!ship.isPlayerShip()) {
+		if (!isPlayerShip()) {
 			// Shield resize prop
 			PropController prop = new PropController(shield, SHIELD_RESIZE_PROP_ID);
 			prop.setSelectable(true);
@@ -1323,7 +1327,7 @@ public class ShipContainer implements Disposable, SLListener {
 		roomC.addListener(SLEvent.RESIZE, newSystemC);
 		if (newSystemC.canContainStation()) {
 			StationController station = (StationController) getController(newSystem.getStation());
-			if (!shipController.isPlayerShip())
+			if (!isPlayerShip())
 				station.setSlotId(-2);
 			roomC.addListener(SLEvent.RESIZE, station);
 			station.updateFollowOffset();

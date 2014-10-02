@@ -123,7 +123,7 @@ public class SystemController extends ObjectController {
 	public void setInteriorPath(String interiorPath) {
 		SystemObject system = getGameObject();
 
-		if (interiorPath == null && container.getShipController().isPlayerShip()) {
+		if (interiorPath == null && container.isPlayerShip()) {
 			system.setInteriorNamespace(system.getSystemId().getDefaultInteriorNamespace());
 			if (system.getInteriorNamespace() != null)
 				system.setInteriorPath("db:img/ship/interior/" + system.getInteriorNamespace() + ".png"); // Default
