@@ -722,7 +722,7 @@ public class ShipSaveUtils {
 				GlowObject glow = system.getGlow();
 
 				Element glowEl = new Element("roomLayout");
-				glowEl.setAttribute("name", glow.getIdentifier());
+				glowEl.setAttribute("name", system.getInteriorNamespace());
 
 				Element e = new Element("computerGlow");
 				if (!glow.getGlowSet().getIdentifier().equals("glow"))

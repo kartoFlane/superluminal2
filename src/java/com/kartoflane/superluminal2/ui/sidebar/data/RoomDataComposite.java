@@ -3,6 +3,8 @@ package com.kartoflane.superluminal2.ui.sidebar.data;
 import java.io.File;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -56,6 +58,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private Button btnInteriorBrowse;
 	private Button btnInteriorClear;
 	private Text txtInterior;
+	private Label lblNameInfo;
+	private Label lblName;
+	private Text txtName;
 	private Button btnInteriorView;
 	private Label label;
 	private Label lblGlow;
@@ -175,7 +180,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		} else {
 			imagesComposite = new Composite(this, SWT.NONE);
 			GridLayout gl_imagesComposite = new GridLayout(4, false);
-			gl_imagesComposite.marginHeight = 0;
+			gl_imagesComposite.marginHeight = 20;
 			gl_imagesComposite.marginWidth = 0;
 			imagesComposite.setLayout(gl_imagesComposite);
 			imagesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
@@ -200,10 +205,24 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtInterior = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
 			txtInterior.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
+			lblName = new Label(imagesComposite, SWT.NONE);
+			lblName.setText("Export Name");
+			txtName = new Text(imagesComposite, SWT.BORDER);
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+			lblNameInfo = new Label(imagesComposite, SWT.NONE);
+			lblNameInfo.setImage(helpImage);
+			lblNameInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+
+			msg = "This field allows you to specify the name the interior image will be exported as. " +
+					"This is useful, because glow images are tied to image names, so having a unique name " +
+					"will allow the glow image to only be used for your ship.";
+			UIUtils.addTooltip(lblNameInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+
 			// Glow widgets
 			lblGlow = new Label(imagesComposite, SWT.NONE);
 			lblGlow.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-			lblGlow.setText("Manning glow:");
+			lblGlow.setText("Manning Glow:");
 
 			btnGlow = new Button(imagesComposite, SWT.NONE);
 			GridData gd_btnGlow = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1);
@@ -289,6 +308,16 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					}
 				}
 			});
+
+			txtName.addFocusListener(new FocusListener() {
+				public void focusGained(FocusEvent e) {
+				}
+
+				public void focusLost(FocusEvent e) {
+					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+					sys.setInteriorNamespace(txtName.getText());
+				}
+			});
 		}
 
 		btnSystem.addSelectionListener(new SelectionAdapter() {
@@ -361,8 +390,12 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 				lblGlow.setVisible(system.canContainGlow());
 				btnGlow.setVisible(system.canContainGlow());
+				lblName.setVisible(system.canContainGlow());
+				lblNameInfo.setVisible(system.canContainGlow());
+				txtName.setVisible(system.canContainGlow());
 				if (system.canContainGlow()) {
 					btnGlow.setText(system.getGameObject().getGlow().getGlowSet().getIdentifier());
+					txtName.setText(system.getGameObject().getInteriorNamespace());
 				}
 			} else {
 				scaleMaxLevel.setMaximum(system.getLevelCap());
@@ -385,6 +418,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				txtInterior.setText("");
 				lblGlow.setVisible(false);
 				btnGlow.setVisible(false);
+				lblName.setVisible(false);
+				lblNameInfo.setVisible(false);
+				txtName.setVisible(false);
 			} else {
 				scaleMaxLevel.setMaximum(2);
 				scaleMaxLevel.setSelection(1);
@@ -396,9 +432,25 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 	@Override
 	public void setController(AbstractController roomC) {
+		if (this.roomC != null) {
+			SystemObject sys = container.getActiveSystem(this.roomC.getGameObject());
+			if (container.isPlayerShip() && sys.canContainGlow()) {
+				txtName.notifyListeners(SWT.FocusOut, null);
+			}
+		}
+
 		this.roomC = (RoomController) roomC;
 	}
 
 	public void reloadController() {
+	}
+
+	@Override
+	public void dispose() {
+		SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+		if (container.isPlayerShip() && sys.canContainGlow()) {
+			txtName.notifyListeners(SWT.FocusOut, null);
+		}
+		super.dispose();
 	}
 }
