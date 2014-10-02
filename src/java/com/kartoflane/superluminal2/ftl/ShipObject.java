@@ -93,12 +93,6 @@ public class ShipObject extends GameObject {
 		for (int i = 0; i < 3; i++) {
 			augments.add(Database.DEFAULT_AUGMENT_OBJ);
 		}
-
-		for (Systems system : Systems.values()) {
-			ArrayList<SystemObject> list = new ArrayList<SystemObject>();
-			systemMap.put(system, list);
-			add(new SystemObject(system, this));
-		}
 		for (Images image : Images.values()) {
 			ImageObject object = new ImageObject();
 			object.setAlias(image.name().toLowerCase());
@@ -116,6 +110,12 @@ public class ShipObject extends GameObject {
 		this();
 
 		this.isPlayer = isPlayer;
+
+		for (Systems system : Systems.values()) {
+			ArrayList<SystemObject> list = new ArrayList<SystemObject>();
+			systemMap.put(system, list);
+			add(new SystemObject(system, this));
+		}
 
 		if (!isPlayer) {
 			ImageObject shieldObject = imageMap.get(Images.SHIELD);
