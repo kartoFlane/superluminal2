@@ -174,9 +174,11 @@ public class ShipSaveUtils {
 		bytes = IOUtils.readDocument(generateLayoutXML(ship)).getBytes();
 		fileMap.put(fileName, bytes);
 
-		fileName = "data/rooms.xml.append";
-		bytes = IOUtils.readDocument(generateRoomsXML(ship)).getBytes();
-		fileMap.put(fileName, bytes);
+		if (ship.isPlayerShip()) {
+			fileName = "data/rooms.xml.append";
+			bytes = IOUtils.readDocument(generateRoomsXML(ship)).getBytes();
+			fileMap.put(fileName, bytes);
+		}
 
 		// Recover door links
 		for (DoorObject d : ship.getDoors()) {

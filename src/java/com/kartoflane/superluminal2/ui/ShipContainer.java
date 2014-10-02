@@ -223,7 +223,7 @@ public class ShipContainer implements Disposable, SLListener {
 				store(systemC);
 				if (sys.canContainStation()) {
 					StationController sc = StationController.newInstance(this, systemC, system.getStation());
-					if (sys.canContainGlow()) {
+					if (ship.isPlayerShip() && sys.canContainGlow()) {
 						GlowController gc = GlowController.newInstance(sc, system.getGlow());
 						add(gc);
 						store(gc);
@@ -671,7 +671,7 @@ public class ShipContainer implements Disposable, SLListener {
 		setActiveSystem(room.getGameObject(), sys);
 		system.notifySizeChanged(room.getW(), room.getH());
 
-		if (system.canContainGlow() && system.canContainStation()) {
+		if (shipController.isPlayerShip() && system.canContainGlow() && system.canContainStation()) {
 			GlowController glow = (GlowController) getController(sys.getGlow());
 			glow.applyGlowSettings();
 		}
