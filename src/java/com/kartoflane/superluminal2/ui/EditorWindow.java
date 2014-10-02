@@ -975,8 +975,25 @@ public class EditorWindow {
 
 		canvas.addMouseMoveListener(new MouseMoveListener() {
 			public void mouseMove(MouseEvent e) {
-				lblCursorLoc.setText(String.format("%-4s, %-4s | %-2s, %-2s", e.x, e.y,
-						e.x / ShipContainer.CELL_SIZE, e.y / ShipContainer.CELL_SIZE));
+				int x = e.x, y = e.y;
+				int gx = 0, gy = 0;
+
+				if (Manager.mouseShipRelative && Manager.getCurrentShip() != null) {
+					Point shipLoc = Manager.getCurrentShip().getShipController().getLocation();
+					x -= shipLoc.x;
+					y -= shipLoc.y;
+					if (x < 0)
+						gx -= ShipContainer.CELL_SIZE;
+					if (y < 0)
+						gy -= ShipContainer.CELL_SIZE;
+				}
+
+				gx += x;
+				gy += y;
+				gx /= ShipContainer.CELL_SIZE;
+				gy /= ShipContainer.CELL_SIZE;
+
+				lblCursorLoc.setText(String.format("%-4s, %-4s | %-2s, %-2s", x, y, gx, gy));
 			}
 		});
 

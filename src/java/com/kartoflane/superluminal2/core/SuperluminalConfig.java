@@ -27,6 +27,7 @@ public class SuperluminalConfig extends Properties {
 	public static final String ALLOW_OVERLAP =			"allowRoomOverlap";
 	public static final String ALLOW_OVERLAP_DOOR =		"allowDoorOverlap";
 	public static final String RESET_LINKS =			"resetDoorLinksOnMove";
+	public static final String MOUSE_SHIP_RELATIVE =	"pointerRelativeToShip";
 
 	public static final String SLOT_WARNING =			"shownSlotWarning";
 	public static final String ARTILLERY_WARNING =		"shownArtilleryWarning";
@@ -76,8 +77,6 @@ public class SuperluminalConfig extends Properties {
 	 * Updates the config properties with the current runtime values.
 	 */
 	public void setCurrent() {
-		setProperty(FTL_RESOURCE, Manager.resourcePath);
-		setProperty(SAVE_GEOMETRY, "" + Manager.rememberGeometry);
 		setProperty(START_MAX, "" + Manager.startMaximised);
 		setProperty(SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide);
 		setProperty(CHECK_UPDATES, "" + Manager.checkUpdates);
@@ -85,8 +84,13 @@ public class SuperluminalConfig extends Properties {
 		setProperty(ALLOW_OVERLAP, "" + Manager.allowRoomOverlap);
 		setProperty(ALLOW_OVERLAP_DOOR, "" + Manager.allowDoorOverlap);
 		setProperty(RESET_LINKS, "" + Manager.resetDoorLinksOnMove);
+		setProperty(MOUSE_SHIP_RELATIVE, "" + Manager.mouseShipRelative);
+
 		setProperty(SLOT_WARNING, "" + Manager.shownSlotWarning);
 		setProperty(ARTILLERY_WARNING, "" + Manager.shownArtilleryWarning);
+
+		setProperty(FTL_RESOURCE, Manager.resourcePath);
+		setProperty(SAVE_GEOMETRY, "" + Manager.rememberGeometry);
 		if (Manager.rememberGeometry && !Manager.startMaximised)
 			setProperty(GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y);
 	}
@@ -105,6 +109,7 @@ public class SuperluminalConfig extends Properties {
 			configComments += " " + CHECK_UPDATES + " - If true, the program will automatically check for updates each time it is started.\n";
 			configComments += " " + ALLOW_OVERLAP + " - If true, room collision will be disabled, allowing rooms to be placed on top of each other.\n";
 			configComments += " " + ALLOW_OVERLAP_DOOR + " - If true, door collision will be disabled, allowing doors to be placed on top of each other.\n";
+			configComments += " " + MOUSE_SHIP_RELATIVE + " - If true, the mouse tracker will display the pointer's location relative to the ship's origin.\n";
 			configComments += "\n";
 			configComments += " " + GEOMETRY + " - Last saved size of the main window.\n";
 			configComments += "\n";

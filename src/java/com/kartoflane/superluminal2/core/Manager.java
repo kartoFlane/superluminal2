@@ -77,6 +77,8 @@ public abstract class Manager {
 	public static boolean allowRoomOverlap = false;
 	public static boolean allowDoorOverlap = false;
 	public static boolean resetDoorLinksOnMove = false;
+	public static boolean mouseShipRelative = false;
+
 	public static boolean shownSlotWarning = false;
 	public static boolean shownArtilleryWarning = false;
 

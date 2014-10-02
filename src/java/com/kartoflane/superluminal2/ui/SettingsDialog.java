@@ -56,6 +56,7 @@ public class SettingsDialog {
 	private Composite compKeybinds;
 	private Button btnUnbind;
 	private Button btnOverlapDoors;
+	private Button btnMouse;
 
 	public SettingsDialog(Shell parent) {
 		if (instance != null)
@@ -187,6 +188,17 @@ public class SettingsDialog {
 		Label lblSidebar = new Label(compConfig, SWT.WRAP);
 		lblSidebar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		lblSidebar.setText("If checked, the sidebar will be located on the right side of the window.");
+
+		Label separator14 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator14.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+
+		btnMouse = new Button(compConfig, SWT.CHECK);
+		btnMouse.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		btnMouse.setText("Show Mouse Position Relative to Ship Origin");
+
+		Label lblMouse = new Label(compConfig, SWT.WRAP);
+		lblMouse.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		lblMouse.setText("If checked, the mouse tracker will show the mouse pointer's position relative to the ship origin, instead of top left corner of the viewport.");
 		scConfig.setContent(compConfig);
 
 		/*
@@ -298,6 +310,7 @@ public class SettingsDialog {
 				Manager.checkUpdates = btnUpdates.getSelection();
 				Manager.rememberGeometry = btnGeometry.getSelection();
 				Manager.startMaximised = btnMaximise.getSelection();
+				Manager.mouseShipRelative = btnMouse.getSelection();
 
 				// Hotkeys
 				for (Hotkeys id : modifiedHotkeys.keySet()) {
@@ -474,6 +487,7 @@ public class SettingsDialog {
 		btnMaximise.setSelection(Manager.startMaximised);
 		btnUpdates.setSelection(Manager.checkUpdates);
 		btnSidebar.setSelection(Manager.sidebarOnRightSide);
+		btnMouse.setSelection(Manager.mouseShipRelative);
 
 		shell.open();
 	}

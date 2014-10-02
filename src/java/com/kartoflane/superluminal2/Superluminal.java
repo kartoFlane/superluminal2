@@ -68,6 +68,7 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
+	 * - allow users to select whether they want to browse OS filesystem or database with Browse in images + settings to default to OS
 	 * - floor generation customization --> window with options?
 	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
 	 * 
@@ -161,6 +162,8 @@ public class Superluminal {
 		Manager.allowRoomOverlap = appConfig.getPropertyAsBoolean(SuperluminalConfig.ALLOW_OVERLAP, false);
 		Manager.allowDoorOverlap = appConfig.getPropertyAsBoolean(SuperluminalConfig.ALLOW_OVERLAP_DOOR, false);
 		Manager.resetDoorLinksOnMove = appConfig.getPropertyAsBoolean(SuperluminalConfig.RESET_LINKS, true);
+		Manager.mouseShipRelative = appConfig.getPropertyAsBoolean(SuperluminalConfig.MOUSE_SHIP_RELATIVE, false);
+
 		Manager.shownSlotWarning = appConfig.getPropertyAsBoolean(SuperluminalConfig.SLOT_WARNING, false);
 		Manager.shownArtilleryWarning = appConfig.getPropertyAsBoolean(SuperluminalConfig.ARTILLERY_WARNING, false);
 		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
