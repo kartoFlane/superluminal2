@@ -119,8 +119,6 @@ public class ZoomWindow
 			}
 		});
 
-		slider.addMouseWheelListener(this);
-
 		updateText();
 		setCopySource(source);
 		shell.setSize(300, 300);
@@ -294,7 +292,7 @@ public class ZoomWindow
 		Object source = e.getSource();
 		if (source == slider || source == canvas || source == EditorWindow.getInstance().getSidebarWidget()) {
 			float newScale = scale + e.count / 5f;
-			slider.setSelection((int) newScale * 100);
+			slider.setSelection((int) (newScale * 100));
 			setScale(newScale);
 		}
 	}
