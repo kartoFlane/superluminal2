@@ -137,10 +137,10 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 		if (!bounds.contains(x, y))
 			return -1;
 
-		x = (x - bounds.x) / ShipContainer.CELL_SIZE;
-		y = (y - bounds.y) / ShipContainer.CELL_SIZE;
+		x = x - bounds.x;
+		y = y - bounds.y;
 
-		return x + (y * (bounds.width / ShipContainer.CELL_SIZE));
+		return x + (y * bounds.width);
 	}
 
 	/**
@@ -150,8 +150,8 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 */
 	public boolean canContainSlotId(int slotId) {
 		Rectangle bounds = getBounds();
-		int w = bounds.width / ShipContainer.CELL_SIZE;
-		int h = bounds.height / ShipContainer.CELL_SIZE;
+		int w = bounds.width;
+		int h = bounds.height;
 		return w + h * w >= slotId && slotId >= 0;
 	}
 
