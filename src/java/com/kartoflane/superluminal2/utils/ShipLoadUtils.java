@@ -95,7 +95,7 @@ public class ShipLoadUtils {
 			throw new FileNotFoundException("TXT layout file could not be found in game's archives: " + ship.getLayoutTXT());
 
 		InputStream is = db.getInputStream(ship.getLayoutTXT());
-		loadLayoutTXT(ship, is, ship.getLayoutTXT());
+		loadLayoutTXT(ship, is);
 
 		// Load ship's image namespace
 		attr = e.getAttributeValue("img");
@@ -144,7 +144,7 @@ public class ShipLoadUtils {
 			throw new FileNotFoundException("XML layout file could not be found in game's archives: " + ship.getLayoutXML());
 
 		is = db.getInputStream(ship.getLayoutXML());
-		loadLayoutXML(ship, is, ship.getLayoutXML());
+		loadLayoutXML(ship, is);
 
 		// Load gib images
 		for (GibObject gib : ship.getGibs()) {
@@ -514,12 +514,10 @@ public class ShipLoadUtils {
 	 *            the ship object in which the loaded data will be saved
 	 * @param is
 	 *            input stream from which the data is read. The stream is always closed by this method.
-	 * @param fileName
-	 *            how error messages will refer to the stream
 	 * @throws IllegalArgumentException
 	 *             when the file is wrongly formatted
 	 */
-	public static void loadLayoutTXT(ShipObject ship, InputStream is, String fileName) throws IllegalArgumentException {
+	public static void loadLayoutTXT(ShipObject ship, InputStream is) throws IllegalArgumentException {
 		if (ship == null)
 			throw new IllegalArgumentException("Ship object must not be null.");
 		if (is == null)
@@ -546,7 +544,7 @@ public class ShipLoadUtils {
 						continue;
 					} catch (NumberFormatException ex) {
 						// Not a number
-						throw new IllegalArgumentException(fileName + " contained an unknown layout object: " + line);
+						throw new IllegalArgumentException(ship.getLayoutTXT() + " contained an unknown layout object: " + line);
 					}
 				}
 				switch (layoutObject) {
@@ -615,7 +613,7 @@ public class ShipLoadUtils {
 			throw new IllegalArgumentException("Ship object must not be null.");
 		if (f == null)
 			throw new IllegalArgumentException("File must not be null.");
-		loadLayoutTXT(ship, new FileInputStream(f), f.getName());
+		loadLayoutTXT(ship, new FileInputStream(f));
 	}
 
 	/**
@@ -625,8 +623,6 @@ public class ShipLoadUtils {
 	 *            ship object in which the loaded data will be saved
 	 * @param is
 	 *            stream from which the data is read. The stream is always closed by this method.
-	 * @param fileName
-	 *            how error messages will refer to the stream
 	 * @throws IllegalArgumentException
 	 *             when the file is wrongly formatted - a tag or an attribute is missing
 	 * @throws JDOMParseException
@@ -634,7 +630,7 @@ public class ShipLoadUtils {
 	 * @throws IOException
 	 *             when a general IO error occurs
 	 */
-	public static void loadLayoutXML(ShipObject ship, InputStream is, String fileName)
+	public static void loadLayoutXML(ShipObject ship, InputStream is)
 			throws IllegalArgumentException, JDOMParseException, IOException {
 		if (ship == null)
 			throw new IllegalArgumentException("Ship object must not be null.");
@@ -642,7 +638,7 @@ public class ShipLoadUtils {
 			throw new IllegalArgumentException("Stream must not be null.");
 
 		try {
-			Document doc = IOUtils.readStreamXML(is, fileName);
+			Document doc = IOUtils.readStreamXML(is, ship.getLayoutXML());
 
 			Element root = doc.getRootElement();
 			Element child = null;
@@ -865,7 +861,7 @@ public class ShipLoadUtils {
 			throw new IllegalArgumentException("Ship object must not be null.");
 		if (f == null)
 			throw new IllegalArgumentException("File must not be null.");
-		loadLayoutXML(ship, new FileInputStream(f), f.getName());
+		loadLayoutXML(ship, new FileInputStream(f));
 	}
 
 	private static String firstExisting(String[] prefixes, String suffix, Database db) {
