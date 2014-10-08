@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -22,6 +24,7 @@ import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
+import com.kartoflane.superluminal2.ui.DatabaseFileDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GibWidget;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
@@ -39,6 +42,8 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 	private static int selectedTab = 0;
 	private ShipContainer container;
+
+	private Images tempType = null;
 
 	private Text txtHull;
 	private Button btnHullBrowse;
@@ -67,6 +72,9 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 	private Composite compGibs;
 	private Button btnNew;
 	private HashMap<GibController, GibWidget> gibWidgetMap;
+	private Menu mnBrowse;
+	private MenuItem mntmFilesystem;
+	private MenuItem mntmDatabase;
 
 	public ImagesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -85,6 +93,75 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 4, 1));
 
+		mnBrowse = new Menu(this);
+		mntmFilesystem = new MenuItem(mnBrowse, SWT.NONE);
+		mntmFilesystem.setText("System");
+		mntmDatabase = new MenuItem(mnBrowse, SWT.NONE);
+		mntmDatabase.setText("Database");
+
+		mntmDatabase.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DatabaseFileDialog dialog = new DatabaseFileDialog(EditorWindow.getInstance().getShell());
+				dialog.setFilterExtensions(new String[] { "*.png" });
+				dialog.setText("FTL Archive Browser");
+
+				boolean exit = false;
+				while (!exit) {
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path == null) {
+						exit = true;
+					} else {
+						exit = setImage(tempType, "db:", path);
+					}
+				}
+			}
+		});
+		mntmFilesystem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
+				dialog.setFilterExtensions(new String[] { "*.png" });
+				dialog.setFilterPath(prevImagesPath);
+				dialog.setFileName(prevImagesPath);
+
+				boolean exit = false;
+				while (!exit) {
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path != null) {
+						prevImagesPath = path;
+						exit = setImage(tempType, "file:", path);
+					} else {
+						exit = true;
+					}
+				}
+			}
+		});
+		SelectionAdapter browseMenuListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Button source = (Button) e.getSource();
+
+				tempType = null;
+				if (source == btnHullBrowse)
+					tempType = Images.HULL;
+				else if (source == btnFloorBrowse)
+					tempType = Images.FLOOR;
+				else if (source == btnCloakBrowse)
+					tempType = Images.CLOAK;
+				else if (source == btnShieldBrowse)
+					tempType = Images.SHIELD;
+				else if (source == btnMiniBrowse)
+					tempType = Images.THUMBNAIL;
+
+				mnBrowse.setLocation(source.toDisplay(0, source.getSize().y));
+				mnBrowse.setVisible(true);
+			}
+		};
 		SelectionAdapter imageViewListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -105,67 +182,6 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 				if (path != null) {
 					ImageViewerDialog dialog = new ImageViewerDialog(EditorWindow.getInstance().getShell());
 					dialog.open(path);
-				}
-			}
-		};
-		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
-				dialog.setFilterExtensions(new String[] { "*.png" });
-				dialog.setFilterPath(prevImagesPath);
-				dialog.setFileName(prevImagesPath);
-
-				Images type = null;
-				if (e.getSource() == btnHullBrowse)
-					type = Images.HULL;
-				else if (e.getSource() == btnFloorBrowse)
-					type = Images.FLOOR;
-				else if (e.getSource() == btnCloakBrowse)
-					type = Images.CLOAK;
-				else if (e.getSource() == btnShieldBrowse)
-					type = Images.SHIELD;
-				else if (e.getSource() == btnMiniBrowse)
-					type = Images.THUMBNAIL;
-
-				boolean exit = false;
-				while (!exit) {
-					String path = dialog.open();
-
-					// path == null only when user cancels
-					if (path != null) {
-						prevImagesPath = path;
-						File temp = new File(path);
-						if (temp.exists()) {
-							final Images fType = type;
-							UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(container) {
-								public void callback(String arg) {
-									container.setImage(fType, arg);
-									if (!isDisposed())
-										updateData();
-								}
-
-								@Override
-								public String getPresentationName() {
-									return String.format("change %s image", fType.toString());
-								}
-							};
-
-							edit.setOld(container.getImage(type));
-							edit.setCurrent("file:" + path);
-
-							container.setImage(type, "file:" + path);
-							updateData();
-							exit = true;
-
-							if (!edit.isValuesEqual())
-								Manager.getCurrentShip().postEdit(edit);
-						} else {
-							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
-						}
-					} else {
-						exit = true;
-					}
 				}
 			}
 		};
@@ -245,7 +261,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 		btnHullBrowse = new Button(compImages, SWT.NONE);
 		btnHullBrowse.setText("Browse");
-		btnHullBrowse.addSelectionListener(imageBrowseListener);
+		btnHullBrowse.addSelectionListener(browseMenuListener);
 
 		btnHullClear = new Button(compImages, SWT.NONE);
 		btnHullClear.setText("Clear");
@@ -267,7 +283,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 			btnFloorBrowse = new Button(compImages, SWT.NONE);
 			btnFloorBrowse.setText("Browse");
-			btnFloorBrowse.addSelectionListener(imageBrowseListener);
+			btnFloorBrowse.addSelectionListener(browseMenuListener);
 
 			btnFloorClear = new Button(compImages, SWT.NONE);
 			btnFloorClear.setText("Clear");
@@ -290,7 +306,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 		btnCloakBrowse = new Button(compImages, SWT.NONE);
 		btnCloakBrowse.setText("Browse");
-		btnCloakBrowse.addSelectionListener(imageBrowseListener);
+		btnCloakBrowse.addSelectionListener(browseMenuListener);
 
 		btnCloakClear = new Button(compImages, SWT.NONE);
 		btnCloakClear.setText("Clear");
@@ -312,7 +328,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 			btnShieldBrowse = new Button(compImages, SWT.NONE);
 			btnShieldBrowse.setText("Browse");
-			btnShieldBrowse.addSelectionListener(imageBrowseListener);
+			btnShieldBrowse.addSelectionListener(browseMenuListener);
 
 			btnShieldClear = new Button(compImages, SWT.NONE);
 			btnShieldClear.setText("Clear");
@@ -333,7 +349,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 			btnMiniBrowse = new Button(compImages, SWT.NONE);
 			btnMiniBrowse.setText("Browse");
-			btnMiniBrowse.addSelectionListener(imageBrowseListener);
+			btnMiniBrowse.addSelectionListener(browseMenuListener);
 
 			btnMiniClear = new Button(compImages, SWT.NONE);
 			btnMiniClear.setText("Clear");
@@ -472,5 +488,43 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 
 	public static String getPrevGibsPath() {
 		return prevGibsPath;
+	}
+
+	private boolean setImage(Images type, String protocol, String path) {
+		if (type == null)
+			throw new IllegalArgumentException("Type must not be null!");
+
+		boolean result = false;
+
+		if (protocol.equals("file:") && !new File(path).exists()) {
+			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
+			return false;
+		}
+
+		final Images fType = type;
+		UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(container) {
+			public void callback(String arg) {
+				container.setImage(fType, arg);
+				if (!isDisposed())
+					updateData();
+			}
+
+			@Override
+			public String getPresentationName() {
+				return String.format("change %s image", fType.toString());
+			}
+		};
+
+		edit.setOld(container.getImage(type));
+		edit.setCurrent("file:" + path);
+
+		container.setImage(type, "file:" + path);
+		updateData();
+		result = true;
+
+		if (!edit.isValuesEqual())
+			Manager.getCurrentShip().postEdit(edit);
+
+		return result;
 	}
 }

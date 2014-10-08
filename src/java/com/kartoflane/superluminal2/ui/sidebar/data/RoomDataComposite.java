@@ -249,7 +249,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			btnGlow.setLayoutData(gd_btnGlow);
 			btnGlow.setText("None");
 
-			SelectionAdapter imageViewListener = new SelectionAdapter() {
+			btnInteriorView.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
@@ -260,8 +260,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 						dialog.open(path);
 					}
 				}
-			};
-			btnInteriorView.addSelectionListener(imageViewListener);
+			});
 
 			btnInteriorBrowse.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -271,7 +270,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				}
 			});
 
-			SelectionAdapter imageBrowseListener = new SelectionAdapter() {
+			mntmFilesystem.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
@@ -292,8 +291,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 						}
 					}
 				}
-			};
-			mntmFilesystem.addSelectionListener(imageBrowseListener);
+			});
 
 			mntmDatabase.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -316,7 +314,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				}
 			});
 
-			SelectionAdapter imageClearListener = new SelectionAdapter() {
+			btnInteriorClear.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
@@ -348,8 +346,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					if (!edit.isValuesEqual())
 						Manager.postEdit(edit);
 				}
-			};
-			btnInteriorClear.addSelectionListener(imageClearListener);
+			});
 
 			btnGlow.addSelectionListener(new SelectionAdapter() {
 				@Override
