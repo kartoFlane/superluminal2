@@ -68,13 +68,7 @@ public class Superluminal {
 	 * TODO:
 	 * 
 	 * IMMEDIATE:
-	 * - allow users to select whether they want to browse OS filesystem or database with Browse in images + settings to default to OS
-	 * - floor generation customization --> window with options?
 	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
-	 * 
-	 * - undo system
-	 * == various properties undos
-	 * == reorder undo
 	 * 
 	 * MEDIUM:
 	 * - room tool doesn't work sometimes? -- as per SleeperService

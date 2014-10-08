@@ -8,13 +8,14 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
@@ -29,6 +30,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
+import com.kartoflane.superluminal2.ui.DatabaseFileDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GlowSelectionDialog;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
@@ -67,6 +69,9 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private Label label;
 	private Label lblGlow;
 	private Button btnGlow;
+	private Menu mnBrowse;
+	private MenuItem mntmFilesystem;
+	private MenuItem mntmDatabase;
 
 	public RoomDataComposite(Composite parent, RoomController control) {
 		super(parent, SWT.NONE);
@@ -199,6 +204,12 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			btnInteriorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			btnInteriorBrowse.setText("Browse");
 
+			mnBrowse = new Menu(btnInteriorBrowse);
+			mntmFilesystem = new MenuItem(mnBrowse, SWT.NONE);
+			mntmFilesystem.setText("System");
+			mntmDatabase = new MenuItem(mnBrowse, SWT.NONE);
+			mntmDatabase.setText("Database");
+
 			btnInteriorClear = new Button(imagesComposite, SWT.NONE);
 			btnInteriorClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			btnInteriorClear.setText("Default");
@@ -206,12 +217,19 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtInterior = new Text(imagesComposite, SWT.BORDER | SWT.READ_ONLY);
 			txtInterior.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 
-			lblName = new Label(imagesComposite, SWT.NONE);
-			lblName.setText("Export Name");
-			txtName = new Text(imagesComposite, SWT.BORDER);
-			txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			Composite cGlow = new Composite(imagesComposite, SWT.NONE);
+			GridLayout gl_cGlow = new GridLayout(3, false);
+			gl_cGlow.marginHeight = 0;
+			gl_cGlow.marginWidth = 0;
+			cGlow.setLayout(gl_cGlow);
+			cGlow.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 4, 1));
 
-			lblNameInfo = new Label(imagesComposite, SWT.NONE);
+			lblName = new Label(cGlow, SWT.NONE);
+			lblName.setText("Export Name");
+			txtName = new Text(cGlow, SWT.BORDER);
+			txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
+			lblNameInfo = new Label(cGlow, SWT.NONE);
 			lblNameInfo.setImage(helpImage);
 			lblNameInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 
@@ -245,11 +263,17 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			};
 			btnInteriorView.addSelectionListener(imageViewListener);
 
+			btnInteriorBrowse.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					mnBrowse.setLocation(btnInteriorBrowse.toDisplay(0, btnInteriorBrowse.getSize().y));
+					mnBrowse.setVisible(true);
+				}
+			});
+
 			SelectionAdapter imageBrowseListener = new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
-					SystemController system = (SystemController) container.getController(sys);
 					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
 					dialog.setFilterExtensions(new String[] { "*.png" });
 					dialog.setFilterPath(prevInteriorPath);
@@ -260,49 +284,37 @@ public class RoomDataComposite extends Composite implements DataComposite {
 						String path = dialog.open();
 
 						// path == null only when user cancels
-						if (path != null) {
-							prevInteriorPath = path;
-							File temp = new File(path);
-							if (temp.exists()) {
-								UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(system) {
-									public void callback(String arg) {
-										SystemController system = (SystemController) data;
-										boolean vis = system.isVisible();
-										system.setVisible(false);
-										system.setInteriorPath(arg);
-										system.setVisible(vis);
-										if (!isDisposed())
-											updateData();
-									}
-
-									@Override
-									public String getPresentationName() {
-										SystemController system = (SystemController) data;
-										return String.format("change %s image", system.toString());
-									}
-								};
-
-								edit.setOld(system.getInteriorPath());
-								edit.setCurrent("file:" + path);
-
-								system.setVisible(false);
-								system.setInteriorPath("file:" + path);
-								updateData();
-								system.setVisible(true);
-								exit = true;
-
-								if (!edit.isValuesEqual())
-									Manager.postEdit(edit);
-							} else {
-								UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
-							}
-						} else {
+						if (path == null) {
 							exit = true;
+						} else {
+							prevInteriorPath = path;
+							exit = setInteriorImage("file:", path);
 						}
 					}
 				}
 			};
-			btnInteriorBrowse.addSelectionListener(imageBrowseListener);
+			mntmFilesystem.addSelectionListener(imageBrowseListener);
+
+			mntmDatabase.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					DatabaseFileDialog dialog = new DatabaseFileDialog(EditorWindow.getInstance().getShell());
+					dialog.setFilterExtensions(new String[] { "*.png" });
+					dialog.setText("FTL Archive Browser");
+
+					boolean exit = false;
+					while (!exit) {
+						String path = dialog.open();
+
+						// path == null only when user cancels
+						if (path == null) {
+							exit = true;
+						} else {
+							exit = setInteriorImage("db:", path);
+						}
+					}
+				}
+			});
 
 			SelectionAdapter imageClearListener = new SelectionAdapter() {
 				@Override
@@ -371,9 +383,8 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		btnSystem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Point p = btnSystem.getLocation();
 				SystemsMenu sysMenu = new SystemsMenu(container.getParent().getShell(), roomC);
-				sysMenu.setLocation(toDisplay(p.x, p.y + btnSystem.getSize().y));
+				sysMenu.setLocation(btnSystem.toDisplay(0, btnSystem.getSize().y));
 				sysMenu.open();
 			}
 		});
@@ -522,5 +533,48 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			txtName.notifyListeners(SWT.FocusOut, null);
 		}
 		super.dispose();
+	}
+
+	private boolean setInteriorImage(String protocol, String path) {
+		boolean result = false;
+		SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+		SystemController system = (SystemController) container.getController(sys);
+
+		if (protocol.equals("file:") && !new File(path).exists()) {
+			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
+			return false;
+		}
+
+		UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(system) {
+			public void callback(String arg) {
+				SystemController system = (SystemController) data;
+				boolean vis = system.isVisible();
+				system.setVisible(false);
+				system.setInteriorPath(arg);
+				system.setVisible(vis);
+				if (!isDisposed())
+					updateData();
+			}
+
+			@Override
+			public String getPresentationName() {
+				SystemController system = (SystemController) data;
+				return String.format("change %s image", system.toString());
+			}
+		};
+
+		edit.setOld(system.getInteriorPath());
+		edit.setCurrent(protocol + path);
+
+		system.setVisible(false);
+		system.setInteriorPath(protocol + path);
+		updateData();
+		system.setVisible(true);
+		result = true;
+
+		if (!edit.isValuesEqual())
+			Manager.postEdit(edit);
+
+		return result;
 	}
 }

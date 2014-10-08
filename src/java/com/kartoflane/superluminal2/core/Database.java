@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.vhati.ftldat.FTLDat.FTLPack;
 
@@ -16,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
@@ -136,6 +138,14 @@ public class Database {
 		shipFileMap.put("BOSS_3_HARD_DLC", bosses);
 	}
 
+	/**
+	 * Creates a new Database and fills it with data from the specified archives.
+	 * 
+	 * @param data
+	 *            the FTLPack representing the data.dat archive
+	 * @param resource
+	 *            the FTLPack representing the resource.dat archive
+	 */
 	public Database(FTLPack data, FTLPack resource) throws FileNotFoundException, IOException {
 		this();
 
@@ -146,14 +156,27 @@ public class Database {
 		return instance;
 	}
 
+	/**
+	 * @return the first DatabaseEntry in the Database, ie. the DatabaseEntry associated with base game archives.
+	 */
 	public DatabaseEntry getCore() {
 		return dataEntries.size() > 0 ? dataEntries.get(0) : null;
 	}
 
+	/**
+	 * Reloads the core of the Database using the specified archives.
+	 * 
+	 * @param data
+	 *            the FTLPack representing the data.dat archive
+	 * @param resource
+	 *            the FTLPack representing the resource.dat archive
+	 */
 	public void loadCore(FTLPack data, FTLPack resource) {
+		if (dataEntries.size() > 0)
+			dataEntries.remove(0);
 		DatabaseEntry core = new DatabaseEntry(data, resource);
 		core.store(DEFAULT_ANIM_OBJ);
-		dataEntries.add(core);
+		dataEntries.add(0, core);
 	}
 
 	/**
@@ -427,6 +450,11 @@ public class Database {
 		return result;
 	}
 
+	/**
+	 * @param innerPath
+	 *            the sought innerPath
+	 * @return true if any of the DatabaseEntries contains the innerPath, false otherwise
+	 */
 	public boolean contains(String innerPath) {
 		boolean result = false;
 		for (int i = dataEntries.size() - 1; i >= 0 && !result; i--) {
@@ -436,6 +464,17 @@ public class Database {
 		return result;
 	}
 
+	/**
+	 * 
+	 * @param innerPath
+	 *            path to the sought resource
+	 * @return InputStream for the sought resource, from the first DatabaseEntry that contains it (starting from last)
+	 * 
+	 * @throws FileNotFoundException
+	 *             if the Database did not contain the specified innerPath
+	 * @throws IOException
+	 *             if an IO error occurs
+	 */
 	public InputStream getInputStream(String innerPath) throws FileNotFoundException, IOException {
 		InputStream is = null;
 		for (int i = dataEntries.size() - 1; i >= 0 && is == null; i--) {
@@ -446,5 +485,19 @@ public class Database {
 		if (is == null)
 			throw new FileNotFoundException(String.format("Inner path '%s' was not found in the database.", innerPath));
 		return is;
+	}
+
+	public List<String> listFiles(Predicate<String> filter) {
+		List<String> result = new ArrayList<String>();
+
+		for (int i = dataEntries.size() - 1; i >= 0; i--) {
+			DatabaseEntry de = dataEntries.get(i);
+			for (String innerPath : de.list()) {
+				if (!result.contains(innerPath) && (filter == null || filter.accept(innerPath)))
+					result.add(innerPath);
+			}
+		}
+
+		return result;
 	}
 }
