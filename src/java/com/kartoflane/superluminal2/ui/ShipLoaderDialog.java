@@ -36,6 +36,7 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.interfaces.Action;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
@@ -47,6 +48,11 @@ import com.kartoflane.superluminal2.utils.Utils;
 
 public class ShipLoaderDialog {
 	private static final Logger log = LogManager.getLogger(ShipLoaderDialog.class);
+	private static final Predicate<ShipMetadata> defaultFilter = new Predicate<ShipMetadata>() {
+		public boolean accept(ShipMetadata s) {
+			return true;
+		}
+	};
 
 	private static ShipLoaderDialog instance = null;
 
@@ -60,6 +66,7 @@ public class ShipLoaderDialog {
 	private HashMap<ShipMetadata, TreeItem> dataTreeMap = new HashMap<ShipMetadata, TreeItem>();
 	private HashMap<String, TreeItem> blueprintTreeMap = new HashMap<String, TreeItem>();
 
+	private Predicate<ShipMetadata> filter = defaultFilter;
 	private boolean sortByBlueprint = true;
 
 	private Preview preview = null;
@@ -159,11 +166,17 @@ public class ShipLoaderDialog {
 		sashForm.setWeights(new int[] { minTreeWidth, defaultMetadataWidth });
 
 		Composite buttonComposite = new Composite(shell, SWT.NONE);
-		GridLayout gl_buttonComposite = new GridLayout(2, false);
+		GridLayout gl_buttonComposite = new GridLayout(3, false);
 		gl_buttonComposite.marginWidth = 0;
 		gl_buttonComposite.marginHeight = 0;
 		buttonComposite.setLayout(gl_buttonComposite);
 		buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+		Button btnSearch = new Button(buttonComposite, SWT.NONE);
+		btnSearch.setText("Search");
+		GridData gd_btnSearch = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSearch.widthHint = 80;
+		btnSearch.setLayoutData(gd_btnSearch);
 
 		btnLoad = new Button(buttonComposite, SWT.NONE);
 		GridData gd_btnLoad = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
@@ -251,6 +264,28 @@ public class ShipLoaderDialog {
 					sortByBlueprint = false;
 					loadShipList(Database.getInstance().getShipMetadata());
 				}
+			}
+		});
+
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ShipSearchDialog ssDialog = new ShipSearchDialog(shell);
+				Predicate<ShipMetadata> resultFilter = ssDialog.open();
+
+				if (resultFilter == AbstractSearchDialog.RESULT_DEFAULT) {
+					if (filter == defaultFilter)
+						return;
+					filter = defaultFilter;
+				} else if (resultFilter == AbstractSearchDialog.RESULT_UNCHANGED) {
+					// Do nothing
+					return;
+				} else {
+					filter = resultFilter;
+				}
+
+				loadShipList();
+				tree.notifyListeners(SWT.Selection, null);
 			}
 		});
 
@@ -343,6 +378,12 @@ public class ShipLoaderDialog {
 		h.setKey(SWT.CR);
 		Manager.hookHotkey(shell, h);
 
+		h = new Hotkey();
+		h.setCtrl(true);
+		h.setKey('f');
+		h.addNotifyAction(btnSearch, true);
+		Manager.hookHotkey(shell, h);
+
 		loadShipList();
 	}
 
@@ -390,7 +431,23 @@ public class ShipLoaderDialog {
 
 	public void loadShipList() {
 		Database db = Database.getInstance();
-		loadShipList(db.getShipMetadata());
+		HashMap<String, ArrayList<ShipMetadata>> ships = db.getShipMetadata();
+
+		if (filter != null && filter != defaultFilter) {
+			String[] set = ships.keySet().toArray(new String[0]);
+			for (String s : set) {
+				ShipMetadata[] mdata = ships.get(s).toArray(new ShipMetadata[0]);
+				for (ShipMetadata md : mdata) {
+					if (!filter.accept(md))
+						ships.get(s).remove(md);
+				}
+
+				if (ships.get(s).isEmpty())
+					ships.remove(s);
+			}
+		}
+
+		loadShipList(ships);
 	}
 
 	private void handleException(ShipMetadata metadata, Exception ex) {
