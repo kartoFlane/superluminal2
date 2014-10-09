@@ -383,8 +383,9 @@ public abstract class Manager {
 
 		// Don't execute the hotkey action if an editable widget has focus
 		Control c = display.getFocusControl();
-		boolean execute = c != null && !(c.isEnabled() && (c instanceof Spinner ||
-				(c instanceof Text && ((Text) c).getEditable())));
+		boolean execute = (c != null && !(c.isEnabled() && (c instanceof Spinner ||
+				(c instanceof Text && ((Text) c).getEditable())))) ||
+				e.keyCode == SWT.CR || e.keyCode == SWT.LF || e.keyCode == SWT.KEYPAD_CR;
 
 		if (execute) {
 			Shell shell = c.getShell();
@@ -402,8 +403,9 @@ public abstract class Manager {
 
 		// Don't execute the hotkey action if an editable widget has focus
 		Control c = display.getFocusControl();
-		boolean execute = c != null && !(c.isEnabled() && (c instanceof Spinner ||
-				(c instanceof Text && ((Text) c).getEditable())));
+		boolean execute = (c != null && !(c.isEnabled() && (c instanceof Spinner ||
+				(c instanceof Text && ((Text) c).getEditable())))) ||
+				e.keyCode == SWT.CR || e.keyCode == SWT.LF || e.keyCode == SWT.KEYPAD_CR;
 
 		if (execute) {
 			Shell shell = c.getShell();
