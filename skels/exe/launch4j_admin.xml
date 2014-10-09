@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>true</dontWrapJar>
   <headerType>console</headerType>
-  <jar>./superluminal2-win.jar</jar>
+  <jar>.\superluminal2-win.jar</jar>
   <outfile>.\superluminal2_admin.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
@@ -13,7 +13,7 @@
   <customProcName>false</customProcName>
   <stayAlive>false</stayAlive>
   <manifest>admin.manifest</manifest>
-  <icon></icon>
+  <icon>.\sl2.ico</icon>
   <classPath>
     <mainClass>com.kartoflane.superluminal2.Superluminal</mainClass>
     <cp>superluminal2-win.jar</cp>

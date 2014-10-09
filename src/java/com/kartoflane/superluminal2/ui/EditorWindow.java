@@ -23,6 +23,7 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
@@ -171,6 +172,15 @@ public class EditorWindow {
 		Rectangle displaySize = m.getClientArea();
 		displaySize.width = (displaySize.width / 5) * 4;
 		displaySize.height = (displaySize.height / 5) * 4;
+
+		// Load icons
+		Image icon16 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_16.png");
+		Image icon32 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_32.png");
+		Image icon48 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_48.png");
+		Image icon64 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_64.png");
+		Image icon128 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_128.png");
+		Image[] icons = new Image[] { icon16, icon32, icon48, icon64, icon128 };
+		shell.setImages(icons);
 
 		// Instantiate quasi-singletons
 		new MouseInputDispatcher();
