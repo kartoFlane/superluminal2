@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -43,9 +44,24 @@ import com.kartoflane.superluminal2.utils.Utils;
 
 public class DatabaseFileDialog extends Dialog implements SelectionListener {
 
+	private final Predicate<String> defaultFilter = new Predicate<String>() {
+		public boolean accept(String s) {
+			if (filterExtensions == null)
+				return true;
+
+			for (int i = 0; i < filterExtensions.length; i++) {
+				if (filterExtensions[i] == null || s.matches(regexize(filterExtensions[i])))
+					return true;
+			}
+			return false;
+		}
+	};
+
 	private String result = null;
 	private String[] filterExtensions = new String[0];
 	private Map<String, TreeItem> itemMap = new HashMap<String, TreeItem>();
+
+	private Predicate<String> filter = defaultFilter;
 
 	private Shell shell;
 	private Button btnConfirm;
@@ -56,6 +72,8 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 	private Text txtFile;
 	private Canvas canvas;
 	private Preview preview;
+	private SashForm sashForm;
+	private Button btnSearch;
 
 	public DatabaseFileDialog(Shell parent, int style) {
 		super(parent, style);
@@ -90,18 +108,21 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 		shell.setText(getText());
 		shell.setLayout(new GridLayout(2, false));
 
-		tree = new Tree(shell, SWT.BORDER);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		sashForm = new SashForm(shell, SWT.SMOOTH);
+		sashForm.setSashWidth(5);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		tree = new Tree(sashForm, SWT.BORDER);
 		tree.addSelectionListener(this);
 
-		canvas = new Canvas(shell, SWT.NONE);
-		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1));
-
+		canvas = new Canvas(sashForm, SWT.NONE);
 		preview = new Preview();
 		RGB rgb = canvas.getBackground().getRGB();
 		preview.setBackgroundColor((int) (0.9 * rgb.red), (int) (0.9 * rgb.green), (int) (0.9 * rgb.blue));
 		preview.setDrawBackground(true);
 		canvas.addPaintListener(preview);
+
+		sashForm.setWeights(new int[] { 3, 2 });
 
 		txtFile = new Text(shell, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -120,11 +141,18 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 		cmbExtensions.addSelectionListener(this);
 
 		composite = new Composite(shell, SWT.NONE);
-		GridLayout gl_composite = new GridLayout(2, false);
+		GridLayout gl_composite = new GridLayout(3, false);
 		gl_composite.marginWidth = 0;
 		gl_composite.marginHeight = 0;
 		composite.setLayout(gl_composite);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+		btnSearch = new Button(composite, SWT.NONE);
+		GridData gd_btnSearch = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_btnSearch.widthHint = 80;
+		btnSearch.setLayoutData(gd_btnSearch);
+		btnSearch.setText("Search");
+		btnSearch.addSelectionListener(this);
 
 		btnConfirm = new Button(composite, SWT.NONE);
 		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
@@ -144,6 +172,19 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 			public void handleEvent(Event e) {
 				btnCancel.notifyListeners(SWT.Selection, null);
 				e.doit = false;
+			}
+		});
+
+		tree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				if (e.button == 1 && tree.getSelectionCount() != 0) {
+					TreeItem selectedItem = tree.getSelection()[0];
+					if (selectedItem.getItemCount() == 0 && btnConfirm.isEnabled())
+						btnConfirm.notifyListeners(SWT.Selection, null);
+					else if (selectedItem.getBounds().contains(e.x, e.y))
+						selectedItem.setExpanded(!selectedItem.getExpanded());
+				}
 			}
 		});
 
@@ -173,19 +214,6 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 			}
 		});
 
-		tree.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				if (e.button == 1 && tree.getSelectionCount() != 0) {
-					TreeItem selectedItem = tree.getSelection()[0];
-					if (selectedItem.getItemCount() == 0 && btnConfirm.isEnabled())
-						btnConfirm.notifyListeners(SWT.Selection, null);
-					else if (selectedItem.getBounds().contains(e.x, e.y))
-						selectedItem.setExpanded(!selectedItem.getExpanded());
-				}
-			}
-		});
-
 		// Register hotkeys
 		Hotkey h = new Hotkey();
 		h.setOnPress(new Action() {
@@ -201,25 +229,31 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 		});
 		h.setKey(SWT.CR);
 		Manager.hookHotkey(shell, h);
+
+		h = new Hotkey();
+		h.setCtrl(true);
+		h.setKey('f');
+		h.addNotifyAction(btnSearch, true);
+		Manager.hookHotkey(shell, h);
 	}
 
-	private void loadItems(final String ext) {
+	private void loadItems(String ext) {
 		for (TreeItem item : itemMap.values())
 			item.dispose();
 		itemMap.clear();
 		tree.removeAll();
 
-		Predicate<String> filter = new Predicate<String>() {
-			public boolean accept(String s) {
-				return ext == null || s.matches(ext);
-			}
-		};
-
 		List<String> pathlist = Database.getInstance().listFiles(filter);
 		Collections.sort(pathlist, new AlphanumComparator());
 
 		for (String ipath : pathlist) {
-			createItems(ipath);
+			if (ipath.matches(ext))
+				createItems(ipath);
+		}
+
+		if (filter != defaultFilter) {
+			for (TreeItem item : itemMap.values())
+				item.setExpanded(true);
 		}
 	}
 
@@ -325,8 +359,27 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 			result = null;
 			dispose();
 		}
+		else if (source == btnSearch) {
+			DatabaseSearchDialog dbsDialog = new DatabaseSearchDialog(shell);
+			Predicate<String> resultFilter = dbsDialog.open();
+
+			if (resultFilter == AbstractSearchDialog.RESULT_DEFAULT) {
+				if (filter == defaultFilter)
+					return;
+				filter = defaultFilter;
+			} else if (resultFilter == AbstractSearchDialog.RESULT_UNCHANGED) {
+				// Do nothing
+				return;
+			} else {
+				filter = resultFilter;
+			}
+
+			loadItems(regexize(cmbExtensions.getText()));
+			tree.notifyListeners(SWT.Selection, null);
+		}
 		else if (source == tree) {
-			txtFile.setText(reconstructPath(tree.getSelection()[0]));
+			if (tree.getSelectionCount() > 0)
+				txtFile.setText(reconstructPath(tree.getSelection()[0]));
 		}
 		else if (source == cmbExtensions) {
 			btnConfirm.setEnabled(false);
@@ -379,7 +432,6 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 		}
 
 		public int compare(String s1, String s2) {
-
 			int thisMarker = 0;
 			int thatMarker = 0;
 			int s1Length = s1.length();
