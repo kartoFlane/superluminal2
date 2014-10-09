@@ -14,8 +14,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
@@ -30,6 +28,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
+import com.kartoflane.superluminal2.ui.BrowseMenu;
 import com.kartoflane.superluminal2.ui.DatabaseFileDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GlowSelectionDialog;
@@ -69,9 +68,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	private Label label;
 	private Label lblGlow;
 	private Button btnGlow;
-	private Menu mnBrowse;
-	private MenuItem mntmFilesystem;
-	private MenuItem mntmDatabase;
+	private BrowseMenu mnb;
 
 	public RoomDataComposite(Composite parent, RoomController control) {
 		super(parent, SWT.NONE);
@@ -204,12 +201,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			btnInteriorBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			btnInteriorBrowse.setText("Browse");
 
-			mnBrowse = new Menu(btnInteriorBrowse);
-			mntmFilesystem = new MenuItem(mnBrowse, SWT.NONE);
-			mntmFilesystem.setText("System");
-			mntmDatabase = new MenuItem(mnBrowse, SWT.NONE);
-			mntmDatabase.setText("Database");
-
 			btnInteriorClear = new Button(imagesComposite, SWT.NONE);
 			btnInteriorClear.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 			btnInteriorClear.setText("Default");
@@ -262,15 +253,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				}
 			});
 
-			btnInteriorBrowse.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					mnBrowse.setLocation(btnInteriorBrowse.toDisplay(0, btnInteriorBrowse.getSize().y));
-					mnBrowse.setVisible(true);
-				}
-			});
+			mnb = new BrowseMenu(this);
+			mnb.addTo(btnInteriorBrowse);
 
-			mntmFilesystem.addSelectionListener(new SelectionAdapter() {
+			mnb.addSystemListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
@@ -293,7 +279,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				}
 			});
 
-			mntmDatabase.addSelectionListener(new SelectionAdapter() {
+			mnb.addDataListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					DatabaseFileDialog dialog = new DatabaseFileDialog(EditorWindow.getInstance().getShell());
@@ -341,6 +327,7 @@ public class RoomDataComposite extends Composite implements DataComposite {
 					edit.setOld(system.getInteriorPath());
 					system.setInteriorPath(null);
 					edit.setCurrent(system.getInteriorPath());
+					EditorWindow.getInstance().canvasRedraw();
 					updateData();
 
 					if (!edit.isValuesEqual())
@@ -533,7 +520,6 @@ public class RoomDataComposite extends Composite implements DataComposite {
 	}
 
 	private boolean setInteriorImage(String protocol, String path) {
-		boolean result = false;
 		SystemObject sys = container.getActiveSystem(roomC.getGameObject());
 		SystemController system = (SystemController) container.getController(sys);
 
@@ -563,15 +549,13 @@ public class RoomDataComposite extends Composite implements DataComposite {
 		edit.setOld(system.getInteriorPath());
 		edit.setCurrent(protocol + path);
 
-		system.setVisible(false);
 		system.setInteriorPath(protocol + path);
+		EditorWindow.getInstance().canvasRedraw();
 		updateData();
-		system.setVisible(true);
-		result = true;
 
 		if (!edit.isValuesEqual())
 			Manager.postEdit(edit);
 
-		return result;
+		return true;
 	}
 }

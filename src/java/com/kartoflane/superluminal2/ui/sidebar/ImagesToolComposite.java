@@ -12,8 +12,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -24,6 +22,7 @@ import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
+import com.kartoflane.superluminal2.ui.BrowseMenu;
 import com.kartoflane.superluminal2.ui.DatabaseFileDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GibWidget;
@@ -72,9 +71,8 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 	private Composite compGibs;
 	private Button btnNew;
 	private HashMap<GibController, GibWidget> gibWidgetMap;
-	private Menu mnBrowse;
-	private MenuItem mntmFilesystem;
-	private MenuItem mntmDatabase;
+	private BrowseMenu mnbImages;
+	private BrowseMenu mnbGibs;
 
 	public ImagesToolComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -93,13 +91,10 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 4, 1));
 
-		mnBrowse = new Menu(this);
-		mntmFilesystem = new MenuItem(mnBrowse, SWT.NONE);
-		mntmFilesystem.setText("System");
-		mntmDatabase = new MenuItem(mnBrowse, SWT.NONE);
-		mntmDatabase.setText("Database");
+		mnbImages = new BrowseMenu(this);
+		mnbGibs = new BrowseMenu(this);
 
-		mntmDatabase.addSelectionListener(new SelectionAdapter() {
+		mnbImages.addDataListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DatabaseFileDialog dialog = new DatabaseFileDialog(EditorWindow.getInstance().getShell());
@@ -119,7 +114,7 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 				}
 			}
 		});
-		mntmFilesystem.addSelectionListener(new SelectionAdapter() {
+		mnbImages.addSystemListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
@@ -158,8 +153,8 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 				else if (source == btnMiniBrowse)
 					tempType = Images.THUMBNAIL;
 
-				mnBrowse.setLocation(source.toDisplay(0, source.getSize().y));
-				mnBrowse.setVisible(true);
+				mnbImages.setLocation(source.toDisplay(0, source.getSize().y));
+				mnbImages.setVisible(true);
 			}
 		};
 		SelectionAdapter imageViewListener = new SelectionAdapter() {
@@ -376,7 +371,8 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		btnNew.setText("New Gib");
 
-		btnNew.addSelectionListener(new SelectionAdapter() {
+		mnbGibs.addTo(btnNew);
+		mnbGibs.addSystemListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
@@ -391,31 +387,30 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 					// path == null only when user cancels
 					if (path != null) {
 						prevGibsPath = path;
-						File temp = new File(path);
-						if (temp.exists()) {
-							GibObject gib = new GibObject();
-							gib.setId(container.getGibControllers().length + 1);
-							gib.setImagePath("file:" + path);
-							GibController gc = GibController.newInstance(container, gib);
-							gc.updateFollower();
-							gc.setParent(container.getImageController(Images.HULL));
-							gc.updateFollowOffset();
-							gc.redraw();
-
-							container.add(gc);
-							container.store(gc);
-
-							GibWidget gw = new GibWidget(compGibs, gc);
-							gibWidgetMap.put(gc, gw);
-
-							compGibs.layout();
-
-							exit = true;
-						} else {
-							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
-						}
+						exit = createGib("file:", path);
 					} else {
 						exit = true;
+					}
+				}
+			}
+		});
+
+		mnbGibs.addDataListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DatabaseFileDialog dialog = new DatabaseFileDialog(EditorWindow.getInstance().getShell());
+				dialog.setFilterExtensions(new String[] { "*.png" });
+				dialog.setText("FTL Archive Browser");
+
+				boolean exit = false;
+				while (!exit) {
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path == null) {
+						exit = true;
+					} else {
+						exit = createGib("db:", path);
 					}
 				}
 			}
@@ -494,8 +489,6 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 		if (type == null)
 			throw new IllegalArgumentException("Type must not be null!");
 
-		boolean result = false;
-
 		if (protocol.equals("file:") && !new File(path).exists()) {
 			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
 			return false;
@@ -516,15 +509,41 @@ public class ImagesToolComposite extends Composite implements DataComposite {
 		};
 
 		edit.setOld(container.getImage(type));
-		edit.setCurrent("file:" + path);
+		edit.setCurrent(protocol + path);
 
-		container.setImage(type, "file:" + path);
+		container.setImage(type, protocol + path);
+		EditorWindow.getInstance().canvasRedraw();
 		updateData();
-		result = true;
 
 		if (!edit.isValuesEqual())
 			Manager.getCurrentShip().postEdit(edit);
 
-		return result;
+		return true;
+	}
+
+	private boolean createGib(String protocol, String path) {
+		if (protocol.equals("file:") && !new File(path).exists()) {
+			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
+			return false;
+		}
+
+		GibObject gib = new GibObject();
+		gib.setId(container.getGibControllers().length + 1);
+		gib.setImagePath(protocol + path);
+		GibController gc = GibController.newInstance(container, gib);
+		gc.updateFollower();
+		gc.setParent(container.getImageController(Images.HULL));
+		gc.updateFollowOffset();
+		gc.redraw();
+
+		container.add(gc);
+		container.store(gc);
+
+		GibWidget gw = new GibWidget(compGibs, gc);
+		gibWidgetMap.put(gc, gw);
+
+		compGibs.layout();
+
+		return true;
 	}
 }

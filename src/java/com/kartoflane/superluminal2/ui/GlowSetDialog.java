@@ -9,6 +9,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,6 +37,8 @@ public class GlowSetDialog {
 	private boolean typeCloak = false;
 	private GlowSet result = null;
 
+	private Button tempSource = null;
+
 	private Shell shell = null;
 	private Text txtBlue;
 	private Button btnClearYellow;
@@ -55,6 +58,7 @@ public class GlowSetDialog {
 	private Button btnMan;
 	private Button btnCloak;
 	private Label lblBlue;
+	private BrowseMenu mnb;
 
 	public GlowSetDialog(Shell parent) {
 		if (instance != null)
@@ -258,7 +262,21 @@ public class GlowSetDialog {
 		btnViewGreen.addSelectionListener(imageViewListener);
 		btnViewYellow.addSelectionListener(imageViewListener);
 
-		SelectionAdapter imageBrowseListener = new SelectionAdapter() {
+		mnb = new BrowseMenu(shell);
+		SelectionListener browseListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				tempSource = (Button) e.getSource();
+
+				mnb.setLocation(tempSource.toDisplay(0, tempSource.getSize().y));
+				mnb.setVisible(true);
+			}
+		};
+		btnBrowseBlue.addSelectionListener(browseListener);
+		btnBrowseGreen.addSelectionListener(browseListener);
+		btnBrowseYellow.addSelectionListener(browseListener);
+
+		mnb.addSystemListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(shell, SWT.OPEN);
@@ -268,11 +286,11 @@ public class GlowSetDialog {
 
 				Text widget = null;
 
-				if (e.getSource() == btnBrowseBlue) {
+				if (tempSource == btnBrowseBlue) {
 					widget = txtBlue;
-				} else if (e.getSource() == btnBrowseGreen) {
+				} else if (tempSource == btnBrowseGreen) {
 					widget = txtGreen;
-				} else if (e.getSource() == btnBrowseYellow) {
+				} else if (tempSource == btnBrowseYellow) {
 					widget = txtYellow;
 				}
 
@@ -281,7 +299,9 @@ public class GlowSetDialog {
 					String path = dialog.open();
 
 					// path == null only when user cancels
-					if (path != null) {
+					if (path == null) {
+						exit = true;
+					} else {
 						prevPath = path;
 						File temp = new File(path);
 						if (temp.exists()) {
@@ -294,15 +314,47 @@ public class GlowSetDialog {
 						} else {
 							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
 						}
-					} else {
-						exit = true;
 					}
 				}
 			}
-		};
-		btnBrowseBlue.addSelectionListener(imageBrowseListener);
-		btnBrowseGreen.addSelectionListener(imageBrowseListener);
-		btnBrowseYellow.addSelectionListener(imageBrowseListener);
+		});
+
+		mnb.addDataListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DatabaseFileDialog dialog = new DatabaseFileDialog(EditorWindow.getInstance().getShell());
+				dialog.setFilterExtensions(new String[] { "*.png" });
+				dialog.setText("FTL Archive Browser");
+
+				Text widget = null;
+
+				if (tempSource == btnBrowseBlue) {
+					widget = txtBlue;
+				} else if (tempSource == btnBrowseGreen) {
+					widget = txtGreen;
+				} else if (tempSource == btnBrowseYellow) {
+					widget = txtYellow;
+				}
+
+				boolean exit = false;
+				while (!exit) {
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path == null) {
+						exit = true;
+					} else {
+						widget.setText("db:" + path);
+						widget.selectAll();
+						widget.clearSelection();
+						updateWidgets();
+						checkConfirm();
+						exit = true;
+					}
+				}
+
+			}
+		});
 
 		SelectionAdapter imageClearListener = new SelectionAdapter() {
 			@Override

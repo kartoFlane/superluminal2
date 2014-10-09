@@ -26,6 +26,7 @@ public class GibWidget extends Composite {
 	private Button btnView = null;
 	private Button btnBrowse = null;
 	private Text txtImage = null;
+	private BrowseMenu mnb = null;
 
 	public GibWidget(Composite parent, GibController gib) {
 		super(parent, SWT.NONE);
@@ -36,6 +37,8 @@ public class GibWidget extends Composite {
 		setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
 		controller = gib;
+
+		mnb = new BrowseMenu(this);
 
 		label = new Label(this, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -63,7 +66,9 @@ public class GibWidget extends Composite {
 		btnBrowse = new Button(this, SWT.NONE);
 		btnBrowse.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		btnBrowse.setText("Browse");
-		btnBrowse.addSelectionListener(new SelectionAdapter() {
+
+		mnb.addTo(btnBrowse);
+		mnb.addSystemListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(EditorWindow.getInstance().getShell(), SWT.OPEN);
@@ -77,17 +82,30 @@ public class GibWidget extends Composite {
 
 					// path == null only when user cancels
 					if (path != null) {
-						ImagesToolComposite.setPrevGibsPath(path);
-						File temp = new File(path);
-						if (temp.exists()) {
-							controller.setImage("file:" + path);
-							updateData();
-							exit = true;
-						} else {
-							UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
-						}
+						exit = setImage("file:", path);
 					} else {
 						exit = true;
+					}
+				}
+			}
+		});
+
+		mnb.addDataListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DatabaseFileDialog dialog = new DatabaseFileDialog(EditorWindow.getInstance().getShell());
+				dialog.setFilterExtensions(new String[] { "*.png" });
+				dialog.setText("FTL Archive Browser");
+
+				boolean exit = false;
+				while (!exit) {
+					String path = dialog.open();
+
+					// path == null only when user cancels
+					if (path == null) {
+						exit = true;
+					} else {
+						exit = setImage("db:", path);
 					}
 				}
 			}
@@ -110,4 +128,15 @@ public class GibWidget extends Composite {
 		txtImage.setText(str == null ? "" : IOUtils.trimProtocol(str));
 	}
 
+	private boolean setImage(String protocol, String path) {
+		if (protocol.equals("file:") && !new File(path).exists()) {
+			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null, "The file you have selected does not exist.");
+			return false;
+		}
+
+		controller.setImage(protocol + path);
+		EditorWindow.getInstance().canvasRedraw();
+		updateData();
+		return true;
+	}
 }
