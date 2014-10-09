@@ -419,19 +419,19 @@ public abstract class Manager {
 	}
 
 	private static boolean checkShift(KeyEvent e) {
-		return (e.stateMask & SWT.SHIFT) == SWT.SHIFT || e.keyCode == SWT.SHIFT;
+		return (e.stateMask & SWT.SHIFT) != 0 || e.keyCode == SWT.SHIFT;
 	}
 
 	private static boolean checkCtrl(KeyEvent e) {
-		return (e.stateMask & SWT.CTRL) == SWT.CTRL || e.keyCode == SWT.CTRL;
+		return (e.stateMask & SWT.CTRL) != 0 || e.keyCode == SWT.CTRL;
 	}
 
 	private static boolean checkAlt(KeyEvent e) {
-		return (e.stateMask & SWT.ALT) == SWT.ALT || e.keyCode == SWT.ALT;
+		return (e.stateMask & SWT.ALT) != 0 || e.keyCode == SWT.ALT;
 	}
 
 	private static boolean checkCommand(KeyEvent e) {
-		return (e.stateMask & SWT.COMMAND) == SWT.COMMAND || e.keyCode == SWT.COMMAND;
+		return (e.stateMask & SWT.COMMAND) != 0 || e.keyCode == SWT.COMMAND;
 	}
 
 	public static void hookHotkey(Shell shell, Hotkey hotkey) {
