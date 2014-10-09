@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
@@ -230,9 +231,7 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener {
 		h.setKey(SWT.CR);
 		Manager.hookHotkey(shell, h);
 
-		h = new Hotkey();
-		h.setCtrl(true);
-		h.setKey('f');
+		h = new Hotkey(Manager.getHotkey(Hotkeys.SEARCH));
 		h.addNotifyAction(btnSearch, true);
 		Manager.hookHotkey(shell, h);
 	}

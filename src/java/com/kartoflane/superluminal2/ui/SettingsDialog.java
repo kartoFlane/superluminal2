@@ -198,7 +198,8 @@ public class SettingsDialog {
 
 		Label lblMouse = new Label(compConfig, SWT.WRAP);
 		lblMouse.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblMouse.setText("If checked, the mouse tracker will show the mouse pointer's position relative to the ship origin, instead of top left corner of the viewport.");
+		lblMouse.setText("If checked, the mouse tracker will show the mouse pointer's position " +
+				"relative to the ship origin, instead of top left corner of the viewport.");
 		scConfig.setContent(compConfig);
 
 		/*
@@ -225,7 +226,7 @@ public class SettingsDialog {
 				Hotkeys.DOOR_TOOL, Hotkeys.MOUNT_TOOL, Hotkeys.STATION_TOOL
 		};
 		Hotkeys[] commands = {
-				Hotkeys.DELETE, Hotkeys.PIN, Hotkeys.NEW_SHIP, Hotkeys.LOAD_SHIP, Hotkeys.SAVE_SHIP,
+				Hotkeys.SEARCH, Hotkeys.DELETE, Hotkeys.PIN, Hotkeys.NEW_SHIP, Hotkeys.LOAD_SHIP, Hotkeys.SAVE_SHIP,
 				Hotkeys.SAVE_SHIP_AS, Hotkeys.CLOSE_SHIP, Hotkeys.LOAD_LEGACY, Hotkeys.MANAGE_MOD,
 				Hotkeys.SETTINGS, Hotkeys.UNDO, Hotkeys.REDO, Hotkeys.CLOAK, Hotkeys.ANIMATE
 		};

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
@@ -334,9 +335,7 @@ public class WeaponSelectionDialog {
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 
 		// Register hotkeys
-		Hotkey h = new Hotkey();
-		h.setCtrl(true);
-		h.setKey('f');
+		Hotkey h = new Hotkey(Manager.getHotkey(Hotkeys.SEARCH));
 		h.addNotifyAction(btnSearch, true);
 		Manager.hookHotkey(shell, h);
 	}

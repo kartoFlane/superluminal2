@@ -13,6 +13,7 @@ public enum Hotkeys {
 	STATION_TOOL,
 
 	// Commands
+	SEARCH,
 	DELETE,
 	PIN,
 	NEW_SHIP,
@@ -64,6 +65,8 @@ public enum Hotkeys {
 			case STATION_TOOL:
 				return "Station Placement Tool";
 
+			case SEARCH:
+				return "Search";
 			case DELETE:
 				return "Delete";
 			case PIN:

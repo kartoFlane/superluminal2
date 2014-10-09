@@ -320,6 +320,10 @@ public abstract class Manager {
 		// Command hotkeys
 		getHotkey(Hotkeys.PIN).setKey(' ');
 
+		hotkey = getHotkey(Hotkeys.SEARCH);
+		hotkey.setKey('f');
+		hotkey.setCtrl(true);
+
 		hotkey = getHotkey(Hotkeys.DELETE);
 		hotkey.setKey('d');
 		hotkey.setShift(true);

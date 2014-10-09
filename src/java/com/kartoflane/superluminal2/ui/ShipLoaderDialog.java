@@ -35,6 +35,7 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
@@ -378,10 +379,9 @@ public class ShipLoaderDialog {
 		h.setKey(SWT.CR);
 		Manager.hookHotkey(shell, h);
 
-		h = new Hotkey();
-		h.setCtrl(true);
-		h.setKey('f');
+		h = new Hotkey(Manager.getHotkey(Hotkeys.SEARCH));
 		h.addNotifyAction(btnSearch, true);
+		System.out.println(h);
 		Manager.hookHotkey(shell, h);
 
 		loadShipList();
