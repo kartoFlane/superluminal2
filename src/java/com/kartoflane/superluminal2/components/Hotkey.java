@@ -39,7 +39,7 @@ public class Hotkey {
 		enabled = h.enabled;
 		shift = h.shift;
 		ctrl = h.ctrl;
-		alt = h.ctrl;
+		alt = h.alt;
 		command = h.command;
 		key = h.key;
 	}
