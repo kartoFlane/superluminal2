@@ -175,11 +175,12 @@ public class EditorWindow {
 
 		// Load icons
 		Image icon16 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_16.png");
+		Image icon24 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_24.png");
 		Image icon32 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_32.png");
 		Image icon48 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_48.png");
 		Image icon64 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_64.png");
 		Image icon128 = Cache.checkOutImage(shell, "cpath:/assets/icons/Superluminal_2_128.png");
-		Image[] icons = new Image[] { icon16, icon32, icon48, icon64, icon128 };
+		Image[] icons = new Image[] { icon16, icon24, icon32, icon48, icon64, icon128 };
 		shell.setImages(icons);
 
 		// Instantiate quasi-singletons
