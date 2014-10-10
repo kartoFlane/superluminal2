@@ -52,6 +52,7 @@ public class ZoomWindow
 
 	private Transform transform = null;
 	private float scale = 1.0f;
+	private long lastScrollEventTime = 0;
 
 	private Shell shell;
 	private Canvas canvas;
@@ -245,10 +246,6 @@ public class ZoomWindow
 		updateText();
 	}
 
-	private boolean isStyle(int controlStyle, int checkStyle) {
-		return (controlStyle & checkStyle) == checkStyle;
-	}
-
 	/*
 	 * =====================
 	 * XXX: Listener methods
@@ -290,10 +287,24 @@ public class ZoomWindow
 
 	public void mouseScrolled(MouseEvent e) {
 		Object source = e.getSource();
-		if (source == slider || source == canvas || source == EditorWindow.getInstance().getSidebarWidget()) {
+
+		/*
+		 * Since the zoom window is a display filter, all scroll events pass through it.
+		 * 
+		 * Oftentimes, a single scroll of the mouse will trigger several scroll events,
+		 * one per each widget, and they all would trigger the scale change.
+		 * 
+		 * We only want to change the scale once per mouse scroll, so we filter the events
+		 * based on time at which they've been issued (since the multiple events get issued
+		 * at the same time)
+		 */
+		if (lastScrollEventTime < e.time &&
+				(source == slider || source == canvas || (source instanceof Control &&
+				((Control) source).getShell() == EditorWindow.getInstance().getShell()))) {
 			float newScale = scale + e.count / 5f;
 			slider.setSelection((int) (newScale * 100));
 			setScale(newScale);
+			lastScrollEventTime = e.time;
 		}
 	}
 
@@ -304,7 +315,7 @@ public class ZoomWindow
 		// This is because the first paint event is sent when the image is painted to buffer,
 		// and the second event when the widget itself gets painted (ie. our copySource)
 		if (!oddPaintEvent) {
-			if (isStyle(copySource.getStyle(), SWT.DOUBLE_BUFFERED)) {
+			if ((copySource.getStyle() & SWT.DOUBLE_BUFFERED) != 0) {
 				copySource.redraw(copyOrigin.x, copyOrigin.y,
 						(int) (bufferW / scale), (int) (bufferH / scale), false);
 			} else {

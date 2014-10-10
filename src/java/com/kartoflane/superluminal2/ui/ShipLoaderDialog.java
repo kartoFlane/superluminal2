@@ -381,7 +381,6 @@ public class ShipLoaderDialog {
 
 		h = new Hotkey(Manager.getHotkey(Hotkeys.SEARCH));
 		h.addNotifyAction(btnSearch, true);
-		System.out.println(h);
 		Manager.hookHotkey(shell, h);
 
 		loadShipList();
