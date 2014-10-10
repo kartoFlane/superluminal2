@@ -1,5 +1,32 @@
 Changelog
 
+2.1.0:
+- Added zoom feature (in the form of a separate window, found under View > Open Zoom Window)
+- Added cursor position tracker at the top-right of the main window + config setting to show
+  the pointer location relative to the ship's origin
+- Added automated floor image generation (Edit > Generate Floor Image...)
+- Added ability to change the name that interior images get exported as (important for glows)
+- Added ability to select images directly from FTL's archives -- all 'Browse' buttons now open
+  a dropdown menu instead, allowing you to choose what you want to browse ('System' is default
+  file selection, 'Database' is the FTL archives)
+- Added a bunch of undoable operations:
+  * image undo (can undo hull/floor/cloak/shield/thumbnail modification)
+  * interior image modification
+  * door orientation modification
+  * system availability toggle
+  * active system selection undo
+  * mount rotation/mirror/direction modification
+- Changed station images to rectangles taking half of a grid cell, made them fainter
+- Added manning glows' placement modification (blue station appearing where the old purple ones
+  used to be, can be clicked and moved around to adjust the glow images' locations)
+- Added a modifiable hotkey setting that is shared for all search dialogs
+- Weapon mounts now display artillery image only when the artillery systems is assigned
+- Gib animation now won't start if the ship has no gibs
+- Fixed some cursor visibility issues with Room Tool
+- Fixed some systems for player ships allowing to set their level to 9 or 10.
+- Fixed a bug with hotkeys, which caused hotkeys that used the Ctrl modifier to also require
+  Alt modifier to be triggered.
+
 2.0.6b beta:
 - Fixed a crash related to the Overview Window & gib animation
 - Fixed 'Cancel' button in search dialogs not working correctly

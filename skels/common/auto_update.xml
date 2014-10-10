@@ -1,6 +1,13 @@
 <versions>
-	<latest id="2.0.6b beta" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.1.0" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.1.0">
+			<change>Added zoom feature, View > Open Zoom Window</change>
+			<change>Added automated floor image generation, Edit > Generate Floor Image</change>
+			<change>Added manning glows' placement modification</change>
+			<change>Added image undo/redo</change>
+			<change>Many other changes, check changelog for details.</change>
+		</version>
 		<version id="2.0.6b beta">
 			<change>Fixed gib animation sometimes crashing the editor</change>
 			<change>Fixed gib linking via Ship Overview not working</change>

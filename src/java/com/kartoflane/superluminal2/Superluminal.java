@@ -45,7 +45,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.0.8");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.0");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -62,13 +62,11 @@ public class Superluminal {
 	public static final int WRAP_TOLERANCE = 9;
 
 	/**
-	 * settings ideas:
-	 * --------
-	 * 
 	 * TODO:
+	 * =============================================================================================
 	 * 
 	 * IMMEDIATE:
-	 * - added cursor position tracker with monospaced font --> verify that it works on Mac and Linux
+	 * 
 	 * 
 	 * MEDIUM:
 	 * - room tool doesn't work sometimes? -- as per SleeperService
