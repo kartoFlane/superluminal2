@@ -67,6 +67,8 @@ public class SuperluminalConfig extends Properties {
 	public boolean getPropertyAsBoolean(String key, boolean defaultValue) {
 		String s = getProperty(key);
 		try {
+			if (s == null)
+				return defaultValue;
 			return Boolean.parseBoolean(s);
 		} catch (Exception e) {
 			return defaultValue;
