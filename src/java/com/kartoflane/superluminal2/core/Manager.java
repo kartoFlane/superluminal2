@@ -364,6 +364,7 @@ public abstract class Manager {
 		hotkey.setKey('c');
 		hotkey.setShift(true);
 
+		getHotkey(Hotkeys.OPEN_ZOOM).setEnabled(false);
 		getHotkey(Hotkeys.ANIMATE).setEnabled(false);
 		getHotkey(Hotkeys.LOAD_LEGACY).setEnabled(false);
 		getHotkey(Hotkeys.SAVE_SHIP_AS).setEnabled(false);
