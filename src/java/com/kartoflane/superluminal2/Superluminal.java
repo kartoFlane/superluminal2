@@ -37,6 +37,7 @@ import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.ui.EditorWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -45,7 +46,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.0");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.0a");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -66,7 +67,6 @@ public class Superluminal {
 	 * =============================================================================================
 	 * 
 	 * IMMEDIATE:
-	 * 
 	 * 
 	 * MEDIUM:
 	 * - room tool doesn't work sometimes? -- as per SleeperService
@@ -302,11 +302,19 @@ public class Superluminal {
 					display.sleep();
 			}
 		} catch (Throwable t) {
-			log.error("An error has occured and the editor was forced to terminate.", t);
-
 			String msg = APP_NAME + " has encountered a problem and needs to close.\n\n" +
 					"Please check editor-log.txt in the editor's directory, and post " +
 					"it in the editor's thread at the FTL forums.";
+
+			ShipContainer ship = Manager.getCurrentShip();
+			if (ship != null) {
+				String name = "crash_" + System.currentTimeMillis() + ".ftl";
+				msg += "\n\nThe ship you had loaded has been saved in the editor's directory as '" +
+						name + "'.";
+				ship.save(new File(name));
+			}
+
+			log.error("An error has occured and the editor was forced to terminate.", t);
 			UIUtils.showErrorDialog(editorWindow.getShell(), null, msg);
 		}
 
@@ -341,6 +349,7 @@ public class Superluminal {
 		final String[] downloadLink = new String[1];
 		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
 		final ArrayList<String> changes = new ArrayList<String>();
+		final Exception[] lastException = new Exception[1];
 
 		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...",
 				"Checking for updates, please wait...", new Action() {
@@ -369,10 +378,13 @@ public class Superluminal {
 							}
 						} catch (UnknownHostException e) {
 							log.error("Update check failed -- connection to the repository could not be estabilished.");
+							lastException[0] = e;
 						} catch (JDOMException e) {
 							log.error("Udpate check failed -- an error has occured while parsing update file.", e);
+							lastException[0] = e;
 						} catch (Exception e) {
 							log.error("An error occured while checking for updates.", e);
+							lastException[0] = e;
 						} finally {
 							try {
 								if (is != null)
@@ -382,6 +394,12 @@ public class Superluminal {
 						}
 					}
 				});
+
+		if (lastException[0] != null) {
+			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null,
+					String.format("An error occurred while checking for updates:%n%n%s: %s",
+							lastException[0].getClass().getSimpleName(), lastException[0].getMessage()));
+		}
 
 		if (remoteVersion[0] == null) {
 			// Version check failed, already logged by previous catches
@@ -432,6 +450,9 @@ public class Superluminal {
 				}
 			} catch (Exception e) {
 				log.error("An error has occured while displaying update result.", e);
+				UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null,
+						String.format("An error has occured while displaying update result:%n%n%s: %s",
+								e.getClass().getSimpleName(), e.getMessage()));
 			}
 		} else {
 			if (APP_VERSION.compareTo(remoteVersion[0]) == 0) {
