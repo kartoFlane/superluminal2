@@ -363,8 +363,10 @@ public class RoomDataComposite extends Composite implements DataComposite {
 				}
 
 				public void focusLost(FocusEvent e) {
-					SystemObject sys = container.getActiveSystem(roomC.getGameObject());
-					sys.setInteriorNamespace(txtName.getText());
+					if (!txtName.getText().equals("")) {
+						SystemObject sys = container.getActiveSystem(roomC.getGameObject());
+						sys.setInteriorNamespace(txtName.getText());
+					}
 				}
 			});
 		}

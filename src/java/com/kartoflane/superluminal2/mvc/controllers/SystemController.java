@@ -140,6 +140,18 @@ public class SystemController extends ObjectController {
 		redraw();
 	}
 
+	public String getInteriorPath() {
+		return getGameObject().getInteriorPath();
+	}
+
+	public void setInteriorNamespace(String namespace) {
+		getGameObject().setInteriorNamespace(namespace);
+	}
+
+	public String getInteriorNamespace() {
+		return getGameObject().getInteriorNamespace();
+	}
+
 	public int getLevelCap() {
 		return getGameObject().getLevelCap();
 	}
@@ -158,10 +170,6 @@ public class SystemController extends ObjectController {
 
 	public int getLevelMax() {
 		return getGameObject().getLevelMax();
-	}
-
-	public String getInteriorPath() {
-		return getGameObject().getInteriorPath();
 	}
 
 	public boolean canContainGlow() {

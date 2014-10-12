@@ -38,6 +38,8 @@ import com.kartoflane.superluminal2.events.SLRestoreEvent;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.GameObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
+import com.kartoflane.superluminal2.ftl.GlowObject;
+import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.ImageObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
@@ -674,6 +676,22 @@ public class ShipContainer implements Disposable, SLListener {
 
 		setActiveSystem(room.getGameObject(), sys);
 		system.notifySizeChanged(room.getW(), room.getH());
+
+		if (isPlayerShip() && system.canContainGlow() && sys.getGlow() == Database.DEFAULT_GLOW_OBJ) {
+			Database db = Database.getInstance();
+			String glow = sys.getSystemId().getDefaultInteriorNamespace();
+
+			if (system.getSystemId() == Systems.CLOAKING) {
+				GlowSet glowSet = db.getGlowSet(glow);
+				sys.getGlow().setGlowSet(glowSet);
+			} else {
+				glow = glow.replace("room_", "");
+				GlowObject glowObject = db.getGlow(glow);
+				if (glowObject != null) {
+					sys.setGlow(glowObject);
+				}
+			}
+		}
 
 		if (isPlayerShip() && system.canContainGlow() && system.canContainStation()) {
 			GlowController glow = (GlowController) getController(sys.getGlow());
