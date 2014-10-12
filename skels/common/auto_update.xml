@@ -1,6 +1,13 @@
 <versions>
-	<latest id="2.1.0" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.1.0a" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.1.0a">
+			<change>Fixed editor not loading default settings when it was ran for the first time</change>
+			<change>Fixed a crash when assigning activation glow to cloaking system</change>
+			<change>Fixed several bugs related to system/glow assignment</change>
+			<change>Added crash-save feature</change>
+			<change>Improvements to database browse search - search terms can now be partial</change>
+		</version>
 		<version id="2.1.0">
 			<change>Added zoom feature, View > Open Zoom Window</change>
 			<change>Added automated floor image generation, Edit > Generate Floor Image</change>

@@ -1,5 +1,14 @@
 Changelog
 
+2.1.0a:
+- Fixed a bug that would prevent the editor from loading some of the default settings when
+  the program was started for the first time.
+- Fixed a crash when assigning activation glow image to cloaking system
+- Fixed several bugs related to system/glow assignment
+- Improved database browse search -- search terms can now be partial
+- Added crash-save feature -- should the editor crash, your ship will be saved as an .ftl file
+  in the editor's directory.
+
 2.1.0:
 - Added zoom feature (in the form of a separate window, found under View > Open Zoom Window)
 - Added cursor position tracker at the top-right of the main window + config setting to show
