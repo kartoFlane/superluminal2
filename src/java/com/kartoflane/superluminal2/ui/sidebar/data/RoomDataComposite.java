@@ -345,10 +345,15 @@ public class RoomDataComposite extends Composite implements DataComposite {
 
 					if (glowSet != null) {
 						btnGlow.setText(glowSet.getIdentifier());
-						GlowController gc = (GlowController) container.getController(systemObject.getGlow());
-						gc.setVisible(false);
-						gc.setGlowSet(glowSet);
-						gc.setVisible(true);
+
+						if (systemObject.getSystemId() == Systems.CLOAKING) {
+							systemObject.getGlow().setGlowSet(glowSet);
+						} else {
+							GlowController gc = (GlowController) container.getController(systemObject.getGlow());
+							gc.setVisible(false);
+							gc.setGlowSet(glowSet);
+							gc.setVisible(true);
+						}
 					}
 				}
 			});
