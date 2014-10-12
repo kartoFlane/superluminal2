@@ -149,8 +149,8 @@ public class DatabaseSearchDialog extends AbstractSearchDialog<String> {
 			public boolean accept(String o) {
 				boolean result = true;
 
-				String mName = "(.+/)*?" + name + "[^/]*?";
-				String mParent = "(.+/)*?" + parent + "[^/]*?/.*?";
+				String mName = "(.+/)*?[^/]*?" + name + "[^/]*?";
+				String mParent = "(.+/)*?[^/]*?" + parent + "[^/]*?/.*?";
 				if (caseSensitive) {
 					result &= o.matches(mName);
 					result &= o.matches(mParent);
