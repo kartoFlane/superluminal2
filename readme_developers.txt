@@ -73,6 +73,16 @@ Explanation of the repository's directory structure:
       The manifest files will be embedded to prevent VirtualStore redirection.
         http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware
 
+  "src/"
+    The source code of the application
+    
+    "java/"
+      Uncompiled Java files which constitute the editor (package explanation below)
+    
+    "resources/"
+      Various resources that are embedded in the compiled .jar file, and used by
+      the program.
+
 
 ===============================================================
 General explanation of source code packages and their contents:
