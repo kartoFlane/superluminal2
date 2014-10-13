@@ -53,6 +53,8 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 	protected boolean visible = true;
 	protected boolean highlighted = false;
 
+	private boolean disposed = false;
+
 	public BaseView() {
 	}
 
@@ -619,7 +621,6 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		LayeredPainter.getInstance().remove(controller, layer);
 	}
 
-	@Override
 	public void dispose() {
 		removeFromPainter();
 		setVisible(false);
@@ -635,5 +636,11 @@ public abstract class BaseView implements View, Disposable, Redrawable {
 		backgroundColor = null;
 		image = null;
 		imagePath = null;
+
+		disposed = true;
+	}
+
+	public boolean isDisposed() {
+		return disposed;
 	}
 }

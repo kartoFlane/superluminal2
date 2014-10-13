@@ -868,6 +868,7 @@ public class ShipContainer implements Disposable, SLListener {
 	public void dispose(AbstractController controller) {
 		if (controller instanceof ObjectController)
 			objectControllerMap.remove(((ObjectController) controller).getGameObject());
+		remove(controller);
 		controller.dispose();
 	}
 
@@ -1006,9 +1007,8 @@ public class ShipContainer implements Disposable, SLListener {
 			eventHandler.sendEvent(new SLRestoreEvent(controller));
 	}
 
-	@Override
 	public void dispose() throws NotDeletableException {
-		if (shipController == null)
+		if (isDisposed())
 			return;
 
 		for (MountController mount : mountControllers) {
@@ -1057,6 +1057,10 @@ public class ShipContainer implements Disposable, SLListener {
 		eventHandler.dispose();
 
 		System.gc();
+	}
+
+	public boolean isDisposed() {
+		return shipController == null;
 	}
 
 	public void updateChildBoundingAreas() {

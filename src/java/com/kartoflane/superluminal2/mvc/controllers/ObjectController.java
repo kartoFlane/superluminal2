@@ -58,4 +58,8 @@ public abstract class ObjectController extends AbstractController implements Ali
 	public boolean isDeleted() {
 		return getGameObject().isDeleted();
 	}
+
+	public boolean isDisposed() {
+		return model.isDisposed();
+	}
 }

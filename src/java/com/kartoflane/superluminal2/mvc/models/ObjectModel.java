@@ -59,4 +59,8 @@ public class ObjectModel extends BaseModel {
 			throw new IllegalStateException("Model is disposed.");
 		return gameObject.isDeletable();
 	}
+
+	public boolean isDisposed() {
+		return gameObject == null;
+	}
 }

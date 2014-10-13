@@ -24,4 +24,9 @@ public interface Disposable {
 	 * Disposed objects cannot be retrieved via undo, therefore this method should be called to clean up unretrievable objects.
 	 */
 	public void dispose() throws NotDeletableException;
+
+	/**
+	 * @return true if this object has been disposed and should not be used anymore, false otherwise.
+	 */
+	public boolean isDisposed();
 }

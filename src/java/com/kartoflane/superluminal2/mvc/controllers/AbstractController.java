@@ -843,11 +843,14 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	public void dispose() {
-		if (model.isDisposed())
+		if (isDisposed())
 			return;
 
 		if (eventHandler != null)
 			eventHandler.sendEvent(new SLDisposeEvent(this));
+
+		// unregister this follower
+		setParent(null);
 
 		model.dispose();
 		view.dispose();
