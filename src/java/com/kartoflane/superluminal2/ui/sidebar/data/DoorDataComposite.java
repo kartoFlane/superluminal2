@@ -9,13 +9,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.kartoflane.superluminal2.core.Grid;
+import com.kartoflane.superluminal2.core.Grid.Snapmodes;
+import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
 import com.kartoflane.superluminal2.ui.OverviewWindow;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
@@ -176,6 +181,18 @@ public class DoorDataComposite extends Composite implements DataComposite {
 		label.setText("Door" + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
 
 		btnHorizontal.setSelection(controller.isHorizontal());
+
+		int cs = ShipContainer.CELL_SIZE;
+		// Disable the button if there's another door at the position that this door would take, were its orientation changed
+		if (controller.isHorizontal()) {
+			btnHorizontal.setEnabled(LayeredPainter.getInstance().getControllerAt(
+					Grid.getInstance().snapToGrid(controller.getX() - cs / 2, controller.getY() + cs / 2,
+							Snapmodes.EDGE_V), Layers.DOOR) == null);
+		} else {
+			btnHorizontal.setEnabled(LayeredPainter.getInstance().getControllerAt(
+					Grid.getInstance().snapToGrid(controller.getX() + cs / 2, controller.getY() - cs / 2,
+							Snapmodes.EDGE_H), Layers.DOOR) == null);
+		}
 
 		lblIdLeft.setText((controller.isHorizontal() ? "Upper" : "Left") + " ID:");
 		lblIdRight.setText((controller.isHorizontal() ? "Lower" : "Right") + " ID:");
