@@ -102,4 +102,13 @@ public class GlowSet implements Comparable<GlowSet>, Identifiable {
 		return namespace.compareTo(o.namespace);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof GlowSet) {
+			return namespace.equals(((GlowSet) o).namespace);
+		} else {
+			return false;
+		}
+	}
+
 }

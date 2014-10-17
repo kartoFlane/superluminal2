@@ -94,6 +94,15 @@ public class GlowObject extends GameObject implements Comparable<GlowObject>, Id
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (o instanceof GlowObject) {
+			return identifier.equals(((GlowObject) o).identifier);
+		} else {
+			return false;
+		}
+	}
+
+	@Override
 	public void update() {
 		ShipContainer container = Manager.getCurrentShip();
 		GlowController glowC = (GlowController) container.getController(this);

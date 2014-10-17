@@ -1,5 +1,8 @@
 package com.kartoflane.superluminal2.ui;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -28,6 +31,7 @@ import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
+import com.kartoflane.superluminal2.utils.Utils.AlphanumComparator;
 
 public class GlowSelectionDialog {
 	private static GlowSelectionDialog instance = null;
@@ -224,7 +228,14 @@ public class GlowSelectionDialog {
 		for (TreeItem trtm : tree.getItems())
 			trtm.dispose();
 
-		for (GlowSet glowSet : Database.getInstance().getGlowSets()) {
+		ArrayList<String> glowSetNames = new ArrayList<String>();
+		for (GlowSet gs : Database.getInstance().getGlowSets())
+			glowSetNames.add(gs.getNamespace());
+
+		Collections.sort(glowSetNames, new AlphanumComparator());
+
+		for (String namespace : glowSetNames) {
+			GlowSet glowSet = Database.getInstance().getGlowSet(namespace);
 			// Only create widgets for cloaking glows if Cloaking system is selected
 			boolean cloak = glowSet.getImage(Glows.CLOAK) != null;
 			if ((system.getSystemId() == Systems.CLOAKING) != cloak)
