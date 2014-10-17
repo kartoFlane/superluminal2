@@ -641,6 +641,8 @@ public class ShipContainer implements Disposable, SLListener {
 			StringBuilder buf = new StringBuilder();
 			buf.append(Superluminal.APP_NAME);
 			buf.append(" has encountered an error while generating the floor image:\n\n");
+			buf.append(ex.getClass().getSimpleName());
+			buf.append(": ");
 			buf.append(ex.getMessage());
 			buf.append("\n\nCheck log for details.");
 
@@ -868,7 +870,6 @@ public class ShipContainer implements Disposable, SLListener {
 	public void dispose(AbstractController controller) {
 		if (controller instanceof ObjectController)
 			objectControllerMap.remove(((ObjectController) controller).getGameObject());
-		remove(controller);
 		controller.dispose();
 	}
 
