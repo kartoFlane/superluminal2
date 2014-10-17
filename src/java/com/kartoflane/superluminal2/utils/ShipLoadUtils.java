@@ -255,20 +255,25 @@ public class ShipLoadUtils {
 					system.setInteriorPath(null);
 				}
 
-				// When an interior image doesn't have a corresponding glow,
-				// No glow is used -- apparently there is no default to fall back to.
-				// The editor will try to create a glow, should no match be found
+				// Load manning glow image for the system
+				// If the specified glow image can't be found, use the default one
 				if (system.canContainGlow()) {
 					if (attr == null)
 						attr = sys.getDefaultInteriorNamespace();
 
 					if (system.getSystemId() == Systems.CLOAKING) {
 						GlowSet glowSet = db.getGlowSet(attr);
-						system.getGlow().setGlowSet(glowSet);
+						if (glowSet == null) {
+							system.getGlow().setGlowSet(Database.DEFAULT_GLOW_SET);
+						} else {
+							system.getGlow().setGlowSet(glowSet);
+						}
 					} else {
 						attr = attr.replace("room_", "");
 						GlowObject glowObject = db.getGlow(attr);
-						if (glowObject != null) {
+						if (glowObject == null) {
+							system.setGlow(Database.DEFAULT_GLOW_OBJ);
+						} else {
 							system.setGlow(glowObject);
 						}
 					}
