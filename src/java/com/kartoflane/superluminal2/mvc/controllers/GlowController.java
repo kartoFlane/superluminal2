@@ -31,6 +31,7 @@ public class GlowController extends ObjectController {
 
 		this.station = station.getGameObject();
 
+		setDeletable(false);
 		setSelectable(true);
 		setLocModifiable(true);
 
