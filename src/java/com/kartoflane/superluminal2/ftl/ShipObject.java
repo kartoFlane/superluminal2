@@ -662,7 +662,7 @@ public class ShipObject extends GameObject {
 	 * Puts the new drone at the specified index in the drone list.
 	 */
 	public void changeDrone(int index, DroneObject neu) {
-		if (index < 0 || index > weaponSlots)
+		if (index < 0 || index > droneSlots)
 			throw new IllegalArgumentException("Index is out of bounds: " + index);
 		if (neu == null)
 			throw new IllegalArgumentException("New drone must not be null.");
