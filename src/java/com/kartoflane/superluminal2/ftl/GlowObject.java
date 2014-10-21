@@ -29,12 +29,14 @@ public class GlowObject extends GameObject implements Comparable<GlowObject>, Id
 	 */
 	public GlowObject() {
 		this("Default Glow");
+		setDeletable(false);
 	}
 
 	public GlowObject(String identifier) {
 		if (identifier == null)
 			throw new IllegalArgumentException("Identifier must not be null.");
 		this.identifier = identifier;
+		setDeletable(false);
 		setGlowSet(Database.DEFAULT_GLOW_SET);
 	}
 

@@ -31,7 +31,6 @@ public class GlowController extends ObjectController {
 
 		this.station = station.getGameObject();
 
-		setDeletable(false);
 		setSelectable(true);
 		setLocModifiable(true);
 
@@ -41,6 +40,7 @@ public class GlowController extends ObjectController {
 
 		station.addListener(SLEvent.VISIBLE, this);
 		station.addListener(SLEvent.DIRECTION, this);
+		station.addListener(SLEvent.DISPOSE, this);
 	}
 
 	/**
@@ -177,11 +177,13 @@ public class GlowController extends ObjectController {
 
 	@Override
 	public void handleEvent(SLEvent e) {
-		if (e.type == SLEvent.DIRECTION) {
+		if (e.type == SLEvent.DIRECTION)
 			setDirection((Directions) e.data);
-		} else {
-			super.handleEvent(e);
+		if (e.type == SLEvent.DISPOSE) {
+			dispose();
 		}
+
+		super.handleEvent(e);
 	}
 
 	@Override
