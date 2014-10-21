@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.1.0a" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.1.0b" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.1.0b">
+			<change>Fixed several crashes</change>
+			<change>Fixed several bugs related to glows & glow selection dialog</change>
+		</version>
 		<version id="2.1.0a">
 			<change>Fixed editor not loading default settings when it was ran for the first time</change>
 			<change>Fixed a crash when assigning activation glow to cloaking system</change>

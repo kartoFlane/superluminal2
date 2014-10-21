@@ -1,5 +1,17 @@
 Changelog
 
+2.1.0b:
+- Fixed a crash caused by the editor sometimes attempting to access already deleted elements
+- Door orientation toggle button ("Horizontal") now is disabled when changing the door's
+  orientation would cause it to collide with another door.
+- Fixed the editor failing to load ships with custom interior image for the cloaking system,
+  that had no matching glow image
+- Fixed glow selection dialog sometimes listing repeated entries
+- Glow selection dialog now lists its entries in alphanumerical order
+- Fixed glows being deletable
+- Fixed a crash related to drone selection
+- Fixed glows sometimes not being properly disposed when closing / loading another ship
+
 2.1.0a:
 - Fixed a bug that would prevent the editor from loading some of the default settings when
   the program was started for the first time.
