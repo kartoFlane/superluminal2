@@ -451,9 +451,14 @@ public class ShipLoaderDialog {
 
 	private void handleException(ShipMetadata metadata, Exception ex) {
 		log.warn("An error has occured while loading " + metadata.getBlueprintName() + ": ", ex);
-		String msg = String.format("%s could not be loaded:%n%n", metadata.getBlueprintName()) +
-				"Check the log for details.";
-		UIUtils.showWarningDialog(shell, null, msg);
+		StringBuilder buf = new StringBuilder();
+		buf.append(metadata.getBlueprintName());
+		buf.append(" could not be loaded:\n\n");
+		buf.append(ex.getClass().getSimpleName());
+		buf.append(": ");
+		buf.append(ex.getMessage());
+		buf.append("\n\nCheck the log or console for details.");
+		UIUtils.showWarningDialog(shell, null, buf.toString());
 	}
 
 	private void updatePreview() {
