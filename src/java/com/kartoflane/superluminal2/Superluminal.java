@@ -46,7 +46,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.0b");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.0c");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -351,49 +351,50 @@ public class Superluminal {
 		final ArrayList<String> changes = new ArrayList<String>();
 		final Exception[] lastException = new Exception[1];
 
-		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...",
-				"Checking for updates, please wait...", new Action() {
-					public void execute() {
-						InputStream is = null;
-						try {
-							URL url = new URL(APP_UPDATE_FETCH_URL);
-							is = url.openStream();
+		String msg = "Checking for updates, please wait..." + (manual ? "" : "\n(You can disable this in Edit > Settings)");
 
-							Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
-							Element root = updateDoc.getRootElement();
-							Element latest = root.getChild("latest");
-							String id = latest.getAttributeValue("id");
+		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", msg, new Action() {
+			public void execute() {
+				InputStream is = null;
+				try {
+					URL url = new URL(APP_UPDATE_FETCH_URL);
+					is = url.openStream();
 
-							downloadLink[0] = latest.getAttributeValue("url");
-							remoteVersion[0] = new ComparableVersion(id);
+					Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
+					Element root = updateDoc.getRootElement();
+					Element latest = root.getChild("latest");
+					String id = latest.getAttributeValue("id");
 
-							Element changelog = root.getChild("changelog");
-							for (Element version : changelog.getChildren("version")) {
-								ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
-								if (vId.compareTo(APP_VERSION) > 0) {
-									for (Element change : version.getChildren("change")) {
-										changes.add(change.getValue());
-									}
-								}
-							}
-						} catch (UnknownHostException e) {
-							log.error("Update check failed -- connection to the repository could not be estabilished.");
-							lastException[0] = e;
-						} catch (JDOMException e) {
-							log.error("Udpate check failed -- an error has occured while parsing update file.", e);
-							lastException[0] = e;
-						} catch (Exception e) {
-							log.error("An error occured while checking for updates.", e);
-							lastException[0] = e;
-						} finally {
-							try {
-								if (is != null)
-									is.close();
-							} catch (IOException e) {
+					downloadLink[0] = latest.getAttributeValue("url");
+					remoteVersion[0] = new ComparableVersion(id);
+
+					Element changelog = root.getChild("changelog");
+					for (Element version : changelog.getChildren("version")) {
+						ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
+						if (vId.compareTo(APP_VERSION) > 0) {
+							for (Element change : version.getChildren("change")) {
+								changes.add(change.getValue());
 							}
 						}
 					}
-				});
+				} catch (UnknownHostException e) {
+					log.error("Update check failed -- connection to the repository could not be estabilished.");
+					lastException[0] = e;
+				} catch (JDOMException e) {
+					log.error("Udpate check failed -- an error has occured while parsing update file.", e);
+					lastException[0] = e;
+				} catch (Exception e) {
+					log.error("An error occured while checking for updates.", e);
+					lastException[0] = e;
+				} finally {
+					try {
+						if (is != null)
+							is.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+		});
 
 		if (lastException[0] != null) {
 			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null,

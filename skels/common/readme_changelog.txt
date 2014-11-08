@@ -1,5 +1,10 @@
 Changelog
 
+2.1.0c:
+- Fixed a crash caused by systems whose image had no corresponding entry in rooms.xml
+  (ships exhibiting this problem will fail to load)
+- ShipLoader dialog now provides an explanation why a ship could not be loaded.
+
 2.1.0b:
 - Fixed a crash caused by the editor sometimes attempting to access already deleted elements
 - Door orientation toggle button ("Horizontal") now is disabled when changing the door's

@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.1.0b" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.1.0c" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.1.0c">
+			<change>Fixed a crash related to missing glow images</change>
+			<change>ShipLoader now provides an explanation for when a ship can't be loaded</change>
+		</version>
 		<version id="2.1.0b">
 			<change>Fixed several crashes</change>
 			<change>Fixed several bugs related to glows & glow selection dialog</change>
