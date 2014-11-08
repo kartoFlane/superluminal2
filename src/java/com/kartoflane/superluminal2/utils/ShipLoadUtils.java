@@ -272,7 +272,8 @@ public class ShipLoadUtils {
 						attr = attr.replace("room_", "");
 						GlowObject glowObject = db.getGlow(attr);
 						if (glowObject == null) {
-							system.setGlow(Database.DEFAULT_GLOW_OBJ);
+							throw new IllegalArgumentException(String.format("Could not find roomLayout entry for '%s' (%s) in rooms.xml",
+									system.getInteriorNamespace(), system));
 						} else {
 							system.setGlow(glowObject);
 						}

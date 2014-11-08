@@ -697,7 +697,8 @@ public class ShipContainer implements Disposable, SLListener {
 
 		if (isPlayerShip() && system.canContainGlow() && system.canContainStation()) {
 			GlowController glow = (GlowController) getController(sys.getGlow());
-			glow.applyGlowSettings();
+			if (glow != null)
+				glow.applyGlowSettings();
 		}
 
 		if (system.getSystemId() == Systems.ARTILLERY)
