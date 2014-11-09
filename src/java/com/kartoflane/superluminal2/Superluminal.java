@@ -336,6 +336,9 @@ public class Superluminal {
 		display.dispose();
 
 		log.info("Bye");
+		// Prevents the application from lingering on MacOSX when the window is closed,
+		// makes no difference on Windows/Linux
+		System.exit(0);
 	}
 
 	/**
