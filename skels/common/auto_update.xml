@@ -1,6 +1,9 @@
 <versions>
-	<latest id="2.1.0c" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.1.0d" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+		<version id="2.1.0d">
+			<change>Fixed glow images being saved with incorrect name in rooms.xml</change>
+		</version>
 		<version id="2.1.0c">
 			<change>Fixed a crash related to missing glow images</change>
 			<change>ShipLoader now provides an explanation for when a ship can't be loaded</change>

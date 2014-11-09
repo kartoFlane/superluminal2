@@ -1,5 +1,8 @@
 Changelog
 
+2.1.0d:
+- Fixed glow images being saved with incorrect name in rooms.xml
+
 2.1.0c:
 - Fixed a crash caused by systems whose image had no corresponding entry in rooms.xml
   (ships exhibiting this problem will fail to load)

@@ -2,12 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
     <dict>
-    <key>CFBundleDevelopmentRegion</key>
+        <key>CFBundleDevelopmentRegion</key>
         <string>English</string>
         <key>CFBundleExecutable</key>
         <string>runme</string>
         <key>CFBundleGetInfoString</key>
-        <string>Superluminal 2.1.0c</string>          <!-- Change version -->
+        <string>Superluminal 2.1.0d</string>          <!-- Change version -->
         <key>CFBundleIconFile</key>
         <string>appIcon.icns</string>
         <key>CFBundleIdentifier</key>
@@ -19,14 +19,16 @@
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>
-        <string>2.1.0c</string>                       <!-- Change version -->
+        <string>2.1.0d</string>                       <!-- Change version -->
         <key>CFBundleSignature</key>
         <string>????</string>
         <key>CFBundleVersion</key>
-        <string>2.1.0c</string>                       <!-- Change version -->
+        <string>2.1.0d</string>                       <!-- Change version -->
         <key>LSHasLocalizedDisplayName</key>
         <true/>
         <key>NSHumanReadableCopyright</key>
         <string>Copyright 2014 kartoFlane</string>
+        <key>KeepAlive</key>
+        <false/>
     </dict>
 </plist>
