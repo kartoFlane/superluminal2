@@ -1,5 +1,11 @@
 Changelog
 
+2.1.1:
+- Editor now recognizes .rawappend files when loading mods via Mod Management
+- Added an option to enemy ships to select weapon/drone loadout like in player ships
+- When loading a ship that is missing a glow in rooms.xml, the editor now uses
+  the default glow for that system instead of failing to load the ship
+
 2.1.0d:
 - Fixed glow images being saved with incorrect name in rooms.xml
 
