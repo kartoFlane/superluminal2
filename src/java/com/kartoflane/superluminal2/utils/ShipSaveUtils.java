@@ -457,9 +457,16 @@ public class ShipSaveUtils {
 		weaponList.setAttribute("missiles", "" + ship.getMissilesAmount());
 		weaponList.setAttribute("count", "" + ship.getWeaponSlots());
 
-		// Player ships' weapons have to be declared explicitly, ie. listed by name
-		// Only the first 'count' weapons are loaded in-game
-		if (ship.isPlayerShip()) {
+		if (ship.getWeaponsByList()) {
+			// Weapons are randomly drafted from a list of weapons
+			// 'count' determines how many weapons are drafted
+			WeaponList list = ship.getWeaponList();
+			if (list != Database.DEFAULT_WEAPON_LIST)
+				weaponList.setAttribute("load", list.getBlueprintName());
+		}
+		else {
+			// Weapons declared explicitly, ie. listed by name
+			// Only the first 'count' weapons are loaded in-game
 			for (WeaponObject weapon : ship.getWeapons()) {
 				if (weapon == Database.DEFAULT_WEAPON_OBJ)
 					continue;
@@ -468,22 +475,22 @@ public class ShipSaveUtils {
 				weaponList.addContent(e);
 			}
 		}
-		// Enemy ships' weapons are randomly drafted from a list of weapons
-		// 'count' determines how many weapons are drafted
-		else {
-			WeaponList list = ship.getWeaponList();
-			if (list != Database.DEFAULT_WEAPON_LIST)
-				weaponList.setAttribute("load", list.getBlueprintName());
-		}
 		shipBlueprint.addContent(weaponList);
 
 		Element droneList = new Element("droneList");
 		droneList.setAttribute("drones", "" + ship.getDronePartsAmount());
 		droneList.setAttribute("count", "" + ship.getDroneSlots());
 
-		// Player ships' drones have to be declared explicitly, ie. listed by name
-		// Only the first 'count' drones are loaded in-game
-		if (ship.isPlayerShip()) {
+		if (ship.getDronesByList()) {
+			// Drones are randomly drafted from a list of drones
+			// 'count' determines how many drones are drafted
+			DroneList list = ship.getDroneList();
+			if (list != Database.DEFAULT_DRONE_LIST)
+				droneList.setAttribute("load", list.getBlueprintName());
+		}
+		else {
+			// Drones declared explicitly, ie. listed by name
+			// Only the first 'count' drones are loaded in-game
 			for (DroneObject drone : ship.getDrones()) {
 				if (drone == Database.DEFAULT_DRONE_OBJ)
 					continue;
@@ -491,13 +498,6 @@ public class ShipSaveUtils {
 				e.setAttribute("name", drone.getBlueprintName());
 				droneList.addContent(e);
 			}
-		}
-		// Enemy ships' drones are randomly drafted from a list of drones
-		// 'count' determines how many drones are drafted
-		else {
-			DroneList list = ship.getDroneList();
-			if (list != Database.DEFAULT_DRONE_LIST)
-				droneList.setAttribute("load", list.getBlueprintName());
 		}
 		shipBlueprint.addContent(droneList);
 

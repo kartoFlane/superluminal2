@@ -272,8 +272,15 @@ public class ShipLoadUtils {
 						attr = attr.replace("room_", "");
 						GlowObject glowObject = db.getGlow(attr);
 						if (glowObject == null) {
-							throw new IllegalArgumentException(String.format("Could not find roomLayout entry for '%s' (%s) in rooms.xml",
-									system.getInteriorNamespace(), system));
+							String glow = system.getSystemId().getDefaultInteriorNamespace();
+
+							glow = glow.replace("room_", "");
+							GlowObject obj = Database.getInstance().getGlow(glow);
+							if (obj != null) {
+								glowObject = obj;
+							} else {
+								glowObject = Database.DEFAULT_GLOW_OBJ;
+							}
 						} else {
 							system.setGlow(glowObject);
 						}
@@ -349,7 +356,19 @@ public class ShipLoadUtils {
 			if (attr != null)
 				count = Integer.valueOf(attr);
 
-			if (isPlayer) {
+			attr = child.getAttributeValue("load");
+			if (attr == null && !isPlayer) {
+				ship.setWeaponsByList(false);
+			} else if (attr != null && isPlayer) {
+				throw new IllegalArgumentException("Player ships cannot delcare weapons by list.");
+			}
+
+			if (ship.getWeaponsByList()) {
+				WeaponList list = db.getWeaponList(attr);
+				if (list == null)
+					throw new IllegalArgumentException("BlueprintList could not be found: " + attr);
+				ship.setWeaponList(list);
+			} else {
 				int loaded = 0;
 				for (Element weapon : child.getChildren("weapon")) {
 					if (count != -1 && loaded >= count)
@@ -366,14 +385,6 @@ public class ShipLoadUtils {
 					ship.changeWeapon(Database.DEFAULT_WEAPON_OBJ, weaponObject);
 
 					loaded++;
-				}
-			} else {
-				attr = child.getAttributeValue("load");
-				if (attr != null) {
-					WeaponList list = db.getWeaponList(attr);
-					if (list == null)
-						throw new IllegalArgumentException("BlueprintList could not be found: " + attr);
-					ship.setWeaponList(list);
 				}
 			}
 		}
@@ -393,7 +404,19 @@ public class ShipLoadUtils {
 			if (attr != null)
 				count = Integer.valueOf(attr);
 
-			if (ship.isPlayerShip()) {
+			attr = child.getAttributeValue("load");
+			if (attr == null && !isPlayer) {
+				ship.setDronesByList(false);
+			} else if (attr != null && isPlayer) {
+				throw new IllegalArgumentException("Player ships cannot delcare dronesby list.");
+			}
+
+			if (ship.getDronesByList()) {
+				DroneList list = db.getDroneList(attr);
+				if (list == null)
+					throw new IllegalArgumentException("BlueprintList could not be found: " + attr);
+				ship.setDroneList(list);
+			} else {
 				int loaded = 0;
 				for (Element drone : child.getChildren("drone")) {
 					if (count != -1 && loaded >= count)
@@ -410,14 +433,6 @@ public class ShipLoadUtils {
 					ship.changeDrone(Database.DEFAULT_DRONE_OBJ, droneObject);
 
 					loaded++;
-				}
-			} else {
-				attr = child.getAttributeValue("load");
-				if (attr != null) {
-					DroneList list = db.getDroneList(attr);
-					if (list == null)
-						throw new IllegalArgumentException("BlueprintList could not be found: " + attr);
-					ship.setDroneList(list);
 				}
 			}
 		}

@@ -43,6 +43,8 @@ public class ShipObject extends GameObject {
 	private ArrayList<AugmentObject> augments;
 	private ArrayList<WeaponObject> weapons;
 	private ArrayList<DroneObject> drones;
+	private boolean weaponByList = false;
+	private boolean droneByList = false;
 	private WeaponList weaponList = Database.DEFAULT_WEAPON_LIST;
 	private DroneList droneList = Database.DEFAULT_DRONE_LIST;
 	private BoardingStrategies boardingAI = BoardingStrategies.SABOTAGE;
@@ -121,6 +123,8 @@ public class ShipObject extends GameObject {
 			ImageObject shieldObject = imageMap.get(Images.SHIELD);
 			shieldObject.setImagePath("db:img/ship/enemy_shields.png");
 			blueprintName = "NEW_ENEMY_SHIP";
+			weaponByList = true;
+			droneByList = true;
 		}
 	}
 
@@ -551,6 +555,14 @@ public class ShipObject extends GameObject {
 		return weaponSlots;
 	}
 
+	public boolean getWeaponsByList() {
+		return weaponByList;
+	}
+
+	public void setWeaponsByList(boolean byList) {
+		weaponByList = byList;
+	}
+
 	/**
 	 * Sets the weapon list that the ship will use as its loadout.<br>
 	 * Enemy ships only.
@@ -633,6 +645,14 @@ public class ShipObject extends GameObject {
 	 */
 	public int getDroneSlots() {
 		return droneSlots;
+	}
+
+	public boolean getDronesByList() {
+		return droneByList;
+	}
+
+	public void setDronesByList(boolean byList) {
+		droneByList = byList;
 	}
 
 	/**

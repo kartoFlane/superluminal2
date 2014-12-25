@@ -77,6 +77,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 	private HashMap<Races, Spinner> spCrewMax = new HashMap<Races, Spinner>();
 	private Spinner spMissiles;
 	private Spinner spWeaponSlots;
+	private Button btnWeaponByList;
+	private Button btnDroneByList;
 	private Button btnWeaponList;
 	private Button btnDroneList;
 	private Group grpWeapons;
@@ -431,6 +433,36 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			}
 		});
 
+		if (!ship.isPlayerShip()) {
+			btnWeaponByList = new Button(grpWeapons, SWT.CHECK);
+			btnWeaponByList.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false, 1, 1));
+			btnWeaponByList.setText("Weapons By List");
+			btnWeaponByList.setSelection(ship.getWeaponsByList());
+
+			Label lblWeaponByListInfo = new Label(grpWeapons, SWT.NONE);
+			lblWeaponByListInfo.setImage(helpImage);
+			lblWeaponByListInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+			msg = "Unchecking this allows you to define this ship's weapons directly, like in player ships.";
+			UIUtils.addTooltip(lblWeaponByListInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+
+			btnWeaponByList.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					btnWeaponList.dispose();
+					clearWeaponSlots();
+					ship.setWeaponsByList(btnWeaponByList.getSelection());
+					if (ship.getWeaponsByList()) {
+						createWeaponList(ship);
+					} else {
+						createWeaponSlots(ship.getWeaponSlots());
+					}
+					updateData();
+					container.updateMounts();
+					EditorWindow.getInstance().updateSidebarScroll();
+				}
+			});
+		}
+
 		Label lblWeaponSlots = new Label(grpWeapons, SWT.NONE);
 		lblWeaponSlots.setText("Slots");
 
@@ -442,7 +474,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		spWeaponSlots.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (ship.isPlayerShip()) {
+				if (ship.getWeaponsByList()) {
+					ship.setWeaponSlots(spWeaponSlots.getSelection());
+					updateData();
+				} else {
 					if (spWeaponSlots.getSelection() > 4 && ship.getWeaponSlots() <= 4 && !Manager.shownSlotWarning) {
 						String msg = "Giving a ship more than 4 weapon slots will cause ingame UI to break.\n" +
 								"On top of that, toggling autofire on weapons assigned to slots >4 will crash the game.\n" +
@@ -460,33 +495,14 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 					container.updateMounts();
 
 					EditorWindow.getInstance().updateSidebarScroll();
-				} else {
-					ship.setWeaponSlots(spWeaponSlots.getSelection());
-					updateData();
 				}
 			}
 		});
 
-		if (ship.isPlayerShip()) {
-			createWeaponSlots(ship.getWeaponSlots());
+		if (ship.getWeaponsByList()) {
+			createWeaponList(ship);
 		} else {
-			btnWeaponList = new Button(grpWeapons, SWT.NONE);
-			btnWeaponList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-			btnWeaponList.setText("<weapon list>");
-
-			btnWeaponList.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					WeaponList current = ship.getWeaponList();
-					WeaponSelectionDialog dialog = new WeaponSelectionDialog(EditorWindow.getInstance().getShell());
-					WeaponList neu = dialog.open(current);
-
-					if (neu != null) {
-						ship.setWeaponList(neu);
-						updateData();
-					}
-				}
-			});
+			createWeaponSlots(ship.getWeaponSlots());
 		}
 
 		/*
@@ -516,6 +532,35 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			}
 		});
 
+		if (!ship.isPlayerShip()) {
+			btnDroneByList = new Button(grpDrones, SWT.CHECK);
+			btnDroneByList.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false, 1, 1));
+			btnDroneByList.setText("Drones By List");
+			btnDroneByList.setSelection(ship.getDronesByList());
+
+			Label lblDroneByListInfo = new Label(grpDrones, SWT.NONE);
+			lblDroneByListInfo.setImage(helpImage);
+			lblDroneByListInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
+			msg = "Unchecking this allows you to define this ship's drones directly, like in player ships.";
+			UIUtils.addTooltip(lblDroneByListInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+
+			btnDroneByList.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					btnDroneList.dispose();
+					clearDroneSlots();
+					ship.setDronesByList(btnDroneByList.getSelection());
+					if (ship.getDronesByList()) {
+						createDroneList(ship);
+					} else {
+						createDroneSlots(ship.getDroneSlots());
+					}
+					updateData();
+					EditorWindow.getInstance().updateSidebarScroll();
+				}
+			});
+		}
+
 		Label lblDroneSlots = new Label(grpDrones, SWT.NONE);
 		lblDroneSlots.setText("Slots");
 
@@ -527,7 +572,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		spDroneSlots.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (ship.isPlayerShip()) {
+				if (ship.getDronesByList()) {
+					ship.setDroneSlots(spDroneSlots.getSelection());
+					updateData();
+				} else {
 					if (spDroneSlots.getSelection() > 4 && ship.getDroneSlots() <= 4 && !Manager.shownSlotWarning) {
 						String msg = "Giving a ship more than 4 drone slots will cause ingame UI to break.\n" +
 								"While it's possible for a ship to have any number of drone slots, this\n" +
@@ -543,33 +591,14 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 					updateData();
 
 					EditorWindow.getInstance().updateSidebarScroll();
-				} else {
-					ship.setDroneSlots(spDroneSlots.getSelection());
-					updateData();
 				}
 			}
 		});
 
-		if (ship.isPlayerShip()) {
-			createDroneSlots(ship.getDroneSlots());
+		if (ship.getDronesByList()) {
+			createDroneList(ship);
 		} else {
-			btnDroneList = new Button(grpDrones, SWT.NONE);
-			btnDroneList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-			btnDroneList.setText("<drone list>");
-
-			btnDroneList.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					DroneList current = ship.getDroneList();
-					DroneSelectionDialog dialog = new DroneSelectionDialog(EditorWindow.getInstance().getShell());
-					DroneList neu = dialog.open(current);
-
-					if (neu != null) {
-						ship.setDroneList(neu);
-						updateData();
-					}
-				}
-			});
+			createDroneSlots(ship.getDroneSlots());
 		}
 
 		/*
@@ -822,15 +851,24 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		spDrones.setSelection(ship.getDronePartsAmount());
 		spDroneSlots.setSelection(ship.getDroneSlots());
 
-		if (ship.isPlayerShip()) {
-			int count = 0;
+		int count = 0;
+		if (ship.getWeaponsByList()) {
+			WeaponList wList = ship.getWeaponList();
+			btnWeaponList.setText(wList.getBlueprintName());
+		} else {
+			count = 0;
 			for (WeaponObject weapon : ship.getWeapons()) {
 				if (count < ship.getWeaponSlots()) {
 					btnWeapons.get(count).setText(weapon.toString());
 					count++;
 				}
 			}
+		}
 
+		if (ship.getDronesByList()) {
+			DroneList dList = ship.getDroneList();
+			btnDroneList.setText(dList.getBlueprintName());
+		} else {
 			count = 0;
 			for (DroneObject drone : ship.getDrones()) {
 				if (count < ship.getDroneSlots()) {
@@ -838,15 +876,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 					count++;
 				}
 			}
-		} else {
-			WeaponList wList = ship.getWeaponList();
-			btnWeaponList.setText(wList.getBlueprintName());
-
-			DroneList dList = ship.getDroneList();
-			btnDroneList.setText(dList.getBlueprintName());
 		}
 
-		int count = 0;
+		count = 0;
 		for (AugmentObject augment : ship.getAugments()) {
 			btnAugments.get(count).setText(augment.toString());
 			count++;
@@ -897,6 +929,28 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 		compArm.layout();
 	}
 
+	private void createWeaponList(final ShipObject ship) {
+		btnWeaponList = new Button(grpWeapons, SWT.NONE);
+		btnWeaponList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		btnWeaponList.setText("<weapon list>");
+
+		btnWeaponList.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WeaponList current = ship.getWeaponList();
+				WeaponSelectionDialog dialog = new WeaponSelectionDialog(EditorWindow.getInstance().getShell());
+				WeaponList neu = dialog.open(current);
+
+				if (neu != null) {
+					ship.setWeaponList(neu);
+					updateData();
+				}
+			}
+		});
+
+		compArm.layout();
+	}
+
 	private void createWeaponSlots(int n) {
 		SelectionAdapter listener = new SelectionAdapter() {
 			@Override
@@ -930,6 +984,28 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 			b.addSelectionListener(listener);
 			btnWeapons.add(b);
 		}
+
+		compArm.layout();
+	}
+
+	private void createDroneList(final ShipObject ship) {
+		btnDroneList = new Button(grpDrones, SWT.NONE);
+		btnDroneList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		btnDroneList.setText("<drone list>");
+
+		btnDroneList.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DroneList current = ship.getDroneList();
+				DroneSelectionDialog dialog = new DroneSelectionDialog(EditorWindow.getInstance().getShell());
+				DroneList neu = dialog.open(current);
+
+				if (neu != null) {
+					ship.setDroneList(neu);
+					updateData();
+				}
+			}
+		});
 
 		compArm.layout();
 	}

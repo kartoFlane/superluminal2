@@ -961,7 +961,11 @@ public class ShipContainer implements Disposable, SLListener {
 		for (MountController mount : mountControllers) {
 			mount.setId(i);
 			if (i < slots) {
-				mount.setWeapon(weapons[i]);
+				if (ship.getWeaponsByList()) {
+					mount.setWeapon(Database.DEFAULT_WEAPON_OBJ);
+				} else {
+					mount.setWeapon(weapons[i]);
+				}
 			} else {
 				// Artillery starts taking up mounts after the weapons, or 4th slot if the
 				// ship has less than 4 slots. As such, a dummy mount is required
