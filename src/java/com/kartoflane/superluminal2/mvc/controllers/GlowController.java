@@ -123,7 +123,7 @@ public class GlowController extends ObjectController {
 	public Point getGlowLocRelativeToRoom() {
 		Point result = getFollowOffset();
 		RoomObject room = getRoom();
-		if (room != null) {
+		if (room != null && !room.isDeleted()) {
 			Point rel = room.getSlotLocation(station.getSlotId());
 			if (rel != null) {
 				result.x += rel.x - getWDir() / 2;
