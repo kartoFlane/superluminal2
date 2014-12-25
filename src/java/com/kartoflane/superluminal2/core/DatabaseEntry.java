@@ -147,7 +147,8 @@ public class DatabaseEntry {
 
 		if (archive == null) {
 			if (innerPath.endsWith(".txt") || innerPath.endsWith(".xml") ||
-					innerPath.endsWith(".xml.append") || innerPath.endsWith(".append.xml"))
+					innerPath.endsWith(".xml.append") || innerPath.endsWith(".append.xml") ||
+					innerPath.endsWith(".xml.rawappend") || innerPath.endsWith(".rawappend.xml"))
 				return data.getInputStream(innerPath);
 			else
 				return resource.getInputStream(innerPath);
@@ -414,7 +415,7 @@ public class DatabaseEntry {
 		preloadAnims();
 		loadGlowSets();
 
-		String[] extensions = { ".xml", ".xml.append", ".append.xml" };
+		String[] extensions = { ".xml", ".xml.append", ".append.xml", ".xml.rawappend", ".rawappend.xml" };
 		InputStream is = null;
 
 		String[] blueprintFiles = { "data/blueprints", "data/autoBlueprints",
@@ -558,7 +559,7 @@ public class DatabaseEntry {
 	}
 
 	private void preloadAnims() {
-		String[] extensions = { ".xml", ".xml.append", ".append.xml" };
+		String[] extensions = { ".xml", ".xml.append", ".append.xml", ".xml.rawappend", ".rawappend.xml" };
 		String[] animPaths = new String[] { "data/animations", "data/dlcAnimations" };
 
 		for (String ext : extensions) {
