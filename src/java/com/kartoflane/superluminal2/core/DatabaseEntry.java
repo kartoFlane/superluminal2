@@ -421,8 +421,9 @@ public class DatabaseEntry {
 		String[] blueprintFiles = { "data/blueprints", "data/autoBlueprints",
 				"data/dlcBlueprints", "data/dlcBlueprintsOverwrite" };
 
-		for (String ext : extensions) {
-			for (String innerPath : blueprintFiles) {
+		for (String innerPath : blueprintFiles) {
+			boolean found = false;
+			for (String ext : extensions) {
 				try {
 					is = getInputStream(innerPath + ext);
 					DecodeResult dr = IOUtils.decodeText(is, null);
@@ -468,26 +469,33 @@ public class DatabaseEntry {
 							log.warn(getName() + ": could not load augment: " + ex.getMessage());
 						}
 					}
+					found = true;
 				} catch (FileNotFoundException e) {
 					// Spammy and not very useful.
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				} catch (IOException e) {
-					log.error(getName() + ": an error has occured while loading file '" + innerPath + "':", e);
+					log.error(String.format("%s: an error occured while loading file '%s': ", getName(), innerPath), e);
+					found = true;
 				} catch (JDOMParseException e) {
-					log.error(getName() + ": an error has occured while parsing file '" + innerPath + "':", e);
+					log.error(String.format("%s: an error occured while parsing file '%s': ", getName(), innerPath), e);
+					found = true;
 				} finally {
 					try {
 						if (is != null)
 							is.close();
 					} catch (IOException e) {
+						log.error(getName() + ": an error occured while closing stream", e);
 					}
 				}
 			}
+
+			if (!found)
+				log.trace(String.format("%s did not contain file %s", getName(), innerPath));
 		}
 
-		for (String ext : extensions) {
-			// Lists reference their contents directly, so they have to be loaded in a separate loop
-			for (String innerPath : blueprintFiles) {
+		for (String innerPath : blueprintFiles) {
+			for (String ext : extensions) {
+				// Lists reference their contents directly, so they have to be loaded in a second pass
 				try {
 					is = getInputStream(innerPath + ext);
 					DecodeResult dr = IOUtils.decodeText(is, null);
@@ -507,14 +515,15 @@ public class DatabaseEntry {
 					// Spammy and not very useful.
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				} catch (IOException e) {
-					log.error(getName() + ": an error has occured while loading file '" + innerPath + "':", e);
+					log.error(String.format("%s: an error occured while loading file '%s': ", getName(), innerPath), e);
 				} catch (JDOMParseException e) {
-					log.error(getName() + ": an error has occured while parsing file '" + innerPath + "':", e);
+					log.error(String.format("%s: an error occured while parsing file '%s': ", getName(), innerPath), e);
 				} finally {
 					try {
 						if (is != null)
 							is.close();
 					} catch (IOException e) {
+						log.error(getName() + ": an error occured while closing stream", e);
 					}
 				}
 			}
@@ -540,14 +549,15 @@ public class DatabaseEntry {
 			} catch (FileNotFoundException e) {
 				// log.trace(String.format("Inner path '%s' could not be found.", "data/rooms" + ext));
 			} catch (IOException e) {
-				log.error(getName() + ": an error has occured while loading file 'data/rooms.xml':", e);
+				log.error(String.format("%s: an error occured while loading file '%s': ", getName(), "data/rooms"), e);
 			} catch (JDOMParseException e) {
-				log.error(getName() + ": an error has occured while parsing file 'data/rooms.xml':", e);
+				log.error(String.format("%s: an error occured while parsing file '%s': ", getName(), "data/rooms"), e);
 			} finally {
 				try {
 					if (is != null)
 						is.close();
 				} catch (IOException e) {
+					log.error(getName() + ": an error occured while closing stream", e);
 				}
 			}
 		}
@@ -562,8 +572,9 @@ public class DatabaseEntry {
 		String[] extensions = { ".xml", ".xml.append", ".append.xml", ".xml.rawappend", ".rawappend.xml" };
 		String[] animPaths = new String[] { "data/animations", "data/dlcAnimations" };
 
-		for (String ext : extensions) {
-			for (String innerPath : animPaths) {
+		for (String innerPath : animPaths) {
+			boolean found = false;
+			for (String ext : extensions) {
 				InputStream is = null;
 				try {
 					is = getInputStream(innerPath + ext);
@@ -591,20 +602,28 @@ public class DatabaseEntry {
 							log.warn(getName() + ": could not load animation: " + ex.getMessage());
 						}
 					}
+
+					found = true;
 				} catch (FileNotFoundException e) {
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				} catch (IOException e) {
-					log.error(getName() + ": an error has occured while loading file " + innerPath + ":", e);
+					log.error(String.format("%s: an error occured while loading file '%s': ", getName(), innerPath), e);
+					found = true;
 				} catch (JDOMParseException e) {
-					log.error(getName() + ": an error has occured while parsing file " + innerPath + ":", e);
+					log.error(String.format("%s: an error occured while parsing file '%s': ", getName(), innerPath), e);
+					found = true;
 				} finally {
 					try {
 						if (is != null)
 							is.close();
 					} catch (IOException e) {
+						log.error(getName() + ": an error occured while closing stream", e);
 					}
 				}
 			}
+
+			if (!found)
+				log.trace(String.format("%s did not contain file %s", getName(), innerPath));
 		}
 	}
 
