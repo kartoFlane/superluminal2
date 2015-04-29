@@ -1225,8 +1225,18 @@ public class ShipContainer implements Disposable, SLListener {
 
 		// Floor's offset is relative to hull's top-left corner
 		offset = ship.getFloorOffset();
-		center.x = (int) Math.round((floor.getW() - hull.getW()) / 2.0) + offset.x;
-		center.y = (int) Math.round((floor.getH() - hull.getH()) / 2.0) + offset.y;
+
+		// ==================
+		int wCorrection = 0;
+		int hCorrection = 0;
+		if ((floor.getW() - hull.getW()) % 2 != 0)
+			wCorrection = 1;
+		if ((floor.getH() - hull.getH()) % 2 != 0)
+			hCorrection = 1;
+		// ==================
+
+		center.x = (int) Math.round((floor.getW() - hull.getW() + wCorrection) / 2.0) + offset.x;
+		center.y = (int) Math.round((floor.getH() - hull.getH() + hCorrection) / 2.0) + offset.y;
 		floor.setFollowOffset(center.x, center.y);
 		floor.updateView();
 
