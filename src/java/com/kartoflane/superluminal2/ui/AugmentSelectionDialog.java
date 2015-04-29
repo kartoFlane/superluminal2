@@ -37,6 +37,7 @@ import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class AugmentSelectionDialog {
 
@@ -297,7 +298,7 @@ public class AugmentSelectionDialog {
 
 		updateData();
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();

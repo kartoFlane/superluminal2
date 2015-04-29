@@ -62,7 +62,7 @@ public class SettingsDialog {
 		if (instance != null)
 			throw new IllegalStateException("Previous instance has not been disposed!");
 		instance = this;
-		display = Display.getCurrent();
+		display = UIUtils.getDisplay();
 
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
 		shell.setText(Superluminal.APP_NAME + " - Settings");

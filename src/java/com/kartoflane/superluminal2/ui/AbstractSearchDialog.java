@@ -4,6 +4,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 /**
  * A general search dialog framework. Allows to construct a filter for the specified type.<br>
@@ -119,7 +120,7 @@ public abstract class AbstractSearchDialog<T> {
 	public Predicate<T> open() {
 		shell.open();
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();

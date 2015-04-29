@@ -61,7 +61,7 @@ public class UIUtils {
 			throw new IllegalArgumentException("Message must not be null.");
 
 		if (parentShell == null) {
-			parentShell = new Shell(Display.getCurrent());
+			parentShell = new Shell(UIUtils.getDisplay());
 			dispose = true;
 		}
 
@@ -97,7 +97,7 @@ public class UIUtils {
 			throw new IllegalArgumentException("Message must not be null.");
 
 		if (parentShell == null) {
-			parentShell = new Shell(Display.getCurrent());
+			parentShell = new Shell(UIUtils.getDisplay());
 			dispose = true;
 		}
 
@@ -133,7 +133,7 @@ public class UIUtils {
 			throw new IllegalArgumentException("Message must not be null.");
 
 		if (parentShell == null) {
-			parentShell = new Shell(Display.getCurrent());
+			parentShell = new Shell(UIUtils.getDisplay());
 			dispose = true;
 		}
 
@@ -169,7 +169,7 @@ public class UIUtils {
 			throw new IllegalArgumentException("Message must not be null.");
 
 		if (parentShell == null) {
-			parentShell = new Shell(Display.getCurrent());
+			parentShell = new Shell(UIUtils.getDisplay());
 			dispose = true;
 		}
 
@@ -208,7 +208,7 @@ public class UIUtils {
 			throw new IllegalArgumentException("Message must not be null.");
 
 		if (parentShell == null) {
-			parentShell = new Shell(Display.getCurrent());
+			parentShell = new Shell(UIUtils.getDisplay());
 			dispose = true;
 		}
 

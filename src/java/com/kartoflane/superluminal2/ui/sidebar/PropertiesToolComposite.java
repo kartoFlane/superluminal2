@@ -1089,7 +1089,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite 
 
 	@Override
 	public boolean isFocusControl() {
-		Control c = Display.getCurrent().getFocusControl();
+		Control c = UIUtils.getDisplay().getFocusControl();
 		boolean result = c == txtClass || c == spHealth || c == spPower || c == spMissiles || c == spWeaponSlots ||
 				c == spDrones || c == spDroneSlots || c == txtLayout || c == txtImage;
 		if (container.getShipController().isPlayerShip()) {

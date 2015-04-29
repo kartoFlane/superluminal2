@@ -46,6 +46,7 @@ import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class WeaponSelectionDialog {
 
@@ -352,7 +353,7 @@ public class WeaponSelectionDialog {
 
 		updateData();
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();

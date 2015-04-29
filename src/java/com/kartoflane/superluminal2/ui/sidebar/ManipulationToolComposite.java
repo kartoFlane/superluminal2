@@ -341,7 +341,7 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 
 	@Override
 	public boolean isFocusControl() {
-		Control c = Display.getCurrent().getFocusControl();
+		Control c = UIUtils.getDisplay().getFocusControl();
 		return c == btnPinned || c == spNudge || c == spX || c == spY;
 	}
 

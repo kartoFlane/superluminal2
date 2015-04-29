@@ -31,6 +31,7 @@ import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
+import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils.AlphanumComparator;
 
 public class GlowSelectionDialog {
@@ -204,7 +205,7 @@ public class GlowSelectionDialog {
 		if (currentItem != null)
 			tree.setSelection(currentItem);
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();

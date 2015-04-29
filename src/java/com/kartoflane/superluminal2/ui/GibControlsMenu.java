@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class GibControlsMenu {
 
@@ -51,7 +52,7 @@ public class GibControlsMenu {
 	public PropControls open() {
 		controlsMenu.setVisible(true);
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (controlsMenu.isVisible()) {
 			if (!display.readAndDispatch())
 				display.sleep();

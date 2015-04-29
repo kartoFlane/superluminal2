@@ -398,7 +398,7 @@ public class GlowSetDialog {
 
 		shell.open();
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();

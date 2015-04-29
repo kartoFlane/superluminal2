@@ -41,6 +41,7 @@ import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class DroneSelectionDialog {
 
@@ -321,7 +322,7 @@ public class DroneSelectionDialog {
 
 		updateData();
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();

@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 
 import com.kartoflane.superluminal2.Superluminal;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class LoadingDialog {
 
@@ -25,7 +26,7 @@ public class LoadingDialog {
 	public LoadingDialog(Shell parentShell, String title, String message) {
 		instances++;
 
-		display = Display.getCurrent();
+		display = UIUtils.getDisplay();
 
 		if (title == null)
 			title = Superluminal.APP_NAME + " - Loading...";

@@ -771,7 +771,7 @@ public class ShipSaveUtils {
 	private static boolean isImageCorrupt(String path) {
 		Image image = null;
 		try {
-			image = new Image(Display.getCurrent(), path);
+			image = new Image(UIUtils.getDisplay(), path);
 		} catch (SWTException e) {
 			if (e.getCause() instanceof FileNotFoundException == false) {
 				log.warn(String.format("Image '%s' is corrupt and will not be exported.", path));

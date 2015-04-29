@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Widget;
 
 import com.kartoflane.superluminal2.components.enums.Races;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class CrewMenu {
 
@@ -56,7 +57,7 @@ public class CrewMenu {
 	public Races open() {
 		crewMenu.setVisible(true);
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (crewMenu.isVisible()) {
 			if (!display.readAndDispatch())
 				display.sleep();

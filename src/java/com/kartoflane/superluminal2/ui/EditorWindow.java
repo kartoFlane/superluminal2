@@ -483,7 +483,7 @@ public class EditorWindow {
 
 		display.addFilter(SWT.FocusIn, new Listener() {
 			public void handleEvent(Event e) {
-				Control focus = Display.getCurrent().getFocusControl();
+				Control focus = UIUtils.getDisplay().getFocusControl();
 				if (focus == shell || focus == canvas || focus == sideContainer) {
 					Database db = Database.getInstance();
 					if (db != null && db.getCore() != null && !db.verify()) {

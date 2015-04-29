@@ -12,7 +12,6 @@ import net.vhati.ftldat.FTLDat.FTLPack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
@@ -29,6 +28,7 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 public class Database {
 	private static final Logger log = LogManager.getLogger(Database.class);
@@ -195,7 +195,7 @@ public class Database {
 		Image img = null;
 		try {
 			InputStream is = core.getInputStream("img/nullResource.png");
-			img = new Image(Display.getCurrent(), is);
+			img = new Image(UIUtils.getDisplay(), is);
 			return true;
 		} catch (Exception e) {
 			return false;

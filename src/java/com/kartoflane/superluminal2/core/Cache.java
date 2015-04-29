@@ -13,7 +13,8 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
+
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 /**
  * A Cache class that only creates a requested object once, and then
@@ -86,7 +87,7 @@ public class Cache {
 			try {
 				if (image == null) {
 					InputStream is = Manager.getInputStream(path);
-					image = new Image(Display.getCurrent(), is);
+					image = new Image(UIUtils.getDisplay(), is);
 					cachedImageMap.put(path, image);
 				}
 
@@ -156,7 +157,7 @@ public class Cache {
 			throw new IllegalArgumentException("RGB is null.");
 		} else {
 			if (color == null) {
-				color = new Color(Display.getCurrent(), rgb);
+				color = new Color(UIUtils.getDisplay(), rgb);
 				cachedColorMap.put(rgb, color);
 			}
 

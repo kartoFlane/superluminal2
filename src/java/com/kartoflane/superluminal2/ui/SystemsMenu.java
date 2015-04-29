@@ -25,6 +25,7 @@ import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.undo.UndoableSystemAssignmentEdit;
 import com.kartoflane.superluminal2.undo.UndoableSystemEmptyEdit;
 import com.kartoflane.superluminal2.undo.UndoableSystemEmptyEdit.NoSystemsException;
+import com.kartoflane.superluminal2.utils.UIUtils;
 
 @SuppressWarnings("serial")
 public class SystemsMenu {
@@ -88,7 +89,7 @@ public class SystemsMenu {
 
 		systemMenu.setVisible(true);
 
-		Display display = Display.getCurrent();
+		Display display = UIUtils.getDisplay();
 		while (systemMenu.isVisible()) {
 			if (!display.readAndDispatch())
 				display.sleep();

@@ -36,7 +36,7 @@ public class SWTFontUtils {
 	public static Font getMonospacedFont() {
 		synchronized (MONOSPACED_FONTS) {
 			// Get current display.
-			Display display = Display.getCurrent();
+			Display display = UIUtils.getDisplay();
 			if (display == null) {
 				String msg = "Must be invoked for a SWT UI thread.";
 				throw new IllegalStateException(msg);
