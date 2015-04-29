@@ -3,23 +3,19 @@ Changelog
 2.1.1:
 - Editor now recognizes .rawappend files when loading mods via Mod Management
 - Added an option to enemy ships to select weapon/drone loadout like in player ships
-- When loading a ship that is missing a glow in rooms.xml, the editor now uses
-  the default glow for that system instead of failing to load the ship
+- When loading a ship that is missing a glow in rooms.xml, the editor now uses the default glow for that system instead of failing to load the ship
 
 2.1.0d:
 - Fixed glow images being saved with incorrect name in rooms.xml
 
 2.1.0c:
-- Fixed a crash caused by systems whose image had no corresponding entry in rooms.xml
-  (ships exhibiting this problem will fail to load)
+- Fixed a crash caused by systems whose image had no corresponding entry in rooms.xml (ships exhibiting this problem will fail to load)
 - ShipLoader dialog now provides an explanation why a ship could not be loaded.
 
 2.1.0b:
 - Fixed a crash caused by the editor sometimes attempting to access already deleted elements
-- Door orientation toggle button ("Horizontal") now is disabled when changing the door's
-  orientation would cause it to collide with another door.
-- Fixed the editor failing to load ships with custom interior image for the cloaking system,
-  that had no matching glow image
+- Door orientation toggle button ("Horizontal") now is disabled when changing the door's orientation would cause it to collide with another door.
+- Fixed the editor failing to load ships with custom interior image for the cloaking system, that had no matching glow image
 - Fixed glow selection dialog sometimes listing repeated entries
 - Glow selection dialog now lists its entries in alphanumerical order
 - Fixed glows being deletable
@@ -27,23 +23,18 @@ Changelog
 - Fixed glows sometimes not being properly disposed when closing / loading another ship
 
 2.1.0a:
-- Fixed a bug that would prevent the editor from loading some of the default settings when
-  the program was started for the first time.
+- Fixed a bug that would prevent the editor from loading some of the default settings when the program was started for the first time.
 - Fixed a crash when assigning activation glow image to cloaking system
 - Fixed several bugs related to system/glow assignment
 - Improved database browse search -- search terms can now be partial
-- Added crash-save feature -- should the editor crash, your ship will be saved as an .ftl file
-  in the editor's directory.
+- Added crash-save feature -- should the editor crash, your ship will be saved as an .ftl file in the editor's directory.
 
 2.1.0:
 - Added zoom feature (in the form of a separate window, found under View > Open Zoom Window)
-- Added cursor position tracker at the top-right of the main window + config setting to show
-  the pointer location relative to the ship's origin
+- Added cursor position tracker at the top-right of the main window + config setting to show the pointer location relative to the ship's origin
 - Added automated floor image generation (Edit > Generate Floor Image...)
 - Added ability to change the name that interior images get exported as (important for glows)
-- Added ability to select images directly from FTL's archives -- all 'Browse' buttons now open
-  a dropdown menu instead, allowing you to choose what you want to browse ('System' is default
-  file selection, 'Database' is the FTL archives)
+- Added ability to select images directly from FTL's archives -- all 'Browse' buttons now open a dropdown menu instead, allowing you to choose what you want to browse ('System' is default file selection, 'Database' is the FTL archives)
 - Added a bunch of undoable operations:
   * image undo (can undo hull/floor/cloak/shield/thumbnail modification)
   * interior image modification
@@ -52,15 +43,13 @@ Changelog
   * active system selection undo
   * mount rotation/mirror/direction modification
 - Changed station images to rectangles taking half of a grid cell, made them fainter
-- Added manning glows' placement modification (blue station appearing where the old purple ones
-  used to be, can be clicked and moved around to adjust the glow images' locations)
+- Added manning glows' placement modification (blue station appearing where the old purple ones used to be, can be clicked and moved around to adjust the glow images' locations)
 - Added a modifiable hotkey setting that is shared for all search dialogs
 - Weapon mounts now display artillery image only when the artillery systems is assigned
 - Gib animation now won't start if the ship has no gibs
 - Fixed some cursor visibility issues with Room Tool
 - Fixed some systems for player ships allowing to set their level to 9 or 10.
-- Fixed a bug with hotkeys, which caused hotkeys that used the Ctrl modifier to also require
-  Alt modifier to be triggered.
+- Fixed a bug with hotkeys, which caused hotkeys that used the Ctrl modifier to also require Alt modifier to be triggered.
 
 2.0.6b beta:
 - Fixed a crash related to the Overview Window & gib animation
@@ -73,15 +62,13 @@ Changelog
 
 2.0.6 beta:
 - Improved stats display in weapon & drone selection dialogs
-- Added 'Follow Hull' button to Mount Tool -- when checked, newly created weapon mounts
-  will follow hull
+- Added 'Follow Hull' button to Mount Tool -- when checked, newly created weapon mounts will follow hull
 - Added 'Follow Hull' button to gibs
 - Newly created gibs now correctly follow hull by default
 - Several minor UI tweaks
 - Mac Command key support should now work correctly (tested)
 - .ftl files can now be dropped onto the main editor frame to load them
-- The editor can now open .ftl and .zip files by dragging them onto the .exe, or by using
-  the "Open With..." option in the mod files' context menu
+- The editor can now open .ftl and .zip files by dragging them onto the .exe, or by using the "Open With..." option in the mod files' context menu
 - Added "Unsaved Changes" warning when closing the application
 - Added artillery modification & display (moved to Armaments tab)
 - Fixed undo of offset that was modified by shift-dragging
@@ -92,28 +79,23 @@ Changelog
 
 2.0.5 beta (which was actually 2.0.4...):
 - Fixed shift-dragging the ship origin to set the offset
-- Fixed a bug with messed up numbering when reordering game objects via ShipOverview, and then
-  adding new objects of the same type
+- Fixed a bug with messed up numbering when reordering game objects via ShipOverview, and then adding new objects of the same type
 - Added support for Mac's Command key in hotkeys (untested)
 - Fixed application name on Mac (now reads 'Superluminal' instead of 'SWT')
 - Fixed a bug that would cause the editor to crash during mount-gib or door linking
-- Fixed value of angular velocity constant in the editor's database (was 10 times too big), which
-  was causing gibs to spin wildly
+- Fixed value of angular velocity constant in the editor's database (was 10 times too big), which was causing gibs to spin wildly
 - Added ship death animation simulation -- animates both gibs and weapon mounts attached to them
 - Save command now always saves the ship, without checking whether or not it's been modified
 - Made 3 more actions hotkeyable: Save Ship As, Open .shp, Animate Gibs
 - Made some minor improvements to the Settings window
 - Added 'allowDoorOverlap' settings option
 - Added option to make weapon mounts and images follow hull (select object > check "Follow Hull")
-- Added mono-directional dragging -- hold down Shift while dragging an object to have it move in
-  only one direction (horizontal or vertical)
+- Added mono-directional dragging -- hold down Shift while dragging an object to have it move in only one direction (horizontal or vertical)
 
 2.0.3a beta:
-- Fixed a bug that would cause the editor to crash when you tried to open the editor without
-  pointing it to the game's archives
+- Fixed a bug that would cause the editor to crash when you tried to open the editor without pointing it to the game's archives
 - Fixed "Save As" thinking it was "Save"
-- Fixed Mac distribution of the editor not having proper permissions set -- you should now be
-  able to launch the editor without having to go through the chmod command
+- Fixed Mac distribution of the editor not having proper permissions set -- you should now be able to launch the editor without having to go through the chmod command
 
 2.0.3 beta:
 - Menu buttons' hotkey text is now updated when you modify hotkeys
@@ -122,10 +104,8 @@ Changelog
 - Added gibs' angular velocity modification
 - Added raw value modification to gibs
 - Fixed a somewhat rare bug with system visibility
-- Fixed a bug with station visibility that would cause the station to not be hidden when its
-  system was assigned to a room that cannot contain it
-- Fixed a bug with automated door linking persisting after saving was completed, which could
-  cause bugged links when the user moved the doors/rooms around and then saved again
+- Fixed a bug with station visibility that would cause the station to not be hidden when its system was assigned to a room that cannot contain it
+- Fixed a bug with automated door linking persisting after saving was completed, which could cause bugged links when the user moved the doors/rooms around and then saved again
 - Fixed a bug with Mod Management that would allow the same mod to be loaded multiple times
 - Added mount-gib linking
 - Reworked hotkey system
@@ -138,14 +118,12 @@ Changelog
   * Room resize
   * System (un)assignment
   * Door linking
-- Added "Unsaved Changes" warnings/prompts -- however, this is tied to the undo/redo system,
-  so only making undoable changes will cause the warnings to pop up
+- Added "Unsaved Changes" warnings/prompts -- however, this is tied to the undo/redo system, so only making undoable changes will cause the warnings to pop up
 
 2.0.1 beta:
 - Fixed a minor code screw-up that prevented shield, floor and thumbnail images from being saved.
 - Fixed some stations being visible when they should not be
-- Fixed the corrupt image "bug" -- the editor now detects when you've installed mods with SMM
-  while the editor was running, and now automatically reloads the database
+- Fixed the corrupt image "bug" -- the editor now detects when you've installed mods with SMM while the editor was running, and now automatically reloads the database
 - Added keybind modification to the Settings dialog
 - Rooms, weapon mounts and gibs can now be reordered via the Ship Overview window -- simply drag them.
 
@@ -158,8 +136,7 @@ Changelog
 - Disabled the horizontal offset slider for enemy ships, since it doesn't affect them
 - Fixed enemy offset loading & improved enemy optimal offset calculation
 - Ship Loader now also remembers previous selection
-- Enemy ship images now get saved to 'ships_glow' instead of 'ships_noglow' -- still not sure
-  if only one is enough for enemy ship hulls to show up correctly
+- Enemy ship images now get saved to 'ships_glow' instead of 'ships_noglow' -- still not sure if only one is enough for enemy ship hulls to show up correctly
 - Removed unnecessary method calls, reducing ManipulationTool dragging lag by around 33%
 - Fixed a bug with database reloading that would crash the editor in any mods were loaded
 - Corrected ship saving to only export interior and glow images when the system using them
@@ -180,16 +157,13 @@ Changelog
 - Slightly reworked & improved the Overview Window, added gibs, and a visibility toggle button
 
 2.0.0 beta8:
-- The update dialog now displays a brief list of changes that have been made since the version
-  you're using
-- Fixed a bug with ship loading that would not link mounts to gibs correctly, causing problems
-  when you tried to save the ship
+- The update dialog now displays a brief list of changes that have been made since the version you're using
+- Fixed a bug with ship loading that would not link mounts to gibs correctly, causing problems when you tried to save the ship
 - Weapon/drone/augment selection dialogs now will also scroll to show the last selected item
 - Added the ability to change enemy ships' boarding AI, now only gets exported for enemy ships
 - Fixed a bug that would not allow to confirm "No Drone List" in drone selection dialog
 - Fixed systems not disappearing when hiding rooms
-- Done some preliminary work on gibs - can be viewed and moved around with Gib Tool (you have to hide
-  all the other elements first - keys 1 through 8 by default). Gibs are not exported yet.
+- Done some preliminary work on gibs - can be viewed and moved around with Gib Tool (you have to hide all the other elements first - keys 1 through 8 by default). Gibs are not exported yet.
 
 2.0.0 beta7:
 - Some of the previously unloadable ships can now be loaded (missing 'max' attribute on
@@ -226,8 +200,7 @@ Changelog
 2.0.0 beta4:
 - Added Calculate Optimal Offset option - calculates both thick and fine offsets
 - Added fine offset modification (HORIZONTAL and VERTICAL properties)
-- Added ability to show the hangar image as background, which accurately shows where
-  the ship will be positioned in-game.
+- Added ability to show the hangar image as background, which accurately shows where the ship will be positioned in-game.
 - Added more tooltips
 - Added mouse shortcuts to Weapon Mounting Tool
 - Added enemy shield resizing
@@ -238,20 +211,15 @@ Changelog
 - Fixed a minor screw-up that caused the additional weapon/drone slots to be unusable
 - Fixed Images Tool's hotkey not working
 - Added a crappy image for Images Tool
-- Some spinners (ie. numerical fields with up/down arrows) were showing up incorrectly on
-  Linux, attempted to fix that by giving them a fixed width
-- Added "Show File" button to Image Viewer, which will show the file in the OS' filesystem,
-  disabled if it's not applicable for the currently viewed image.
-- Wired min and max sector spinners to update the ship's min/max sector values (they were
-  having no effect previously)
+- Some spinners (ie. numerical fields with up/down arrows) were showing up incorrectly on Linux, attempted to fix that by giving them a fixed width
+- Added "Show File" button to Image Viewer, which will show the file in the OS' filesystem, disabled if it's not applicable for the currently viewed image.
+- Wired min and max sector spinners to update the ship's min/max sector values (they were having no effect previously)
 - Min/max sector tags now get saved before the <systemList> tag
 - Editor now also saves the <boardingAI>sabotage</boardingAI> tag
 - Fixed DatabaseCore in Mod Management being draggable and thus removeable on some platforms
 - Added the option to reload the entire database
-- Weapon mounts can now display any weapon as if it were equipped at the mount, without
-  actually changing the loadout
-- Added info icons to several elements of the UI, that display a short tip when hovered over,
-  which describes the setting
+- Weapon mounts can now display any weapon as if it were equipped at the mount, without actually changing the loadout
+- Added info icons to several elements of the UI, that display a short tip when hovered over, which describes the setting
 - Added ship offset modification
 
 2.0.0 beta2:
@@ -263,8 +231,7 @@ Changelog
 - Default images are now loaded when a system is assigned for the first time
 - Also removed ability to assign interior images to systems in enemy ships
 - Images tab moved from Properties to its own separate "tool"
-- Weapon/drone slots now allow up to 8 slots, but show a warning the first time the
-  user assigns more than 4 slots
+- Weapon/drone slots now allow up to 8 slots, but show a warning the first time the user assigns more than 4 slots
 
 2.0.0 beta1:
 - Test release
