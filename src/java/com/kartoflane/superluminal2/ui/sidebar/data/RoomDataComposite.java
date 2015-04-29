@@ -359,13 +359,17 @@ public class RoomDataComposite extends Composite implements DataComposite {
 			});
 
 			txtName.addFocusListener(new FocusListener() {
+				private String prevValue = "";
+				
 				public void focusGained(FocusEvent e) {
 				}
 
 				public void focusLost(FocusEvent e) {
-					if (!txtName.getText().equals("")) {
+					String newValue = txtName.getText();
+					if (!newValue.trim().equals("") && !prevValue.equals(newValue)) {
+						prevValue = newValue;
 						SystemObject sys = container.getActiveSystem(roomC.getGameObject());
-						sys.setInteriorNamespace(txtName.getText());
+						sys.setInteriorNamespace(newValue);
 					}
 				}
 			});
