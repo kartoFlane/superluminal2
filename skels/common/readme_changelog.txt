@@ -1,5 +1,9 @@
 Changelog
 
+2.1.1a:
+- Fixed a typo in the error message displayed when trying to animate gibs when the ship has none (animte -> animate)
+- Fixed a bug with systems sharing interior images.
+
 2.1.1:
 - Editor now recognizes .rawappend files when loading mods via Mod Management
 - Added an option to enemy ships to select weapon/drone loadout like in player ships

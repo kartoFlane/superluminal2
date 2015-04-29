@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.1.1" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.1.1a" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
 	<changelog>
+        <version id="2.1.1a">
+            <change>Fixed a typo</change>
+            <change>Fixed a bug with systems sharing interior images</change>
+        </version>
 		<version id="2.1.1">
 			<change>Editor now recognizes .rawappend files</change>
 			<change>Enemy ships can now have weapon/drone loadout defined like player ships do</change>
