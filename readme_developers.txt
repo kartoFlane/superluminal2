@@ -87,6 +87,9 @@ Explanation of the repository's directory structure:
 ===============================================================
 General explanation of source code packages and their contents:
 
+  "com.kartoflane.ftl.floorgen"
+    A self-contained pseudo-library that generates accurate floor images from ship layout data.
+
   "com.kartoflane.superluminal2"
     Contains the main class.
     
