@@ -3,7 +3,13 @@ package com.kartoflane.ftl.floorgen;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.kartoflane.ftl.layout.DoorLayoutObject;
+import com.kartoflane.ftl.layout.RoomLayoutObject;
+import com.kartoflane.ftl.layout.ShipLayout;
+
 
 class Layout {
 	private final Graph tileGraph;
@@ -33,8 +39,58 @@ class Layout {
 
 			// Add the tiles constituting the room to the graph
 			for (int x = r.x; x < r.x + r.width; x++) {
-				for (int y = r.y; y < r.y + r.height; y++)
+				for (int y = r.y; y < r.y + r.height; y++) {
 					addTile(x, y);
+				}
+			}
+		}
+
+		// Remove airlocks that somehow are located between/inside rooms
+		Door[] doors = airlocks.toArray(new Door[0]);
+		for (Door d : doors) {
+			int x = d.getX(), y = d.getY();
+
+			// If the airlock is located on an edge that connects with
+			// a node with 8 connections, then it is between/inside a room
+			if (isInner(x, y) || (d.isHorizontal() && isInner(x + 1, y)) ||
+					(!d.isHorizontal() && isInner(x, y + 1))) {
+				airlocks.remove(d);
+			}
+		}
+
+		width = maxX - minX;
+		height = maxY - minY;
+
+		if (width < 0 || height < 0)
+			throw new IllegalArgumentException("Error -- ship dimensions are negative");
+	}
+
+	Layout(ShipLayout layout) {
+		airlocks = new ArrayList<Door>();
+		for (DoorLayoutObject door : layout.listDoors()) {
+			if (door.getLeftIndex() == -1 || door.getRightIndex() == -1) {
+				airlocks.add(new Door(door.getX(), door.getY(), door.getHorizontal() == 0));
+			}
+		}
+
+		tileGraph = new Graph();
+		int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0, maxY = 0;
+		for (RoomLayoutObject room : layout.listRooms()) {
+			// Find the min and max points of the layout to determine its size
+			if (room.getX() < minX)
+				minX = room.getX();
+			if (room.getY() < minY)
+				minY = room.getY();
+			if (room.getX() + room.getW() > maxX)
+				maxX = room.getX() + room.getW();
+			if (room.getY() + room.getH() > maxY)
+				maxY = room.getY() + room.getH();
+
+			// Add the tiles constituting the room to the graph
+			for (int x = room.getX(); x < room.getX() + room.getW(); x++) {
+				for (int y = room.getY(); y < room.getY() + room.getH(); y++) {
+					addTile(x, y);
+				}
 			}
 		}
 

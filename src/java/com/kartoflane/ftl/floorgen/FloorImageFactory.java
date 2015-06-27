@@ -16,6 +16,9 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
+import com.kartoflane.ftl.layout.ShipLayout;
+
+
 /**
  * A "factory" of floor images for ships' layouts.<br>
  * <br>
@@ -40,8 +43,8 @@ import javax.imageio.ImageIO;
 public class FloorImageFactory {
 
 	// @formatter:off
-	private static final int cellSize =				35;
-	private static final Color transparentColor = 	new Color(0, 0, 0, 0);
+	private static final int cellSize =           35;
+	private static final Color transparentColor = new Color(0, 0, 0, 0);
 	// @formatter:on
 
 	private int floorMargin;
@@ -56,7 +59,7 @@ public class FloorImageFactory {
 	public FloorImageFactory() {
 		floorMargin = 4;
 		borderWidth = 2;
-		floorColor = Color.GRAY;
+		floorColor = new Color(0x64696F);
 		borderColor = Color.BLACK;
 	}
 
@@ -127,7 +130,10 @@ public class FloorImageFactory {
 	 */
 
 	/**
-	 * {@link #generateFloorImage(InputStream)}
+	 * Attempts to generate a matching floor image for the specified layout.<br>
+	 * <br>
+	 * The returned image can be later saved using<br>
+	 * {@link ImageIO ImageIO.write(image, "PNG", new File("C:/yourImageName.PNG"));}
 	 * 
 	 * @param layoutFile
 	 *            the .txt room layout file
@@ -137,12 +143,13 @@ public class FloorImageFactory {
 	 * @throws IOException
 	 *             when an IOException occurs
 	 * @throws IllegalArgumentException
-	 *             when the file contains syntax errors
+	 *             when the file contains syntax errors, or the argument is null
 	 */
 	public BufferedImage generateFloorImage(File layoutFile) throws
 			FileNotFoundException, IllegalArgumentException, IOException {
-		if (layoutFile == null)
+		if (layoutFile == null) {
 			throw new IllegalArgumentException("Argument must not be null!");
+		}
 
 		InputStream is = null;
 		BufferedImage result = null;
@@ -150,7 +157,8 @@ public class FloorImageFactory {
 		try {
 			is = new FileInputStream(layoutFile);
 			result = generateFloorImage(is);
-		} finally {
+		}
+		finally {
 			if (is != null)
 				is.close();
 		}
@@ -170,33 +178,68 @@ public class FloorImageFactory {
 	 *            input stream for the file containing the ship's room layout
 	 * @return the floor image
 	 * 
-	 * @throws IOException
-	 *             when an IOException occurs
 	 * @throws IllegalArgumentException
-	 *             when the file contains syntax errors
+	 *             when the file contains syntax errors, or argument is null
 	 */
 	public BufferedImage generateFloorImage(InputStream is) throws
-			IOException, IllegalArgumentException {
-		if (is == null)
+			IllegalArgumentException {
+		if (is == null) {
 			throw new IllegalArgumentException("Argument must not be null!");
+		}
 
-		Layout layout = loadLayout(is);
+		return generateFloorImage(loadLayout(is));
+	}
+
+	/**
+	 * Attempts to generate a matching floor image for the specified layout.<br>
+	 * <br>
+	 * The returned image can be later saved using<br>
+	 * {@link ImageIO ImageIO.write(image, "PNG", new File("C:/yourImageName.PNG"));}
+	 * 
+	 * @param layout
+	 *            <tt>ShipLayout</tt> object representing the ship's layout
+	 * @return the floor image
+	 * @throws IllegalArgumentException
+	 * 
+	 */
+	public BufferedImage generateFloorImage(ShipLayout layout) {
+		if (layout == null) {
+			throw new IllegalArgumentException("Argument must not be null!");
+		}
+
+		return generateFloorImage(new Layout(layout));
+	}
+
+	/**
+	 * Attempts to generate a matching floor image for the specified layout.<br>
+	 * <br>
+	 * The returned image can be later saved using<br>
+	 * {@link ImageIO ImageIO.write(image, "PNG", new File("C:/yourImageName.PNG"));}
+	 * 
+	 * @param layout
+	 *            <tt>Layout</tt> object representing the ship's .txt layout
+	 * @return the floor image
+	 */
+	private BufferedImage generateFloorImage(Layout layout) {
+		if (layout == null) {
+			throw new IllegalArgumentException("Argument must not be null!");
+		}
 
 		final int offset = floorMargin + borderWidth;
 
 		// TYPE_INT_ARGB specifies the image format: 8-bit RGBA packed into integer pixels
-		BufferedImage result = new BufferedImage(layout.getWidth() * cellSize + 2 * offset,
+		final BufferedImage result = new BufferedImage(layout.getWidth() * cellSize + 2 * offset,
 				layout.getHeight() * cellSize + 2 * offset, BufferedImage.TYPE_INT_ARGB);
 
-		Graphics2D gc = result.createGraphics();
+		final Graphics2D gc = result.createGraphics();
 
 		// Ensure that the background is transparent
 		gc.setBackground(transparentColor);
 		gc.clearRect(0, 0, result.getWidth(), result.getHeight());
 
 		// Create rectangles representing each individual tile and store them in a matrix for ease of referencing
-		Graph graph = layout.getTileGraph();
-		Rectangle[][] tiles = new Rectangle[layout.getWidth()][layout.getHeight()];
+		final Graph graph = layout.getTileGraph();
+		final Rectangle[][] tiles = new Rectangle[layout.getWidth()][layout.getHeight()];
 		for (Point v : graph) {
 			if (graph.hasEdge(v, v.x + 1, v.y) && graph.hasEdge(v, v.x, v.y + 1) && graph.hasEdge(v, v.x + 1, v.y + 1))
 				tiles[v.x][v.y] = new Rectangle(offset + v.x * cellSize, offset + v.y * cellSize,
@@ -235,13 +278,15 @@ public class FloorImageFactory {
 							// Don't draw if there's a neighbouring airlock, unless on a double dent
 							if (layout.isDoubleDent(x + 1, y) || !layout.hasAirlockAt(x + 1, y, true))
 								drawTopLeftCorner(gc, cx, cy);
-						} else {
+						}
+						else {
 							gc.setColor(borderColor);
 							// Dents & double dents need to be drawn with slight offsets to prevent overlapping
 							if (layout.isDent(x, y) || layout.isDoubleDent(x, y)) {
 								gc.fillRect(tile.x + floorMargin, tile.y - floorMargin - borderWidth,
 										tile.width - floorMargin, floorMargin + borderWidth);
-							} else {
+							}
+							else {
 								gc.fillRect(tile.x, tile.y - floorMargin - borderWidth,
 										tile.width, floorMargin + borderWidth);
 							}
@@ -282,7 +327,8 @@ public class FloorImageFactory {
 							// Don't draw if there's a neighbouring airlock, unless on a double dent
 							if (layout.isDoubleDent(x, y + 1) || !layout.hasAirlockAt(x, y + 1, false))
 								drawTopLeftCorner(gc, cx, cy);
-						} else {
+						}
+						else {
 							boolean isDent = layout.isDent(x, y) || layout.isDoubleDent(x, y);
 							boolean isLowerDent = layout.isDent(x, y + 1) || layout.isDoubleDent(x, y + 1);
 
@@ -291,13 +337,16 @@ public class FloorImageFactory {
 							if (isDent && isLowerDent) {
 								gc.fillRect(tile.x - floorMargin - borderWidth, tile.y + floorMargin,
 										floorMargin + borderWidth, tile.height - floorMargin * 2);
-							} else if (isDent) {
+							}
+							else if (isDent) {
 								gc.fillRect(tile.x - floorMargin - borderWidth, tile.y + floorMargin,
 										floorMargin + borderWidth, tile.height - floorMargin);
-							} else if (isLowerDent) {
+							}
+							else if (isLowerDent) {
 								gc.fillRect(tile.x - floorMargin - borderWidth, tile.y,
 										floorMargin + borderWidth, tile.height - floorMargin);
-							} else {
+							}
+							else {
 								gc.fillRect(tile.x - floorMargin - borderWidth, tile.y,
 										floorMargin + borderWidth, tile.height);
 							}
@@ -327,13 +376,15 @@ public class FloorImageFactory {
 							if (layout.isDoubleDent(x + 1, y + 1) || !layout.hasAirlockAt(x + 1, y + 1, true))
 								drawBottomLeftCorner(gc, cx, cy);
 
-						} else {
+						}
+						else {
 							gc.setColor(borderColor);
 							// Dents & double dents need to be drawn with slight offsets to prevent overlapping
 							if (layout.isDent(x, y + 1) || layout.isDoubleDent(x, y + 1)) {
 								gc.fillRect(tile.x + floorMargin, tile.y + tile.height, tile.width - floorMargin,
 										floorMargin + borderWidth);
-							} else {
+							}
+							else {
 								gc.fillRect(tile.x, tile.y + tile.height, tile.width,
 										floorMargin + borderWidth);
 							}
@@ -374,7 +425,8 @@ public class FloorImageFactory {
 							// Don't draw if there's a neighbouring airlock, unless on a double dent
 							if (layout.isDoubleDent(x + 1, y + 1) || !layout.hasAirlockAt(x + 1, y + 1, false))
 								drawTopRightCorner(gc, cx, cy);
-						} else {
+						}
+						else {
 							gc.setColor(borderColor);
 							// Overlaps caused by dents & double dents drawn here are obscured by other tiles
 							gc.fillRect(tile.x + tile.width, tile.y,
@@ -437,7 +489,7 @@ public class FloorImageFactory {
 				new int[] { cy, cy + floorMargin - 1, cy }, 3);
 	}
 
-	private Layout loadLayout(InputStream is) throws FileNotFoundException, IllegalArgumentException {
+	private Layout loadLayout(InputStream is) throws IllegalArgumentException {
 		List<Rectangle> rooms = new ArrayList<Rectangle>();
 		List<Door> airlocks = new ArrayList<Door>();
 
@@ -452,13 +504,15 @@ public class FloorImageFactory {
 			LayoutObjects layoutObject = null;
 			try {
 				layoutObject = LayoutObjects.valueOf(line);
-			} catch (IllegalArgumentException e) {
+			}
+			catch (IllegalArgumentException e) {
 				try {
 					// Not a layout object -- has to be integer value
 					// Check if it is, in fact, a number to verify syntax
 					Integer.parseInt(line);
 					continue;
-				} catch (NumberFormatException ex) {
+				}
+				catch (NumberFormatException ex) {
 					// Not a layout object or integer value - syntax error
 					// Intercept the exception to throw a more meaningful one...
 					throw new IllegalArgumentException("TXT layout syntax error on line: \n" + line);

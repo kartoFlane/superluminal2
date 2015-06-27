@@ -14,10 +14,10 @@ import java.util.Map;
  * The graph is symmetric, irreflexive and not transitive.
  */
 class Graph implements Iterable<Point> {
-	private Map<Point, List<Point>> adj;
+	private Map<Point, List<Point>> adjMap;
 
 	public Graph() {
-		adj = new HashMap<Point, List<Point>>();
+		adjMap = new HashMap<Point, List<Point>>();
 	}
 
 	/**
@@ -25,11 +25,11 @@ class Graph implements Iterable<Point> {
 	 */
 	public Graph(Graph graph) {
 		this();
-		adj.putAll(graph.adj);
+		adjMap.putAll(graph.adjMap);
 	}
 
 	public Iterator<Point> iterator() {
-		return adj.keySet().iterator();
+		return adjMap.keySet().iterator();
 	}
 
 	public void addEdge(Point v1, Point v2) {
@@ -43,7 +43,7 @@ class Graph implements Iterable<Point> {
 	}
 
 	public boolean hasEdge(Point v1, Point v2) {
-		List<Point> list = adj.get(v1);
+		List<Point> list = adjMap.get(v1);
 		if (list == null)
 			return false;
 		return list.contains(v2);
@@ -58,17 +58,17 @@ class Graph implements Iterable<Point> {
 	}
 
 	public List<Point> listNeighbours(Point v) {
-		if (adj.get(v) == null)
+		if (adjMap.get(v) == null)
 			return new ArrayList<Point>();
 		else
-			return new ArrayList<Point>(adj.get(v));
+			return new ArrayList<Point>(adjMap.get(v));
 	}
 
 	public int countEdges(Point v) {
-		if (adj.get(v) == null)
+		if (adjMap.get(v) == null)
 			return 0;
 		else
-			return adj.get(v).size();
+			return adjMap.get(v).size();
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Graph implements Iterable<Point> {
 	 * and numbers listed in that row indicate points that row is connected to.
 	 */
 	public String toString() {
-		int f = 1, s = adj.keySet().size();
+		int f = 1, s = adjMap.keySet().size();
 		while (s > 0) {
 			s /= 10;
 			f += 1;
@@ -85,13 +85,13 @@ class Graph implements Iterable<Point> {
 		StringBuilder buf = new StringBuilder();
 		int i = 1;
 
-		for (Point v : adj.keySet()) {
+		for (Point v : adjMap.keySet()) {
 			buf.append(String.format("%-" + f + "s", i));
 			buf.append(String.format("%11s", toString(v)));
 			buf.append(": ");
-			List<Point> l = adj.get(v);
+			List<Point> l = adjMap.get(v);
 			int j = 1;
-			for (Point w : adj.keySet()) {
+			for (Point w : adjMap.keySet()) {
 				if (l.contains(w)) {
 					buf.append(String.format("%" + f + "s", j));
 				}
@@ -112,19 +112,19 @@ class Graph implements Iterable<Point> {
 	 */
 
 	private void delEdge(Point v1, Point v2) {
-		List<Point> list = adj.get(v1);
+		List<Point> list = adjMap.get(v1);
 		if (list == null)
 			return;
 		list.remove(v2);
 		if (list.isEmpty())
-			adj.remove(v1);
+			adjMap.remove(v1);
 	}
 
 	private void newEdge(Point v1, Point v2) {
-		List<Point> list = adj.get(v1);
+		List<Point> list = adjMap.get(v1);
 		if (list == null) {
 			list = new LinkedList<Point>();
-			adj.put(v1, list);
+			adjMap.put(v1, list);
 		}
 		if (!list.contains(v2) && !v1.equals(v2))
 			list.add(v2);
