@@ -95,7 +95,7 @@ public class NewShipDialog {
 		shell.setSize(size.x + 5, size.y);
 		Point parSize = parentShell.getSize();
 		Point parLoc = parentShell.getLocation();
-		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+		shell.setLocation(parLoc.x + parSize.x / 2 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 
 		// Register hotkeys
 		Hotkey h = new Hotkey();

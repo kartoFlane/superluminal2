@@ -1,6 +1,5 @@
 package com.kartoflane.superluminal2;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +26,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 
+import com.kartoflane.common.selfpatch.SelfPatcher;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.OS;
@@ -36,6 +36,10 @@ import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
+import com.kartoflane.superluminal2.selfpatch.SPSLGetTask;
+import com.kartoflane.superluminal2.selfpatch.SPSLPatchTask;
+import com.kartoflane.superluminal2.selfpatch.SPSLRunTask;
+import com.kartoflane.superluminal2.ui.DownloadDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.IOUtils;
@@ -444,16 +448,9 @@ public class Superluminal {
 				box.setMessage(buf.toString());
 
 				if (box.open() == SWT.YES) {
-					URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
-
-					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-						try {
-							desktop.browse(url.toURI());
-						} catch (Exception e) {
-							log.error("An error has occured while opening web browser.", e);
-						}
-					}
+					SelfPatcher sp = new SelfPatcher(new SPSLGetTask(), new SPSLPatchTask(), new SPSLRunTask());
+					DownloadDialog dd = new DownloadDialog(EditorWindow.getInstance().getShell());
+					sp.patch(dd);
 				}
 			} catch (Exception e) {
 				log.error("An error has occured while displaying update result.", e);
