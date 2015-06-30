@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -448,9 +449,32 @@ public class Superluminal {
 				box.setMessage(buf.toString());
 
 				if (box.open() == SWT.YES) {
-					SelfPatcher sp = new SelfPatcher(new SPSLGetTask(), new SPSLPatchTask(), new SPSLRunTask());
-					DownloadDialog dd = new DownloadDialog(EditorWindow.getInstance().getShell());
-					sp.patch(dd);
+					try {
+						SelfPatcher sp = new SelfPatcher(new SPSLGetTask(), new SPSLPatchTask(), new SPSLRunTask());
+						DownloadDialog dd = new DownloadDialog(EditorWindow.getInstance().getShell());
+						sp.patch(dd);
+					} catch (Exception e) {
+						log.error("Self-patching failed!", e);
+
+						box = new MessageBox(EditorWindow.getInstance().getShell(),
+								SWT.ICON_ERROR | SWT.YES | SWT.NO);
+						box.setText(APP_NAME + " - Auto-Update Failed");
+						box.setMessage("Whoops! Something went terribly wrong, and the editor was unable to patch itself.\n" +
+								"Do you want to download and update the editor manually?");
+
+						if (box.open() == SWT.YES) {
+							URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
+							Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+							if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+								try {
+									desktop.browse(url.toURI());
+								}
+								catch (Exception ex) {
+									log.error("An error has occured while opening web browser.", ex);
+								}
+							}
+						}
+					}
 				}
 			} catch (Exception e) {
 				log.error("An error has occured while displaying update result.", e);
