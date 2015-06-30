@@ -90,6 +90,9 @@ General explanation of source code packages and their contents:
   "com.kartoflane.ftl.floorgen"
     A self-contained pseudo-library that generates accurate floor images from ship layout data.
 
+  "com.kartoflane.common.selfpatch"
+    Base classes and interfaces for the self-patching functionality.
+
   "com.kartoflane.superluminal2"
     Contains the main class.
     
@@ -142,6 +145,9 @@ General explanation of source code packages and their contents:
 
         ".props"
           Views for props.
+
+    ".selfpatch"
+      Implementation of the self-patch functionality for the editor.
 
     ".tools"
       Classes for the tools used in the editor. Originally they were intended to be
