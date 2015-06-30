@@ -29,6 +29,12 @@ public class Patcher {
 			}
 			else {
 				System.err.printf( "Could not rename '%s'; retrying...", f.getPath() );
+				try {
+					// Sleep so that we give the other program time to do its stuff
+					Thread.sleep( 200 );
+				}
+				catch ( InterruptedException e ) {
+				}
 			}
 		}
 
