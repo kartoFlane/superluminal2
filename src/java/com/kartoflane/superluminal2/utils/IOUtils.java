@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,16 +20,27 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
 import net.vhati.modmanager.core.SloppyXMLParser;
 
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
+
+import com.kartoflane.superluminal2.core.DatabaseEntry;
+import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.ui.ShipContainer;
 
 /**
  * This class contains methods used to read and write files, as well as interpret content
@@ -86,6 +98,60 @@ public class IOUtils {
 			return m.group();
 		else
 			return "";
+	}
+
+	/**
+	 * Merges the file-byte map with the specified ShipContainer, effectively saving
+	 * the ship in the file-byte map.
+	 */
+	public static void merge(Map<String, byte[]> base, ShipContainer container)
+			throws JDOMParseException, IOException {
+		ShipObject ship = container.getShipController().getGameObject();
+		Map<String, byte[]> fileMap = ShipSaveUtils.saveShip(container);
+
+		for (String file : fileMap.keySet()) {
+			if (base.containsKey(file)) {
+				// Mod already contains that file; need to consider further
+				if (file.endsWith(".png") || file.equals(ship.getLayoutTXT()) || file.equals(ship.getLayoutXML())) {
+					// Overwrite graphics and layout files
+					base.put(file, fileMap.get(file));
+				}
+				else if (file.endsWith(".xml") || file.endsWith(".append") ||
+						file.endsWith(".rawappend") || file.endsWith(".rawclobber")) {
+					// Merge XML files, while removing obscured elements
+					Document docBase = IOUtils.parseXML(new String(base.get(file)));
+					Document docAdd = IOUtils.parseXML(new String(fileMap.get(file)));
+
+					List<Element> addList = docAdd.getRootElement().getChildren();
+					for (int i = 0; i < addList.size(); ++i) {
+						Element e = addList.get(i);
+						String name = e.getAttributeValue("name");
+						if (name == null) {
+							// Can't identify; just add it.
+							docBase.addContent(e);
+						}
+						else {
+							// Remove elements that are obscured, in order to prevent bloating
+							List<Element> baseList = docBase.getRootElement().getChildren(e.getName(), e.getNamespace());
+							for (int j = 0; j < baseList.size(); ++j) {
+								Element el = baseList.get(j);
+								String name2 = el.getAttributeValue("name");
+								if (name2 != null && name2.equals(name)) {
+									el.detach();
+								}
+							}
+							docBase.addContent(e);
+						}
+					}
+
+					base.put(file, readDocument(docBase).getBytes());
+				}
+			}
+			else {
+				// Doesn't exist; add it
+				base.put(file, fileMap.get(file));
+			}
+		}
 	}
 
 	/**
@@ -184,6 +250,26 @@ public class IOUtils {
 			baos.write(bytes, 0, read);
 		return baos.toByteArray();
 	}
+	
+	/**
+	 * Reads contents of the DatabaseEntry into a filename-byte map.
+	 */
+	public static HashMap<String, byte[]> readEntry(DatabaseEntry entry) throws IOException {
+		HashMap<String, byte[]> result = new HashMap<String, byte[]>();
+
+		for (String fileName : entry.list()) {
+			InputStream is = null;
+			try {
+				entry.getInputStream(fileName);
+				result.put(fileName, readStream(is));
+			} finally {
+				if (is != null)
+					is.close();
+			}
+		}
+
+		return result;
+	}
 
 	/**
 	 * Interprets the string as XML.
@@ -221,6 +307,80 @@ public class IOUtils {
 		while ((len = in.read(buffer)) != -1) {
 			out.write(buffer, 0, len);
 		}
+	}
+
+	/**
+	 * Writes the file-byte map as a hierarchy of files.
+	 */
+	public static void writeDir(Map<String, byte[]> files, File destination)
+			throws IOException {
+		for (String fileName : files.keySet()) {
+			ByteArrayInputStream in = null;
+			FileOutputStream out = null;
+
+			File file = new File(destination.getAbsolutePath() + "/" + fileName);
+			file.getParentFile().mkdirs();
+
+			try {
+				in = new ByteArrayInputStream(files.get(fileName));
+				out = new FileOutputStream(file);
+				IOUtils.write(in, out);
+			} finally {
+				if (in != null)
+					in.close();
+				if (out != null)
+					out.close();
+			}
+		}
+	}
+
+	/**
+	 * Writes the file-byte map as a single zip file.
+	 */
+	public static void writeZip(Map<String, byte[]> files, File destination)
+			throws IOException {
+		ZipInputStream in = null;
+		ZipOutputStream out = null;
+		try {
+			in = new ZipInputStream(new ByteArrayInputStream(createZip(files)));
+			out = new ZipOutputStream(new FileOutputStream(destination));
+
+			ZipEntry entry = null;
+			while ((entry = in.getNextEntry()) != null) {
+				out.putNextEntry(entry);
+
+				byte[] byteBuff = new byte[4096];
+				int bytesRead = 0;
+				while ((bytesRead = in.read(byteBuff)) != -1)
+					out.write(byteBuff, 0, bytesRead);
+
+				in.closeEntry();
+			}
+		} finally {
+			if (in != null)
+				in.close();
+			if (out != null)
+				out.close();
+		}
+	}
+
+	private static byte[] createZip(Map<String, byte[]> files)
+			throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ZipOutputStream zf = new ZipOutputStream(bos);
+		Iterator<String> it = files.keySet().iterator();
+		String fileName = null;
+		ZipEntry ze = null;
+
+		while (it.hasNext()) {
+			fileName = it.next();
+			ze = new ZipEntry(fileName);
+			zf.putNextEntry(ze);
+			zf.write(files.get(fileName));
+		}
+		zf.close();
+
+		return bos.toByteArray();
 	}
 
 	/**

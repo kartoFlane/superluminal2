@@ -1,32 +1,24 @@
 package com.kartoflane.superluminal2.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Display;
 import org.jdom2.Comment;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Images;
@@ -34,6 +26,7 @@ import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -71,31 +64,7 @@ public class ShipSaveUtils {
 			throw new IllegalArgumentException("Not a file: " + saveFile.getName());
 
 		HashMap<String, byte[]> fileMap = saveShip(container);
-
-		// Write the zip archive
-		ZipInputStream in = null;
-		ZipOutputStream out = null;
-		try {
-			in = new ZipInputStream(new ByteArrayInputStream(createZip(fileMap)));
-			out = new ZipOutputStream(new FileOutputStream(saveFile));
-
-			ZipEntry entry = null;
-			while ((entry = in.getNextEntry()) != null) {
-				out.putNextEntry(entry);
-
-				byte[] byteBuff = new byte[4096];
-				int bytesRead = 0;
-				while ((bytesRead = in.read(byteBuff)) != -1)
-					out.write(byteBuff, 0, bytesRead);
-
-				in.closeEntry();
-			}
-		} finally {
-			if (in != null)
-				in.close();
-			if (out != null)
-				out.close();
-		}
+		IOUtils.writeZip(fileMap, saveFile);
 	}
 
 	public static void saveShipXML(File destination, ShipContainer container) throws IllegalArgumentException, IOException {
@@ -105,26 +74,26 @@ public class ShipSaveUtils {
 			throw new IllegalArgumentException("Not a directory: " + destination.getName());
 
 		HashMap<String, byte[]> fileMap = saveShip(container);
+		IOUtils.writeDir(fileMap, destination);
+	}
 
-		// Write the files
-		for (String fileName : fileMap.keySet()) {
-			ByteArrayInputStream in = null;
-			FileOutputStream out = null;
+	/**
+	 * Saves the ship within the context of the specified database entry, as the specified file.
+	 * 
+	 * @param destination the output file.
+	 * @param entry the DatabaseEntry (runtime representation of an .ftl mod) within which the ship is to be saved.
+	 * @param container the ShipContainer to be saved.
+	 */
+	public static void saveShipMod(File destination, DatabaseEntry entry, ShipContainer container)
+			throws IllegalArgumentException, IOException, JDOMParseException {
+		if (destination == null)
+			throw new IllegalArgumentException("Destination file must not be null.");
+		if (destination.isDirectory())
+			throw new IllegalArgumentException("Not a file: " + destination.getName());
 
-			File file = new File(destination.getAbsolutePath() + "/" + fileName);
-			file.getParentFile().mkdirs();
-
-			try {
-				in = new ByteArrayInputStream(fileMap.get(fileName));
-				out = new FileOutputStream(file);
-				IOUtils.write(in, out);
-			} finally {
-				if (in != null)
-					in.close();
-				if (out != null)
-					out.close();
-			}
-		}
+		HashMap<String, byte[]> entryMap = IOUtils.readEntry(entry);
+		IOUtils.merge(entryMap, container);
+		IOUtils.writeZip(entryMap, destination);
 	}
 
 	/**
@@ -741,24 +710,6 @@ public class ShipSaveUtils {
 
 		doc.setRootElement(root);
 		return doc;
-	}
-
-	private static byte[] createZip(Map<String, byte[]> files) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ZipOutputStream zf = new ZipOutputStream(bos);
-		Iterator<String> it = files.keySet().iterator();
-		String fileName = null;
-		ZipEntry ze = null;
-
-		while (it.hasNext()) {
-			fileName = it.next();
-			ze = new ZipEntry(fileName);
-			zf.putNextEntry(ze);
-			zf.write(files.get(fileName));
-		}
-		zf.close();
-
-		return bos.toByteArray();
 	}
 
 	/**
