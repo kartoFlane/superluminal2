@@ -85,6 +85,7 @@ import com.kartoflane.superluminal2.tools.RoomTool;
 import com.kartoflane.superluminal2.tools.StationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
 import com.kartoflane.superluminal2.ui.GibPropContainer.PropControls;
+import com.kartoflane.superluminal2.ui.SaveOptionsDialog.SaveOptions;
 import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.undo.UndoableDeleteEdit;
 import com.kartoflane.superluminal2.undo.UndoableOffsetsEdit;
@@ -1497,17 +1498,21 @@ public class EditorWindow {
 	}
 
 	public boolean promptSaveShip(ShipContainer container, boolean prompt) {
-		File temp = container.getSaveDestination();
+		SaveOptions sop = container.getSaveOptions();
+		File file = sop.file;
+		DatabaseEntry mod = sop.mod;
 
-		if (temp == null || prompt) {
+		if (file == null || prompt) {
 			SaveOptionsDialog dialog = new SaveOptionsDialog(shell);
-			temp = dialog.open();
+			SaveOptions so = dialog.open();
+			file = so.file;
+			mod = so.mod;
 		}
 
-		if (temp != null) // User could've aborted selection, which returns null.
-			container.save(temp);
+		if (file != null) // User could've aborted selection, which returns null.
+			container.save(file, mod);
 
-		return temp != null;
+		return file != null;
 	}
 
 	private void registerHotkeys() {

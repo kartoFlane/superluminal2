@@ -34,6 +34,7 @@ import java.util.zip.ZipOutputStream;
 import net.vhati.modmanager.core.SloppyXMLOutputProcessor;
 import net.vhati.modmanager.core.SloppyXMLParser;
 
+import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
@@ -122,17 +123,24 @@ public class IOUtils {
 					Document docBase = IOUtils.parseXML(new String(base.get(file)));
 					Document docAdd = IOUtils.parseXML(new String(fileMap.get(file)));
 
-					List<Element> addList = docAdd.getRootElement().getChildren();
+					Element root = docBase.getRootElement();
+
+					List<Content> addList = docAdd.getContent();
 					for (int i = 0; i < addList.size(); ++i) {
-						Element e = addList.get(i);
+						Content c=  addList.get(i);
+						if ( c instanceof Element == false)
+							continue;
+						Element e = (Element)c;
+
 						String name = e.getAttributeValue("name");
 						if (name == null) {
 							// Can't identify; just add it.
-							docBase.addContent(e);
+							e.detach();
+							root.addContent(e);
 						}
 						else {
 							// Remove elements that are obscured, in order to prevent bloating
-							List<Element> baseList = docBase.getRootElement().getChildren(e.getName(), e.getNamespace());
+							List<Element> baseList = root.getChildren(e.getName(), e.getNamespace());
 							for (int j = 0; j < baseList.size(); ++j) {
 								Element el = baseList.get(j);
 								String name2 = el.getAttributeValue("name");
@@ -140,7 +148,8 @@ public class IOUtils {
 									el.detach();
 								}
 							}
-							docBase.addContent(e);
+							e.detach();
+							root.addContent(e);
 						}
 					}
 
@@ -260,7 +269,7 @@ public class IOUtils {
 		for (String fileName : entry.list()) {
 			InputStream is = null;
 			try {
-				entry.getInputStream(fileName);
+				is = entry.getInputStream(fileName);
 				result.put(fileName, readStream(is));
 			} finally {
 				if (is != null)

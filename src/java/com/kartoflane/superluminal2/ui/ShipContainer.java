@@ -25,6 +25,7 @@ import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
 import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
@@ -60,6 +61,7 @@ import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.tools.CreationTool;
 import com.kartoflane.superluminal2.tools.Tool.Tools;
+import com.kartoflane.superluminal2.ui.SaveOptionsDialog.SaveOptions;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.ShipSaveUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
@@ -96,6 +98,7 @@ public class ShipContainer implements Disposable, SLListener {
 
 	private boolean shipSaved = false;
 	private File saveDestination = null;
+	private DatabaseEntry saveMod = null;
 
 	private ShipController shipController = null;
 	private GibPropContainer gibContainer = null;
@@ -358,6 +361,7 @@ public class ShipContainer implements Disposable, SLListener {
 			throw new IllegalStateException("Save destination must not be null.");
 
 		saveDestination = f;
+		saveMod = null;
 
 		if (saveDestination.isDirectory()) {
 			EditorWindow.log.trace("Saving ship to " + saveDestination.getAbsolutePath());
@@ -383,9 +387,45 @@ public class ShipContainer implements Disposable, SLListener {
 			}
 		}
 	}
+	
+	public void save(File f, DatabaseEntry mod) {
+		if (f == null)
+			throw new IllegalStateException("Save destination must not be null.");
+		if (mod == null) {
+			save(f);
+		}
+		else {
+			saveDestination = f;
+			saveMod = mod;
 
-	public File getSaveDestination() {
-		return saveDestination;
+			if (saveDestination.isDirectory()) {
+				EditorWindow.log.trace("Saving ship to " + saveDestination.getAbsolutePath());
+
+				try {
+					ShipSaveUtils.saveShipModXML(saveDestination, mod, this);
+					shipSaved = true;
+					EditorWindow.log.trace("Ship saved successfully.");
+				} catch (Exception ex) {
+					EditorWindow.log.error("An error occured while saving the ship: ", ex);
+					UIUtils.showWarningDialog(window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+				}
+			} else {
+				EditorWindow.log.trace("Saving ship as " + saveDestination.getAbsolutePath());
+
+				try {
+					ShipSaveUtils.saveShipModFTL(saveDestination, mod, this);
+					shipSaved = true;
+					EditorWindow.log.trace("Ship saved successfully.");
+				} catch (Exception ex) {
+					EditorWindow.log.error("An error occured while saving the ship: ", ex);
+					UIUtils.showWarningDialog(window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details.");
+				}
+			}
+		}
+	}
+
+	public SaveOptions getSaveOptions() {
+		return new SaveOptions( saveDestination, saveMod );
 	}
 
 	public boolean isSaved() {

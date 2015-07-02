@@ -84,7 +84,7 @@ public class ShipSaveUtils {
 	 * @param entry the DatabaseEntry (runtime representation of an .ftl mod) within which the ship is to be saved.
 	 * @param container the ShipContainer to be saved.
 	 */
-	public static void saveShipMod(File destination, DatabaseEntry entry, ShipContainer container)
+	public static void saveShipModFTL(File destination, DatabaseEntry entry, ShipContainer container)
 			throws IllegalArgumentException, IOException, JDOMParseException {
 		if (destination == null)
 			throw new IllegalArgumentException("Destination file must not be null.");
@@ -94,6 +94,18 @@ public class ShipSaveUtils {
 		HashMap<String, byte[]> entryMap = IOUtils.readEntry(entry);
 		IOUtils.merge(entryMap, container);
 		IOUtils.writeZip(entryMap, destination);
+	}
+
+	public static void saveShipModXML(File destination, DatabaseEntry entry, ShipContainer container)
+			throws IllegalArgumentException, IOException, JDOMParseException {
+		if (destination == null)
+			throw new IllegalArgumentException("Destination file must not be null.");
+		if (!destination.isDirectory())
+			throw new IllegalArgumentException("Not a directory: " + destination.getName());
+
+		HashMap<String, byte[]> entryMap = IOUtils.readEntry(entry);
+		IOUtils.merge(entryMap, container);
+		IOUtils.writeDir(entryMap, destination);
 	}
 
 	/**

@@ -21,14 +21,19 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
+import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
+
+import org.eclipse.swt.widgets.Combo;
 
 public class SaveOptionsDialog {
 	private static SaveOptionsDialog instance = null;
 	private static String prevPath = System.getProperty("user.home");
 
-	private File result = null;
+	private File resultFile = null;
+	private DatabaseEntry resultMod = null;
 
 	private Shell shell = null;
 	private Button btnCancel;
@@ -41,6 +46,11 @@ public class SaveOptionsDialog {
 	private Button btnFTL;
 	private Label lblDirectoryHelp;
 	private Label lblArchiveHelp;
+	private Label lblInclude;
+	private Combo cmbInclude;
+	private Label lblSeparator2;
+	private Label lblIncludeInfo;
+	private Label lblSeparator1;
 
 	public SaveOptionsDialog(Shell parent) {
 		if (instance != null)
@@ -77,6 +87,41 @@ public class SaveOptionsDialog {
 		msg = "Saves the ship as a ready-to-install .ftl archive.";
 		UIUtils.addTooltip(lblArchiveHelp, msg);
 
+		lblSeparator1 = new Label(shell, SWT.NONE);
+		lblSeparator1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+
+		lblInclude = new Label(shell, SWT.NONE);
+		lblInclude.setText("Include mod files from:");
+
+		lblIncludeInfo = new Label(shell, SWT.NONE);
+		lblIncludeInfo.setImage(helpImage);
+		lblIncludeInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+
+		cmbInclude = new Combo(shell, SWT.READ_ONLY);
+		cmbInclude.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		cmbInclude.add("None");
+		cmbInclude.select(0);
+
+		msg = "Selecting a mod here will bundle it with your ship.";
+
+		Database db = Database.getInstance();
+		DatabaseEntry[] des = db.getEntries();
+		if (des.length <= 1) {
+			cmbInclude.setEnabled(false);
+			msg += "\nDisabled: no mods are currently loaded.";
+		}
+		else {
+			for (DatabaseEntry de : des) {
+				if (de == db.getCore())
+					continue;
+				cmbInclude.add(de.getName());
+			}
+		}
+		UIUtils.addTooltip(lblIncludeInfo, msg);
+
+		lblSeparator2 = new Label(shell, SWT.NONE);
+		lblSeparator2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+
 		lblSaveLocation = new Label(shell, SWT.NONE);
 		lblSaveLocation.setText("Save location:");
 
@@ -107,7 +152,7 @@ public class SaveOptionsDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				btnBrowse.setEnabled(true);
-				result = null;
+				resultFile = null;
 				txtDestination.setText("");
 				btnConfirm.setEnabled(false);
 			}
@@ -117,9 +162,23 @@ public class SaveOptionsDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				btnBrowse.setEnabled(true);
-				result = null;
+				resultFile = null;
 				txtDestination.setText("");
 				btnConfirm.setEnabled(false);
+			}
+		});
+		
+		cmbInclude.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int i = cmbInclude.getSelectionIndex();
+				if (i == 0) {
+					resultMod = null;
+				}
+				else {
+					Database db = Database.getInstance();
+					resultMod = db.getEntries()[i];
+				}
 			}
 		});
 
@@ -136,11 +195,11 @@ public class SaveOptionsDialog {
 				// User could've aborted selection, which returns null.
 				if (temp != null) {
 					prevPath = temp.getAbsolutePath();
-					result = temp;
+					resultFile = temp;
 					txtDestination.setText(temp.getAbsolutePath());
 				}
 
-				btnConfirm.setEnabled(result != null);
+				btnConfirm.setEnabled(resultFile != null);
 			}
 		});
 
@@ -154,7 +213,7 @@ public class SaveOptionsDialog {
 		btnCancel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				result = null;
+				resultFile = null;
 				dispose();
 			}
 		});
@@ -176,7 +235,7 @@ public class SaveOptionsDialog {
 		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
 	}
 
-	public File open() {
+	public SaveOptions open() {
 		Display display = Display.getDefault();
 
 		shell.open();
@@ -186,7 +245,7 @@ public class SaveOptionsDialog {
 				display.sleep();
 		}
 
-		return result;
+		return new SaveOptions(resultFile, resultMod);
 	}
 
 	public static SaveOptionsDialog getInstance() {
@@ -201,5 +260,25 @@ public class SaveOptionsDialog {
 		Cache.checkInImage(this, "cpath:/assets/help.png");
 		shell.dispose();
 		instance = null;
+	}
+
+	public static class SaveOptions {
+		public final File file;
+		public final DatabaseEntry mod;
+
+		public SaveOptions(File f) {
+			file = f;
+			mod = null;
+		}
+
+		public SaveOptions(File f, DatabaseEntry de) {
+			file = f;
+			mod = de;
+		}
+
+		public SaveOptions(DatabaseEntry de) {
+			mod = de;
+			file = de.getFile();
+		}
 	}
 }
