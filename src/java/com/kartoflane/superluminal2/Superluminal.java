@@ -51,7 +51,7 @@ public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
 
 	public static final String APP_NAME = "Superluminal";
-	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.1a");
+	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.2");
 	public static final String APP_UPDATE_FETCH_URL = "https://raw.github.com/kartoFlane/superluminal2/master/skels/common/auto_update.xml";
 	public static final String APP_FORUM_URL = "http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901&p=78738#p78738";
 	public static final String APP_AUTHOR = "kartoFlane";
@@ -72,8 +72,6 @@ public class Superluminal {
 	 * =============================================================================================
 	 * 
 	 * IMMEDIATE:
-	 * - different systems get shields glow for some reason
-	 * - cloaking starts with default glow for some reason
 	 * - work out correction from center-relative to top-left-corner-relative
 	 * 
 	 * MEDIUM:

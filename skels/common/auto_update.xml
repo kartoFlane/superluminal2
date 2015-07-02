@@ -1,10 +1,15 @@
 <versions>
-	<latest id="2.1.1a" url="http://sourceforge.net/projects/superluminal2/files/Superluminal2/" />
+	<latest id="2.1.2" url="https://github.com/kartoFlane/superluminal2/releases/latest" />
 	<changelog>
-        <version id="2.1.1a">
-            <change>Fixed a typo</change>
-            <change>Fixed a bug with systems sharing interior images</change>
-        </version>
+		<version id="2.1.2">
+			<change>Added experimental self-patching functionality</change>
+			<change>The floor generation algorithm can now be customized</change>
+			<change>Added experimental feature that allows you to bundle your ship with a loaded mod when saving</change>
+		</version>
+    <version id="2.1.1a">
+      <change>Fixed a typo</change>
+      <change>Fixed a bug with systems sharing interior images</change>
+    </version>
 		<version id="2.1.1">
 			<change>Editor now recognizes .rawappend files</change>
 			<change>Enemy ships can now have weapon/drone loadout defined like player ships do</change>
