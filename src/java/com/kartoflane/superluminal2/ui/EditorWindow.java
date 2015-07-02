@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import com.kartoflane.ftl.floorgen.FloorImageFactory;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.EventHandler;
 import com.kartoflane.superluminal2.components.Hotkey;
@@ -732,6 +733,12 @@ public class EditorWindow {
 					return;
 				}
 
+				FloorgenDialog fd = new FloorgenDialog(shell);
+				FloorImageFactory fif = fd.open();
+
+				if (fif == null)
+					return;
+
 				UndoablePropertyEdit<String> edit = new UndoablePropertyEdit<String>(container) {
 					public void callback(String arg) {
 						container.setImage(Images.FLOOR, arg);
@@ -745,7 +752,7 @@ public class EditorWindow {
 				};
 
 				edit.setOld(container.getImage(Images.FLOOR));
-				Manager.getCurrentShip().generateFloorImage();
+				Manager.getCurrentShip().generateFloorImage(fif);
 				edit.setCurrent(container.getImage(Images.FLOOR));
 
 				if (!edit.isValuesEqual())

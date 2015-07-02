@@ -608,7 +608,7 @@ public class ShipContainer implements Disposable, SLListener {
 		return ship.getOffsetFine();
 	}
 
-	public void generateFloorImage() {
+	public void generateFloorImage(FloorImageFactory fif) {
 		ShipObject ship = shipController.getGameObject();
 
 		// Prepare the ship data
@@ -623,7 +623,8 @@ public class ShipContainer implements Disposable, SLListener {
 		ship.linkDoors();
 
 		// Generate the image
-		FloorImageFactory fif = new FloorImageFactory();
+		if (fif == null)
+			fif = new FloorImageFactory();
 		String content = ShipSaveUtils.generateLayoutTXT(ship);
 		InputStream is = null;
 
