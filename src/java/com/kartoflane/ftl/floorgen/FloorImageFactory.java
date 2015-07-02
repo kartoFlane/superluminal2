@@ -49,6 +49,7 @@ public class FloorImageFactory {
 
 	private int floorMargin;
 	private int borderWidth;
+	private int cornerSize;
 
 	private Color floorColor;
 	private Color borderColor;
@@ -59,6 +60,7 @@ public class FloorImageFactory {
 	public FloorImageFactory() {
 		floorMargin = 4;
 		borderWidth = 2;
+		cornerSize = 2;
 		floorColor = new Color(0x64696F);
 		borderColor = Color.BLACK;
 	}
@@ -97,8 +99,22 @@ public class FloorImageFactory {
 	}
 
 	/**
+	 * Sets size of corners. Larger value = smaller corners.<br>
+	 * Default: 2
+	 */
+	public void setCornerSize(int size) {
+		if (size < 0)
+			throw new IllegalArgumentException("Argument must be non-negative!");
+		cornerSize = size;
+	}
+
+	public int getCornerSize() {
+		return cornerSize;
+	}
+
+	/**
 	 * Sets color of the floor image's body. Can be null for transparent color.<br>
-	 * Default: <tt>RGBA[128, 128, 128, 255]</tt>
+	 * Default: <tt>ARGB[0xFF64696F]</tt>
 	 */
 	public void setFloorColor(Color c) {
 		if (c == null)
@@ -455,38 +471,38 @@ public class FloorImageFactory {
 
 	private void drawTopLeftCorner(Graphics2D gc, int cx, int cy) {
 		gc.setColor(borderColor);
-		gc.fillPolygon(new int[] { cx, cx - floorMargin - borderWidth - 1, cx },
-				new int[] { cy, cy, cy - floorMargin - borderWidth - 1 }, 3);
+		gc.fillPolygon(new int[] { cx, cx - floorMargin - borderWidth, cx - floorMargin - borderWidth, cx - cornerSize - 1, cx },
+				new int[] { cy, cy, cy - cornerSize - 1, cy - floorMargin - borderWidth, cy - floorMargin - borderWidth }, 5);
 		gc.setColor(floorColor);
-		gc.fillPolygon(new int[] { cx, cx - floorMargin, cx },
-				new int[] { cy, cy, cy - floorMargin }, 3);
+		gc.fillPolygon(new int[] { cx, cx - floorMargin, cx - floorMargin, cx - cornerSize, cx },
+				new int[] { cy, cy, cy - cornerSize, cy - floorMargin, cy - floorMargin }, 5);
 	}
 
 	private void drawTopRightCorner(Graphics2D gc, int cx, int cy) {
 		gc.setColor(borderColor);
-		gc.fillPolygon(new int[] { cx, cx, cx + floorMargin + borderWidth },
-				new int[] { cy, cy - floorMargin - borderWidth - 1, cy }, 3);
+		gc.fillPolygon(new int[] { cx, cx, cx + cornerSize + 1, cx + floorMargin + borderWidth, cx + floorMargin + borderWidth },
+				new int[] { cy, cy - floorMargin - borderWidth, cy - floorMargin - borderWidth, cy - cornerSize - 1, cy }, 5);
 		gc.setColor(floorColor);
-		gc.fillPolygon(new int[] { cx, cx, cx + floorMargin - 1 },
-				new int[] { cy, cy - floorMargin, cy }, 3);
+		gc.fillPolygon(new int[] { cx, cx, cx + cornerSize, cx + floorMargin, cx + floorMargin },
+				new int[] { cy, cy - floorMargin, cy - floorMargin, cy - cornerSize, cy }, 5);
 	}
 
 	private void drawBottomLeftCorner(Graphics2D gc, int cx, int cy) {
 		gc.setColor(borderColor);
-		gc.fillPolygon(new int[] { cx, cx, cx - floorMargin - borderWidth - 1 },
-				new int[] { cy, cy + floorMargin + borderWidth, cy }, 3);
+		gc.fillPolygon(new int[] { cx, cx, cx - cornerSize, cx - floorMargin - borderWidth, cx - floorMargin - borderWidth },
+				new int[] { cy, cy + floorMargin + borderWidth, cy + floorMargin + borderWidth, cy + cornerSize, cy }, 5);
 		gc.setColor(floorColor);
-		gc.fillPolygon(new int[] { cx, cx, cx - floorMargin },
-				new int[] { cy, cy + floorMargin - 1, cy }, 3);
+		gc.fillPolygon(new int[] { cx, cx, cx - cornerSize, cx - floorMargin, cx - floorMargin },
+				new int[] { cy, cy + floorMargin, cy + floorMargin, cy + cornerSize - 1, cy }, 5);
 	}
 
 	private void drawBottomRightCorner(Graphics2D gc, int cx, int cy) {
 		gc.setColor(borderColor);
-		gc.fillPolygon(new int[] { cx, cx, cx + floorMargin + borderWidth },
-				new int[] { cy, cy + floorMargin + borderWidth, cy }, 3);
+		gc.fillPolygon(new int[] { cx, cx, cx + cornerSize, cx + floorMargin + borderWidth, cx + floorMargin + borderWidth },
+				new int[] { cy, cy + floorMargin + borderWidth, cy + floorMargin + borderWidth, cy + cornerSize, cy }, 5);
 		gc.setColor(floorColor);
-		gc.fillPolygon(new int[] { cx, cx, cx + floorMargin - 1 },
-				new int[] { cy, cy + floorMargin - 1, cy }, 3);
+		gc.fillPolygon(new int[] { cx, cx, cx + cornerSize - 1, cx + floorMargin, cx + floorMargin },
+				new int[] { cy, cy + floorMargin, cy + floorMargin, cy + cornerSize - 1, cy }, 5);
 	}
 
 	private Layout loadLayout(InputStream is) throws IllegalArgumentException {
