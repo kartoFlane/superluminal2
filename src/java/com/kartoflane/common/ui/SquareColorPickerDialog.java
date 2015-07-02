@@ -97,6 +97,8 @@ public class SquareColorPickerDialog extends Dialog {
 
 		if ( current == null )
 			this.current = new RGB( 0, 0, 0 );
+		else
+			this.current = current;
 		result = this.current;
 
 		shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL );

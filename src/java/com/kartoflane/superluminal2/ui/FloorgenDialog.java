@@ -226,7 +226,9 @@ public class FloorgenDialog {
 			public void widgetSelected( SelectionEvent e ) {
 				SquareColorPickerDialog cpd = new SquareColorPickerDialog( shell );
 				cpd.setText( Superluminal.APP_NAME + " - Color Picker (Border Color)" );
-				RGB rgb = cpd.open( null );
+				java.awt.Color c = result.getBorderColor();
+				RGB input = new RGB( c.getRed(), c.getGreen(), c.getBlue() );
+				RGB rgb = cpd.open( input );
 				if ( rgb != null ) {
 					java.awt.Color color = new java.awt.Color( rgb.red, rgb.green, rgb.blue );
 					result.setBorderColor( color );
@@ -240,7 +242,9 @@ public class FloorgenDialog {
 			public void widgetSelected( SelectionEvent e ) {
 				SquareColorPickerDialog cpd = new SquareColorPickerDialog( shell );
 				cpd.setText( Superluminal.APP_NAME + " - Color Picker (Floor Color)" );
-				RGB rgb = cpd.open( null );
+				java.awt.Color c = result.getFloorColor();
+				RGB input = new RGB( c.getRed(), c.getGreen(), c.getBlue() );
+				RGB rgb = cpd.open( input );
 				if ( rgb != null ) {
 					java.awt.Color color = new java.awt.Color( rgb.red, rgb.green, rgb.blue );
 					result.setFloorColor( color );
