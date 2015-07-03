@@ -11,7 +11,7 @@ It is a complete rewrite of, and successor to, the original [Superluminal](https
 Download
 --------
 
-The compiled program can be downloaded at [Sourceforge](https://sourceforge.net/projects/superluminal2/files/Superluminal2/).
+The compiled program can be found on this repository's [Releases](https://github.com/kartoFlane/superluminal2/releases) page.
 
 Development
 -----------
