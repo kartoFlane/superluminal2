@@ -220,7 +220,7 @@ public class SquareColorPickerDialog extends Dialog {
 		txtH.setLayoutData( gd_txtH );
 
 		Label lblUnitH = new Label( coControls, SWT.NONE );
-		lblUnitH.setText( "°" );
+		lblUnitH.setText( "\u00b0" );
 
 		Label lblG = new Label( coControls, SWT.NONE );
 		lblG.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
@@ -447,7 +447,7 @@ public class SquareColorPickerDialog extends Dialog {
 			return ( t.getText().length() < 3 || t.getSelectionCount() > 0 ) && ( ch >= '0' && ch <= '9' );
 		}
 		else if ( src == txtH || src == txtS || src == txtV ) {
-			if ( ch == '.' && ( t.getText().indexOf( "." ) == -1 || t.getSelectionText().contains( "." ) ) )
+			if ( ch == '.' && ( !t.getText().contains( "." ) || t.getSelectionText().contains( "." ) ) )
 				return true;
 			return ( t.getText().length() < 6 || t.getSelectionCount() > 0 ) && ( ch >= '0' && ch <= '9' );
 		}
@@ -465,9 +465,10 @@ public class SquareColorPickerDialog extends Dialog {
 			}
 			catch ( StringIndexOutOfBoundsException e ) {
 			}
-			HSV hsv = new HSV( rgb );
-			huePicker.setSelection( hsv.h );
-			shadePicker.setSelection( hsv.s, hsv.v );
+
+			float[] hsv = rgb.getHSB();
+			huePicker.setSelection( hsv[0] );
+			shadePicker.setSelection( hsv[1], hsv[2] );
 		}
 		else if ( src == txtR || src == txtG || src == txtB ) {
 			RGB rgb = new RGB( 0, 0, 0 );
@@ -486,9 +487,10 @@ public class SquareColorPickerDialog extends Dialog {
 			}
 			catch ( NumberFormatException e ) {
 			}
-			HSV hsv = new HSV( rgb );
-			huePicker.setSelection( hsv.h );
-			shadePicker.setSelection( hsv.s, hsv.v );
+
+			float[] hsv = rgb.getHSB();
+			huePicker.setSelection( hsv[0] );
+			shadePicker.setSelection( hsv[1], hsv[2] );
 		}
 		else if ( src == txtH || src == txtS || src == txtV ) {
 			HSV hsv = new HSV( 0, 0, 0 );
