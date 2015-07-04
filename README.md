@@ -6,12 +6,12 @@ The editor provides a layer of abstraction over the game's files, making the tas
 
 It is a complete rewrite of, and successor to, the original [Superluminal](https://github.com/kartoFlane/Superluminal) editor.
 
-<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png" width="100px" height="auto" /></a>
-<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot2.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot2.png" width="100px" height="auto" /></a>
-<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot3.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot3.png" width="100px" height="auto" /></a>
-<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot4.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot4.png" width="100x" height="auto" /></a>
-<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot5.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot5.png" width="100px" height="auto" /></a>
-<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot6.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot6.png" width="100px" height="auto" /></a>
+<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1_thumb.png" width="100px" height="auto" /></a>
+<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot2.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot2_thumb.png" width="100px" height="auto" /></a>
+<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot3.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot3_thumb.png" width="100px" height="auto" /></a>
+<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot4.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot4_thumb.png" width="100x" height="auto" /></a>
+<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot5.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot5_thumb.png" width="100px" height="auto" /></a>
+<a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot6.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot6_thumb.png" width="100px" height="auto" /></a>
 
 Download
 --------
