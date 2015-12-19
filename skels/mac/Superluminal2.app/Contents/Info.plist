@@ -7,7 +7,7 @@
         <key>CFBundleExecutable</key>
         <string>runme</string>
         <key>CFBundleGetInfoString</key>
-        <string>Superluminal 2.1.2</string>          <!-- Change version -->
+        <string>Superluminal 2.1.2b</string>          <!-- Change version -->
         <key>CFBundleIconFile</key>
         <string>appIcon.icns</string>
         <key>CFBundleIdentifier</key>
@@ -19,11 +19,11 @@
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>
-        <string>2.1.2</string>                       <!-- Change version -->
+        <string>2.1.2b</string>                       <!-- Change version -->
         <key>CFBundleSignature</key>
         <string>????</string>
         <key>CFBundleVersion</key>
-        <string>2.1.2</string>                       <!-- Change version -->
+        <string>2.1.2b</string>                       <!-- Change version -->
         <key>LSHasLocalizedDisplayName</key>
         <true/>
         <key>NSHumanReadableCopyright</key>

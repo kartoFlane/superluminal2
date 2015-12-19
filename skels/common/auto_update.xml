@@ -1,6 +1,13 @@
 <versions>
-	<latest id="2.1.2" url="https://github.com/kartoFlane/superluminal2/releases/latest" />
+	<latest id="2.1.2b" url="https://github.com/kartoFlane/superluminal2/releases/latest" />
 	<changelog>
+		<version id="2.1.2b">
+			<change>Updated GUI library version. Hopefully fixes the issues with Windows 10.</change>
+			<change>Self-patching functionality is broken for non-Windows platforms, you'll need to update the editor manually.</change>
+		</version>
+    <version id="2.1.2a">
+      <change>Fixed stations blocking placement of doors</change>
+    </version>
 		<version id="2.1.2">
 			<change>Added experimental self-patching functionality</change>
 			<change>The floor generation algorithm can now be customized</change>
@@ -23,7 +30,7 @@
 		</version>
 		<version id="2.1.0b">
 			<change>Fixed several crashes</change>
-			<change>Fixed several bugs related to glows & glow selection dialog</change>
+			<change>Fixed several bugs related to glows and glow selection dialog</change>
 		</version>
 		<version id="2.1.0a">
 			<change>Fixed editor not loading default settings when it was ran for the first time</change>
