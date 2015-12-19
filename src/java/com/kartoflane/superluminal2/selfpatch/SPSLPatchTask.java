@@ -79,7 +79,7 @@ public class SPSLPatchTask implements SPPatchTask {
 			}
 		}
 		else {
-			// TODO
+			// TODO: tarball handling
 		}
 	}
 }

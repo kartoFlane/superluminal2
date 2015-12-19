@@ -51,12 +51,17 @@ public class SPSLGetTask extends SPGetTask {
 						else if ( os.isLinux() )
 							regex += Pattern.quote( "/Superluminal.Linux-" );
 						else if ( os.isMac() )
-							regex += Pattern.quote( "/Superluminal.Mac-" );
+							regex += Pattern.quote( "/Superluminal.Mac" );
 
-						if ( os.is32Bit() )
-							regex += "32\\.";
-						else if ( os.is64Bit() )
-							regex += "64\\.";
+						if ( os.isMac() ) {
+							regex += "\\.";
+						}
+						else {
+							if ( os.is32Bit() )
+								regex += "32\\.";
+							else if ( os.is64Bit() )
+								regex += "64\\.";
+						}
 
 						if ( os.isWindows() )
 							regex += ".*?" + Pattern.quote( ".zip" ) + ")" + "\"";
