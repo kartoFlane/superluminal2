@@ -1,5 +1,5 @@
 <assembly>
-	<id>dist-mac-64</id>
+	<id>dist-mac</id>
 	<formats>
 		<format>tar.gz</format>
 	</formats>

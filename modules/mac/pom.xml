@@ -9,9 +9,9 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>sl-mac32</artifactId>
+	<artifactId>sl-mac</artifactId>
 	<packaging>jar</packaging>
-	<name>Superluminal Mac-32</name>
+	<name>Superluminal Mac</name>
 
 	<dependencies>
 		<dependency>
@@ -27,10 +27,10 @@
 			</exclusions>
 		</dependency>
 		
-		<!-- SWT Mac 32-bit -->
+		<!-- SWT Mac 64-bit -->
 		<dependency>
 			<groupId>org.eclipse.swt</groupId>
-			<artifactId>org.eclipse.swt.cocoa.macosx</artifactId>
+			<artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
 			<version>${swt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
@@ -45,7 +45,7 @@
 				<executions>
 					<!-- Build jar -->
 					<execution>
-						<id>jar-with-dependencies-mac32</id>
+						<id>jar-with-dependencies-mac64</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
@@ -70,7 +70,7 @@
 					
 					<!-- Build zip archive -->
 					<execution>
-						<id>dist-mac-32</id>
+						<id>dist-mac-64</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
