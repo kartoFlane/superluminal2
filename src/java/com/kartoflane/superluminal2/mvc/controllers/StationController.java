@@ -30,6 +30,7 @@ public class StationController extends ObjectController {
 
 		setSelectable(false);
 		setLocModifiable(false);
+		setCollidable(false);
 
 		setSize(ShipContainer.CELL_SIZE, ShipContainer.CELL_SIZE);
 
