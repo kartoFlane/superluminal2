@@ -6,6 +6,8 @@ The editor provides a layer of abstraction over the game's files, making the tas
 
 It is a complete rewrite of, and successor to, the original [Superluminal](https://github.com/kartoFlane/Superluminal) editor.
 
+Related thread on the FTL forums can be found [here](http://www.ftlgame.com/forum/viewtopic.php?f=12&t=24901).
+
 <a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot1_thumb.png" width="100px" height="auto" /></a>
 <a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot2.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot2_thumb.png" width="100px" height="auto" /></a>
 <a href="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot3.png"><img src="https://raw.github.com/kartoFlane/superluminal2/master/img/ScreenShot3_thumb.png" width="100px" height="auto" /></a>
