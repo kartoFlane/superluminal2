@@ -13,6 +13,9 @@ To just compile the source code, use 'compile' profile.
 (compiled jar will be located in "modules/core/target")
 For example, "mvn package -P win"
 
+To increment project version, run "mvn versions:set" -- you will then be prompted
+to enter the new version string.
+
 ================================================
 This project depends on the following libraries:
 - JDOM 2.x
