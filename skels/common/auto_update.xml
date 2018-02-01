@@ -5,18 +5,18 @@
 			<change>Updated GUI library version. Hopefully fixes the issues with Windows 10.</change>
 			<change>Self-patching functionality is broken for non-Windows platforms, you'll need to update the editor manually.</change>
 		</version>
-    <version id="2.1.2a">
-      <change>Fixed stations blocking placement of doors</change>
-    </version>
+		<version id="2.1.2a">
+			<change>Fixed stations blocking placement of doors</change>
+		</version>
 		<version id="2.1.2">
 			<change>Added experimental self-patching functionality</change>
 			<change>The floor generation algorithm can now be customized</change>
 			<change>Added experimental feature that allows you to bundle your ship with a loaded mod when saving</change>
 		</version>
-    <version id="2.1.1a">
-      <change>Fixed a typo</change>
-      <change>Fixed a bug with systems sharing interior images</change>
-    </version>
+		<version id="2.1.1a">
+			<change>Fixed a typo</change>
+			<change>Fixed a bug with systems sharing interior images</change>
+		</version>
 		<version id="2.1.1">
 			<change>Editor now recognizes .rawappend files</change>
 			<change>Enemy ships can now have weapon/drone loadout defined like player ships do</change>
