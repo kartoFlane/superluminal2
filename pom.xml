@@ -16,7 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<jdk.version>1.6</jdk.version>
-		<swt.version>4.5.1</swt.version>
+		<swt.version>4.6.1</swt.version>
 		<log4j.version>2.0-rc1</log4j.version>
 		<jdom2.version>2.0.5</jdom2.version>
 	</properties>
