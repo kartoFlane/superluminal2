@@ -1,4 +1,4 @@
-package com.kartoflane.common.swt.ui.widgets;
+package com.kartoflane.common.ui.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;

@@ -1,4 +1,4 @@
-package com.kartoflane.common.swt.graphics;
+package com.kartoflane.common.graphics;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;

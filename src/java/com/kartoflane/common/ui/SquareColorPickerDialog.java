@@ -1,4 +1,4 @@
-package com.kartoflane.common.swt.ui;
+package com.kartoflane.common.ui;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
