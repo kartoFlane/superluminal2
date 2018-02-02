@@ -31,9 +31,10 @@ import com.kartoflane.superluminal2.undo.UndoablePropertyEdit;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
-@SuppressWarnings("serial")
-public class MountDataComposite extends Composite implements DataComposite {
 
+@SuppressWarnings("serial")
+public class MountDataComposite extends Composite implements DataComposite
+{
 	private static final String noLinkText = "Not linked";
 	private static final String selectGibText = "Select a gib";
 
@@ -55,290 +56,325 @@ public class MountDataComposite extends Composite implements DataComposite {
 	private Button btnFollowHull;
 	private Label lblFollowHelp;
 
-	public MountDataComposite(Composite parent, MountController control) {
-		super(parent, SWT.NONE);
+
+	public MountDataComposite( Composite parent, MountController control )
+	{
+		super( parent, SWT.NONE );
 
 		controller = control;
-		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
+		Image helpImage = Cache.checkOutImage( this, "cpath:/assets/help.png" );
 
-		setLayout(new GridLayout(2, false));
+		setLayout( new GridLayout( 2, false ) );
 
-		label = new Label(this, SWT.NONE);
-		label.setAlignment(SWT.CENTER);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		label.setText("Mount");
+		label = new Label( this, SWT.NONE );
+		label.setAlignment( SWT.CENTER );
+		label.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+		label.setText( "Mount" );
 
-		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		Label separator = new Label( this, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
 
-		btnFollowHull = new Button(this, SWT.CHECK);
-		btnFollowHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		btnFollowHull.setText("Follow Hull");
+		btnFollowHull = new Button( this, SWT.CHECK );
+		btnFollowHull.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, true, false, 1, 1 ) );
+		btnFollowHull.setText( "Follow Hull" );
 
-		lblFollowHelp = new Label(this, SWT.NONE);
-		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblFollowHelp.setImage(helpImage);
+		lblFollowHelp = new Label( this, SWT.NONE );
+		lblFollowHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblFollowHelp.setImage( helpImage );
 		String msg = "When checked, this object will follow the hull image, so that " +
-				"when hull is moved, this object is moved as well.";
-		UIUtils.addTooltip(lblFollowHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+			"when hull is moved, this object is moved as well.";
+		UIUtils.addTooltip( lblFollowHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		btnFollowHull.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (btnFollowHull.getSelection()) {
-					controller.setParent(Manager.getCurrentShip().getImageController(Images.HULL));
-				} else {
-					controller.setParent(Manager.getCurrentShip().getShipController());
+		btnFollowHull.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( btnFollowHull.getSelection() ) {
+						controller.setParent( Manager.getCurrentShip().getImageController( Images.HULL ) );
+					}
+					else {
+						controller.setParent( Manager.getCurrentShip().getShipController() );
+					}
+					controller.updateFollowOffset();
 				}
-				controller.updateFollowOffset();
 			}
-		});
+		);
 
 		// Separator to make the sidebar appear less cluttered
-		new Label(this, SWT.NONE);
-		new Label(this, SWT.NONE);
+		new Label( this, SWT.NONE );
+		new Label( this, SWT.NONE );
 
-		btnRotated = new Button(this, SWT.CHECK);
-		btnRotated.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		btnRotated.setText("Rotated");
+		btnRotated = new Button( this, SWT.CHECK );
+		btnRotated.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, true, false, 1, 1 ) );
+		btnRotated.setText( "Rotated" );
 
-		lblRotHelp = new Label(this, SWT.NONE);
-		lblRotHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblRotHelp.setImage(helpImage);
+		lblRotHelp = new Label( this, SWT.NONE );
+		lblRotHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblRotHelp.setImage( helpImage );
 		msg = "This determines the direction the weapon is going to face, " +
-				"and in which it's going to shoot.";
-		UIUtils.addTooltip(lblRotHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+			"and in which it's going to shoot.";
+		UIUtils.addTooltip( lblRotHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		btnMirrored = new Button(this, SWT.CHECK);
-		btnMirrored.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		btnMirrored.setText("Mirrored");
+		btnMirrored = new Button( this, SWT.CHECK );
+		btnMirrored.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, true, false, 1, 1 ) );
+		btnMirrored.setText( "Mirrored" );
 
-		lblMirHelp = new Label(this, SWT.NONE);
-		lblMirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblMirHelp.setImage(helpImage);
+		lblMirHelp = new Label( this, SWT.NONE );
+		lblMirHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblMirHelp.setImage( helpImage );
 		msg = "Flips the weapon along X or Y axis, depending on rotation.";
-		UIUtils.addTooltip(lblMirHelp, msg);
+		UIUtils.addTooltip( lblMirHelp, msg );
 
-		Label lblDirection = new Label(this, SWT.NONE);
-		lblDirection.setText("Power-up Direction:");
+		Label lblDirection = new Label( this, SWT.NONE );
+		lblDirection.setText( "Power-up Direction:" );
 
-		lblDirHelp = new Label(this, SWT.NONE);
-		lblDirHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblDirHelp.setImage(helpImage);
+		lblDirHelp = new Label( this, SWT.NONE );
+		lblDirHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblDirHelp.setImage( helpImage );
 		msg = "This determines the direction in which the weapon " +
-				"will 'slide' when it is powered up.";
-		UIUtils.addTooltip(lblDirHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+			"will 'slide' when it is powered up.";
+		UIUtils.addTooltip( lblDirHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		cmbDirection = new DirectionCombo(this, SWT.READ_ONLY, true);
-		GridData gd_cmbDirection = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
+		cmbDirection = new DirectionCombo( this, SWT.READ_ONLY, true );
+		GridData gd_cmbDirection = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 2, 1 );
 		gd_cmbDirection.widthHint = 80;
-		cmbDirection.setLayoutData(gd_cmbDirection);
-		cmbDirection.select(0);
+		cmbDirection.setLayoutData( gd_cmbDirection );
+		cmbDirection.select( 0 );
 
-		lblLinkedGib = new Label(this, SWT.NONE);
-		lblLinkedGib.setText("Linked Gib:");
+		lblLinkedGib = new Label( this, SWT.NONE );
+		lblLinkedGib.setText( "Linked Gib:" );
 
-		lblGibInfo = new Label(this, SWT.NONE);
-		lblGibInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblGibInfo.setImage(helpImage);
+		lblGibInfo = new Label( this, SWT.NONE );
+		lblGibInfo.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblGibInfo.setImage( helpImage );
 		msg = "This determines the gib to which this mount is attached. " +
-				"When the ship explodes, the mount will float along with the gib. " +
-				"If no gib is specified, the mount will simply disappear.";
-		UIUtils.addTooltip(lblGibInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+			"When the ship explodes, the mount will float along with the gib. " +
+			"If no gib is specified, the mount will simply disappear.";
+		UIUtils.addTooltip( lblGibInfo, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		btnLinkedGib = new Button(this, SWT.TOGGLE);
-		btnLinkedGib.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		btnLinkedGib.setText(noLinkText);
+		btnLinkedGib = new Button( this, SWT.TOGGLE );
+		btnLinkedGib.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
+		btnLinkedGib.setText( noLinkText );
 
-		btnSelectGib = new Button(this, SWT.NONE);
-		GridData gd_btnSelectGib = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		btnSelectGib = new Button( this, SWT.NONE );
+		GridData gd_btnSelectGib = new GridData( SWT.FILL, SWT.CENTER, false, false, 1, 1 );
 		gd_btnSelectGib.widthHint = 35;
-		btnSelectGib.setLayoutData(gd_btnSelectGib);
-		btnSelectGib.setText(">");
-		UIUtils.addTooltip(btnSelectGib, "Select the linked gib");
+		btnSelectGib.setLayoutData( gd_btnSelectGib );
+		btnSelectGib.setText( ">" );
+		UIUtils.addTooltip( btnSelectGib, "Select the linked gib" );
 
-		Label lblWeapon = new Label(this, SWT.NONE);
-		lblWeapon.setText("Displayed Weapon:");
+		Label lblWeapon = new Label( this, SWT.NONE );
+		lblWeapon.setText( "Displayed Weapon:" );
 
-		lblWeaponInfo = new Label(this, SWT.NONE);
-		lblWeaponInfo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblWeaponInfo.setImage(helpImage);
+		lblWeaponInfo = new Label( this, SWT.NONE );
+		lblWeaponInfo.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblWeaponInfo.setImage( helpImage );
 		msg = "This setting is only cosmetic, and allows " +
-				"you to view how a given weapon would look, " +
-				"were it placed on this mount.";
-		UIUtils.addTooltip(lblWeaponInfo, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+			"you to view how a given weapon would look, " +
+			"were it placed on this mount.";
+		UIUtils.addTooltip( lblWeaponInfo, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		btnWeapon = new Button(this, SWT.NONE);
-		btnWeapon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		btnWeapon.setText("<No Weapon>");
+		btnWeapon = new Button( this, SWT.NONE );
+		btnWeapon.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+		btnWeapon.setText( "<No Weapon>" );
 
-		btnRotated.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>(controller) {
-					@Override
-					public void callback(Boolean arg) {
-						MountController controller = (MountController) data;
-						Rectangle oldBounds = controller.getBounds();
-						controller.setRotated(arg);
-						controller.redraw();
-						EditorWindow.getInstance().canvasRedraw(oldBounds);
-						EditorWindow.getInstance().updateSidebarContent();
-					}
+		btnRotated.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>( controller ) {
+						@Override
+						public void callback( Boolean arg )
+						{
+							MountController controller = (MountController)data;
+							Rectangle oldBounds = controller.getBounds();
+							controller.setRotated( arg );
+							controller.redraw();
+							EditorWindow.getInstance().canvasRedraw( oldBounds );
+							EditorWindow.getInstance().updateSidebarContent();
+						}
 
-					@Override
-					public String getPresentationName() {
-						return "rotate mount";
-					}
-				};
+						@Override
+						public String getPresentationName()
+						{
+							return "rotate mount";
+						}
+					};
 
-				edit.setOld(controller.isRotated());
+					edit.setOld( controller.isRotated() );
 
-				Rectangle oldBounds = controller.getBounds();
-				controller.setRotated(btnRotated.getSelection());
-				controller.redraw();
-				EditorWindow.getInstance().canvasRedraw(oldBounds);
+					Rectangle oldBounds = controller.getBounds();
+					controller.setRotated( btnRotated.getSelection() );
+					controller.redraw();
+					EditorWindow.getInstance().canvasRedraw( oldBounds );
 
-				edit.setCurrent(controller.isRotated());
-				Manager.postEdit(edit);
-			}
-		});
-
-		btnMirrored.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>(controller) {
-					@Override
-					public void callback(Boolean arg) {
-						MountController controller = (MountController) data;
-						Rectangle oldBounds = controller.getBounds();
-						controller.setMirrored(arg);
-						controller.redraw();
-						EditorWindow.getInstance().canvasRedraw(oldBounds);
-						EditorWindow.getInstance().updateSidebarContent();
-					}
-
-					@Override
-					public String getPresentationName() {
-						return "mirror mount";
-					}
-				};
-
-				edit.setOld(controller.isMirrored());
-
-				Rectangle oldBounds = controller.getBounds();
-				controller.setMirrored(btnMirrored.getSelection());
-				controller.redraw();
-				EditorWindow.getInstance().canvasRedraw(oldBounds);
-
-				edit.setCurrent(controller.isMirrored());
-				Manager.postEdit(edit);
-			}
-		});
-
-		cmbDirection.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				UndoablePropertyEdit<Directions> edit = new UndoablePropertyEdit<Directions>(controller) {
-					@Override
-					public void callback(Directions arg) {
-						MountController controller = (MountController) data;
-						controller.setDirection(arg);
-						EditorWindow.getInstance().updateSidebarContent();
-					}
-
-					@Override
-					public String getPresentationName() {
-						return "change mount direction";
-					}
-				};
-
-				edit.setOld(controller.getDirection());
-				controller.setDirection(cmbDirection.getDirection());
-				edit.setCurrent(controller.getDirection());
-				if (!edit.isValuesEqual())
-					Manager.postEdit(edit);
-			}
-		});
-
-		btnWeapon.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				WeaponObject current = controller.getWeapon();
-				WeaponSelectionDialog dialog = new WeaponSelectionDialog(EditorWindow.getInstance().getShell());
-				WeaponObject neu = dialog.open(current);
-
-				if (neu != null) {
-					controller.setWeapon(neu);
-					updateData();
+					edit.setCurrent( controller.isRotated() );
+					Manager.postEdit( edit );
 				}
 			}
-		});
+		);
 
-		btnLinkedGib.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ManipulationTool tool = (ManipulationTool) Manager.getSelectedTool();
+		btnMirrored.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					UndoablePropertyEdit<Boolean> edit = new UndoablePropertyEdit<Boolean>( controller ) {
+						@Override
+						public void callback( Boolean arg )
+						{
+							MountController controller = (MountController)data;
+							Rectangle oldBounds = controller.getBounds();
+							controller.setMirrored( arg );
+							controller.redraw();
+							EditorWindow.getInstance().canvasRedraw( oldBounds );
+							EditorWindow.getInstance().updateSidebarContent();
+						}
 
-				if (btnLinkedGib.getSelection()) {
-					btnLinkedGib.setText(selectGibText);
-					tool.setStateMountGibLink();
-				} else {
-					GibObject gib = controller.getGib();
-					btnLinkedGib.setText(gib == Database.DEFAULT_GIB_OBJ ? noLinkText : gib.toString());
-					tool.setStateManipulate();
+						@Override
+						public String getPresentationName()
+						{
+							return "mirror mount";
+						}
+					};
+
+					edit.setOld( controller.isMirrored() );
+
+					Rectangle oldBounds = controller.getBounds();
+					controller.setMirrored( btnMirrored.getSelection() );
+					controller.redraw();
+					EditorWindow.getInstance().canvasRedraw( oldBounds );
+
+					edit.setCurrent( controller.isMirrored() );
+					Manager.postEdit( edit );
 				}
 			}
-		});
+		);
 
-		btnSelectGib.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Manager.setSelected(Manager.getCurrentShip().getController(controller.getGib()));
+		cmbDirection.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					UndoablePropertyEdit<Directions> edit = new UndoablePropertyEdit<Directions>( controller ) {
+						@Override
+						public void callback( Directions arg )
+						{
+							MountController controller = (MountController)data;
+							controller.setDirection( arg );
+							EditorWindow.getInstance().updateSidebarContent();
+						}
+
+						@Override
+						public String getPresentationName()
+						{
+							return "change mount direction";
+						}
+					};
+
+					edit.setOld( controller.getDirection() );
+					controller.setDirection( cmbDirection.getDirection() );
+					edit.setCurrent( controller.getDirection() );
+					if ( !edit.isValuesEqual() )
+						Manager.postEdit( edit );
+				}
 			}
-		});
+		);
+
+		btnWeapon.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					WeaponObject current = controller.getWeapon();
+					WeaponSelectionDialog dialog = new WeaponSelectionDialog( EditorWindow.getInstance().getShell() );
+					WeaponObject neu = dialog.open( current );
+
+					if ( neu != null ) {
+						controller.setWeapon( neu );
+						updateData();
+					}
+				}
+			}
+		);
+
+		btnLinkedGib.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					ManipulationTool tool = (ManipulationTool)Manager.getSelectedTool();
+
+					if ( btnLinkedGib.getSelection() ) {
+						btnLinkedGib.setText( selectGibText );
+						tool.setStateMountGibLink();
+					}
+					else {
+						GibObject gib = controller.getGib();
+						btnLinkedGib.setText( gib == Database.DEFAULT_GIB_OBJ ? noLinkText : gib.toString() );
+						tool.setStateManipulate();
+					}
+				}
+			}
+		);
+
+		btnSelectGib.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					Manager.setSelected( Manager.getCurrentShip().getController( controller.getGib() ) );
+				}
+			}
+		);
 
 		updateData();
 	}
 
 	@Override
-	public void updateData() {
+	public void updateData()
+	{
 		String alias = controller.getAlias();
-		label.setText("Mount " + controller.getId() + (alias == null || alias.trim().equals("") ? "" : " (" + alias + ")"));
+		label.setText( "Mount " + controller.getId() + ( alias == null || alias.trim().equals( "" ) ? "" : " (" + alias + ")" ) );
 
-		btnFollowHull.setSelection(controller.getParent() == Manager.getCurrentShip().getImageController(Images.HULL));
+		btnFollowHull.setSelection( controller.getParent() == Manager.getCurrentShip().getImageController( Images.HULL ) );
 
-		btnRotated.setSelection(controller.isRotated());
-		btnMirrored.setSelection(controller.isMirrored());
+		btnRotated.setSelection( controller.isRotated() );
+		btnMirrored.setSelection( controller.isMirrored() );
 
-		cmbDirection.select(DirectionCombo.toIndex(controller.getDirection()));
+		cmbDirection.select( DirectionCombo.toIndex( controller.getDirection() ) );
 
 		WeaponObject weapon = controller.getWeapon();
-		btnWeapon.setText(weapon.toString());
+		btnWeapon.setText( weapon.toString() );
 
 		GibObject gib = controller.getGib();
-		if (gib == Database.DEFAULT_GIB_OBJ)
-			btnLinkedGib.setText(noLinkText);
+		if ( gib == Database.DEFAULT_GIB_OBJ )
+			btnLinkedGib.setText( noLinkText );
 		else
-			btnLinkedGib.setText(gib.toString());
-		btnLinkedGib.setSelection(false);
+			btnLinkedGib.setText( gib.toString() );
+		btnLinkedGib.setSelection( false );
 
-		btnSelectGib.setEnabled(gib != Database.DEFAULT_GIB_OBJ);
+		btnSelectGib.setEnabled( gib != Database.DEFAULT_GIB_OBJ );
 
-		OverviewWindow.staticUpdate(controller);
+		OverviewWindow.staticUpdate( controller );
 	}
 
 	@Override
-	public void setController(AbstractController controller) {
-		this.controller = (MountController) controller;
+	public void setController( AbstractController controller )
+	{
+		this.controller = (MountController)controller;
 	}
 
-	public void reloadController() {
+	public void reloadController()
+	{
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose()
+	{
 		super.dispose();
-		Cache.checkInImage(this, "cpath:/assets/help.png");
+		Cache.checkInImage( this, "cpath:/assets/help.png" );
 	}
 }

@@ -6,65 +6,78 @@ import org.eclipse.swt.widgets.Composite;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.sidebar.PropertiesToolComposite;
 
-public class PropertyTool extends Tool {
 
-	public PropertyTool(EditorWindow window) {
-		super(window);
+public class PropertyTool extends Tool
+{
+	public PropertyTool( EditorWindow window )
+	{
+		super( window );
 	}
 
 	@Override
-	public void select() {
+	public void select()
+	{
 		window.disposeSidebarContent();
 
-		PropertiesToolComposite createC = getToolComposite(window.getSidebarWidget());
-		window.setSidebarContent(createC);
+		PropertiesToolComposite createC = getToolComposite( window.getSidebarWidget() );
+		window.setSidebarContent( createC );
 	}
 
 	@Override
-	public void deselect() {
+	public void deselect()
+	{
 	}
 
 	@Override
-	public PropertiesToolComposite getToolComposite(Composite parent) {
-		return (PropertiesToolComposite) super.getToolComposite(parent);
+	public PropertiesToolComposite getToolComposite( Composite parent )
+	{
+		return (PropertiesToolComposite)super.getToolComposite( parent );
 	}
 
 	@Override
-	public PropertiesToolComposite createToolComposite(Composite parent) {
-		if (parent == null)
-			throw new IllegalArgumentException("Parent must not be null.");
-		compositeInstance = new PropertiesToolComposite(parent);
-		return (PropertiesToolComposite) compositeInstance;
+	public PropertiesToolComposite createToolComposite( Composite parent )
+	{
+		if ( parent == null )
+			throw new IllegalArgumentException( "Parent must not be null." );
+		compositeInstance = new PropertiesToolComposite( parent );
+		return (PropertiesToolComposite)compositeInstance;
 	}
 
 	@Override
-	public void mouseDoubleClick(MouseEvent e) {
+	public void mouseDoubleClick( MouseEvent e )
+	{
 	}
 
 	@Override
-	public void mouseDown(MouseEvent e) {
+	public void mouseDown( MouseEvent e )
+	{
 	}
 
 	@Override
-	public void mouseUp(MouseEvent e) {
+	public void mouseUp( MouseEvent e )
+	{
 		// Returns focus to the main window when user clicks on the canvas, allowing to use hotkeys
-		if (!window.isFocusControl())
+		if ( !window.isFocusControl() )
 			window.forceFocus();
 	}
 
 	@Override
-	public void mouseMove(MouseEvent e) {
+	public void mouseMove( MouseEvent e )
+	{
 	}
 
 	@Override
-	public void mouseEnter(MouseEvent e) {
+	public void mouseEnter( MouseEvent e )
+	{
 	}
 
 	@Override
-	public void mouseExit(MouseEvent e) {
+	public void mouseExit( MouseEvent e )
+	{
 	}
 
 	@Override
-	public void mouseHover(MouseEvent e) {
+	public void mouseHover( MouseEvent e )
+	{
 	}
 }

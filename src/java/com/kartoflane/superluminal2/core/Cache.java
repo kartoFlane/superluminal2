@@ -16,6 +16,7 @@ import org.eclipse.swt.graphics.RGB;
 
 import com.kartoflane.superluminal2.utils.UIUtils;
 
+
 /**
  * A Cache class that only creates a requested object once, and then
  * redistribute the reference to that object to clients.
@@ -24,13 +25,15 @@ import com.kartoflane.superluminal2.utils.UIUtils;
  * @author kartoFlane
  * 
  */
-public class Cache {
-	private static final Logger log = LogManager.getLogger(Cache.class);
+public class Cache
+{
+	private static final Logger log = LogManager.getLogger( Cache.class );
 
 	private static HashMap<String, Image> cachedImageMap = new HashMap<String, Image>();
 	private static HashMap<RGB, Color> cachedColorMap = new HashMap<RGB, Color>();
 	private static HashMap<String, ArrayList<Object>> imageCustomerMap = new HashMap<String, ArrayList<Object>>();
 	private static HashMap<RGB, ArrayList<Object>> colorCustomerMap = new HashMap<RGB, ArrayList<Object>>();
+
 
 	/**
 	 * Request an Image handle for the given path.<br>
@@ -60,44 +63,49 @@ public class Cache {
 	 * @param path
 	 *            path to the requested resource, beginning with a protocol
 	 */
-	public static Image checkOutImage(Object customer, String path) {
+	public static Image checkOutImage( Object customer, String path )
+	{
 		Image image = null;
-		ArrayList<Object> customers = imageCustomerMap.get(path);
+		ArrayList<Object> customers = imageCustomerMap.get( path );
 
 		// create a new list of customers if there isn't any
-		if (customers == null) {
+		if ( customers == null ) {
 			customers = new ArrayList<Object>();
-			imageCustomerMap.put(path, customers);
+			imageCustomerMap.put( path, customers );
 		}
 
-		if (customer == null)
-			throw new IllegalArgumentException("Customer is null.");
+		if ( customer == null )
+			throw new IllegalArgumentException( "Customer is null." );
 
 		// check whether the image has already been cached
-		image = cachedImageMap.get(path);
-		if (image != null && image.isDisposed()) {
-			cachedImageMap.remove(path);
+		image = cachedImageMap.get( path );
+		if ( image != null && image.isDisposed() ) {
+			cachedImageMap.remove( path );
 			customers.clear();
 			image = null;
 		}
 
-		if (path == null) {
-			throw new IllegalArgumentException("Path is null.");
-		} else {
+		if ( path == null ) {
+			throw new IllegalArgumentException( "Path is null." );
+		}
+		else {
 			try {
-				if (image == null) {
-					InputStream is = Manager.getInputStream(path);
-					image = new Image(UIUtils.getDisplay(), is);
-					cachedImageMap.put(path, image);
+				if ( image == null ) {
+					InputStream is = Manager.getInputStream( path );
+					image = new Image( UIUtils.getDisplay(), is );
+					cachedImageMap.put( path, image );
 				}
 
-				customers.add(customer);
-			} catch (SWTException e) {
-				log.warn(String.format("%s - resource contains invalid data: %s", path, e.getClass().getSimpleName() + ": " + e.getMessage()));
-			} catch (IllegalArgumentException e) {
-				log.warn(String.format("Could not load %s: %s", path, e.getClass().getSimpleName() + ": " + e.getMessage()));
-			} catch (FileNotFoundException e) {
-				log.warn("Could not find file: " + path);
+				customers.add( customer );
+			}
+			catch ( SWTException e ) {
+				log.warn( String.format( "%s - resource contains invalid data: %s", path, e.getClass().getSimpleName() + ": " + e.getMessage() ) );
+			}
+			catch ( IllegalArgumentException e ) {
+				log.warn( String.format( "Could not load %s: %s", path, e.getClass().getSimpleName() + ": " + e.getMessage() ) );
+			}
+			catch ( FileNotFoundException e ) {
+				log.warn( "Could not find file: " + path );
 			}
 		}
 
@@ -107,13 +115,14 @@ public class Cache {
 	/**
 	 * Signal the Cache that the customer is done using the image.
 	 */
-	public static void checkInImage(Object customer, String path) {
-		ArrayList<Object> customers = imageCustomerMap.get(path);
+	public static void checkInImage( Object customer, String path )
+	{
+		ArrayList<Object> customers = imageCustomerMap.get( path );
 
-		if (customers != null && customers.size() > 0) {
+		if ( customers != null && customers.size() > 0 ) {
 			Iterator<Object> it = customers.iterator();
-			while (it.hasNext()) {
-				if (it.next() == customer) {
+			while ( it.hasNext() ) {
+				if ( it.next() == customer ) {
 					it.remove();
 					break;
 				}
@@ -121,47 +130,49 @@ public class Cache {
 		}
 
 		// no one is using the resource anymore
-		if (customers == null || customers.size() == 0) {
-			Image image = cachedImageMap.get(path);
-			if (image != null && !image.isDisposed())
+		if ( customers == null || customers.size() == 0 ) {
+			Image image = cachedImageMap.get( path );
+			if ( image != null && !image.isDisposed() )
 				image.dispose();
-			cachedImageMap.remove(path);
+			cachedImageMap.remove( path );
 		}
 	}
 
 	/**
 	 * Request a Color handle for the given RGB.
 	 */
-	public static Color checkOutColor(Object customer, RGB rgb) {
+	public static Color checkOutColor( Object customer, RGB rgb )
+	{
 		Color color = null;
-		ArrayList<Object> customers = colorCustomerMap.get(rgb);
+		ArrayList<Object> customers = colorCustomerMap.get( rgb );
 
 		// create a new list of customers if there isn't any
-		if (customers == null) {
+		if ( customers == null ) {
 			customers = new ArrayList<Object>();
-			colorCustomerMap.put(rgb, customers);
+			colorCustomerMap.put( rgb, customers );
 		}
 
-		if (customer == null)
-			throw new IllegalArgumentException("Customer is null.");
+		if ( customer == null )
+			throw new IllegalArgumentException( "Customer is null." );
 
 		// check whether the image has already been cached
-		color = cachedColorMap.get(rgb);
-		if (color != null && color.isDisposed()) {
-			cachedColorMap.remove(rgb);
+		color = cachedColorMap.get( rgb );
+		if ( color != null && color.isDisposed() ) {
+			cachedColorMap.remove( rgb );
 			customers.clear();
 			color = null;
 		}
 
-		if (rgb == null) {
-			throw new IllegalArgumentException("RGB is null.");
-		} else {
-			if (color == null) {
-				color = new Color(UIUtils.getDisplay(), rgb);
-				cachedColorMap.put(rgb, color);
+		if ( rgb == null ) {
+			throw new IllegalArgumentException( "RGB is null." );
+		}
+		else {
+			if ( color == null ) {
+				color = new Color( UIUtils.getDisplay(), rgb );
+				cachedColorMap.put( rgb, color );
 			}
 
-			customers.add(customer);
+			customers.add( customer );
 		}
 
 		return color;
@@ -170,13 +181,14 @@ public class Cache {
 	/**
 	 * Signal the Cache that the customer is done using the color.
 	 */
-	public static void checkInColor(Object customer, RGB rgb) {
-		ArrayList<Object> customers = colorCustomerMap.get(rgb);
+	public static void checkInColor( Object customer, RGB rgb )
+	{
+		ArrayList<Object> customers = colorCustomerMap.get( rgb );
 
-		if (customers != null && customers.size() > 0) {
+		if ( customers != null && customers.size() > 0 ) {
 			Iterator<Object> it = customers.iterator();
-			while (it.hasNext()) {
-				if (it.next() == customer) {
+			while ( it.hasNext() ) {
+				if ( it.next() == customer ) {
 					it.remove();
 					break;
 				}
@@ -184,18 +196,19 @@ public class Cache {
 		}
 
 		// no one is using the resource anymore
-		if (customers == null || customers.size() == 0) {
-			Color color = cachedColorMap.get(rgb);
-			if (color != null && !color.isDisposed())
+		if ( customers == null || customers.size() == 0 ) {
+			Color color = cachedColorMap.get( rgb );
+			if ( color != null && !color.isDisposed() )
 				color.dispose();
-			cachedColorMap.remove(rgb);
+			cachedColorMap.remove( rgb );
 		}
 	}
 
 	/** Flush the Cache of any stored Image references, disposing them in the process. */
-	public static void disposeImages() {
-		for (Map.Entry<String, Image> entry : cachedImageMap.entrySet()) {
-			if (entry.getValue() != null && !entry.getValue().isDisposed())
+	public static void disposeImages()
+	{
+		for ( Map.Entry<String, Image> entry : cachedImageMap.entrySet() ) {
+			if ( entry.getValue() != null && !entry.getValue().isDisposed() )
 				entry.getValue().dispose();
 		}
 		cachedImageMap.clear();
@@ -203,9 +216,10 @@ public class Cache {
 	}
 
 	/** Flush the Cache of any stored Color references, disposing them in the process. */
-	public static void disposeColors() {
-		for (Map.Entry<RGB, Color> entry : cachedColorMap.entrySet()) {
-			if (entry.getValue() != null && !entry.getValue().isDisposed())
+	public static void disposeColors()
+	{
+		for ( Map.Entry<RGB, Color> entry : cachedColorMap.entrySet() ) {
+			if ( entry.getValue() != null && !entry.getValue().isDisposed() )
 				entry.getValue().dispose();
 		}
 		cachedColorMap.clear();
@@ -213,7 +227,8 @@ public class Cache {
 	}
 
 	/** Flush the Cache of any stored resources, disposing them in the proces. */
-	public static void dispose() {
+	public static void dispose()
+	{
 		disposeImages();
 		disposeColors();
 	}

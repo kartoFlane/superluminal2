@@ -2,65 +2,77 @@ package com.kartoflane.superluminal2.mvc.models;
 
 import com.kartoflane.superluminal2.ftl.GameObject;
 
-public class ObjectModel extends BaseModel {
 
+public class ObjectModel extends BaseModel
+{
 	protected GameObject gameObject = null;
 
-	private ObjectModel() {
+
+	private ObjectModel()
+	{
 		super();
 	}
 
-	public ObjectModel(GameObject gameObject) {
+	public ObjectModel( GameObject gameObject )
+	{
 		this();
-		setGameObject(gameObject);
+		setGameObject( gameObject );
 	}
 
-	public void setGameObject(GameObject o) {
+	public void setGameObject( GameObject o )
+	{
 		gameObject = o;
 	}
 
-	public GameObject getGameObject() {
-		if (gameObject == null)
-			throw new IllegalStateException("Model is disposed.");
+	public GameObject getGameObject()
+	{
+		if ( gameObject == null )
+			throw new IllegalStateException( "Model is disposed." );
 		return gameObject;
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose()
+	{
 		super.dispose();
-		gameObject.setModel(null);
+		gameObject.setModel( null );
 		gameObject = null;
 	}
 
 	@Override
-	public void delete() {
-		if (gameObject == null)
-			throw new IllegalStateException("Model is disposed.");
+	public void delete()
+	{
+		if ( gameObject == null )
+			throw new IllegalStateException( "Model is disposed." );
 		gameObject.delete();
 	}
 
 	@Override
-	public void restore() {
-		if (gameObject == null)
-			throw new IllegalStateException("Model is disposed.");
+	public void restore()
+	{
+		if ( gameObject == null )
+			throw new IllegalStateException( "Model is disposed." );
 		gameObject.restore();
 	}
 
 	@Override
-	public void setDeletable(boolean deletable) {
-		if (gameObject == null)
-			throw new IllegalStateException("Model is disposed.");
-		gameObject.setDeletable(deletable);
+	public void setDeletable( boolean deletable )
+	{
+		if ( gameObject == null )
+			throw new IllegalStateException( "Model is disposed." );
+		gameObject.setDeletable( deletable );
 	}
 
 	@Override
-	public boolean isDeletable() {
-		if (gameObject == null)
-			throw new IllegalStateException("Model is disposed.");
+	public boolean isDeletable()
+	{
+		if ( gameObject == null )
+			throw new IllegalStateException( "Model is disposed." );
 		return gameObject.isDeletable();
 	}
 
-	public boolean isDisposed() {
+	public boolean isDisposed()
+	{
 		return gameObject == null;
 	}
 }

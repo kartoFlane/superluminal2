@@ -1,45 +1,66 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum Systems {
+public enum Systems
+{
 	EMPTY,
-	ARTILLERY, BATTERY, CLOAKING, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
-	MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS;
+	ARTILLERY,
+	BATTERY,
+	CLOAKING,
+	CLONEBAY,
+	DOORS,
+	DRONES,
+	ENGINES,
+	HACKING,
+	MEDBAY,
+	MIND,
+	OXYGEN,
+	PILOT,
+	SENSORS,
+	SHIELDS,
+	TELEPORTER,
+	WEAPONS;
 
 	@Override
-	public String toString() {
-		return name().substring(0, 1) + name().substring(1).toLowerCase();
+	public String toString()
+	{
+		return name().substring( 0, 1 ) + name().substring( 1 ).toLowerCase();
 	}
 
 	/** @return array of all systems, excluding {@link #EMPTY} */
-	public static Systems[] getSystems() {
+	public static Systems[] getSystems()
+	{
 		return new Systems[] {
-				ARTILLERY, BATTERY, CLOAKING, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
-				MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
+			ARTILLERY, BATTERY, CLOAKING, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
+			MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
 		};
 	}
 
 	/** @return true if the system can have a station, false otherwise. */
-	public boolean canContainStation() {
+	public boolean canContainStation()
+	{
 		return this == Systems.SHIELDS || this == Systems.ENGINES ||
-				this == Systems.WEAPONS || this == Systems.MEDBAY ||
-				this == Systems.PILOT || this == Systems.DOORS ||
-				this == Systems.SENSORS || this == Systems.CLONEBAY;
+			this == Systems.WEAPONS || this == Systems.MEDBAY ||
+			this == Systems.PILOT || this == Systems.DOORS ||
+			this == Systems.SENSORS || this == Systems.CLONEBAY;
 	}
 
 	/** @return true if the system can have a interior image, false otherwise */
-	public boolean canContainInterior() {
+	public boolean canContainInterior()
+	{
 		return this != Systems.EMPTY && this != Systems.CLONEBAY && this != Systems.TELEPORTER;
 	}
 
 	/** @return true if the system can have a glow image, false otherwise. */
-	public boolean canContainGlow() {
+	public boolean canContainGlow()
+	{
 		return this == Systems.SHIELDS || this == Systems.ENGINES ||
-				this == Systems.WEAPONS || this == Systems.PILOT ||
-				this == Systems.CLOAKING;
+			this == Systems.WEAPONS || this == Systems.PILOT ||
+			this == Systems.CLOAKING;
 	}
 
-	public int getDefaultSlotId() {
-		switch (this) {
+	public int getDefaultSlotId()
+	{
+		switch ( this ) {
 			case PILOT:
 			case DOORS:
 			case SHIELDS:
@@ -56,8 +77,9 @@ public enum Systems {
 		}
 	}
 
-	public Directions getDefaultSlotDirection() {
-		switch (this) {
+	public Directions getDefaultSlotDirection()
+	{
+		switch ( this ) {
 			case ENGINES:
 				return Directions.DOWN;
 			case PILOT:
@@ -76,8 +98,9 @@ public enum Systems {
 		}
 	}
 
-	public String getDefaultInteriorNamespace() {
-		switch (this) {
+	public String getDefaultInteriorNamespace()
+	{
+		switch ( this ) {
 			case ARTILLERY:
 				return "room_artillery";
 			case BATTERY:
@@ -114,11 +137,13 @@ public enum Systems {
 		}
 	}
 
-	public String getIcon() {
+	public String getIcon()
+	{
 		return "cpath:/assets/system/" + toString().toLowerCase() + ".png";
 	}
 
-	public String getSmallIcon() {
+	public String getSmallIcon()
+	{
 		return "cpath:/assets/smallsystem/" + toString().toLowerCase() + ".png";
 	}
 }

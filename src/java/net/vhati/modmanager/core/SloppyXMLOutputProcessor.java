@@ -35,11 +35,12 @@ import org.jdom2.util.NamespaceStack;
  *
  * @see org.jdom2.output.XMLOutputter
  */
-public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
-
+public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor
+{
 	// Copied from AbstractXMLOutputProcessor in JDOM 2.0.5, with modification.
 	@Override
-	protected void printElement( Writer out, FormatStack fstack, NamespaceStack nstack, Element element ) throws IOException {
+	protected void printElement( Writer out, FormatStack fstack, NamespaceStack nstack, Element element ) throws IOException
+	{
 		nstack.push( element );
 		try {
 			final List<Content> content = element.getContent();
@@ -61,7 +62,8 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 						write( out, "></" );
 						write( out, element.getQualifiedName() );
 						write( out, ">" );
-					} else {
+					}
+					else {
 						write( out, " />" );
 					}
 					return;
@@ -80,10 +82,10 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 
 			try {
 				final String space = element.getAttributeValue( "space", Namespace.XML_NAMESPACE );
-				if ( "default".equals(space) ) {
+				if ( "default".equals( space ) ) {
 					fstack.setTextMode( fstack.getDefaultMode() );
 				}
-				else if ( "preserve".equals(space) ) {
+				else if ( "preserve".equals( space ) ) {
 					fstack.setTextMode( Format.TextMode.PRESERVE );
 				}
 
@@ -132,13 +134,13 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 		}
 
 		// Technically, nstack.push(), super.printElement(), nstack.pop()
-		//   would be enough to make namespaces look already declared.
+		// would be enough to make namespaces look already declared.
 		// But to avoid having to loop over root's child content to feed
-		//   XMLOutputter, means writing most of this method just for
-		//   root (omitting the tag printing parts).
+		// XMLOutputter, means writing most of this method just for
+		// root (omitting the tag printing parts).
 		// And to expand tags that have blank content while still
-		//   trimming, means writing the whole method (excluding root
-		//    with if blocks).
+		// trimming, means writing the whole method (excluding root
+		// with if blocks).
 	}
 
 
@@ -152,7 +154,8 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor {
 	 *
 	 * LineEndings will be CR-LF. Except for comments!?
 	 */
-	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException {
+	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException
+	{
 		Format format = Format.getPrettyFormat();
 		format.setExpandEmptyElements( false );
 		format.setOmitDeclaration( false );

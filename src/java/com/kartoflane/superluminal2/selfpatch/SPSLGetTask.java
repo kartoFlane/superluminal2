@@ -17,13 +17,14 @@ import com.kartoflane.common.selfpatch.SPGetTask;
 import com.kartoflane.superluminal2.components.enums.OS;
 
 
-public class SPSLGetTask extends SPGetTask {
-
+public class SPSLGetTask extends SPGetTask
+{
 	private static final int bufferSize = 1024 * 16;
 
 
 	@Override
-	public void run() {
+	public void run()
+	{
 		File tmpFile = null;
 		Exception exception = null;
 		HttpURLConnection connection = null;

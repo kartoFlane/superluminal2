@@ -14,8 +14,9 @@ import org.eclipse.swt.widgets.Shell;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
-public class LoadingDialog {
 
+public class LoadingDialog
+{
 	private static volatile int instances = 0;
 
 	private volatile boolean exit = false;
@@ -23,64 +24,72 @@ public class LoadingDialog {
 	private Shell shell = null;
 	private Display display = null;
 
-	public LoadingDialog(Shell parentShell, String title, String message) {
+
+	public LoadingDialog( Shell parentShell, String title, String message )
+	{
 		instances++;
 
 		display = UIUtils.getDisplay();
 
-		if (title == null)
+		if ( title == null )
 			title = Superluminal.APP_NAME + " - Loading...";
-		if (message == null)
+		if ( message == null )
 			message = "Loading, please wait...";
 
-		shell = new Shell(parentShell, SWT.BORDER | SWT.TITLE | SWT.APPLICATION_MODAL);
-		shell.setText(title);
-		shell.setLayout(new GridLayout(1, false));
+		shell = new Shell( parentShell, SWT.BORDER | SWT.TITLE | SWT.APPLICATION_MODAL );
+		shell.setText( title );
+		shell.setLayout( new GridLayout( 1, false ) );
 
-		Label lblLoadingPleaseWait = new Label(shell, SWT.WRAP);
-		lblLoadingPleaseWait.setText(message);
-		GridData gd_lblLoadingPleaseWait = new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1);
+		Label lblLoadingPleaseWait = new Label( shell, SWT.WRAP );
+		lblLoadingPleaseWait.setText( message );
+		GridData gd_lblLoadingPleaseWait = new GridData( SWT.CENTER, SWT.CENTER, true, false, 1, 1 );
 		gd_lblLoadingPleaseWait.widthHint = 250;
-		lblLoadingPleaseWait.setLayoutData(gd_lblLoadingPleaseWait);
+		lblLoadingPleaseWait.setLayoutData( gd_lblLoadingPleaseWait );
 
-		ProgressBar progressBar = new ProgressBar(shell, SWT.SMOOTH | SWT.INDETERMINATE);
-		progressBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		ProgressBar progressBar = new ProgressBar( shell, SWT.SMOOTH | SWT.INDETERMINATE );
+		progressBar.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
 
-		shell.addListener(SWT.Close, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				e.doit = false;
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					e.doit = false;
+				}
 			}
-		});
+		);
 
 		shell.pack();
 
 		Point size = shell.getSize();
 		Point parSize = parentShell.getSize();
 		Point parLoc = parentShell.getLocation();
-		shell.setLocation(parLoc.x + parSize.x / 2 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+		shell.setLocation( parLoc.x + parSize.x / 2 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2 );
 	}
 
-	public static boolean isActive() {
+	public static boolean isActive()
+	{
 		return instances != 0;
 	}
 
-	public void open() {
+	public void open()
+	{
 		shell.open();
 
-		while (!exit) {
-			if (!display.readAndDispatch())
+		while ( !exit ) {
+			if ( !display.readAndDispatch() )
 				display.sleep();
 		}
 
 		shell.dispose();
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		instances--;
 		exit = true;
 		// Wakes the display from sleep
 		// Without this call, the dialog would wait for user input, and then disappear.
-		display.asyncExec(null);
+		display.asyncExec( null );
 	}
 }

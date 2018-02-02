@@ -6,24 +6,28 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
-public class KeyboardInputDispatcher implements KeyListener, Listener {
 
+public class KeyboardInputDispatcher implements KeyListener, Listener
+{
 	@Override
-	public void keyPressed(KeyEvent e) {
-		Manager.notifyKeyPressed(e);
+	public void keyPressed( KeyEvent e )
+	{
+		Manager.notifyKeyPressed( e );
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		Manager.notifyKeyReleased(e);
+	public void keyReleased( KeyEvent e )
+	{
+		Manager.notifyKeyReleased( e );
 	}
 
 	@Override
-	public void handleEvent(Event e) {
-		KeyEvent ke = new KeyEvent(e);
-		if (e.type == SWT.KeyDown)
-			keyPressed(ke);
-		else if (e.type == SWT.KeyUp)
-			keyReleased(ke);
+	public void handleEvent( Event e )
+	{
+		KeyEvent ke = new KeyEvent( e );
+		if ( e.type == SWT.KeyDown )
+			keyPressed( ke );
+		else if ( e.type == SWT.KeyUp )
+			keyReleased( ke );
 	}
 }

@@ -10,16 +10,19 @@ import java.util.regex.Pattern;
  * @author kartoFlane
  *
  */
-public class FTLLayoutParser {
-
+public class FTLLayoutParser
+{
 	private FTLLayoutFactory factory;
 
-	public FTLLayoutParser() {
-		this(null);
+
+	public FTLLayoutParser()
+	{
+		this( null );
 	}
 
-	public FTLLayoutParser(FTLLayoutFactory factory) {
-		if (factory == null)
+	public FTLLayoutParser( FTLLayoutFactory factory )
+	{
+		if ( factory == null )
 			factory = new DefaultFTLLayoutFactory();
 		this.factory = factory;
 	}
@@ -34,8 +37,9 @@ public class FTLLayoutParser {
 	 * @throws FTLLayoutParseException
 	 *             when an error occurs while parsing
 	 */
-	public ShipLayout build(String source) throws FTLLayoutParseException {
-		Scanner sc = new Scanner(source);
+	public ShipLayout build( String source ) throws FTLLayoutParseException
+	{
+		Scanner sc = new Scanner( source );
 		ShipLayout layout = new ShipLayout();
 
 		int line = -1;
@@ -43,64 +47,66 @@ public class FTLLayoutParser {
 		try {
 			String lineContent = null;
 
-			while (sc.hasNextLine()) {
+			while ( sc.hasNextLine() ) {
 				++line;
 				lineContent = sc.nextLine();
 
-				if (lineContent == null || lineContent.trim().equals("")) {
-					if (sc.hasNextLine()) {
+				if ( lineContent == null || lineContent.trim().equals( "" ) ) {
+					if ( sc.hasNextLine() ) {
 						// throw new FTLLayoutParseException("Double line break only allowed at the end of the file.", layout, line);
 					}
 				}
-				else if (Pattern.matches("\\w*", lineContent)) {
+				else if ( Pattern.matches( "\\w*", lineContent ) ) {
 					LOType objectType = null;
 					try {
-						objectType = LOType.valueOf(lineContent);
+						objectType = LOType.valueOf( lineContent );
 
-						switch (objectType) {
+						switch ( objectType ) {
 							case X_OFFSET:
-								layout.addLayoutObject(factory.xOffset(line, sc.nextInt()));
+								layout.addLayoutObject( factory.xOffset( line, sc.nextInt() ) );
 								++line;
 								break;
 							case Y_OFFSET:
-								layout.addLayoutObject(factory.yOffset(line, sc.nextInt()));
+								layout.addLayoutObject( factory.yOffset( line, sc.nextInt() ) );
 								++line;
 								break;
 							case HORIZONTAL:
-								layout.addLayoutObject(factory.horizontal(line, sc.nextInt()));
+								layout.addLayoutObject( factory.horizontal( line, sc.nextInt() ) );
 								++line;
 								break;
 							case VERTICAL:
-								layout.addLayoutObject(factory.vertical(line, sc.nextInt()));
+								layout.addLayoutObject( factory.vertical( line, sc.nextInt() ) );
 								++line;
 								break;
 							case ELLIPSE:
-								layout.addLayoutObject(factory.ellipse(line, sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt()));
+								layout.addLayoutObject( factory.ellipse( line, sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt() ) );
 								line += 4;
 								break;
 							case ROOM:
-								layout.addLayoutObject(factory.room(line, sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt()));
+								layout.addLayoutObject( factory.room( line, sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt() ) );
 								line += 5;
 								break;
 							case DOOR:
-								layout.addLayoutObject(factory.door(line, sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt() == 0));
+								layout.addLayoutObject(
+									factory.door( line, sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt() == 0 )
+								);
 								line += 5;
 								break;
 							default:
-								throw new RuntimeException("Implementation error. Should never happen.");
+								throw new RuntimeException( "Implementation error. Should never happen." );
 						}
 					}
-					catch (IllegalArgumentException e) {
-						throw new FTLLayoutParseException("Unrecognised layout object: " + lineContent, layout, line);
+					catch ( IllegalArgumentException e ) {
+						throw new FTLLayoutParseException( "Unrecognised layout object: " + lineContent, layout, line );
 					}
 				}
 				else {
-					throw new FTLLayoutParseException("Unexpected characters: " + lineContent, layout, line);
+					throw new FTLLayoutParseException( "Unexpected characters: " + lineContent, layout, line );
 				}
 			}
 
-			if (!lineContent.equals("")) {
-				throw new FTLLayoutParseException("No empty line at the end of the file", layout, line);
+			if ( !lineContent.equals( "" ) ) {
+				throw new FTLLayoutParseException( "No empty line at the end of the file", layout, line );
 			}
 		}
 		finally {

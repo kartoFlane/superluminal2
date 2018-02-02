@@ -20,8 +20,8 @@ import javax.swing.SwingUtilities;
  * Appropriated from Slipstream Mod Manager's ProgressDialog
  */
 @SuppressWarnings("serial")
-class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionListener {
-
+class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionListener
+{
 	private final JScrollPane statusScroll;
 	private final JProgressBar progressBar;
 	private final JTextArea statusArea;
@@ -33,7 +33,8 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	private boolean succeeded = false;
 
 
-	public SPSwingDownloadDialog() {
+	public SPSwingDownloadDialog()
+	{
 		super( null, "Downloading...", ModalityType.APPLICATION_MODAL );
 
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE );
@@ -77,7 +78,8 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	}
 
 	@Override
-	public void actionPerformed( ActionEvent e ) {
+	public void actionPerformed( ActionEvent e )
+	{
 		Object source = e.getSource();
 
 		if ( source == continueBtn ) {
@@ -93,16 +95,21 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	 * @param message
 	 *            a string, or null
 	 */
-	public void setStatusTextLater( final String message ) {
-		SwingUtilities.invokeLater( new Runnable() {
-			@Override
-			public void run() {
-				setStatusText( message != null ? message : "..." );
+	public void setStatusTextLater( final String message )
+	{
+		SwingUtilities.invokeLater(
+			new Runnable() {
+				@Override
+				public void run()
+				{
+					setStatusText( message != null ? message : "..." );
+				}
 			}
-		} );
+		);
 	}
 
-	protected void setStatusText( String message ) {
+	protected void setStatusText( String message )
+	{
 		statusArea.setText( message != null ? message : "..." );
 		statusArea.setCaretPosition( 0 );
 	}
@@ -116,23 +123,27 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	 * @param value
 	 *            the new value
 	 */
-	public void setProgressLater( final int value ) {
-		SwingUtilities.invokeLater( new Runnable() {
-			@Override
-			public void run() {
-				if ( value >= 0 ) {
-					if ( progressBar.isIndeterminate() )
-						progressBar.setIndeterminate( false );
+	public void setProgressLater( final int value )
+	{
+		SwingUtilities.invokeLater(
+			new Runnable() {
+				@Override
+				public void run()
+				{
+					if ( value >= 0 ) {
+						if ( progressBar.isIndeterminate() )
+							progressBar.setIndeterminate( false );
 
-					progressBar.setValue( value );
-				}
-				else {
-					if ( !progressBar.isIndeterminate() )
-						progressBar.setIndeterminate( true );
-					progressBar.setValue( 0 );
+						progressBar.setValue( value );
+					}
+					else {
+						if ( !progressBar.isIndeterminate() )
+							progressBar.setIndeterminate( true );
+						progressBar.setValue( 0 );
+					}
 				}
 			}
-		} );
+		);
 	}
 
 	/**
@@ -145,27 +156,31 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	 * @param max
 	 *            the new maximum
 	 */
-	public void setProgressLater( final int value, final int max ) {
-		SwingUtilities.invokeLater( new Runnable() {
-			@Override
-			public void run() {
-				if ( value >= 0 && max >= 0 ) {
-					if ( progressBar.isIndeterminate() )
-						progressBar.setIndeterminate( false );
+	public void setProgressLater( final int value, final int max )
+	{
+		SwingUtilities.invokeLater(
+			new Runnable() {
+				@Override
+				public void run()
+				{
+					if ( value >= 0 && max >= 0 ) {
+						if ( progressBar.isIndeterminate() )
+							progressBar.setIndeterminate( false );
 
-					if ( progressBar.getMaximum() != max ) {
-						progressBar.setValue( 0 );
-						progressBar.setMaximum( max );
+						if ( progressBar.getMaximum() != max ) {
+							progressBar.setValue( 0 );
+							progressBar.setMaximum( max );
+						}
+						progressBar.setValue( value );
 					}
-					progressBar.setValue( value );
-				}
-				else {
-					if ( !progressBar.isIndeterminate() )
-						progressBar.setIndeterminate( true );
-					progressBar.setValue( 0 );
+					else {
+						if ( !progressBar.isIndeterminate() )
+							progressBar.setIndeterminate( true );
+						progressBar.setValue( 0 );
+					}
 				}
 			}
-		} );
+		);
 	}
 
 
@@ -174,16 +189,21 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	 *
 	 * If anything went wrong, e may be non-null.
 	 */
-	public void setTaskOutcomeLater( final boolean success, final Exception e ) {
-		SwingUtilities.invokeLater( new Runnable() {
-			@Override
-			public void run() {
-				setTaskOutcome( success, e );
+	public void setTaskOutcomeLater( final boolean success, final Exception e )
+	{
+		SwingUtilities.invokeLater(
+			new Runnable() {
+				@Override
+				public void run()
+				{
+					setTaskOutcome( success, e );
+				}
 			}
-		} );
+		);
 	}
 
-	protected void setTaskOutcome( final boolean outcome, final Exception e ) {
+	protected void setTaskOutcome( final boolean outcome, final Exception e )
+	{
 		done = true;
 		succeeded = outcome;
 
@@ -197,22 +217,26 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	}
 
 	@Override
-	public void taskProgress( int value, int max ) {
+	public void taskProgress( int value, int max )
+	{
 		this.setProgressLater( value, max );
 	}
 
 	@Override
-	public void taskStatus( String message ) {
+	public void taskStatus( String message )
+	{
 		setStatusTextLater( message != null ? message : "..." );
 	}
 
 	@Override
-	public void taskFinished( boolean outcome, Exception e ) {
+	public void taskFinished( boolean outcome, Exception e )
+	{
 		setTaskOutcomeLater( outcome, e );
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose()
+	{
 		if ( !done ) {
 			if ( taskThread != null ) {
 				taskThread.interrupt();
@@ -227,12 +251,14 @@ class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionL
 	}
 
 	@Override
-	public void spShow() {
+	public void spShow()
+	{
 		setVisible( true );
 	}
 
 	@Override
-	public void setTaskThread( Thread thread ) {
+	public void setTaskThread( Thread thread )
+	{
 		taskThread = thread;
 	}
 }

@@ -5,17 +5,20 @@ import com.kartoflane.ftl.layout.SingleValueLayoutObject;
 
 
 public class LocatedSingleValueLayoutObject extends SingleValueLayoutObject
-		implements LocatedLayoutObject {
-
+	implements LocatedLayoutObject
+{
 	private final int line;
 
-	public LocatedSingleValueLayoutObject(LOType type, int line, int i) {
-		super(type, i);
+
+	public LocatedSingleValueLayoutObject( LOType type, int line, int i )
+	{
+		super( type, i );
 		this.line = line;
 	}
 
 	@Override
-	public int getLine() {
+	public int getLine()
+	{
 		return line;
 	}
 }

@@ -14,8 +14,9 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
-public class RoomObject extends GameObject implements Alias, Movable, Resizable, Indexable, Comparable<RoomObject> {
 
+public class RoomObject extends GameObject implements Alias, Movable, Resizable, Indexable, Comparable<RoomObject>
+{
 	private int id = -1;
 	private int locX = 0;
 	private int locY = 0;
@@ -24,44 +25,52 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 
 	private String alias = null;
 
-	public RoomObject() {
-		setDeletable(true);
+
+	public RoomObject()
+	{
+		setDeletable( true );
 	}
 
-	public RoomObject(int id) {
+	public RoomObject( int id )
+	{
 		this();
 		this.id = id;
 	}
 
-	public void update() {
-		if (model == null)
-			throw new IllegalArgumentException("Model must not be null.");
+	public void update()
+	{
+		if ( model == null )
+			throw new IllegalArgumentException( "Model must not be null." );
 
 		ShipController shipC = Manager.getCurrentShip().getShipController();
 		ShipObject ship = shipC.getGameObject();
-		locX = ((model.getX() - shipC.getX()) / ShipContainer.CELL_SIZE) -
-				((model.getW() / ShipContainer.CELL_SIZE) / 2) - ship.getXOffset();
-		locY = ((model.getY() - shipC.getY()) / ShipContainer.CELL_SIZE) -
-				((model.getH() / ShipContainer.CELL_SIZE) / 2) - ship.getYOffset();
+		locX = ( ( model.getX() - shipC.getX() ) / ShipContainer.CELL_SIZE ) -
+			( ( model.getW() / ShipContainer.CELL_SIZE ) / 2 ) - ship.getXOffset();
+		locY = ( ( model.getY() - shipC.getY() ) / ShipContainer.CELL_SIZE ) -
+			( ( model.getH() / ShipContainer.CELL_SIZE ) / 2 ) - ship.getYOffset();
 		sizeW = model.getW() / ShipContainer.CELL_SIZE;
 		sizeH = model.getH() / ShipContainer.CELL_SIZE;
 	}
 
-	public void setId(int id) {
+	public void setId( int id )
+	{
 		this.id = id;
 	}
 
-	public int getId() {
+	public int getId()
+	{
 		return id;
 	}
 
 	@Override
-	public String getAlias() {
+	public String getAlias()
+	{
 		return alias;
 	}
 
 	@Override
-	public void setAlias(String alias) {
+	public void setAlias( String alias )
+	{
 		this.alias = alias;
 	}
 
@@ -69,7 +78,8 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 * Sets the distance from the ship anchor, in grid cells.
 	 */
 	@Override
-	public boolean setLocation(int x, int y) {
+	public boolean setLocation( int x, int y )
+	{
 		locX = x;
 		locY = y;
 		return true;
@@ -79,7 +89,8 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 * Moves the room by the specified number of grid cells.
 	 */
 	@Override
-	public boolean translate(int dx, int dy) {
+	public boolean translate( int dx, int dy )
+	{
 		locX += dx;
 		locY += dy;
 		return true;
@@ -89,17 +100,20 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 * @return the distance from the ship anchor to the top-left corner, in grid cells.
 	 */
 	@Override
-	public Point getLocation() {
-		return new Point(locX, locY);
+	public Point getLocation()
+	{
+		return new Point( locX, locY );
 	}
 
 	@Override
-	public int getX() {
+	public int getX()
+	{
 		return locX;
 	}
 
 	@Override
-	public int getY() {
+	public int getY()
+	{
 		return locY;
 	}
 
@@ -107,7 +121,8 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 * Sets size of the room, in grid cells.
 	 */
 	@Override
-	public boolean setSize(int w, int h) {
+	public boolean setSize( int w, int h )
+	{
 		sizeW = w;
 		sizeH = h;
 		return true;
@@ -117,30 +132,34 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 * @return size of the room, in grid cells.
 	 */
 	@Override
-	public Point getSize() {
-		return new Point(sizeW, sizeH);
+	public Point getSize()
+	{
+		return new Point( sizeW, sizeH );
 	}
 
 	@Override
-	public int getW() {
+	public int getW()
+	{
 		return sizeW;
 	}
 
 	@Override
-	public int getH() {
+	public int getH()
+	{
 		return sizeH;
 	}
 
 	/** Returns the slot id of the tile at the given coordinates (relative to the canvas). */
-	public int getSlotId(int x, int y) {
+	public int getSlotId( int x, int y )
+	{
 		Rectangle bounds = getBounds();
-		if (!bounds.contains(x, y))
+		if ( !bounds.contains( x, y ) )
 			return -1;
 
 		x = x - bounds.x;
 		y = y - bounds.y;
 
-		return x + (y * bounds.width);
+		return x + ( y * bounds.width );
 	}
 
 	/**
@@ -148,7 +167,8 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	 *            the slot id that is to be checked
 	 * @return true if the room can contain station at the given slot, false otherwise.
 	 */
-	public boolean canContainSlotId(int slotId) {
+	public boolean canContainSlotId( int slotId )
+	{
 		Rectangle bounds = getBounds();
 		int w = bounds.width;
 		int h = bounds.height;
@@ -158,67 +178,77 @@ public class RoomObject extends GameObject implements Alias, Movable, Resizable,
 	/**
 	 * @return center of the tile at which the slot will be located in this room, in pixels
 	 */
-	public Point getSlotLocation(int slotId) {
+	public Point getSlotLocation( int slotId )
+	{
 		Point size = model.getSize();
 		int w = size.x / ShipContainer.CELL_SIZE;
 		int h = size.y / ShipContainer.CELL_SIZE;
 
 		// can't contain
-		if (w + (h - 1) * w < slotId || slotId < 0)
+		if ( w + ( h - 1 ) * w < slotId || slotId < 0 )
 			return null;
 
 		int x = slotId % w;
 		int y = slotId / w;
 
-		return new Point(x * ShipContainer.CELL_SIZE + ShipContainer.CELL_SIZE / 2 + 1,
-				y * ShipContainer.CELL_SIZE + ShipContainer.CELL_SIZE / 2 + 1);
+		return new Point(
+			x * ShipContainer.CELL_SIZE + ShipContainer.CELL_SIZE / 2 + 1,
+			y * ShipContainer.CELL_SIZE + ShipContainer.CELL_SIZE / 2 + 1
+		);
 	}
 
 	/**
 	 * @return rectangle representing the area of the room
 	 */
 	@Override
-	public Rectangle getBounds() {
-		return new Rectangle(locX, locY, sizeW, sizeH);
+	public Rectangle getBounds()
+	{
+		return new Rectangle( locX, locY, sizeW, sizeH );
 	}
 
 	@Override
-	public boolean contains(int x, int y) {
-		return getBounds().contains(x, y);
+	public boolean contains( int x, int y )
+	{
+		return getBounds().contains( x, y );
 	}
 
 	@Override
-	public boolean intersects(Rectangle rect) {
-		return getBounds().intersects(rect);
+	public boolean intersects( Rectangle rect )
+	{
+		return getBounds().intersects( rect );
 	}
 
 	@Override
-	public int compareTo(RoomObject o) {
+	public int compareTo( RoomObject o )
+	{
 		return id - o.id;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		String result = toStringNoAlias();
 
-		if (getAlias() != null && !getAlias().equals(""))
+		if ( getAlias() != null && !getAlias().equals( "" ) )
 			result += " (" + getAlias() + ")";
 		return result;
 	}
 
-	public String toStringNoAlias() {
-		if (id == -1) {
+	public String toStringNoAlias()
+	{
+		if ( id == -1 ) {
 			return "-1: Airlock";
 		}
 
-		ArrayList<SystemObject> systems = Manager.getCurrentShip().getAllAssignedSystems(this);
+		ArrayList<SystemObject> systems = Manager.getCurrentShip().getAllAssignedSystems( this );
 		String result = getId() + ": ";
-		if (systems.size() == 0) {
+		if ( systems.size() == 0 ) {
 			result += Systems.EMPTY.toString();
-		} else {
-			for (int i = 0; i < systems.size(); i++) {
-				result += systems.get(i).toString();
-				if (i != systems.size() - 1)
+		}
+		else {
+			for ( int i = 0; i < systems.size(); i++ ) {
+				result += systems.get( i ).toString();
+				if ( i != systems.size() - 1 )
 					result += " / ";
 			}
 		}

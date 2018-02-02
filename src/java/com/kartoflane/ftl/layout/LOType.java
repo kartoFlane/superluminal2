@@ -7,7 +7,8 @@ package com.kartoflane.ftl.layout;
  * @author kartoFlane
  *
  */
-public enum LOType {
+public enum LOType
+{
 	X_OFFSET,
 	Y_OFFSET,
 	HORIZONTAL,

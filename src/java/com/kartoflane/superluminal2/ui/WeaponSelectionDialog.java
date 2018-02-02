@@ -48,8 +48,9 @@ import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.views.Preview;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
-public class WeaponSelectionDialog {
 
+public class WeaponSelectionDialog
+{
 	private static WeaponSelectionDialog instance = null;
 
 	private static final int defaultBlueTabWidth = 200;
@@ -57,7 +58,8 @@ public class WeaponSelectionDialog {
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 250;
 	private static final Predicate<WeaponObject> defaultFilter = new Predicate<WeaponObject>() {
-		public boolean accept(WeaponObject object) {
+		public boolean accept( WeaponObject object )
+		{
 			return true;
 		}
 	};
@@ -86,265 +88,307 @@ public class WeaponSelectionDialog {
 	private TreeColumn trclmnName;
 	private Button btnSearch;
 
-	public WeaponSelectionDialog(Shell parent) {
-		if (instance != null)
-			throw new IllegalStateException("Previous instance has not been disposed!");
+
+	public WeaponSelectionDialog( Shell parent )
+	{
+		if ( instance != null )
+			throw new IllegalStateException( "Previous instance has not been disposed!" );
 		instance = this;
 
 		treeItemMap = new HashMap<WeaponTypes, TreeItem>();
 
-		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
-		shell.setText(Superluminal.APP_NAME + " - Weapon Selection");
-		shell.setLayout(new GridLayout(1, false));
+		shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL );
+		shell.setText( Superluminal.APP_NAME + " - Weapon Selection" );
+		shell.setLayout( new GridLayout( 1, false ) );
 
-		SashForm sashForm = new SashForm(shell, SWT.SMOOTH);
-		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		SashForm sashForm = new SashForm( shell, SWT.SMOOTH );
+		sashForm.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
-		tree = new Tree(sashForm, SWT.BORDER | SWT.FULL_SELECTION);
-		tree.setHeaderVisible(true);
+		tree = new Tree( sashForm, SWT.BORDER | SWT.FULL_SELECTION );
+		tree.setHeaderVisible( true );
 		// remove the horizontal bar so that it doesn't flicker when the tree is resized
 		tree.getHorizontalBar().dispose();
 
-		trclmnBlueprint = new TreeColumn(tree, SWT.LEFT);
-		trclmnBlueprint.setWidth(defaultBlueTabWidth);
-		trclmnBlueprint.setText("Blueprint");
+		trclmnBlueprint = new TreeColumn( tree, SWT.LEFT );
+		trclmnBlueprint.setWidth( defaultBlueTabWidth );
+		trclmnBlueprint.setText( "Blueprint" );
 
-		trclmnName = new TreeColumn(tree, SWT.RIGHT);
-		trclmnName.setWidth(defaultNameTabWidth);
-		trclmnName.setText("Name");
+		trclmnName = new TreeColumn( tree, SWT.RIGHT );
+		trclmnName.setWidth( defaultNameTabWidth );
+		trclmnName.setText( "Name" );
 
-		ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm, SWT.BORDER | SWT.V_SCROLL);
-		scrolledComposite.setExpandHorizontal(true);
-		scrolledComposite.setExpandVertical(true);
+		ScrolledComposite scrolledComposite = new ScrolledComposite( sashForm, SWT.BORDER | SWT.V_SCROLL );
+		scrolledComposite.setExpandHorizontal( true );
+		scrolledComposite.setExpandVertical( true );
 
-		Composite compData = new Composite(scrolledComposite, SWT.NONE);
-		GridLayout gl_compData = new GridLayout(1, false);
+		Composite compData = new Composite( scrolledComposite, SWT.NONE );
+		GridLayout gl_compData = new GridLayout( 1, false );
 		gl_compData.marginHeight = 0;
 		gl_compData.marginWidth = 0;
-		compData.setLayout(gl_compData);
+		compData.setLayout( gl_compData );
 
-		canvas = new Canvas(compData, SWT.DOUBLE_BUFFERED);
-		GridData gd_canvas = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+		canvas = new Canvas( compData, SWT.DOUBLE_BUFFERED );
+		GridData gd_canvas = new GridData( SWT.FILL, SWT.FILL, true, false, 1, 1 );
 		gd_canvas.heightHint = 100;
-		canvas.setLayoutData(gd_canvas);
+		canvas.setLayoutData( gd_canvas );
 
 		preview = new Preview();
 		RGB rgb = canvas.getBackground().getRGB();
-		preview.setBackgroundColor((int) (0.9 * rgb.red), (int) (0.9 * rgb.green), (int) (0.9 * rgb.blue));
-		preview.setDrawBackground(true);
-		canvas.addPaintListener(preview);
+		preview.setBackgroundColor( (int)( 0.9 * rgb.red ), (int)( 0.9 * rgb.green ), (int)( 0.9 * rgb.blue ) );
+		preview.setDrawBackground( true );
+		canvas.addPaintListener( preview );
 
-		Label lblDescription = new Label(compData, SWT.NONE);
-		lblDescription.setText("Description:");
+		Label lblDescription = new Label( compData, SWT.NONE );
+		lblDescription.setText( "Description:" );
 
-		txtDesc = new Text(compData, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		GridData gd_txtDesc = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+		txtDesc = new Text( compData, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI );
+		GridData gd_txtDesc = new GridData( SWT.FILL, SWT.FILL, true, false, 1, 1 );
 		gd_txtDesc.heightHint = 60;
-		txtDesc.setLayoutData(gd_txtDesc);
-		scrolledComposite.setContent(compData);
-		scrolledComposite.setMinSize(compData.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		sashForm.setWeights(new int[] { minTreeWidth, defaultDataWidth });
+		txtDesc.setLayoutData( gd_txtDesc );
+		scrolledComposite.setContent( compData );
+		scrolledComposite.setMinSize( compData.computeSize( SWT.DEFAULT, SWT.DEFAULT ) );
+		sashForm.setWeights( new int[] { minTreeWidth, defaultDataWidth } );
 
-		statTable = new StatTable(compData);
-		statTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		statTable = new StatTable( compData );
+		statTable.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
-		Composite compButtons = new Composite(shell, SWT.NONE);
-		GridLayout gl_compButtons = new GridLayout(3, false);
+		Composite compButtons = new Composite( shell, SWT.NONE );
+		GridLayout gl_compButtons = new GridLayout( 3, false );
 		gl_compButtons.marginWidth = 0;
 		gl_compButtons.marginHeight = 0;
-		compButtons.setLayout(gl_compButtons);
-		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		compButtons.setLayout( gl_compButtons );
+		compButtons.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, false, 1, 1 ) );
 
-		btnSearch = new Button(compButtons, SWT.NONE);
-		GridData gd_btnSearch = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		btnSearch = new Button( compButtons, SWT.NONE );
+		GridData gd_btnSearch = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
 		gd_btnSearch.widthHint = 80;
-		btnSearch.setLayoutData(gd_btnSearch);
-		btnSearch.setText("Search");
+		btnSearch.setLayoutData( gd_btnSearch );
+		btnSearch.setText( "Search" );
 
-		btnConfirm = new Button(compButtons, SWT.NONE);
-		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		btnConfirm = new Button( compButtons, SWT.NONE );
+		GridData gd_btnConfirm = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_btnConfirm.widthHint = 80;
-		btnConfirm.setLayoutData(gd_btnConfirm);
-		btnConfirm.setText("Confirm");
+		btnConfirm.setLayoutData( gd_btnConfirm );
+		btnConfirm.setText( "Confirm" );
 
-		btnCancel = new Button(compButtons, SWT.NONE);
-		GridData gd_btnCancel = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
+		btnCancel = new Button( compButtons, SWT.NONE );
+		GridData gd_btnCancel = new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 );
 		gd_btnCancel.widthHint = 80;
-		btnCancel.setLayoutData(gd_btnCancel);
-		btnCancel.setText("Cancel");
+		btnCancel.setLayoutData( gd_btnCancel );
+		btnCancel.setText( "Cancel" );
 
-		tree.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				if (e.button == 1 && tree.getSelectionCount() != 0) {
-					TreeItem selectedItem = tree.getSelection()[0];
-					if (selectedItem.getItemCount() == 0 && btnConfirm.isEnabled())
-						btnConfirm.notifyListeners(SWT.Selection, null);
-					else if (selectedItem.getBounds().contains(e.x, e.y))
-						selectedItem.setExpanded(!selectedItem.getExpanded());
-				}
-			}
-
-			@Override
-			public void mouseDown(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseUp(MouseEvent e) {
-			}
-		});
-
-		tree.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (tree.getSelectionCount() != 0) {
-					TreeItem selectedItem = tree.getSelection()[0];
-					Object o = selectedItem.getData();
-					if (o instanceof WeaponList) {
-						selectionList = (WeaponList) o;
-						resultList = selectionList;
-						result = null;
-						btnConfirm.setEnabled(listMode && resultList != null);
-					} else if (o instanceof WeaponObject) {
-						resultList = null;
-						selection = (WeaponObject) o;
-						result = selection;
-						btnConfirm.setEnabled(!listMode && result != null);
-					} else {
-						resultList = null;
-						result = null;
-						btnConfirm.setEnabled(false);
+		tree.addMouseListener(
+			new MouseListener() {
+				@Override
+				public void mouseDoubleClick( MouseEvent e )
+				{
+					if ( e.button == 1 && tree.getSelectionCount() != 0 ) {
+						TreeItem selectedItem = tree.getSelection()[0];
+						if ( selectedItem.getItemCount() == 0 && btnConfirm.isEnabled() )
+							btnConfirm.notifyListeners( SWT.Selection, null );
+						else if ( selectedItem.getBounds().contains( e.x, e.y ) )
+							selectedItem.setExpanded( !selectedItem.getExpanded() );
 					}
-				} else {
-					resultList = null;
-					result = null;
-					btnConfirm.setEnabled(false);
 				}
-				updateData();
-			}
-		});
 
-		trclmnBlueprint.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// Sort by blueprint name
-				if (!listMode && !sortByBlueprint) {
-					sortByBlueprint = true;
+				@Override
+				public void mouseDown( MouseEvent e )
+				{
+				}
+
+				@Override
+				public void mouseUp( MouseEvent e )
+				{
+				}
+			}
+		);
+
+		tree.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( tree.getSelectionCount() != 0 ) {
+						TreeItem selectedItem = tree.getSelection()[0];
+						Object o = selectedItem.getData();
+						if ( o instanceof WeaponList ) {
+							selectionList = (WeaponList)o;
+							resultList = selectionList;
+							result = null;
+							btnConfirm.setEnabled( listMode && resultList != null );
+						}
+						else if ( o instanceof WeaponObject ) {
+							resultList = null;
+							selection = (WeaponObject)o;
+							result = selection;
+							btnConfirm.setEnabled( !listMode && result != null );
+						}
+						else {
+							resultList = null;
+							result = null;
+							btnConfirm.setEnabled( false );
+						}
+					}
+					else {
+						resultList = null;
+						result = null;
+						btnConfirm.setEnabled( false );
+					}
+					updateData();
+				}
+			}
+		);
+
+		trclmnBlueprint.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					// Sort by blueprint name
+					if ( !listMode && !sortByBlueprint ) {
+						sortByBlueprint = true;
+						updateTree();
+					}
+				}
+			}
+		);
+
+		trclmnName.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					// Sort by title
+					if ( !listMode && sortByBlueprint ) {
+						sortByBlueprint = false;
+						updateTree();
+					}
+				}
+			}
+		);
+
+		btnSearch.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					WeaponSearchDialog wsDialog = new WeaponSearchDialog( shell );
+					Predicate<WeaponObject> result = wsDialog.open();
+
+					if ( result == AbstractSearchDialog.RESULT_DEFAULT ) {
+						filter = defaultFilter;
+					}
+					else if ( result == AbstractSearchDialog.RESULT_UNCHANGED ) {
+						// Do nothing
+					}
+					else {
+						filter = result;
+					}
+
 					updateTree();
+					tree.notifyListeners( SWT.Selection, null );
 				}
 			}
-		});
+		);
 
-		trclmnName.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// Sort by title
-				if (!listMode && sortByBlueprint) {
-					sortByBlueprint = false;
-					updateTree();
+		btnCancel.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					response = SWT.NO;
+					dispose();
 				}
 			}
-		});
+		);
 
-		btnSearch.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				WeaponSearchDialog wsDialog = new WeaponSearchDialog(shell);
-				Predicate<WeaponObject> result = wsDialog.open();
-
-				if (result == AbstractSearchDialog.RESULT_DEFAULT) {
-					filter = defaultFilter;
-				} else if (result == AbstractSearchDialog.RESULT_UNCHANGED) {
-					// Do nothing
-				} else {
-					filter = result;
-				}
-
-				updateTree();
-				tree.notifyListeners(SWT.Selection, null);
-			}
-		});
-
-		btnCancel.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				response = SWT.NO;
-				dispose();
-			}
-		});
-
-		btnConfirm.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				response = SWT.YES;
-				dispose();
-			}
-		});
-
-		shell.addListener(SWT.Close, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				btnCancel.notifyListeners(SWT.Selection, null);
-				e.doit = false;
-			}
-		});
-
-		shell.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_RETURN && tree.getSelectionCount() != 0) {
-					TreeItem selectedItem = tree.getSelection()[0];
-					if (selectedItem.getItemCount() == 0 && btnConfirm.isEnabled())
-						btnConfirm.notifyListeners(SWT.Selection, null);
-					else
-						selectedItem.setExpanded(!selectedItem.getExpanded());
+		btnConfirm.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					response = SWT.YES;
+					dispose();
 				}
 			}
-		});
+		);
 
-		canvas.addControlListener(new ControlListener() {
-			@Override
-			public void controlMoved(ControlEvent e) {
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					btnCancel.notifyListeners( SWT.Selection, null );
+					e.doit = false;
+				}
 			}
+		);
 
-			@Override
-			public void controlResized(ControlEvent e) {
-				updatePreview();
-				canvas.redraw();
+		shell.addTraverseListener(
+			new TraverseListener() {
+				@Override
+				public void keyTraversed( TraverseEvent e )
+				{
+					if ( e.detail == SWT.TRAVERSE_RETURN && tree.getSelectionCount() != 0 ) {
+						TreeItem selectedItem = tree.getSelection()[0];
+						if ( selectedItem.getItemCount() == 0 && btnConfirm.isEnabled() )
+							btnConfirm.notifyListeners( SWT.Selection, null );
+						else
+							selectedItem.setExpanded( !selectedItem.getExpanded() );
+					}
+				}
 			}
-		});
+		);
+
+		canvas.addControlListener(
+			new ControlListener() {
+				@Override
+				public void controlMoved( ControlEvent e )
+				{
+				}
+
+				@Override
+				public void controlResized( ControlEvent e )
+				{
+					updatePreview();
+					canvas.redraw();
+				}
+			}
+		);
 
 		ControlAdapter resizer = new ControlAdapter() {
 			@Override
-			public void controlResized(ControlEvent e) {
+			public void controlResized( ControlEvent e )
+			{
 				final int BORDER_OFFSET = tree.getBorderWidth();
-				if (trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
-					trclmnBlueprint.setWidth(tree.getClientArea().width - BORDER_OFFSET);
-				trclmnName.setWidth(tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET);
+				if ( trclmnBlueprint.getWidth() > tree.getClientArea().width - BORDER_OFFSET )
+					trclmnBlueprint.setWidth( tree.getClientArea().width - BORDER_OFFSET );
+				trclmnName.setWidth( tree.getClientArea().width - trclmnBlueprint.getWidth() - BORDER_OFFSET );
 			}
 		};
-		tree.addControlListener(resizer);
-		trclmnBlueprint.addControlListener(resizer);
+		tree.addControlListener( resizer );
+		trclmnBlueprint.addControlListener( resizer );
 
-		shell.setMinimumSize(minTreeWidth + defaultDataWidth, 300);
+		shell.setMinimumSize( minTreeWidth + defaultDataWidth, 300 );
 		shell.pack();
-		shell.setSize(600, 400);
+		shell.setSize( 600, 400 );
 		Point size = shell.getSize();
-		shell.setSize(size.x + 5, size.y);
+		shell.setSize( size.x + 5, size.y );
 		Point parSize = parent.getSize();
 		Point parLoc = parent.getLocation();
-		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+		shell.setLocation( parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2 );
 
 		// Register hotkeys
-		Hotkey h = new Hotkey(Manager.getHotkey(Hotkeys.SEARCH));
-		h.addNotifyAction(btnSearch, true);
-		Manager.hookHotkey(shell, h);
+		Hotkey h = new Hotkey( Manager.getHotkey( Hotkeys.SEARCH ) );
+		h.addNotifyAction( btnSearch, true );
+		Manager.hookHotkey( shell, h );
 	}
 
-	private void open() {
+	private void open()
+	{
 		response = SWT.NO;
 
-		if (listMode)
+		if ( listMode )
 			updateTreeList();
 		else
 			updateTree();
@@ -354,277 +398,309 @@ public class WeaponSelectionDialog {
 		updateData();
 
 		Display display = UIUtils.getDisplay();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
+		while ( !shell.isDisposed() ) {
+			if ( !display.readAndDispatch() )
 				display.sleep();
 		}
 	}
 
-	public WeaponList open(WeaponList current) {
+	public WeaponList open( WeaponList current )
+	{
 		listMode = true;
 		resultList = current;
 		result = null;
 
-		if (current == null || current == Database.DEFAULT_WEAPON_LIST) {
+		if ( current == null || current == Database.DEFAULT_WEAPON_LIST ) {
 			resultList = selectionList;
-		} else {
+		}
+		else {
 			selectionList = resultList;
 		}
 
-		btnSearch.setEnabled(false);
+		btnSearch.setEnabled( false );
 
 		open();
 
-		if (response == SWT.YES) {
+		if ( response == SWT.YES ) {
 			return resultList;
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
 
-	public WeaponObject open(WeaponObject current) {
+	public WeaponObject open( WeaponObject current )
+	{
 		listMode = false;
 		resultList = null;
 		result = current;
 
-		if (current == null || current == Database.DEFAULT_WEAPON_OBJ) {
+		if ( current == null || current == Database.DEFAULT_WEAPON_OBJ ) {
 			result = selection;
-		} else {
+		}
+		else {
 			selection = result;
 		}
 
-		btnSearch.setEnabled(true);
+		btnSearch.setEnabled( true );
 
 		open();
 
-		if (response == SWT.YES) {
+		if ( response == SWT.YES ) {
 			return result;
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
 
-	private void updateTree() {
-		for (TreeItem trtm : tree.getItems())
+	private void updateTree()
+	{
+		for ( TreeItem trtm : tree.getItems() )
 			trtm.dispose();
 
-		TreeItem trtm = new TreeItem(tree, SWT.NONE);
-		trtm.setText("No Weapon");
-		trtm.setData(Database.DEFAULT_WEAPON_OBJ);
+		TreeItem trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "No Weapon" );
+		trtm.setData( Database.DEFAULT_WEAPON_OBJ );
 
-		trtm = new TreeItem(tree, SWT.NONE);
-		trtm.setText("Beams");
-		treeItemMap.put(WeaponTypes.BEAM, trtm);
+		trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "Beams" );
+		treeItemMap.put( WeaponTypes.BEAM, trtm );
 
-		trtm = new TreeItem(tree, SWT.NONE);
-		trtm.setText("Bombs");
-		treeItemMap.put(WeaponTypes.BOMB, trtm);
+		trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "Bombs" );
+		treeItemMap.put( WeaponTypes.BOMB, trtm );
 
-		trtm = new TreeItem(tree, SWT.NONE);
-		trtm.setText("Burst");
-		treeItemMap.put(WeaponTypes.BURST, trtm);
+		trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "Burst" );
+		treeItemMap.put( WeaponTypes.BURST, trtm );
 
-		trtm = new TreeItem(tree, SWT.NONE);
-		trtm.setText("Lasers / Ions");
-		treeItemMap.put(WeaponTypes.LASER, trtm);
+		trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "Lasers / Ions" );
+		treeItemMap.put( WeaponTypes.LASER, trtm );
 
-		trtm = new TreeItem(tree, SWT.NONE);
-		trtm.setText("Missiles");
-		treeItemMap.put(WeaponTypes.MISSILES, trtm);
+		trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "Missiles" );
+		treeItemMap.put( WeaponTypes.MISSILES, trtm );
 
 		TreeItem selection = null;
 
-		for (WeaponTypes type : WeaponTypes.values()) {
-			TreeItem typeItem = treeItemMap.get(type);
-			WeaponIterator it = new WeaponIterator(Database.getInstance().getWeaponsByType(type), sortByBlueprint);
-			for (it.first(); it.hasNext(); it.next()) {
+		for ( WeaponTypes type : WeaponTypes.values() ) {
+			TreeItem typeItem = treeItemMap.get( type );
+			WeaponIterator it = new WeaponIterator( Database.getInstance().getWeaponsByType( type ), sortByBlueprint );
+			for ( it.first(); it.hasNext(); it.next() ) {
 				WeaponObject weapon = it.current();
 
-				trtm = new TreeItem(typeItem, SWT.NONE);
-				trtm.setText(0, weapon.getBlueprintName());
-				trtm.setText(1, weapon.getTitle());
-				trtm.setData(weapon);
+				trtm = new TreeItem( typeItem, SWT.NONE );
+				trtm.setText( 0, weapon.getBlueprintName() );
+				trtm.setText( 1, weapon.getTitle() );
+				trtm.setData( weapon );
 
-				if (result == weapon)
+				if ( result == weapon )
 					selection = trtm;
 			}
 
-			if (typeItem.getItemCount() == 0)
+			if ( typeItem.getItemCount() == 0 )
 				typeItem.dispose();
 		}
 
 		tree.layout();
 
-		if (selection != null) {
-			treeItemMap.get(result.getType()).setExpanded(true);
-			tree.select(selection);
-			tree.setTopItem(selection);
-		} else {
-			tree.select(tree.getItem(0));
+		if ( selection != null ) {
+			treeItemMap.get( result.getType() ).setExpanded( true );
+			tree.select( selection );
+			tree.setTopItem( selection );
+		}
+		else {
+			tree.select( tree.getItem( 0 ) );
 		}
 	}
 
-	private void updateTreeList() {
-		for (TreeItem trtm : tree.getItems())
+	private void updateTreeList()
+	{
+		for ( TreeItem trtm : tree.getItems() )
 			trtm.dispose();
 
-		TreeItem trtm = new TreeItem(tree, SWT.NONE);
-		trtm.setText("No Weapon List");
-		trtm.setData(Database.DEFAULT_WEAPON_LIST);
+		TreeItem trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "No Weapon List" );
+		trtm.setData( Database.DEFAULT_WEAPON_LIST );
 
 		TreeItem selection = null;
 
-		for (WeaponList list : Database.getInstance().getWeaponLists()) {
-			trtm = new TreeItem(tree, SWT.NONE);
-			trtm.setText(list.getBlueprintName());
-			trtm.setData(list);
+		for ( WeaponList list : Database.getInstance().getWeaponLists() ) {
+			trtm = new TreeItem( tree, SWT.NONE );
+			trtm.setText( list.getBlueprintName() );
+			trtm.setData( list );
 
-			if (resultList == list)
+			if ( resultList == list )
 				selection = trtm;
 
-			for (WeaponObject weapon : list) {
-				TreeItem weaponItem = new TreeItem(trtm, SWT.NONE);
-				weaponItem.setText(0, weapon.getBlueprintName());
-				weaponItem.setText(1, weapon.getTitle());
-				weaponItem.setData(weapon);
+			for ( WeaponObject weapon : list ) {
+				TreeItem weaponItem = new TreeItem( trtm, SWT.NONE );
+				weaponItem.setText( 0, weapon.getBlueprintName() );
+				weaponItem.setText( 1, weapon.getTitle() );
+				weaponItem.setData( weapon );
 			}
 		}
 
 		tree.layout();
 
-		if (selection != null) {
-			tree.select(selection);
-			tree.setTopItem(selection);
-		} else {
-			tree.select(tree.getItem(0));
+		if ( selection != null ) {
+			tree.select( selection );
+			tree.setTopItem( selection );
+		}
+		else {
+			tree.select( tree.getItem( 0 ) );
 		}
 	}
 
-	private void updateData() {
+	private void updateData()
+	{
 		String path = null;
 
-		if (result != null) {
+		if ( result != null ) {
 			AnimationObject anim = result.getAnimation();
 			path = anim.getSheetPath();
 			Point frameSize = anim.getFrameSize();
-			preview.setSourceSize(frameSize.x, frameSize.y);
-			preview.setOverrideSourceSize(true);
-			preview.setImage(path);
-			preview.setSize(frameSize.x, frameSize.y);
+			preview.setSourceSize( frameSize.x, frameSize.y );
+			preview.setOverrideSourceSize( true );
+			preview.setImage( path );
+			preview.setSize( frameSize.x, frameSize.y );
 
-			statTable.setVisible(false);
+			statTable.setVisible( false );
 			statTable.clear();
-			for (WeaponStats stat : WeaponStats.values()) {
-				if (!stat.doesApply(result.getType()))
+			for ( WeaponStats stat : WeaponStats.values() ) {
+				if ( !stat.doesApply( result.getType() ) )
 					continue;
-				float value = result.getStat(stat);
-				statTable.addEntry(stat.toString(), stat.formatValue(value));
+				float value = result.getStat( stat );
+				statTable.addEntry( stat.toString(), stat.formatValue( value ) );
 			}
-			statTable.setVisible(true);
+			statTable.setVisible( true );
 			statTable.updateColumnWidth();
-			txtDesc.setText(result.getDescription());
-		} else {
-			preview.setImage(null);
+			txtDesc.setText( result.getDescription() );
+		}
+		else {
+			preview.setImage( null );
 			statTable.clear();
-			txtDesc.setText("");
+			txtDesc.setText( "" );
 		}
 
-		preview.setDrawBackground(path != null);
-		preview.setLocation(canvas.getSize().x / 2, canvas.getSize().y / 2);
+		preview.setDrawBackground( path != null );
+		preview.setLocation( canvas.getSize().x / 2, canvas.getSize().y / 2 );
 		canvas.redraw();
 	}
 
-	private void updatePreview() {
+	private void updatePreview()
+	{
 		Point cSize = canvas.getSize();
-		preview.setLocation(cSize.x / 2, cSize.y / 2);
+		preview.setLocation( cSize.x / 2, cSize.y / 2 );
 	}
 
-	public static WeaponSelectionDialog getInstance() {
+	public static WeaponSelectionDialog getInstance()
+	{
 		return instance;
 	}
 
-	public void dispose() {
-		Manager.unhookHotkeys(shell);
+	public void dispose()
+	{
+		Manager.unhookHotkeys( shell );
 		shell.dispose();
 		instance = null;
 	}
 
-	public boolean isActive() {
+	public boolean isActive()
+	{
 		return !shell.isDisposed() && shell.isVisible();
 	}
 
-	private class WeaponIterator implements Iterator<WeaponObject> {
+
+	private class WeaponIterator implements Iterator<WeaponObject>
+	{
 		private final ArrayList<WeaponObject> list;
 		private final WeaponComparator comparator;
 
 		private WeaponObject current = null;
 
-		public WeaponIterator(ArrayList<WeaponObject> list, boolean byBlueprint) {
-			comparator = new WeaponComparator(byBlueprint);
 
-			if (filter == defaultFilter) {
+		public WeaponIterator( ArrayList<WeaponObject> list, boolean byBlueprint )
+		{
+			comparator = new WeaponComparator( byBlueprint );
+
+			if ( filter == defaultFilter ) {
 				this.list = list;
-			} else {
+			}
+			else {
 				this.list = new ArrayList<WeaponObject>();
-				for (WeaponObject w : list) {
-					if (filter.accept(w))
-						this.list.add(w);
+				for ( WeaponObject w : list ) {
+					if ( filter.accept( w ) )
+						this.list.add( w );
 				}
 			}
 		}
 
-		private WeaponObject getSmallestElement() {
+		private WeaponObject getSmallestElement()
+		{
 			WeaponObject result = null;
-			for (WeaponObject weapon : list) {
-				if (result == null || comparator.compare(weapon, result) < 0)
+			for ( WeaponObject weapon : list ) {
+				if ( result == null || comparator.compare( weapon, result ) < 0 )
 					result = weapon;
 			}
 
 			return result;
 		}
 
-		public void first() {
+		public void first()
+		{
 			current = getSmallestElement();
 		}
 
-		public WeaponObject current() {
+		public WeaponObject current()
+		{
 			return current;
 		}
 
 		@Override
-		public boolean hasNext() {
+		public boolean hasNext()
+		{
 			return !list.isEmpty();
 		}
 
 		@Override
-		public WeaponObject next() {
+		public WeaponObject next()
+		{
 			remove();
 			current = getSmallestElement();
 			return current;
 		}
 
 		@Override
-		public void remove() {
-			list.remove(current);
+		public void remove()
+		{
+			list.remove( current );
 		}
 	}
 
-	private class WeaponComparator implements Comparator<WeaponObject> {
+	private class WeaponComparator implements Comparator<WeaponObject>
+	{
 		private final boolean byBlueprint;
 
-		public WeaponComparator(boolean byBlueprint) {
+
+		public WeaponComparator( boolean byBlueprint )
+		{
 			this.byBlueprint = byBlueprint;
 		}
 
 		@Override
-		public int compare(WeaponObject o1, WeaponObject o2) {
-			if (byBlueprint) {
+		public int compare( WeaponObject o1, WeaponObject o2 )
+		{
+			if ( byBlueprint ) {
 				// Just compare the two blueprints together for alphanumerical ordering
-				return o1.getBlueprintName().compareTo(o2.getBlueprintName());
-			} else {
-				int result = o1.getTitle().compareTo(o2.getTitle());
-				if (result == 0) // If titles are the same, fall back to sorting by blueprint
-					result = o1.getBlueprintName().compareTo(o2.getBlueprintName());
+				return o1.getBlueprintName().compareTo( o2.getBlueprintName() );
+			}
+			else {
+				int result = o1.getTitle().compareTo( o2.getTitle() );
+				if ( result == 0 ) // If titles are the same, fall back to sorting by blueprint
+					result = o1.getBlueprintName().compareTo( o2.getBlueprintName() );
 				return result;
 			}
 		}

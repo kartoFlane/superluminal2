@@ -9,6 +9,7 @@ package com.kartoflane.superluminal2.components.interfaces;
  * @param <T>
  *            type of the object which is to be checked
  */
-public interface Predicate<T> {
-	public boolean accept(T object);
+public interface Predicate<T>
+{
+	public boolean accept( T object );
 }

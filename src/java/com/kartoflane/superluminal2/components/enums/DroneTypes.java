@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum DroneTypes {
+public enum DroneTypes
+{
 	BATTLE,
 	BOARDER,
 	COMBAT,
@@ -14,14 +15,16 @@ public enum DroneTypes {
 	/**
 	 * @return an array of all drone types, sans HACKING
 	 */
-	public static DroneTypes[] getPlayableDroneTypes() {
+	public static DroneTypes[] getPlayableDroneTypes()
+	{
 		return new DroneTypes[] {
-				BATTLE, BOARDER, COMBAT, DEFENSE, REPAIR, SHIELD, SHIP_REPAIR
+			BATTLE, BOARDER, COMBAT, DEFENSE, REPAIR, SHIELD, SHIP_REPAIR
 		};
 	}
 
-	public String toString() {
-		switch (this) {
+	public String toString()
+	{
+		switch ( this ) {
 			case BATTLE:
 				return "Anti-Personnel";
 			case REPAIR:
@@ -30,7 +33,7 @@ public enum DroneTypes {
 				return "Hull Repair";
 			default:
 				String s = name();
-				return s.substring(0, 1) + s.substring(1).toLowerCase();
+				return s.substring( 0, 1 ) + s.substring( 1 ).toLowerCase();
 		}
 	}
 }

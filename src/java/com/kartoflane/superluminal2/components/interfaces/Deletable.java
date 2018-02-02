@@ -7,7 +7,8 @@ package com.kartoflane.superluminal2.components.interfaces;
  * @author kartoFlane
  * 
  */
-public interface Deletable {
+public interface Deletable
+{
 	/**
 	 * Hide the object from view, removing it from collections of active objects,
 	 * and add the object to the list of deleted objects in UndoManager, so that
@@ -21,7 +22,7 @@ public interface Deletable {
 	 */
 	public void restore();
 
-	public void setDeletable(boolean deletable);
+	public void setDeletable( boolean deletable );
 
 	public boolean isDeletable();
 }

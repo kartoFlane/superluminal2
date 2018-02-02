@@ -6,8 +6,9 @@ import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
-public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable {
 
+public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable
+{
 	private final String blueprintName;
 	private DroneTypes droneType;
 	private String title = "";
@@ -16,106 +17,127 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 
 	private HashMap<DroneStats, Float> statMap = null;
 
-	public DroneObject() {
+
+	public DroneObject()
+	{
 		droneType = null;
 		blueprintName = "Default Drone";
 		title = "<No Drone>";
 		shortName = "<No Drone>";
 	}
 
-	public DroneObject(String blueprint) {
+	public DroneObject( String blueprint )
+	{
 		blueprintName = blueprint;
 	}
 
 	@Override
-	public String getIdentifier() {
+	public String getIdentifier()
+	{
 		return blueprintName;
 	}
 
-	public void update() {
+	public void update()
+	{
 		// Nothing to do here
 	}
 
-	public void setType(DroneTypes type) {
+	public void setType( DroneTypes type )
+	{
 		droneType = type;
 	}
 
-	public DroneTypes getType() {
+	public DroneTypes getType()
+	{
 		return droneType;
 	}
 
-	public String getBlueprintName() {
+	public String getBlueprintName()
+	{
 		return blueprintName;
 	}
 
-	public void setTitle(String title) {
-		if (title == null)
-			throw new IllegalArgumentException(blueprintName + ": title must not be null.");
+	public void setTitle( String title )
+	{
+		if ( title == null )
+			throw new IllegalArgumentException( blueprintName + ": title must not be null." );
 		this.title = title;
 	}
 
-	public String getTitle() {
+	public String getTitle()
+	{
 		return title;
 	}
 
-	public void setShortName(String name) {
-		if (name == null)
-			throw new IllegalArgumentException(blueprintName + ": name must not be null.");
+	public void setShortName( String name )
+	{
+		if ( name == null )
+			throw new IllegalArgumentException( blueprintName + ": name must not be null." );
 		shortName = name;
 	}
 
-	public String getShortName() {
+	public String getShortName()
+	{
 		return shortName;
 	}
 
-	public void setDescription(String desc) {
-		if (desc == null)
-			throw new IllegalArgumentException(blueprintName + ": description must not be null.");
+	public void setDescription( String desc )
+	{
+		if ( desc == null )
+			throw new IllegalArgumentException( blueprintName + ": description must not be null." );
 		description = desc;
 	}
 
-	public String getDescription() {
+	public String getDescription()
+	{
 		return description;
 	}
 
-	public void setStat(DroneStats stat, float value) {
-		if (stat == null)
-			throw new IllegalArgumentException("Stat type must not be null.");
-		if (statMap == null)
+	public void setStat( DroneStats stat, float value )
+	{
+		if ( stat == null )
+			throw new IllegalArgumentException( "Stat type must not be null." );
+		if ( statMap == null )
 			initStatMap();
-		statMap.put(stat, value);
+		statMap.put( stat, value );
 	}
 
-	public float getStat(DroneStats stat) {
-		if (stat == null)
-			throw new IllegalArgumentException("Stat type must not be null.");
-		if (statMap == null)
+	public float getStat( DroneStats stat )
+	{
+		if ( stat == null )
+			throw new IllegalArgumentException( "Stat type must not be null." );
+		if ( statMap == null )
 			initStatMap();
-		return statMap.get(stat);
+		return statMap.get( stat );
 	}
 
-	private void initStatMap() {
+	private void initStatMap()
+	{
 		statMap = new HashMap<DroneStats, Float>();
-		for (DroneStats stat : DroneStats.values())
-			statMap.put(stat, 0f);
+		for ( DroneStats stat : DroneStats.values() )
+			statMap.put( stat, 0f );
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return title;
 	}
 
 	@Override
-	public int compareTo(DroneObject o) {
-		return blueprintName.compareTo(o.blueprintName);
+	public int compareTo( DroneObject o )
+	{
+		return blueprintName.compareTo( o.blueprintName );
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (o instanceof DroneObject) {
-			DroneObject other = (DroneObject) o;
-			return blueprintName.equals(other.blueprintName);
-		} else
+	public boolean equals( Object o )
+	{
+		if ( o instanceof DroneObject ) {
+			DroneObject other = (DroneObject)o;
+			return blueprintName.equals( other.blueprintName );
+		}
+		else
 			return false;
 	}
 }

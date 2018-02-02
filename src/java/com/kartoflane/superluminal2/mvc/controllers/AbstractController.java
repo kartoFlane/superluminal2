@@ -52,9 +52,11 @@ import com.kartoflane.superluminal2.undo.UndoableMoveEdit;
 import com.kartoflane.superluminal2.undo.ValueUndoableEdit;
 import com.kartoflane.superluminal2.utils.Utils;
 
-public abstract class AbstractController implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
-		MouseInputListener, Collidable, Boundable, Follower, Followable, SLListener {
 
+public abstract class AbstractController
+	implements Controller, Selectable, Disposable, Deletable, Resizable, Pinnable,
+	MouseInputListener, Collidable, Boundable, Follower, Followable, SLListener
+{
 	protected Followable parent = null;
 	protected Point followOffset = null;
 	protected HashSet<Follower> followers = null;
@@ -76,219 +78,249 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 
 	protected Orientations lockDragTo = null;
 	protected Snapmodes snapmode = Snapmodes.FREE;
-	protected Point clickOffset = new Point(0, 0);
+	protected Point clickOffset = new Point( 0, 0 );
 
 	protected ValueUndoableEdit<?> currentEdit = null;
 
+
 	@Override
-	public void setModel(Model model) {
-		if (model == null)
-			throw new IllegalArgumentException("Argument must not be null.");
-		this.model = (BaseModel) model;
+	public void setModel( Model model )
+	{
+		if ( model == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
+		this.model = (BaseModel)model;
 	}
 
-	protected BaseModel getModel() {
+	protected BaseModel getModel()
+	{
 		return model;
 	}
 
 	@Override
-	public void setView(View view) {
-		if (view == null)
-			throw new IllegalArgumentException("Argument must not be null.");
-		if (this.view != null && this.view != view)
+	public void setView( View view )
+	{
+		if ( view == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
+		if ( this.view != null && this.view != view )
 			this.view.dispose();
-		this.view = (BaseView) view;
+		this.view = (BaseView)view;
 
-		view.setController(this);
-		view.setModel(model);
+		view.setController( this );
+		view.setModel( model );
 	}
 
-	protected BaseView getView() {
+	protected BaseView getView()
+	{
 		return view;
 	}
 
-	public void updateView() {
+	public void updateView()
+	{
 		view.updateView();
 	}
 
-	public void addToPainter(Layers layer) {
-		view.addToPainter(layer);
+	public void addToPainter( Layers layer )
+	{
+		view.addToPainter( layer );
 	}
 
-	public void addToPainterBottom(Layers layer) {
-		view.addToPainterBottom(layer);
+	public void addToPainterBottom( Layers layer )
+	{
+		view.addToPainterBottom( layer );
 	}
 
-	public void removeFromPainter() {
+	public void removeFromPainter()
+	{
 		view.removeFromPainter();
 	}
 
-	public void removeFromPainter(Layers layer) {
-		view.removeFromPainter(layer);
+	public void removeFromPainter( Layers layer )
+	{
+		view.removeFromPainter( layer );
 	}
 
-	public boolean setLocation(int x, int y) {
+	public boolean setLocation( int x, int y )
+	{
 		// if the new location falls outside of the area the object is
 		// bounded to, change the parameters to be as close the border as possible
-		if (isBounded() && !isWithinBoundingArea(x, y)) {
-			Point p = limitToBoundingArea(x, y);
+		if ( isBounded() && !isWithinBoundingArea( x, y ) ) {
+			Point p = limitToBoundingArea( x, y );
 			x = p.x;
 			y = p.y;
 		}
 
-		if (isCollidable()) {
-			Rectangle b = new Rectangle(x - getW() / 2, y - getH() / 2, getW(), getH());
-			if (collidesAs(b, this))
+		if ( isCollidable() ) {
+			Rectangle b = new Rectangle( x - getW() / 2, y - getH() / 2, getW(), getH() );
+			if ( collidesAs( b, this ) )
 				return false;
 		}
 
-		model.setLocation(x, y);
+		model.setLocation( x, y );
 
-		if (isFollowActive() && followers != null) { // followers set is lazily instantiated when it's needed
-			for (Follower fol : followers)
+		if ( isFollowActive() && followers != null ) { // followers set is lazily instantiated when it's needed
+			for ( Follower fol : followers )
 				fol.updateFollower();
 		}
 
-		if (eventHandler != null && eventHandler.hooks(SLEvent.MOVE))
-			eventHandler.sendEvent(new SLMoveEvent(this, getLocation()));
+		if ( eventHandler != null && eventHandler.hooks( SLEvent.MOVE ) )
+			eventHandler.sendEvent( new SLMoveEvent( this, getLocation() ) );
 		return true;
 	}
 
-	public boolean setLocation(Point p) {
-		return setLocation(p.x, p.y);
+	public boolean setLocation( Point p )
+	{
+		return setLocation( p.x, p.y );
 	}
 
 	@Override
-	public Point getLocation() {
+	public Point getLocation()
+	{
 		return model.getLocation();
 	}
 
-	public boolean setLocationCorner(int x, int y) {
+	public boolean setLocationCorner( int x, int y )
+	{
 		Rectangle b = model.getBounds();
 		x -= b.x;
 		y -= b.y;
 
-		return translate(x, y);
+		return translate( x, y );
 	}
 
-	public Point getLocationCorner() {
+	public Point getLocationCorner()
+	{
 		Rectangle b = model.getBounds();
-		return new Point(b.x, b.y);
+		return new Point( b.x, b.y );
 	}
 
 	@Override
-	public boolean translate(int dx, int dy) {
+	public boolean translate( int dx, int dy )
+	{
 		// if the new location falls outside of the area the object is
 		// bounded to, change the parameters to be as close the border as possible
-		if (isBounded() && !isWithinBoundingArea(getX() + dx, getY() + dy)) {
-			Point p = limitToBoundingArea(getX() + dx, getY() + dy);
+		if ( isBounded() && !isWithinBoundingArea( getX() + dx, getY() + dy ) ) {
+			Point p = limitToBoundingArea( getX() + dx, getY() + dy );
 			dx = p.x - getX();
 			dy = p.y - getY();
 		}
 
-		if (isCollidable()) {
-			Rectangle b = new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH());
+		if ( isCollidable() ) {
+			Rectangle b = new Rectangle( getX() - getW() / 2, getY() - getH() / 2, getW(), getH() );
 			b.x += dx;
 			b.y += dy;
-			if (collidesAs(b, this))
+			if ( collidesAs( b, this ) )
 				return false;
 		}
 
-		model.translate(dx, dy);
-		if (isFollowActive() && followers != null) { // followers set is lazily instantiated when it's needed
-			for (Follower fol : followers)
+		model.translate( dx, dy );
+		if ( isFollowActive() && followers != null ) { // followers set is lazily instantiated when it's needed
+			for ( Follower fol : followers )
 				fol.updateFollower();
 		}
 
-		if (eventHandler != null && eventHandler.hooks(SLEvent.MOVE))
-			eventHandler.sendEvent(new SLMoveEvent(this, getLocation()));
+		if ( eventHandler != null && eventHandler.hooks( SLEvent.MOVE ) )
+			eventHandler.sendEvent( new SLMoveEvent( this, getLocation() ) );
 		return true;
 	}
 
 	@Override
-	public int getX() {
+	public int getX()
+	{
 		return model.getX();
 	}
 
 	@Override
-	public int getY() {
+	public int getY()
+	{
 		return model.getY();
 	}
 
 	@Override
-	public boolean setSize(int w, int h) {
-		model.setSize(w, h);
+	public boolean setSize( int w, int h )
+	{
+		model.setSize( w, h );
 
-		if (eventHandler != null && eventHandler.hooks(SLEvent.RESIZE))
-			eventHandler.sendEvent(new SLResizeEvent(this, getSize()));
+		if ( eventHandler != null && eventHandler.hooks( SLEvent.RESIZE ) )
+			eventHandler.sendEvent( new SLResizeEvent( this, getSize() ) );
 		return true;
 	}
 
-	public boolean setSize(Point p) {
-		return setSize(p.x, p.y);
+	public boolean setSize( Point p )
+	{
+		return setSize( p.x, p.y );
 	}
 
 	@Override
-	public Point getSize() {
+	public Point getSize()
+	{
 		return model.getSize();
 	}
 
 	@Override
-	public int getW() {
+	public int getW()
+	{
 		return model.getW();
 	}
 
 	@Override
-	public int getH() {
+	public int getH()
+	{
 		return model.getH();
 	}
 
-	public Rectangle getBounds() {
-		return Utils.rotate(model.getBounds(), getRotation());
+	public Rectangle getBounds()
+	{
+		return Utils.rotate( model.getBounds(), getRotation() );
 	}
 
 	/**
 	 * @param rad
 	 *            angle in degrees, 0 = north.
 	 */
-	public void setRotation(float angle) {
-		view.setRotation(angle);
+	public void setRotation( float angle )
+	{
+		view.setRotation( angle );
 	}
 
 	/**
 	 * @param rad
 	 *            angle in degrees
 	 */
-	public void rotate(float angle) {
-		view.setRotation(view.getRotation() + angle);
+	public void rotate( float angle )
+	{
+		view.setRotation( view.getRotation() + angle );
 	}
 
 	/**
 	 * @return rotation in degrees, 0 = north.
 	 */
-	public float getRotation() {
+	public float getRotation()
+	{
 		return view.getRotation();
 	}
 
 	/**
 	 * @return rectangle that is exactly represents the area of the controller.
 	 */
-	public Rectangle getDimensions() {
-		return new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH());
+	public Rectangle getDimensions()
+	{
+		return new Rectangle( getX() - getW() / 2, getY() - getH() / 2, getW(), getH() );
 	}
 
 	/**
 	 * Sets the location of the controller to the specified coordinates, redrawing
 	 * immediately if the controller is visible.
 	 */
-	public void reposition(int x, int y) {
-		if (isVisible()) {
-			setVisible(false);
-			setLocation(x, y);
+	public void reposition( int x, int y )
+	{
+		if ( isVisible() ) {
+			setVisible( false );
+			setLocation( x, y );
 			updateView();
-			setVisible(true);
-		} else {
-			setLocation(x, y);
+			setVisible( true );
+		}
+		else {
+			setLocation( x, y );
 		}
 	}
 
@@ -296,22 +328,25 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * Sets the location of the controller to the specified location, redrawing
 	 * immediately if the controller is visible.
 	 */
-	public void reposition(Point p) {
-		reposition(p.x, p.y);
+	public void reposition( Point p )
+	{
+		reposition( p.x, p.y );
 	}
 
 	/**
 	 * Sets the size of the controller to the specified values, redrawing
 	 * immediately if the controller is visible.
 	 */
-	public void resize(int w, int h) {
-		if (isVisible()) {
-			setVisible(false);
-			setSize(w, h);
+	public void resize( int w, int h )
+	{
+		if ( isVisible() ) {
+			setVisible( false );
+			setSize( w, h );
 			updateView();
-			setVisible(true);
-		} else {
-			setSize(w, h);
+			setVisible( true );
+		}
+		else {
+			setSize( w, h );
 		}
 	}
 
@@ -319,40 +354,48 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * Sets the size of the controller to the specified values, redrawing
 	 * immediately if the controller is visible.
 	 */
-	public void resize(Point p) {
-		resize(p.x, p.y);
+	public void resize( Point p )
+	{
+		resize( p.x, p.y );
 	}
 
-	public Point getPresentedLocation() {
+	public Point getPresentedLocation()
+	{
 		return getLocation();
 	}
 
-	public Point getPresentedSize() {
+	public Point getPresentedSize()
+	{
 		return getSize();
 	}
 
-	public void setPresentedLocation(int x, int y) {
-		reposition(x * presentedFactor, y * presentedFactor);
+	public void setPresentedLocation( int x, int y )
+	{
+		reposition( x * presentedFactor, y * presentedFactor );
 	}
 
-	public void setPresentedLocation(Point p) {
-		setPresentedLocation(p.x, p.y);
+	public void setPresentedLocation( Point p )
+	{
+		setPresentedLocation( p.x, p.y );
 	}
 
-	public void setPresentedSize(int w, int h) {
-		resize(w, h);
+	public void setPresentedSize( int w, int h )
+	{
+		resize( w, h );
 		updateBoundingArea();
 	}
 
-	public void setPresentedSize(Point p) {
-		setPresentedSize(p.x, p.y);
+	public void setPresentedSize( Point p )
+	{
+		setPresentedSize( p.x, p.y );
 	}
 
 	/**
 	 * Presented factor is the number by which the controller's dimensions and location are multiplied
 	 * before they are displayed in the sidebar.
 	 */
-	public void setPresentedFactor(int i) {
+	public void setPresentedFactor( int i )
+	{
 		presentedFactor = i;
 	}
 
@@ -362,38 +405,43 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * 
 	 * @return the presented factor of the room
 	 */
-	public int getPresentedFactor() {
+	public int getPresentedFactor()
+	{
 		return presentedFactor;
 	}
 
 	/**
 	 * Redraws the controller's area.
 	 */
-	public void redraw() {
-		EditorWindow.getInstance().canvasRedraw(getBounds());
+	public void redraw()
+	{
+		EditorWindow.getInstance().canvasRedraw( getBounds() );
 	}
 
 	/**
 	 * Convenience method to redraw the rectangle.
 	 */
-	public static void redraw(Rectangle r) {
-		EditorWindow.getInstance().canvasRedraw(r);
+	public static void redraw( Rectangle r )
+	{
+		EditorWindow.getInstance().canvasRedraw( r );
 	}
 
 	/**
 	 * Forwards the PaintEvent to the View.
 	 */
-	public void redraw(PaintEvent e) {
-		view.redraw(e);
+	public void redraw( PaintEvent e )
+	{
+		view.redraw( e );
 	}
 
 	/**
 	 * Allows to (un)pin the controller. Pinned controllers cannot be moved by dragging.
 	 */
 	@Override
-	public void setPinned(boolean pin) {
-		model.setPinned(pin);
-		setMoving(false);
+	public void setPinned( boolean pin )
+	{
+		model.setPinned( pin );
+		setMoving( false );
 		updateView();
 		redraw();
 	}
@@ -402,7 +450,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * @return true if the controller is pinned and cannot be moved by dragging, false otherwise.
 	 */
 	@Override
-	public boolean isPinned() {
+	public boolean isPinned()
+	{
 		return model.isPinned();
 	}
 
@@ -410,7 +459,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * Allows to make the controller (un)selectable.
 	 */
 	@Override
-	public void setSelectable(boolean sel) {
+	public void setSelectable( boolean sel )
+	{
 		selectable = sel;
 	}
 
@@ -418,7 +468,8 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * @return true if the controller can be selected by clicking on it, false otherwie.
 	 */
 	@Override
-	public boolean isSelectable() {
+	public boolean isSelectable()
+	{
 		return selectable;
 	}
 
@@ -428,13 +479,14 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(ObjectController)} instead.
 	 */
 	@Override
-	public void select() {
+	public void select()
+	{
 		selected = selectable;
 		updateView();
 		redraw();
 
-		if (eventHandler != null && eventHandler.hooks(SLEvent.SELECT))
-			eventHandler.sendEvent(new SLSelectionEvent(this));
+		if ( eventHandler != null && eventHandler.hooks( SLEvent.SELECT ) )
+			eventHandler.sendEvent( new SLSelectionEvent( this ) );
 	}
 
 	/**
@@ -443,18 +495,20 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * This method <b>should not</b> be called directly. Use {@link Manager#setSelected(ObjectController)} instead.
 	 */
 	@Override
-	public void deselect() {
+	public void deselect()
+	{
 		selected = false;
-		setMoving(false);
+		setMoving( false );
 		updateView();
 		redraw();
 
-		if (eventHandler != null && eventHandler.hooks(SLEvent.DESELECT))
-			eventHandler.sendEvent(new SLDeselectionEvent(this));
+		if ( eventHandler != null && eventHandler.hooks( SLEvent.DESELECT ) )
+			eventHandler.sendEvent( new SLDeselectionEvent( this ) );
 	}
 
 	@Override
-	public boolean isSelected() {
+	public boolean isSelected()
+	{
 		return selected;
 	}
 
@@ -462,145 +516,166 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * Checks whether the Followable is fit for the role of a parent.<br>
 	 * Throws appropriate exception when it is not.
 	 */
-	protected final void checkParentConditions(Followable followable) {
-		if (followable != null && !(followable instanceof Controller)) // instanceof returns false for null, but we allow null argument
-			throw new IllegalArgumentException("Followable passed in argument is not a Controller.");
-		if (followable == this)
-			throw new IllegalArgumentException("Cannot be parent to itself.");
-		if (followable instanceof Follower && ((Follower) followable).getParent() == this)
-			throw new IllegalArgumentException("Cannot follow an object that is following the receiver.");
+	protected final void checkParentConditions( Followable followable )
+	{
+		if ( followable != null && !( followable instanceof Controller ) ) // instanceof returns false for null, but we allow null argument
+			throw new IllegalArgumentException( "Followable passed in argument is not a Controller." );
+		if ( followable == this )
+			throw new IllegalArgumentException( "Cannot be parent to itself." );
+		if ( followable instanceof Follower && ( (Follower)followable ).getParent() == this )
+			throw new IllegalArgumentException( "Cannot follow an object that is following the receiver." );
 	}
 
 	@Override
-	public void setParent(Followable followable) {
-		checkParentConditions(followable);
-		if (parent == followable)
+	public void setParent( Followable followable )
+	{
+		checkParentConditions( followable );
+		if ( parent == followable )
 			return;
 
 		// if it passes, change the parent
-		if (parent != null)
-			parent.removeFollower(this);
-		if (followable != null)
-			followable.addFollower(this);
+		if ( parent != null )
+			parent.removeFollower( this );
+		if ( followable != null )
+			followable.addFollower( this );
 
 		parent = followable;
 	}
 
 	@Override
-	public Followable getParent() {
+	public Followable getParent()
+	{
 		return parent;
 	}
 
 	@Override
-	public Point getFollowOffset() {
-		if (followOffset == null)
-			followOffset = new Point(0, 0);
-		return Utils.copy(followOffset);
+	public Point getFollowOffset()
+	{
+		if ( followOffset == null )
+			followOffset = new Point( 0, 0 );
+		return Utils.copy( followOffset );
 	}
 
-	public int getFollowOffsetX() {
-		if (followOffset == null)
+	public int getFollowOffsetX()
+	{
+		if ( followOffset == null )
 			return 0;
 		return followOffset.x;
 	}
 
-	public int getFollowOffsetY() {
-		if (followOffset == null)
+	public int getFollowOffsetY()
+	{
+		if ( followOffset == null )
 			return 0;
 		return followOffset.y;
 	}
 
 	@Override
-	public void setFollowOffset(int x, int y) {
-		if (followOffset == null)
-			followOffset = new Point(x, y);
+	public void setFollowOffset( int x, int y )
+	{
+		if ( followOffset == null )
+			followOffset = new Point( x, y );
 		else {
 			followOffset.x = x;
 			followOffset.y = y;
 		}
 	}
 
-	public void setFollowOffset(Point p) {
-		setFollowOffset(p.x, p.y);
+	public void setFollowOffset( Point p )
+	{
+		setFollowOffset( p.x, p.y );
 	}
 
 	@Override
-	public Set<Follower> getFollowers() {
-		if (followers == null)
+	public Set<Follower> getFollowers()
+	{
+		if ( followers == null )
 			followers = new HashSet<Follower>();
-		return Collections.unmodifiableSet(followers);
+		return Collections.unmodifiableSet( followers );
 	}
 
 	@Override
-	public boolean addFollower(Follower fol) {
-		if (followers == null)
+	public boolean addFollower( Follower fol )
+	{
+		if ( followers == null )
 			followers = new HashSet<Follower>();
-		return followers.add(fol);
+		return followers.add( fol );
 	}
 
 	@Override
-	public boolean removeFollower(Follower fol) {
-		if (followers == null)
+	public boolean removeFollower( Follower fol )
+	{
+		if ( followers == null )
 			followers = new HashSet<Follower>();
-		return followers.remove(fol);
+		return followers.remove( fol );
 	}
 
 	@Override
-	public int getFollowerCount() {
-		if (followers == null)
+	public int getFollowerCount()
+	{
+		if ( followers == null )
 			followers = new HashSet<Follower>();
 		return followers.size();
 	}
 
 	@Override
-	public void setFollowActive(boolean active) {
+	public void setFollowActive( boolean active )
+	{
 		this.followableActive = active;
 	}
 
 	@Override
-	public boolean isFollowActive() {
+	public boolean isFollowActive()
+	{
 		return followableActive;
 	}
 
 	@Override
-	public void updateFollower() {
+	public void updateFollower()
+	{
 		updateBoundingArea();
 		Followable parent = getParent();
-		if (parent == null)
-			throw new IllegalArgumentException("Parent is null.");
+		if ( parent == null )
+			throw new IllegalArgumentException( "Parent is null." );
 		Point offset = getFollowOffset();
 
-		reposition(parent.getX() + offset.x, parent.getY() + offset.y);
+		reposition( parent.getX() + offset.x, parent.getY() + offset.y );
 		updateBoundingArea();
 	}
 
 	@Override
-	public void setCollidable(boolean collidable) {
-		model.setCollidable(collidable);
+	public void setCollidable( boolean collidable )
+	{
+		model.setCollidable( collidable );
 	}
 
 	@Override
-	public boolean isCollidable() {
+	public boolean isCollidable()
+	{
 		return model.isCollidable();
 	}
 
-	public void setMoving(boolean mov) {
+	public void setMoving( boolean mov )
+	{
 		moving = mov && isSelected() && !isPinned();
 	}
 
-	public boolean isMoving() {
+	public boolean isMoving()
+	{
 		return moving;
 	}
 
-	public void setVisible(boolean vis) {
-		view.setVisible(vis);
+	public void setVisible( boolean vis )
+	{
+		view.setVisible( vis );
 		redraw();
 
-		if (eventHandler != null)
-			eventHandler.sendEvent(new SLVisibilityEvent(this, vis));
+		if ( eventHandler != null )
+			eventHandler.sendEvent( new SLVisibilityEvent( this, vis ) );
 	}
 
-	public boolean isVisible() {
+	public boolean isVisible()
+	{
 		return view.isVisible();
 	}
 
@@ -610,62 +685,69 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * @see {@link Grid#snapToGrid(int, int, int)}
 	 * @see {@link Snapmodes}
 	 */
-	public void setSnapMode(Snapmodes snapmode) {
+	public void setSnapMode( Snapmodes snapmode )
+	{
 		this.snapmode = snapmode;
 	}
 
 	/** @return the snapping method used to align the controller to the grid. */
-	public Snapmodes getSnapMode() {
+	public Snapmodes getSnapMode()
+	{
 		return snapmode;
 	}
 
 	/**
 	 * Sets the highlighted state of the controller.
 	 */
-	public void setHighlighted(boolean high) {
-		view.setHighlighted(high);
+	public void setHighlighted( boolean high )
+	{
+		view.setHighlighted( high );
 		updateView();
 		redraw();
 	}
 
-	public boolean isHighlighted() {
+	public boolean isHighlighted()
+	{
 		return view.isHighlighted();
 	}
 
-	public DataComposite getDataComposite(Composite parent) {
-		if (selectable)
-			throw new IllegalStateException("This Controller is selectable, but doesn't define a DataComposite");
+	public DataComposite getDataComposite( Composite parent )
+	{
+		if ( selectable )
+			throw new IllegalStateException( "This Controller is selectable, but doesn't define a DataComposite" );
 		else
 			return null;
 	}
 
 	@Override
-	public void mouseDown(MouseEvent e) {
-		if (Manager.getSelectedToolId() == Tools.POINTER) {
-			boolean contains = contains(e.x, e.y);
-			if (e.button == 1) {
+	public void mouseDown( MouseEvent e )
+	{
+		if ( Manager.getSelectedToolId() == Tools.POINTER ) {
+			boolean contains = contains( e.x, e.y );
+			if ( e.button == 1 ) {
 				clickOffset.x = e.x - getX();
 				clickOffset.y = e.y - getY();
 
-				if (contains && !selected)
-					Manager.setSelected(this);
-				setMoving(contains);
+				if ( contains && !selected )
+					Manager.setSelected( this );
+				setMoving( contains );
 
-				currentEdit = new UndoableMoveEdit(this);
+				currentEdit = new UndoableMoveEdit( this );
 				undoInit();
 			}
 		}
 	}
 
 	@Override
-	public void mouseUp(MouseEvent e) {
-		if (Manager.getSelectedToolId() == Tools.POINTER) {
-			if (e.button == 1) {
+	public void mouseUp( MouseEvent e )
+	{
+		if ( Manager.getSelectedToolId() == Tools.POINTER ) {
+			if ( e.button == 1 ) {
 				lockDragTo = null;
 
-				if (!contains(e.x, e.y) && !contains(getX() + clickOffset.x, getY() + clickOffset.y) && selected)
-					Manager.setSelected(null);
-				setMoving(false);
+				if ( !contains( e.x, e.y ) && !contains( getX() + clickOffset.x, getY() + clickOffset.y ) && selected )
+					Manager.setSelected( null );
+				setMoving( false );
 
 				undoFinalize();
 				EditorWindow.getInstance().updateSidebarContent();
@@ -674,33 +756,37 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	@Override
-	public void mouseMove(MouseEvent e) {
-		if (Manager.getSelectedToolId() == Tools.POINTER) {
-			if (selected && moving) {
+	public void mouseMove( MouseEvent e )
+	{
+		if ( Manager.getSelectedToolId() == Tools.POINTER ) {
+			if ( selected && moving ) {
 				// Decide direction for mono-directional dragging
-				if (monoDirectionalDrag && lockDragTo == null) {
-					int d = Utils.distance(getX() + clickOffset.x, getY() + clickOffset.y, e.x, e.y);
+				if ( monoDirectionalDrag && lockDragTo == null ) {
+					int d = Utils.distance( getX() + clickOffset.x, getY() + clickOffset.y, e.x, e.y );
 					// Have the user drag more than 2px away from click point to determine the direction
 					// Not noticeable to the user, but increases the chance of correct detection
-					if (d > 2) {
-						Point click = new Point(getX() + clickOffset.x, getY() + clickOffset.y);
-						Point cursor = new Point(e.x, e.y);
-						double angle = (Utils.angle(click, cursor) + 90) % 360;
-						if ((angle >= 315 || angle < 45) || (angle >= 135 && angle < 225)) {
+					if ( d > 2 ) {
+						Point click = new Point( getX() + clickOffset.x, getY() + clickOffset.y );
+						Point cursor = new Point( e.x, e.y );
+						double angle = ( Utils.angle( click, cursor ) + 90 ) % 360;
+						if ( ( angle >= 315 || angle < 45 ) || ( angle >= 135 && angle < 225 ) ) {
 							lockDragTo = Orientations.HORIZONTAL;
-						} else {
+						}
+						else {
 							lockDragTo = Orientations.VERTICAL;
 						}
 					}
-				} else {
-					Point p = Grid.getInstance().snapToGrid(e.x - clickOffset.x, e.y - clickOffset.y, snapmode);
-					if (lockDragTo == Orientations.HORIZONTAL) {
+				}
+				else {
+					Point p = Grid.getInstance().snapToGrid( e.x - clickOffset.x, e.y - clickOffset.y, snapmode );
+					if ( lockDragTo == Orientations.HORIZONTAL ) {
 						p.y = getY();
-					} else if (lockDragTo == Orientations.VERTICAL) {
+					}
+					else if ( lockDragTo == Orientations.VERTICAL ) {
 						p.x = getX();
 					}
-					if (p.x != getX() || p.y != getY()) {
-						reposition(p.x, p.y);
+					if ( p.x != getX() || p.y != getY() ) {
+						reposition( p.x, p.y );
 						updateFollowOffset();
 					}
 				}
@@ -709,75 +795,92 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	}
 
 	@Override
-	public void mouseEnter(MouseEvent e) {
-		if (!containsMouse) {
-			setHighlighted(true);
+	public void mouseEnter( MouseEvent e )
+	{
+		if ( !containsMouse ) {
+			setHighlighted( true );
 		}
 		containsMouse = true;
 	}
 
 	@Override
-	public void mouseExit(MouseEvent e) {
-		if (containsMouse) {
-			setHighlighted(false);
+	public void mouseExit( MouseEvent e )
+	{
+		if ( containsMouse ) {
+			setHighlighted( false );
 		}
 		containsMouse = false;
 	}
 
 	@Override
-	public void mouseDoubleClick(MouseEvent e) {
+	public void mouseDoubleClick( MouseEvent e )
+	{
 	}
 
 	@Override
-	public void mouseHover(MouseEvent e) {
+	public void mouseHover( MouseEvent e )
+	{
 	}
 
-	public boolean collides(Rectangle rect) {
-		return collides(rect.x, rect.y, rect.width, rect.height);
-	}
-
-	@Override
-	public boolean collides(int x, int y, int w, int h) {
-		Rectangle rect = new Rectangle(x + getTolerance(), y + getTolerance(),
-				w - 2 * getTolerance(), h - 2 * getTolerance());
-		return rect.intersects(new Rectangle(getX() - getW() / 2, getY() - getH() / 2, getW(), getH()));
+	public boolean collides( Rectangle rect )
+	{
+		return collides( rect.x, rect.y, rect.width, rect.height );
 	}
 
 	@Override
-	public boolean isBounded() {
+	public boolean collides( int x, int y, int w, int h )
+	{
+		Rectangle rect = new Rectangle(
+			x + getTolerance(), y + getTolerance(),
+			w - 2 * getTolerance(), h - 2 * getTolerance()
+		);
+		return rect.intersects( new Rectangle( getX() - getW() / 2, getY() - getH() / 2, getW(), getH() ) );
+	}
+
+	@Override
+	public boolean isBounded()
+	{
 		return model.isBounded();
 	}
 
 	@Override
-	public void setBounded(boolean bound) {
-		model.setBounded(bound);
+	public void setBounded( boolean bound )
+	{
+		model.setBounded( bound );
 	}
 
-	public boolean isWithinBoundingArea(int x, int y) {
-		return model.isWithinBoundingArea(x, y);
+	public boolean isWithinBoundingArea( int x, int y )
+	{
+		return model.isWithinBoundingArea( x, y );
 	}
 
-	public Point limitToBoundingArea(int x, int y) {
-		return model.limitToBoundingArea(x, y);
+	public Point limitToBoundingArea( int x, int y )
+	{
+		return model.limitToBoundingArea( x, y );
 	}
 
-	public Rectangle getBoundingArea() {
+	public Rectangle getBoundingArea()
+	{
 		return model.getBoundingArea();
 	}
 
-	public int getBoundingAreaX() {
+	public int getBoundingAreaX()
+	{
 		return model.getBoundingAreaX();
 	}
 
-	public int getBoundingAreaY() {
+	public int getBoundingAreaY()
+	{
 		return model.getBoundingAreaY();
 	}
 
-	public int getBoundingAreaW() {
+	public int getBoundingAreaW()
+	{
 		return model.getBoundingAreaW();
 	}
 
-	public int getBoundingAreaH() {
+	public int getBoundingAreaH()
+	{
 		return model.getBoundingAreaH();
 	}
 
@@ -793,13 +896,15 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * @param h
 	 *            height of the bounding area
 	 */
-	public void setBoundingArea(int x, int y, int w, int h) {
-		model.setBoundingArea(x, y, w, h);
+	public void setBoundingArea( int x, int y, int w, int h )
+	{
+		model.setBoundingArea( x, y, w, h );
 	}
 
 	/** Sets the area to which the controller is bounded. */
-	public void setBoundingArea(Rectangle r) {
-		setBoundingArea(r.x, r.y, r.width, r.height);
+	public void setBoundingArea( Rectangle r )
+	{
+		setBoundingArea( r.x, r.y, r.width, r.height );
 	}
 
 	/**
@@ -814,8 +919,9 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * @param y2
 	 *            y coordinate of the bottom-right corner of the bounding area
 	 */
-	public void setBoundingPoints(int x1, int y1, int x2, int y2) {
-		setBoundingArea(x1, y1, x2 - x1, y2 - y1);
+	public void setBoundingPoints( int x1, int y1, int x2, int y2 )
+	{
+		setBoundingArea( x1, y1, x2 - x1, y2 - y1 );
 	}
 
 	/**
@@ -826,160 +932,184 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 * @param end
 	 *            the bottom-right corner of the bounding area
 	 */
-	public void setBoundingPoints(Point start, Point end) {
-		setBoundingArea(start.x, start.y, end.x - start.x, end.y - start.y);
+	public void setBoundingPoints( Point start, Point end )
+	{
+		setBoundingArea( start.x, start.y, end.x - start.x, end.y - start.y );
 	}
 
 	/** @return an array of two points describing the area to which the controller is bounded. */
-	public Point[] getBoundingPoints() {
+	public Point[] getBoundingPoints()
+	{
 		Rectangle b = model.getBoundingArea();
 		return new Point[] {
-				new Point(b.x, b.y), new Point(b.x + b.width, b.y + b.height)
+			new Point( b.x, b.y ), new Point( b.x + b.width, b.y + b.height )
 		};
 	}
 
 	/** Updates the area that the controller is bounded to. */
-	public void updateBoundingArea() {
+	public void updateBoundingArea()
+	{
 	}
 
-	public void dispose() {
-		if (isDisposed())
+	public void dispose()
+	{
+		if ( isDisposed() )
 			return;
 
-		if (eventHandler != null)
-			eventHandler.sendEvent(new SLDisposeEvent(this));
+		if ( eventHandler != null )
+			eventHandler.sendEvent( new SLDisposeEvent( this ) );
 
 		// unregister this follower
-		setParent(null);
+		setParent( null );
 
 		model.dispose();
 		view.dispose();
 
-		for (PropController prop : getProps()) {
+		for ( PropController prop : getProps() ) {
 			prop.dispose();
 		}
 
-		if (eventHandler != null)
+		if ( eventHandler != null )
 			eventHandler.dispose();
 	}
 
 	@Override
-	public boolean contains(int x, int y) {
-		return getBounds().contains(x, y); // Some controllers modify their bounds, so use that instead of the model's
+	public boolean contains( int x, int y )
+	{
+		return getBounds().contains( x, y ); // Some controllers modify their bounds, so use that instead of the model's
 	}
 
 	@Override
-	public boolean intersects(Rectangle rect) {
-		return getBounds().intersects(rect); // Some controllers modify their bounds, so use that instead of the model's
+	public boolean intersects( Rectangle rect )
+	{
+		return getBounds().intersects( rect ); // Some controllers modify their bounds, so use that instead of the model's
 	}
 
 	/**
 	 * Flags the controller's location as modifiable, which means that the controller's position
 	 * can be changed by nudging or via the sidebar coordinate boxes.
 	 */
-	public void setLocModifiable(boolean b) {
-		model.setLocModifiable(b);
+	public void setLocModifiable( boolean b )
+	{
+		model.setLocModifiable( b );
 	}
 
 	/**
 	 * @see #setLocModifiable(boolean)
 	 */
-	public boolean isLocModifiable() {
+	public boolean isLocModifiable()
+	{
 		return model.isLocModifiable();
 	}
 
 	@Override
-	public void delete() {
+	public void delete()
+	{
 		deleted = true;
 		view.removeFromPainter();
-		setVisible(false);
+		setVisible( false );
 
-		if (eventHandler != null && eventHandler.hooks(SLEvent.DELETE))
-			eventHandler.sendEvent(new SLDeleteEvent(this));
+		if ( eventHandler != null && eventHandler.hooks( SLEvent.DELETE ) )
+			eventHandler.sendEvent( new SLDeleteEvent( this ) );
 
-		for (PropController prop : getProps()) {
+		for ( PropController prop : getProps() ) {
 			prop.removeFromPainter();
 			prop.redraw();
 			prop.delete();
 			prop.dispose();
 		}
-		if (props != null)
+		if ( props != null )
 			props.clear();
 	}
 
 	@Override
-	public void restore() {
+	public void restore()
+	{
 		monoDirectionalDrag = false;
 		deleted = false;
-		setView(view);
-		setVisible(true);
+		setView( view );
+		setVisible( true );
 
 		createProps();
 	}
 
-	public boolean isDeleted() {
+	public boolean isDeleted()
+	{
 		return deleted;
 	}
 
-	public boolean isDisposed() {
+	public boolean isDisposed()
+	{
 		return model.isDisposed();
 	}
 
 	@Override
-	public void setDeletable(boolean deletable) {
-		model.setDeletable(deletable);
+	public void setDeletable( boolean deletable )
+	{
+		model.setDeletable( deletable );
 	}
 
 	@Override
-	public boolean isDeletable() {
+	public boolean isDeletable()
+	{
 		return model.isDeletable();
 	}
 
 	@Override
-	public void setTolerance(int px) {
-		model.setTolerance(px);
+	public void setTolerance( int px )
+	{
+		model.setTolerance( px );
 	}
 
 	@Override
-	public int getTolerance() {
+	public int getTolerance()
+	{
 		return model.getTolerance();
 	}
 
-	public void addListener(int eventType, SLListener listener) {
-		if (eventHandler == null)
+	public void addListener( int eventType, SLListener listener )
+	{
+		if ( eventHandler == null )
 			eventHandler = new EventHandler();
-		eventHandler.hook(eventType, listener);
+		eventHandler.hook( eventType, listener );
 	}
 
-	public void removeListener(int eventType, SLListener listener) {
-		if (eventHandler == null)
+	public void removeListener( int eventType, SLListener listener )
+	{
+		if ( eventHandler == null )
 			return;
-		eventHandler.unhook(eventType, listener);
+		eventHandler.unhook( eventType, listener );
 	}
 
-	public void removeListener(SLListener listener) {
-		if (eventHandler == null)
+	public void removeListener( SLListener listener )
+	{
+		if ( eventHandler == null )
 			return;
-		eventHandler.unhook(listener);
+		eventHandler.unhook( listener );
 	}
 
-	public void handleEvent(SLEvent e) {
-		if (e instanceof SLMoveEvent) {
-			Point p = (Point) e.data;
-			notifyLocationChanged(p.x, p.y);
-		} else if (e instanceof SLResizeEvent) {
-			Point p = (Point) e.data;
-			notifySizeChanged(p.x, p.y);
-		} else if (e instanceof SLDisposeEvent) {
-			if (eventHandler != null && e.data != null && e.data instanceof SLListener) {
-				eventHandler.unhook((SLListener) e.data);
+	public void handleEvent( SLEvent e )
+	{
+		if ( e instanceof SLMoveEvent ) {
+			Point p = (Point)e.data;
+			notifyLocationChanged( p.x, p.y );
+		}
+		else if ( e instanceof SLResizeEvent ) {
+			Point p = (Point)e.data;
+			notifySizeChanged( p.x, p.y );
+		}
+		else if ( e instanceof SLDisposeEvent ) {
+			if ( eventHandler != null && e.data != null && e.data instanceof SLListener ) {
+				eventHandler.unhook( (SLListener)e.data );
 			}
-		} else if (e instanceof SLVisibilityEvent) {
-			if (e.source == getParent())
-				setVisible((Boolean) e.data);
-		} else if (e instanceof SLModShiftEvent) {
-			monoDirectionalDrag = (Boolean) e.data;
-			if (!monoDirectionalDrag)
+		}
+		else if ( e instanceof SLVisibilityEvent ) {
+			if ( e.source == getParent() )
+				setVisible( (Boolean)e.data );
+		}
+		else if ( e instanceof SLModShiftEvent ) {
+			monoDirectionalDrag = (Boolean)e.data;
+			if ( !monoDirectionalDrag )
 				lockDragTo = null;
 		}
 	}
@@ -987,40 +1117,45 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	/**
 	 * By default, this method gets called when the controller receives a {@link SLEvent#MOVE} event
 	 */
-	public void notifyLocationChanged(int x, int y) {
+	public void notifyLocationChanged( int x, int y )
+	{
 	}
 
 	/**
 	 * By default, this method gets called when the controller receives a {@link SLEvent#RESIZE} event
 	 */
-	public void notifySizeChanged(int w, int h) {
-		resize(w, h);
+	public void notifySizeChanged( int w, int h )
+	{
+		resize( w, h );
 	}
 
-	public void addProp(PropController prop) {
-		if (prop == null)
-			throw new IllegalArgumentException("Argument must not be null.");
-		if (props == null)
+	public void addProp( PropController prop )
+	{
+		if ( prop == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
+		if ( props == null )
 			props = new HashSet<PropController>();
-		if (getProp(prop.getIdentifier()) != null)
-			throw new IllegalArgumentException(String.format("This object already owns a prop named '%s'", prop.getIdentifier()));
-		props.add(prop);
-		addListener(SLEvent.VISIBLE, prop);
+		if ( getProp( prop.getIdentifier() ) != null )
+			throw new IllegalArgumentException( String.format( "This object already owns a prop named '%s'", prop.getIdentifier() ) );
+		props.add( prop );
+		addListener( SLEvent.VISIBLE, prop );
 	}
 
-	public void removeProp(PropController prop) {
-		if (prop == null)
-			throw new IllegalArgumentException("Argument must not be null.");
-		if (props == null)
+	public void removeProp( PropController prop )
+	{
+		if ( prop == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
+		if ( props == null )
 			props = new HashSet<PropController>();
-		props.remove(prop);
-		removeListener(SLEvent.VISIBLE, prop);
+		props.remove( prop );
+		removeListener( SLEvent.VISIBLE, prop );
 	}
 
-	public PropController[] getProps() {
-		if (props == null)
+	public PropController[] getProps()
+	{
+		if ( props == null )
 			return new PropController[0];
-		return props.toArray(new PropController[0]);
+		return props.toArray( new PropController[0] );
 	}
 
 	/**
@@ -1028,17 +1163,19 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 	 *            the identifier of the sought prop
 	 * @return prop with the given identifier, or null if not found
 	 */
-	public PropController getProp(String id) {
-		if (id == null)
-			throw new IllegalArgumentException("Argument must not be null.");
-		if (props == null) {
+	public PropController getProp( String id )
+	{
+		if ( id == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
+		if ( props == null ) {
 			return null;
-		} else {
+		}
+		else {
 			PropController result = null;
 			Iterator<PropController> it = props.iterator();
-			while (it.hasNext() && result == null) {
+			while ( it.hasNext() && result == null ) {
 				PropController p = it.next();
-				if (p.getIdentifier().equals(id))
+				if ( p.getIdentifier().equals( id ) )
 					result = p;
 			}
 
@@ -1046,57 +1183,68 @@ public abstract class AbstractController implements Controller, Selectable, Disp
 		}
 	}
 
-	public static boolean collidesAs(Rectangle rect, AbstractController col) {
-		CollisionPredicate predicate = new CollisionPredicate(rect, col);
-		Layers layer = ((AbstractController) col).view.getLayerId();
-		return LayeredPainter.getInstance().getControllerMatching(predicate, layer) != null;
+	public static boolean collidesAs( Rectangle rect, AbstractController col )
+	{
+		CollisionPredicate predicate = new CollisionPredicate( rect, col );
+		Layers layer = ( (AbstractController)col ).view.getLayerId();
+		return LayeredPainter.getInstance().getControllerMatching( predicate, layer ) != null;
 	}
 
-	public static class CollisionPredicate implements Predicate<AbstractController> {
+
+	public static class CollisionPredicate implements Predicate<AbstractController>
+	{
 		private final Rectangle b;
 		private final Controller controller;
 
-		public CollisionPredicate(Rectangle b, AbstractController controller) {
+
+		public CollisionPredicate( Rectangle b, AbstractController controller )
+		{
 			this.b = b;
 			this.controller = controller;
 		}
 
 		@Override
-		public boolean accept(AbstractController control) {
+		public boolean accept( AbstractController control )
+		{
 			return control.isVisible() && control.isCollidable() &&
-					control != controller && control.collides(b);
+				control != controller && control.collides( b );
 		}
 	}
 
-	public void updateFollowOffset() {
-		if (getParent() != null) {
+
+	public void updateFollowOffset()
+	{
+		if ( getParent() != null ) {
 			Point p = getLocation();
-			setFollowOffset(p.x - getParent().getX(), p.y - getParent().getY());
+			setFollowOffset( p.x - getParent().getX(), p.y - getParent().getY() );
 		}
 	}
 
-	protected void undoInit() {
-		if (currentEdit instanceof UndoableMoveEdit) {
-			UndoableMoveEdit move = (UndoableMoveEdit) currentEdit;
-			move.setOld(getLocation());
+	protected void undoInit()
+	{
+		if ( currentEdit instanceof UndoableMoveEdit ) {
+			UndoableMoveEdit move = (UndoableMoveEdit)currentEdit;
+			move.setOld( getLocation() );
 		}
 	}
 
-	protected void undoFinalize() {
-		if (currentEdit == null)
+	protected void undoFinalize()
+	{
+		if ( currentEdit == null )
 			return;
 
-		if (currentEdit instanceof UndoableMoveEdit) {
-			UndoableMoveEdit move = (UndoableMoveEdit) currentEdit;
-			move.setCurrent(getLocation());
+		if ( currentEdit instanceof UndoableMoveEdit ) {
+			UndoableMoveEdit move = (UndoableMoveEdit)currentEdit;
+			move.setCurrent( getLocation() );
 		}
 
-		if (!currentEdit.isValuesEqual())
-			Manager.getCurrentShip().postEdit(currentEdit);
+		if ( !currentEdit.isValuesEqual() )
+			Manager.getCurrentShip().postEdit( currentEdit );
 
 		currentEdit = null;
 	}
 
-	protected void createProps() {
+	protected void createProps()
+	{
 	}
 }

@@ -1,39 +1,45 @@
 package org.unsynchronized;
-import java.io.*;
-import java.util.*;
 
 /**
  * <p>
- * Represents an enum instance.  As noted in the serialization spec, this consists of
+ * Represents an enum instance. As noted in the serialization spec, this consists of
  * merely the class description (represented by a classdesc) and the string corresponding
- * to the enum's value.  No other fields are ever serialized.
+ * to the enum's value. No other fields are ever serialized.
  * </p>
  */
-public class EnumObject extends ContentBase {
-    /**
-     * The enum's class description.
-     */
-    public ClassDesc classdesc;
+public class EnumObject extends ContentBase
+{
+	/**
+	 * The enum's class description.
+	 */
+	public ClassDesc classdesc;
 
-    /**
-     * The string that represents the enum's value.
-     */
-    public StringObject value;
+	/**
+	 * The string that represents the enum's value.
+	 */
+	public StringObject value;
 
-    /**
-     * Constructor.
-     *
-     * @param handle the enum's handle
-     * @param cd the enum's class description
-     * @param so the enum's value
-     */
-    public EnumObject(int handle, ClassDesc cd, StringObject so) {
-        super(ContentType.ENUM);
-        this.handle = handle;
-        this.classdesc = cd;
-        this.value = so;
-    }
-    public String toString() {
-        return "[enum " + JDeserialize.hex(handle) + ": " + value.value + "]";
-    }
+
+	/**
+	 * Constructor.
+	 *
+	 * @param handle
+	 *            the enum's handle
+	 * @param cd
+	 *            the enum's class description
+	 * @param so
+	 *            the enum's value
+	 */
+	public EnumObject( int handle, ClassDesc cd, StringObject so )
+	{
+		super( ContentType.ENUM );
+		this.handle = handle;
+		this.classdesc = cd;
+		this.value = so;
+	}
+
+	public String toString()
+	{
+		return "[enum " + JDeserialize.hex( handle ) + ": " + value.value + "]";
+	}
 }

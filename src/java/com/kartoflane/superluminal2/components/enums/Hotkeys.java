@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum Hotkeys {
+public enum Hotkeys
+{
 	// Tools
 	POINTER_TOOL,
 	CREATE_TOOL,
@@ -44,8 +45,9 @@ public enum Hotkeys {
 	SHOW_GIBS;
 
 	@Override
-	public String toString() {
-		switch (this) {
+	public String toString()
+	{
+		switch ( this ) {
 			case POINTER_TOOL:
 				return "Manipulation Tool";
 			case CREATE_TOOL:

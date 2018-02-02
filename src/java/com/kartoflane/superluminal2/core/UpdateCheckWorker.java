@@ -165,8 +165,8 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 				if ( Superluminal.APP_VERSION.compareTo( ud.remoteVersion ) < 0 ) {
 					try {
 						log.info(
-							"Update is available, user version: " + Superluminal.APP_VERSION
-								+ ", remote version: " + ud.remoteVersion
+							"Update is available, user version: " + Superluminal.APP_VERSION +
+								", remote version: " + ud.remoteVersion
 						);
 
 						MessageBox box = new MessageBox(

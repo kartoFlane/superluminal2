@@ -23,8 +23,9 @@ import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 
-public class DroneSearchDialog extends AbstractSearchDialog<DroneObject> {
 
+public class DroneSearchDialog extends AbstractSearchDialog<DroneObject>
+{
 	private static final int defaultWidth = 400;
 
 	private DroneTypes type = null;
@@ -36,151 +37,171 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject> {
 	private Text txtDesc;
 	private Button btnCase;
 
-	public DroneSearchDialog(Shell parent) {
-		super(parent);
+
+	public DroneSearchDialog( Shell parent )
+	{
+		super( parent );
 	}
 
 	/**
 	 * @wbp.parser.entryPoint
 	 */
 	@Override
-	public void createContents(Shell parent) {
-		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
-		shell.setLayout(new GridLayout(2, false));
-		shell.setText(Superluminal.APP_NAME + " - Drone Search");
+	public void createContents( Shell parent )
+	{
+		shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL );
+		shell.setLayout( new GridLayout( 2, false ) );
+		shell.setText( Superluminal.APP_NAME + " - Drone Search" );
 
-		Label lblType = new Label(shell, SWT.NONE);
-		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblType.setText("Type:");
+		Label lblType = new Label( shell, SWT.NONE );
+		lblType.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblType.setText( "Type:" );
 
-		cmbType = new Combo(shell, SWT.READ_ONLY);
-		GridData gd_cmbType = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		cmbType = new Combo( shell, SWT.READ_ONLY );
+		GridData gd_cmbType = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_cmbType.widthHint = 100;
-		cmbType.setLayoutData(gd_cmbType);
+		cmbType.setLayoutData( gd_cmbType );
 
-		cmbType.add("All Drones");
-		for (DroneTypes t : DroneTypes.getPlayableDroneTypes())
-			cmbType.add(t.toString());
-		cmbType.select(0);
+		cmbType.add( "All Drones" );
+		for ( DroneTypes t : DroneTypes.getPlayableDroneTypes() )
+			cmbType.add( t.toString() );
+		cmbType.select( 0 );
 
-		Group grpContain = new Group(shell, SWT.NONE);
-		grpContain.setLayout(new GridLayout(2, false));
-		grpContain.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		grpContain.setText("Containing Text In...");
+		Group grpContain = new Group( shell, SWT.NONE );
+		grpContain.setLayout( new GridLayout( 2, false ) );
+		grpContain.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+		grpContain.setText( "Containing Text In..." );
 
-		Label lblBlueprint = new Label(grpContain, SWT.NONE);
-		lblBlueprint.setText("Blueprint Name:");
+		Label lblBlueprint = new Label( grpContain, SWT.NONE );
+		lblBlueprint.setText( "Blueprint Name:" );
 
-		txtBlueprint = new Text(grpContain, SWT.BORDER);
-		txtBlueprint.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		txtBlueprint = new Text( grpContain, SWT.BORDER );
+		txtBlueprint.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
 
-		Label lblTitle = new Label(grpContain, SWT.NONE);
-		lblTitle.setText("Title:");
+		Label lblTitle = new Label( grpContain, SWT.NONE );
+		lblTitle.setText( "Title:" );
 
-		txtTitle = new Text(grpContain, SWT.BORDER);
-		txtTitle.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		txtTitle = new Text( grpContain, SWT.BORDER );
+		txtTitle.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
 
-		Label lblShortName = new Label(grpContain, SWT.NONE);
-		lblShortName.setText("Short Name:");
+		Label lblShortName = new Label( grpContain, SWT.NONE );
+		lblShortName.setText( "Short Name:" );
 
-		txtShort = new Text(grpContain, SWT.BORDER);
-		txtShort.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		txtShort = new Text( grpContain, SWT.BORDER );
+		txtShort.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
 
-		Label lblDescription = new Label(grpContain, SWT.NONE);
-		lblDescription.setText("Description:");
+		Label lblDescription = new Label( grpContain, SWT.NONE );
+		lblDescription.setText( "Description:" );
 
-		txtDesc = new Text(grpContain, SWT.BORDER);
-		txtDesc.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		txtDesc = new Text( grpContain, SWT.BORDER );
+		txtDesc.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
 
-		btnCase = new Button(grpContain, SWT.CHECK);
-		btnCase.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		btnCase.setText("Case-Sensitive");
+		btnCase = new Button( grpContain, SWT.CHECK );
+		btnCase.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 2, 1 ) );
+		btnCase.setText( "Case-Sensitive" );
 
-		Composite compButtons = new Composite(shell, SWT.NONE);
-		GridLayout gl_compButtons = new GridLayout(3, false);
+		Composite compButtons = new Composite( shell, SWT.NONE );
+		GridLayout gl_compButtons = new GridLayout( 3, false );
 		gl_compButtons.marginWidth = 0;
 		gl_compButtons.marginHeight = 0;
-		compButtons.setLayout(gl_compButtons);
-		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true, 2, 1));
+		compButtons.setLayout( gl_compButtons );
+		compButtons.setLayoutData( new GridData( SWT.FILL, SWT.BOTTOM, true, true, 2, 1 ) );
 
-		Button btnDefault = new Button(compButtons, SWT.NONE);
-		GridData gd_btnDefault = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		Button btnDefault = new Button( compButtons, SWT.NONE );
+		GridData gd_btnDefault = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
 		gd_btnDefault.widthHint = 80;
-		btnDefault.setLayoutData(gd_btnDefault);
-		btnDefault.setText("Default");
+		btnDefault.setLayoutData( gd_btnDefault );
+		btnDefault.setText( "Default" );
 
-		Button btnConfirm = new Button(compButtons, SWT.NONE);
-		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		Button btnConfirm = new Button( compButtons, SWT.NONE );
+		GridData gd_btnConfirm = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_btnConfirm.widthHint = 80;
-		btnConfirm.setLayoutData(gd_btnConfirm);
-		btnConfirm.setText("Confirm");
+		btnConfirm.setLayoutData( gd_btnConfirm );
+		btnConfirm.setText( "Confirm" );
 
-		Button btnCancel = new Button(compButtons, SWT.NONE);
-		GridData gd_btnCancel = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
+		Button btnCancel = new Button( compButtons, SWT.NONE );
+		GridData gd_btnCancel = new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 );
 		gd_btnCancel.widthHint = 80;
-		btnCancel.setLayoutData(gd_btnCancel);
-		btnCancel.setText("Cancel");
+		btnCancel.setLayoutData( gd_btnCancel );
+		btnCancel.setText( "Cancel" );
 
-		cmbType.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				try {
-					type = DroneTypes.valueOf(cmbType.getText().toUpperCase());
-				} catch (IllegalArgumentException ex) {
-					type = null;
+		cmbType.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					try {
+						type = DroneTypes.valueOf( cmbType.getText().toUpperCase() );
+					}
+					catch ( IllegalArgumentException ex ) {
+						type = null;
+					}
 				}
 			}
-		});
+		);
 
-		btnDefault.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setResultDefault();
-				dispose();
+		btnDefault.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					setResultDefault();
+					dispose();
+				}
 			}
-		});
+		);
 
-		btnConfirm.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setResultCurrent();
-				dispose();
+		btnConfirm.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					setResultCurrent();
+					dispose();
+				}
 			}
-		});
+		);
 
-		btnCancel.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setResultUnchanged();
-				dispose();
+		btnCancel.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					setResultUnchanged();
+					dispose();
+				}
 			}
-		});
+		);
 
-		shell.addListener(SWT.Close, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				setResultUnchanged();
-				dispose();
-				e.doit = false;
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					setResultUnchanged();
+					dispose();
+					e.doit = false;
+				}
 			}
-		});
+		);
 
 		shell.pack();
-		shell.setSize(defaultWidth, shell.getSize().y);
+		shell.setSize( defaultWidth, shell.getSize().y );
 		Point s = shell.getSize();
 		Point p = parent.getSize();
-		shell.setMinimumSize(s);
-		shell.setLocation(parent.getLocation().x + p.x / 2 - s.x / 2, parent.getLocation().y + p.y / 2 - s.y / 2);
+		shell.setMinimumSize( s );
+		shell.setLocation( parent.getLocation().x + p.x / 2 - s.x / 2, parent.getLocation().y + p.y / 2 - s.y / 2 );
 
 		// Register hotkeys
 		Hotkey h = new Hotkey();
-		h.setKey(SWT.CR);
-		h.addNotifyAction(btnConfirm, true);
-		Manager.hookHotkey(shell, h);
+		h.setKey( SWT.CR );
+		h.addNotifyAction( btnConfirm, true );
+		Manager.hookHotkey( shell, h );
 	}
 
 	@Override
-	protected Predicate<DroneObject> getFilter() {
+	protected Predicate<DroneObject> getFilter()
+	{
 		return new Predicate<DroneObject>() {
 			// All are immutable
 			private DroneTypes type = DroneSearchDialog.this.type;
@@ -190,24 +211,27 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject> {
 			private String shortT = DroneSearchDialog.this.txtShort.getText();
 			private String desc = DroneSearchDialog.this.txtDesc.getText();
 
-			public boolean accept(DroneObject o) {
-				if (type != null) {
-					if (o.getType() != type)
+
+			public boolean accept( DroneObject o )
+			{
+				if ( type != null ) {
+					if ( o.getType() != type )
 						return false;
 				}
 
 				boolean result = true;
 
-				if (caseSensitive) {
-					result &= o.getBlueprintName().contains(blue);
-					result &= o.getTitle().contains(title);
-					result &= o.getShortName().contains(shortT);
-					result &= o.getDescription().contains(desc);
-				} else {
-					result &= o.getBlueprintName().toLowerCase().contains(blue.toLowerCase());
-					result &= o.getTitle().toLowerCase().contains(title.toLowerCase());
-					result &= o.getShortName().toLowerCase().contains(shortT.toLowerCase());
-					result &= o.getDescription().toLowerCase().contains(desc.toLowerCase());
+				if ( caseSensitive ) {
+					result &= o.getBlueprintName().contains( blue );
+					result &= o.getTitle().contains( title );
+					result &= o.getShortName().contains( shortT );
+					result &= o.getDescription().contains( desc );
+				}
+				else {
+					result &= o.getBlueprintName().toLowerCase().contains( blue.toLowerCase() );
+					result &= o.getTitle().toLowerCase().contains( title.toLowerCase() );
+					result &= o.getShortName().toLowerCase().contains( shortT.toLowerCase() );
+					result &= o.getDescription().toLowerCase().contains( desc.toLowerCase() );
 				}
 
 				return result;

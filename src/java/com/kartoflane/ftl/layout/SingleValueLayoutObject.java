@@ -7,14 +7,16 @@ package com.kartoflane.ftl.layout;
  * @author kartoFlane
  *
  */
-public class SingleValueLayoutObject extends LayoutObject {
-
-	public SingleValueLayoutObject(LOType type, int i) {
-		super(type, 1);
+public class SingleValueLayoutObject extends LayoutObject
+{
+	public SingleValueLayoutObject( LOType type, int i )
+	{
+		super( type, 1 );
 		values[0] = i;
 	}
 
-	public int getValue() {
+	public int getValue()
+	{
 		return values[0];
 	}
 }

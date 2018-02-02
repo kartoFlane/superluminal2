@@ -1,8 +1,8 @@
 package com.kartoflane.superluminal2.components.interfaces;
 
-public interface Selectable {
-
-	public void setSelectable(boolean sel);
+public interface Selectable
+{
+	public void setSelectable( boolean sel );
 
 	public boolean isSelectable();
 

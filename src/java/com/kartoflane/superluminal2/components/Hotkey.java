@@ -5,7 +5,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolItem;
 
-public class Hotkey {
+
+public class Hotkey
+{
 	private Runnable onPressAction;
 	private Runnable onReleaseAction;
 	private boolean enabled = true;
@@ -16,10 +18,13 @@ public class Hotkey {
 	private boolean command = false;
 	private int key = '\0';
 
-	public Hotkey() {
+
+	public Hotkey()
+	{
 	}
 
-	public Hotkey(Runnable onPress, Runnable onRelease) {
+	public Hotkey( Runnable onPress, Runnable onRelease )
+	{
 		onPressAction = onPress;
 		onReleaseAction = onRelease;
 	}
@@ -29,9 +34,10 @@ public class Hotkey {
 	 * 
 	 * @param h
 	 */
-	public Hotkey(Hotkey h) {
-		if (h == null)
-			throw new IllegalArgumentException("Argument must not be null.");
+	public Hotkey( Hotkey h )
+	{
+		if ( h == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
 		onPressAction = h.onPressAction;
 		onReleaseAction = h.onReleaseAction;
 		enabled = h.enabled;
@@ -42,37 +48,43 @@ public class Hotkey {
 		key = h.key;
 	}
 
-	public void executePress() {
-		if (onPressAction == null)
+	public void executePress()
+	{
+		if ( onPressAction == null )
 			return;
 		onPressAction.run();
 	}
 
-	public void executeRelease() {
-		if (onReleaseAction == null)
+	public void executeRelease()
+	{
+		if ( onReleaseAction == null )
 			return;
 		onReleaseAction.run();
 	}
 
-	public void setOnPress(Runnable action) {
+	public void setOnPress( Runnable action )
+	{
 		this.onPressAction = action;
 	}
 
-	public void setOnRelease(Runnable action) {
+	public void setOnRelease( Runnable action )
+	{
 		this.onReleaseAction = action;
 	}
 
 	/**
 	 * Sets whether the hotkey is active. An inactive hotkey is considered to not be bound to anything.
 	 */
-	public void setEnabled(boolean e) {
+	public void setEnabled( boolean e )
+	{
 		enabled = e;
 	}
 
 	/**
 	 * @return whether the hotkey is active. An inactive hotkey is considered to not be bound to anything.
 	 */
-	public boolean isEnabled() {
+	public boolean isEnabled()
+	{
 		return enabled;
 	}
 
@@ -84,60 +96,71 @@ public class Hotkey {
 	 * 
 	 * @see Character
 	 */
-	public void setKey(int ch) {
+	public void setKey( int ch )
+	{
 		key = ch;
 	}
 
 	/**
 	 * @return the code point representing the character to which this hotkey is bound, according to {@link Character}
 	 */
-	public int getKey() {
+	public int getKey()
+	{
 		return key;
 	}
 
 	/**
 	 * @see Character#toString(char)
 	 */
-	public String getKeyString() {
-		if (key == '\0')
+	public String getKeyString()
+	{
+		if ( key == '\0' )
 			return "";
 		else
-			return Character.toString((char) getKey());
+			return Character.toString( (char)getKey() );
 	}
 
 	/** Sets whether the hotkey's activation requires Shift modifier to be pressed. */
-	public void setShift(boolean shift) {
+	public void setShift( boolean shift )
+	{
 		this.shift = shift;
 	}
 
-	public boolean getShift() {
+	public boolean getShift()
+	{
 		return shift;
 	}
 
 	/** Sets whether the hotkey's activation requires Control modifier to be pressed. */
-	public void setCtrl(boolean control) {
+	public void setCtrl( boolean control )
+	{
 		ctrl = control;
 	}
 
-	public boolean getCtrl() {
+	public boolean getCtrl()
+	{
 		return ctrl;
 	}
 
 	/** Sets whether the hotkey's activation requires Alt / Function(?) modifier to be pressed. */
-	public void setAlt(boolean alt) {
+	public void setAlt( boolean alt )
+	{
 		this.alt = alt;
 	}
 
-	public boolean getAlt() {
+	public boolean getAlt()
+	{
 		return alt;
 	}
 
 	/** Sets whether the hotkey's activation requires Command modifier to be pressed. */
-	public void setCommand(boolean command) {
+	public void setCommand( boolean command )
+	{
 		this.command = command;
 	}
 
-	public boolean getCommand() {
+	public boolean getCommand()
+	{
 		return command;
 	}
 
@@ -149,17 +172,20 @@ public class Hotkey {
 	 *            int representing the currently pressed key
 	 * @return true if the hotkey is tiggered, false otherwise
 	 */
-	public boolean passes(boolean shift, boolean ctrl, boolean alt, boolean cmd, int keyCode) {
+	public boolean passes( boolean shift, boolean ctrl, boolean alt, boolean cmd, int keyCode )
+	{
 		return this.shift == shift && this.ctrl == ctrl && this.alt == alt && this.command == cmd &&
-				compareKeyCodes(key, keyCode);
+			compareKeyCodes( key, keyCode );
 	}
 
-	private boolean compareKeyCodes(int key1, int key2) {
-		if ((key1 == SWT.CR || key1 == SWT.LF || key1 == SWT.KEYPAD_CR) &&
-				(key2 == SWT.CR || key2 == SWT.LF || key2 == SWT.KEYPAD_CR)) {
+	private boolean compareKeyCodes( int key1, int key2 )
+	{
+		if ( ( key1 == SWT.CR || key1 == SWT.LF || key1 == SWT.KEYPAD_CR ) &&
+			( key2 == SWT.CR || key2 == SWT.LF || key2 == SWT.KEYPAD_CR ) ) {
 			return true;
-		} else {
-			return Character.toLowerCase(key1) == Character.toLowerCase(key2);
+		}
+		else {
+			return Character.toLowerCase( key1 ) == Character.toLowerCase( key2 );
 		}
 	}
 
@@ -168,30 +194,33 @@ public class Hotkey {
 	 * requirements are the same.<br>
 	 * Basically a customised {@link #equals(Object)}.
 	 */
-	public boolean collides(Hotkey h) {
-		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && command == h.command && compareKeyCodes(key, h.key);
+	public boolean collides( Hotkey h )
+	{
+		return shift == h.shift && ctrl == h.ctrl && alt == h.alt && command == h.command && compareKeyCodes( key, h.key );
 	}
 
-	public boolean equals(Object o) {
-		if (o instanceof Hotkey == true)
-			return collides((Hotkey) o);
-		return super.equals(o);
+	public boolean equals( Object o )
+	{
+		if ( o instanceof Hotkey == true )
+			return collides( (Hotkey)o );
+		return super.equals( o );
 	}
 
 	@Override
-	public String toString() {
-		if (key == '\0')
+	public String toString()
+	{
+		if ( key == '\0' )
 			return "";
 
 		String msg = "";
 
-		if (shift)
+		if ( shift )
 			msg += "Shift+";
-		if (ctrl)
+		if ( ctrl )
 			msg += "Ctrl+";
-		if (alt)
+		if ( alt )
 			msg += "Alt+";
-		if (command)
+		if ( command )
 			msg += "⌘+";
 
 		// @formatter:off
@@ -239,108 +268,120 @@ public class Hotkey {
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
-	public void addNotifyAction(final MenuItem item, boolean onPress) {
+	public void addNotifyAction( final MenuItem item, boolean onPress )
+	{
 		Runnable a = new Runnable() {
-			public void run() {
-				if (item.isEnabled())
-					item.notifyListeners(SWT.Selection, null);
+			public void run()
+			{
+				if ( item.isEnabled() )
+					item.notifyListeners( SWT.Selection, null );
 			}
 		};
 
-		if (onPress)
-			setOnPress(a);
+		if ( onPress )
+			setOnPress( a );
 		else
-			setOnRelease(a);
+			setOnRelease( a );
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
-	public void addNotifyAction(final ToolItem item, boolean onPress) {
+	public void addNotifyAction( final ToolItem item, boolean onPress )
+	{
 		Runnable a = new Runnable() {
-			public void run() {
-				if (item.isEnabled())
-					item.notifyListeners(SWT.Selection, null);
+			public void run()
+			{
+				if ( item.isEnabled() )
+					item.notifyListeners( SWT.Selection, null );
 			}
 		};
 
-		if (onPress)
-			setOnPress(a);
+		if ( onPress )
+			setOnPress( a );
 		else
-			setOnRelease(a);
+			setOnRelease( a );
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
-	public void addNotifyAction(final Button item, boolean onPress) {
+	public void addNotifyAction( final Button item, boolean onPress )
+	{
 		Runnable a = new Runnable() {
-			public void run() {
-				if (item.isEnabled())
-					item.notifyListeners(SWT.Selection, null);
+			public void run()
+			{
+				if ( item.isEnabled() )
+					item.notifyListeners( SWT.Selection, null );
 			}
 		};
 
-		if (onPress)
-			setOnPress(a);
+		if ( onPress )
+			setOnPress( a );
 		else
-			setOnRelease(a);
+			setOnRelease( a );
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
-	public void addNotifyAndToggleAction(final MenuItem item, boolean onPress) {
+	public void addNotifyAndToggleAction( final MenuItem item, boolean onPress )
+	{
 		Runnable a = new Runnable() {
-			public void run() {
-				if (item.isEnabled()) {
-					item.setSelection(!item.getSelection());
-					item.notifyListeners(SWT.Selection, null);
+			public void run()
+			{
+				if ( item.isEnabled() ) {
+					item.setSelection( !item.getSelection() );
+					item.notifyListeners( SWT.Selection, null );
 				}
 			}
 		};
 
-		if (onPress)
-			setOnPress(a);
+		if ( onPress )
+			setOnPress( a );
 		else
-			setOnRelease(a);
+			setOnRelease( a );
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
-	public void addNotifyAndToggleAction(final ToolItem item, boolean onPress) {
+	public void addNotifyAndToggleAction( final ToolItem item, boolean onPress )
+	{
 		Runnable a = new Runnable() {
-			public void run() {
-				if (item.isEnabled()) {
-					item.setSelection(!item.getSelection());
-					item.notifyListeners(SWT.Selection, null);
+			public void run()
+			{
+				if ( item.isEnabled() ) {
+					item.setSelection( !item.getSelection() );
+					item.notifyListeners( SWT.Selection, null );
 				}
 			}
 		};
 
-		if (onPress)
-			setOnPress(a);
+		if ( onPress )
+			setOnPress( a );
 		else
-			setOnRelease(a);
+			setOnRelease( a );
 	}
 
 	/**
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
-	public void addNotifyAndToggleAction(final Button item, boolean onPress) {
+	public void addNotifyAndToggleAction( final Button item, boolean onPress )
+	{
 		Runnable a = new Runnable() {
-			public void run() {
-				if (item.isEnabled()) {
-					item.setSelection(!item.getSelection());
-					item.notifyListeners(SWT.Selection, null);
+			public void run()
+			{
+				if ( item.isEnabled() ) {
+					item.setSelection( !item.getSelection() );
+					item.notifyListeners( SWT.Selection, null );
 				}
 			}
 		};
 
-		if (onPress)
-			setOnPress(a);
+		if ( onPress )
+			setOnPress( a );
 		else
-			setOnRelease(a);
+			setOnRelease( a );
 	}
 }

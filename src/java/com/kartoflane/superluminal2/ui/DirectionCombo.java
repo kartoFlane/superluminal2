@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
 
+
 /**
  * A Combo widget with some predefined items, plus convenience methods.<br>
  * <br>
@@ -17,9 +18,10 @@ import com.kartoflane.superluminal2.components.enums.Directions;
  * @author kartoFlane
  * 
  */
-public class DirectionCombo extends Combo {
-
+public class DirectionCombo extends Combo
+{
 	private final boolean full;
+
 
 	/**
 	 * Constructs a new instance of the Combo widget and fills it with predefined items,
@@ -35,35 +37,40 @@ public class DirectionCombo extends Combo {
 	 * 
 	 * @see {@link Combo}
 	 */
-	public DirectionCombo(Composite parent, int style, boolean full) {
-		super(parent, style);
+	public DirectionCombo( Composite parent, int style, boolean full )
+	{
+		super( parent, style );
 		this.full = full;
 
-		add("Up");
-		add("Left");
-		add("Right");
-		add("Down");
-		if (full)
-			add("None");
+		add( "Up" );
+		add( "Left" );
+		add( "Right" );
+		add( "Down" );
+		if ( full )
+			add( "None" );
 	}
 
 	@Override
-	protected void checkSubclass() {
+	protected void checkSubclass()
+	{
 		// Need to override this in order to allow subclassing
 	}
 
-	public void select(Directions dir) {
-		if (dir == Directions.NONE && !full)
-			throw new IllegalArgumentException("DirectionCombo wasn't instantiated as full and doesn't have an item for Directions.NONE");
-		select(toIndex(dir));
+	public void select( Directions dir )
+	{
+		if ( dir == Directions.NONE && !full )
+			throw new IllegalArgumentException( "DirectionCombo wasn't instantiated as full and doesn't have an item for Directions.NONE" );
+		select( toIndex( dir ) );
 	}
 
-	public Directions getDirection() {
-		return toDirection(getSelectionIndex());
+	public Directions getDirection()
+	{
+		return toDirection( getSelectionIndex() );
 	}
 
-	public static int toIndex(Directions dir) {
-		switch (dir) {
+	public static int toIndex( Directions dir )
+	{
+		switch ( dir ) {
 			case UP:
 				return 0;
 			case LEFT:
@@ -75,12 +82,13 @@ public class DirectionCombo extends Combo {
 			case NONE:
 				return 4;
 			default:
-				throw new IllegalArgumentException("Unknown direction: " + dir);
+				throw new IllegalArgumentException( "Unknown direction: " + dir );
 		}
 	}
 
-	public static Directions toDirection(int index) {
-		switch (index) {
+	public static Directions toDirection( int index )
+	{
+		switch ( index ) {
 			case 0:
 				return Directions.UP;
 			case 1:
@@ -92,7 +100,7 @@ public class DirectionCombo extends Combo {
 			case 4:
 				return Directions.NONE;
 			default:
-				throw new IllegalArgumentException("Unknown index: " + index);
+				throw new IllegalArgumentException( "Unknown index: " + index );
 		}
 	}
 }

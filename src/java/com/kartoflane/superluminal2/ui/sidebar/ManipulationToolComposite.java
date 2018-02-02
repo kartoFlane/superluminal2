@@ -14,7 +14,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 
@@ -28,7 +27,9 @@ import com.kartoflane.superluminal2.ui.sidebar.data.DataComposite;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
-public class ManipulationToolComposite extends Composite implements DataComposite {
+
+public class ManipulationToolComposite extends Composite implements DataComposite
+{
 	private Button btnPinned;
 
 	private Composite boundsContainer;
@@ -47,203 +48,224 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 
 	private boolean dataLoad = false;
 
-	public ManipulationToolComposite(Composite parent, boolean location, boolean size) {
-		super(parent, SWT.NONE);
-		setLayout(new GridLayout(2, false));
 
-		Label label = new Label(this, SWT.NONE);
-		label.setAlignment(SWT.CENTER);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		label.setText("Manipulation Tool");
+	public ManipulationToolComposite( Composite parent, boolean location, boolean size )
+	{
+		super( parent, SWT.NONE );
+		setLayout( new GridLayout( 2, false ) );
 
-		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
-		Label lblHelp = new Label(this, SWT.NONE);
-		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblHelp.setImage(helpImage);
+		Label label = new Label( this, SWT.NONE );
+		label.setAlignment( SWT.CENTER );
+		label.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		label.setText( "Manipulation Tool" );
+
+		Image helpImage = Cache.checkOutImage( this, "cpath:/assets/help.png" );
+		Label lblHelp = new Label( this, SWT.NONE );
+		lblHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblHelp.setImage( helpImage );
 		String msg = "- Left-click on a highlighted object to select it.\n" +
-				"- Left-click on empty space to deselect.\n" +
-				"- Only one object can be selected at a time.";
-		UIUtils.addTooltip(lblHelp, msg);
+			"- Left-click on empty space to deselect.\n" +
+			"- Only one object can be selected at a time.";
+		UIUtils.addTooltip( lblHelp, msg );
 
-		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		Label separator = new Label( this, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 2, 1 ) );
 
-		boundsContainer = new Composite(this, SWT.BORDER);
-		GridLayout gl_boundsContainer = new GridLayout(3, false);
-		boundsContainer.setLayout(gl_boundsContainer);
-		boundsContainer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+		boundsContainer = new Composite( this, SWT.BORDER );
+		GridLayout gl_boundsContainer = new GridLayout( 3, false );
+		boundsContainer.setLayout( gl_boundsContainer );
+		boundsContainer.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 2, 1 ) );
 
-		btnPinned = new Button(boundsContainer, SWT.CHECK);
-		btnPinned.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
-		btnPinned.setText("Pinned");
+		btnPinned = new Button( boundsContainer, SWT.CHECK );
+		btnPinned.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, true, false, 3, 1 ) );
+		btnPinned.setText( "Pinned" );
 
-		lblX = new Label(boundsContainer, SWT.NONE);
-		lblX.setText("X:");
+		lblX = new Label( boundsContainer, SWT.NONE );
+		lblX.setText( "X:" );
 
-		spX = new Spinner(boundsContainer, SWT.BORDER);
-		GridData gd_spX = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
+		spX = new Spinner( boundsContainer, SWT.BORDER );
+		GridData gd_spX = new GridData( SWT.RIGHT, SWT.CENTER, false, false, 2, 1 );
 		gd_spX.widthHint = 35;
-		spX.setLayoutData(gd_spX);
-		spX.setEnabled(false);
-		spX.setTextLimit(4);
-		spX.setMaximum(9999);
-		spX.setMinimum(-999);
+		spX.setLayoutData( gd_spX );
+		spX.setEnabled( false );
+		spX.setTextLimit( 4 );
+		spX.setMaximum( 9999 );
+		spX.setMinimum( -999 );
 
-		lblY = new Label(boundsContainer, SWT.NONE);
-		lblY.setText("Y:");
+		lblY = new Label( boundsContainer, SWT.NONE );
+		lblY.setText( "Y:" );
 
-		spY = new Spinner(boundsContainer, SWT.BORDER);
-		GridData gd_spY = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
+		spY = new Spinner( boundsContainer, SWT.BORDER );
+		GridData gd_spY = new GridData( SWT.RIGHT, SWT.CENTER, false, false, 2, 1 );
 		gd_spY.widthHint = 35;
-		spY.setLayoutData(gd_spY);
-		spY.setEnabled(false);
-		spY.setTextLimit(4);
-		spY.setMaximum(9999);
-		spY.setMinimum(-999);
+		spY.setLayoutData( gd_spY );
+		spY.setEnabled( false );
+		spY.setTextLimit( 4 );
+		spY.setMaximum( 9999 );
+		spY.setMinimum( -999 );
 
-		btnUp = new Button(boundsContainer, SWT.NONE);
-		btnUp.setImage(Cache.checkOutImage(this, "cpath:/assets/up.png"));
-		GridData gd_btnUp = new GridData(SWT.CENTER, SWT.CENTER, true, false, 3, 1);
+		btnUp = new Button( boundsContainer, SWT.NONE );
+		btnUp.setImage( Cache.checkOutImage( this, "cpath:/assets/up.png" ) );
+		GridData gd_btnUp = new GridData( SWT.CENTER, SWT.CENTER, true, false, 3, 1 );
 		gd_btnUp.heightHint = 36;
 		gd_btnUp.widthHint = 36;
-		btnUp.setLayoutData(gd_btnUp);
+		btnUp.setLayoutData( gd_btnUp );
 
-		btnLeft = new Button(boundsContainer, SWT.NONE);
-		btnLeft.setImage(Cache.checkOutImage(this, "cpath:/assets/left.png"));
-		GridData gd_btnLeft = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		btnLeft = new Button( boundsContainer, SWT.NONE );
+		btnLeft.setImage( Cache.checkOutImage( this, "cpath:/assets/left.png" ) );
+		GridData gd_btnLeft = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_btnLeft.heightHint = 36;
 		gd_btnLeft.widthHint = 36;
-		btnLeft.setLayoutData(gd_btnLeft);
+		btnLeft.setLayoutData( gd_btnLeft );
 
-		spNudge = new Spinner(boundsContainer, SWT.BORDER);
-		GridData gd_spNudge = new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1);
+		spNudge = new Spinner( boundsContainer, SWT.BORDER );
+		GridData gd_spNudge = new GridData( SWT.CENTER, SWT.CENTER, false, false, 1, 1 );
 		gd_spNudge.widthHint = 20;
-		spNudge.setLayoutData(gd_spNudge);
-		spNudge.setMinimum(1);
+		spNudge.setLayoutData( gd_spNudge );
+		spNudge.setMinimum( 1 );
 		msg = "This determines how much the selected object\nwill move when you press the arrows.";
-		UIUtils.addTooltip(spNudge, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+		UIUtils.addTooltip( spNudge, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		btnRight = new Button(boundsContainer, SWT.NONE);
-		btnRight.setImage(Cache.checkOutImage(this, "cpath:/assets/right.png"));
-		GridData gd_btnRight = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+		btnRight = new Button( boundsContainer, SWT.NONE );
+		btnRight.setImage( Cache.checkOutImage( this, "cpath:/assets/right.png" ) );
+		GridData gd_btnRight = new GridData( SWT.LEFT, SWT.CENTER, true, false, 1, 1 );
 		gd_btnRight.widthHint = 36;
 		gd_btnRight.heightHint = 36;
-		btnRight.setLayoutData(gd_btnRight);
+		btnRight.setLayoutData( gd_btnRight );
 
-		btnDown = new Button(boundsContainer, SWT.NONE);
-		btnDown.setImage(Cache.checkOutImage(this, "cpath:/assets/down.png"));
-		GridData gd_btnDown = new GridData(SWT.CENTER, SWT.CENTER, false, false, 3, 1);
+		btnDown = new Button( boundsContainer, SWT.NONE );
+		btnDown.setImage( Cache.checkOutImage( this, "cpath:/assets/down.png" ) );
+		GridData gd_btnDown = new GridData( SWT.CENTER, SWT.CENTER, false, false, 3, 1 );
 		gd_btnDown.widthHint = 36;
 		gd_btnDown.heightHint = 36;
-		btnDown.setLayoutData(gd_btnDown);
+		btnDown.setLayoutData( gd_btnDown );
 
-		dataContainer = new Composite(this, SWT.BORDER);
-		dataContainer.setLayout(new FillLayout(SWT.HORIZONTAL));
-		dataContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		dataContainer = new Composite( this, SWT.BORDER );
+		dataContainer.setLayout( new FillLayout( SWT.HORIZONTAL ) );
+		dataContainer.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 2, 1 ) );
 
-		btnPinned.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controller.setPinned(btnPinned.getSelection());
-				setController(controller);
-				EditorWindow.getInstance().forceFocus();
+		btnPinned.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					controller.setPinned( btnPinned.getSelection() );
+					setController( controller );
+					EditorWindow.getInstance().forceFocus();
+				}
 			}
-		});
+		);
 
-		btnUp.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Rectangle oldBounds = controller.getBounds();
-				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x, p.y - spNudge.getSelection());
-				updateController();
-				updateData();
-				EditorWindow.getInstance().canvasRedraw(oldBounds);
-				EditorWindow.getInstance().forceFocus();
+		btnUp.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					Rectangle oldBounds = controller.getBounds();
+					Point p = controller.getPresentedLocation();
+					controller.setPresentedLocation( p.x, p.y - spNudge.getSelection() );
+					updateController();
+					updateData();
+					EditorWindow.getInstance().canvasRedraw( oldBounds );
+					EditorWindow.getInstance().forceFocus();
+				}
 			}
-		});
+		);
 
-		btnDown.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Rectangle oldBounds = controller.getBounds();
-				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x, p.y + spNudge.getSelection());
-				updateController();
-				updateData();
-				EditorWindow.getInstance().canvasRedraw(oldBounds);
-				EditorWindow.getInstance().forceFocus();
+		btnDown.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					Rectangle oldBounds = controller.getBounds();
+					Point p = controller.getPresentedLocation();
+					controller.setPresentedLocation( p.x, p.y + spNudge.getSelection() );
+					updateController();
+					updateData();
+					EditorWindow.getInstance().canvasRedraw( oldBounds );
+					EditorWindow.getInstance().forceFocus();
+				}
 			}
-		});
+		);
 
-		btnLeft.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Rectangle oldBounds = controller.getBounds();
-				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x - spNudge.getSelection(), p.y);
-				updateController();
-				updateData();
-				EditorWindow.getInstance().canvasRedraw(oldBounds);
-				EditorWindow.getInstance().forceFocus();
+		btnLeft.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					Rectangle oldBounds = controller.getBounds();
+					Point p = controller.getPresentedLocation();
+					controller.setPresentedLocation( p.x - spNudge.getSelection(), p.y );
+					updateController();
+					updateData();
+					EditorWindow.getInstance().canvasRedraw( oldBounds );
+					EditorWindow.getInstance().forceFocus();
+				}
 			}
-		});
+		);
 
-		btnRight.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Rectangle oldBounds = controller.getBounds();
-				Point p = controller.getPresentedLocation();
-				controller.setPresentedLocation(p.x + spNudge.getSelection(), p.y);
-				updateController();
-				updateData();
-				EditorWindow.getInstance().canvasRedraw(oldBounds);
-				EditorWindow.getInstance().forceFocus();
+		btnRight.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					Rectangle oldBounds = controller.getBounds();
+					Point p = controller.getPresentedLocation();
+					controller.setPresentedLocation( p.x + spNudge.getSelection(), p.y );
+					updateController();
+					updateData();
+					EditorWindow.getInstance().canvasRedraw( oldBounds );
+					EditorWindow.getInstance().forceFocus();
+				}
 			}
-		});
+		);
 
 		ModifyListener applyLocListener = new ModifyListener() {
 			@Override
-			public void modifyText(ModifyEvent e) {
-				if (!dataLoad)
+			public void modifyText( ModifyEvent e )
+			{
+				if ( !dataLoad )
 					applyLocation();
 			}
 		};
 
-		spX.addModifyListener(applyLocListener);
-		spY.addModifyListener(applyLocListener);
+		spX.addModifyListener( applyLocListener );
+		spY.addModifyListener( applyLocListener );
 
-		setEnabled(false);
+		setEnabled( false );
 	}
 
-	private void updateController() {
+	private void updateController()
+	{
 		controller.updateFollowOffset();
 		Manager.getCurrentShip().updateBoundingArea();
 		controller.updateView();
 		controller.redraw();
 	}
 
-	public void setController(AbstractController controller) {
+	public void setController( AbstractController controller )
+	{
 		dataLoad = true;
 
-		if (controller != null) {
-			if (this.controller != null && this.controller.getClass().equals(controller.getClass())) {
+		if ( controller != null ) {
+			if ( this.controller != null && this.controller.getClass().equals( controller.getClass() ) ) {
 				// If the previously selected object is of the same type as the newly
 				// selected one, don't dispose the composite -- just update it with new data
 				DataComposite dc = getDataComposite();
-				dc.setController(controller);
+				dc.setController( controller );
 				dc.updateData();
-			} else {
+			}
+			else {
 				// If they are of different types, or no object was previously selected,
 				// create a new composite and insert it into the data container
-				Composite c = (Composite) getDataComposite();
-				if (c != null)
+				Composite c = (Composite)getDataComposite();
+				if ( c != null )
 					c.dispose();
 
-				c = (Composite) controller.getDataComposite(dataContainer);
-				if (c != null) {
+				c = (Composite)controller.getDataComposite( dataContainer );
+				if ( c != null ) {
 					Control[] changed = { c };
-					dataContainer.layout(changed);
+					dataContainer.layout( changed );
 				}
 			}
 		}
@@ -254,34 +276,36 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		reloadController();
 	}
 
-	public void reloadController() {
+	public void reloadController()
+	{
 		dataLoad = true;
 
-		if (controller == null) {
-			btnPinned.setSelection(false);
+		if ( controller == null ) {
+			btnPinned.setSelection( false );
 
-			Composite c = (Composite) getDataComposite();
-			if (c != null)
+			Composite c = (Composite)getDataComposite();
+			if ( c != null )
 				c.dispose();
 
-			spX.setSelection(0);
-			spY.setSelection(0);
-			spNudge.setSelection(1);
-			setEnabled(false);
-		} else {
-			setEnabled(true);
+			spX.setSelection( 0 );
+			spY.setSelection( 0 );
+			spNudge.setSelection( 1 );
+			setEnabled( false );
+		}
+		else {
+			setEnabled( true );
 
-			btnPinned.setSelection(controller.isPinned());
-			spX.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-			spY.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-			btnUp.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-			btnLeft.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-			btnDown.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-			btnRight.setEnabled(!controller.isPinned() && controller.isLocModifiable());
-			spNudge.setEnabled(!controller.isPinned() && controller.isLocModifiable());
+			btnPinned.setSelection( controller.isPinned() );
+			spX.setEnabled( !controller.isPinned() && controller.isLocModifiable() );
+			spY.setEnabled( !controller.isPinned() && controller.isLocModifiable() );
+			btnUp.setEnabled( !controller.isPinned() && controller.isLocModifiable() );
+			btnLeft.setEnabled( !controller.isPinned() && controller.isLocModifiable() );
+			btnDown.setEnabled( !controller.isPinned() && controller.isLocModifiable() );
+			btnRight.setEnabled( !controller.isPinned() && controller.isLocModifiable() );
+			spNudge.setEnabled( !controller.isPinned() && controller.isLocModifiable() );
 
 			DataComposite dc = getDataComposite();
-			dc.setController(controller);
+			dc.setController( controller );
 			dc.updateData();
 		}
 
@@ -290,64 +314,70 @@ public class ManipulationToolComposite extends Composite implements DataComposit
 		EditorWindow.getInstance().updateSidebarScroll();
 	}
 
-	private DataComposite getDataComposite() {
-		if (dataContainer.getChildren().length == 0)
+	private DataComposite getDataComposite()
+	{
+		if ( dataContainer.getChildren().length == 0 )
 			return null;
 		else
-			return (DataComposite) dataContainer.getChildren()[0];
+			return (DataComposite)dataContainer.getChildren()[0];
 	}
 
-	public void updateData() {
-		if (controller == null)
+	public void updateData()
+	{
+		if ( controller == null )
 			return;
 
 		dataLoad = true;
 
 		Point p = controller.getPresentedLocation();
-		spX.setSelection(p.x);
-		spY.setSelection(p.y);
+		spX.setSelection( p.x );
+		spY.setSelection( p.y );
 
-		if (getDataComposite() != null)
+		if ( getDataComposite() != null )
 			getDataComposite().updateData();
 
 		dataLoad = false;
 	}
 
 	@Override
-	public void setEnabled(boolean enable) {
-		btnPinned.setEnabled(enable);
-		spX.setEnabled(enable);
-		spY.setEnabled(enable);
-		btnUp.setEnabled(enable);
-		btnLeft.setEnabled(enable);
-		btnDown.setEnabled(enable);
-		btnRight.setEnabled(enable);
-		spNudge.setEnabled(enable);
+	public void setEnabled( boolean enable )
+	{
+		btnPinned.setEnabled( enable );
+		spX.setEnabled( enable );
+		spY.setEnabled( enable );
+		btnUp.setEnabled( enable );
+		btnLeft.setEnabled( enable );
+		btnDown.setEnabled( enable );
+		btnRight.setEnabled( enable );
+		spNudge.setEnabled( enable );
 	}
 
-	private void applyLocation() {
-		if (controller != null && controller.isLocModifiable()) {
+	private void applyLocation()
+	{
+		if ( controller != null && controller.isLocModifiable() ) {
 			Rectangle oldBounds = controller.getBounds();
 
-			controller.setPresentedLocation(spX.getSelection(), spY.getSelection());
+			controller.setPresentedLocation( spX.getSelection(), spY.getSelection() );
 			controller.updateFollowOffset();
 			controller.updateView();
 			Manager.getCurrentShip().updateBoundingArea();
 
 			controller.redraw();
-			AbstractController.redraw(oldBounds);
+			AbstractController.redraw( oldBounds );
 		}
 	}
 
 	@Override
-	public boolean isFocusControl() {
+	public boolean isFocusControl()
+	{
 		Control c = UIUtils.getDisplay().getFocusControl();
 		return c == btnPinned || c == spNudge || c == spX || c == spY;
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose()
+	{
 		super.dispose();
-		Cache.checkInImage(this, "cpath:/assets/help.png");
+		Cache.checkInImage( this, "cpath:/assets/help.png" );
 	}
 }

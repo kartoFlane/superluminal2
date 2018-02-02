@@ -34,7 +34,9 @@ import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
-public class SettingsDialog {
+
+public class SettingsDialog
+{
 	private static SettingsDialog instance = null;
 	private Display display = null;
 
@@ -58,18 +60,20 @@ public class SettingsDialog {
 	private Button btnOverlapDoors;
 	private Button btnMouse;
 
-	public SettingsDialog(Shell parent) {
-		if (instance != null)
-			throw new IllegalStateException("Previous instance has not been disposed!");
+
+	public SettingsDialog( Shell parent )
+	{
+		if ( instance != null )
+			throw new IllegalStateException( "Previous instance has not been disposed!" );
 		instance = this;
 		display = UIUtils.getDisplay();
 
-		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
-		shell.setText(Superluminal.APP_NAME + " - Settings");
-		shell.setLayout(new GridLayout(3, false));
+		shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL );
+		shell.setText( Superluminal.APP_NAME + " - Settings" );
+		shell.setLayout( new GridLayout( 3, false ) );
 
-		final TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
-		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		final TabFolder tabFolder = new TabFolder( shell, SWT.NONE );
+		tabFolder.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 3, 1 ) );
 
 		/*
 		 * ====================
@@ -77,58 +81,58 @@ public class SettingsDialog {
 		 * ====================
 		 */
 
-		TabItem tbtmBehaviour = new TabItem(tabFolder, SWT.NONE);
-		tbtmBehaviour.setText("Behaviour");
+		TabItem tbtmBehaviour = new TabItem( tabFolder, SWT.NONE );
+		tbtmBehaviour.setText( "Behaviour" );
 
-		final ScrolledComposite scBehaviour = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
-		scBehaviour.setAlwaysShowScrollBars(true);
-		tbtmBehaviour.setControl(scBehaviour);
-		scBehaviour.setExpandHorizontal(true);
-		scBehaviour.setExpandVertical(true);
+		final ScrolledComposite scBehaviour = new ScrolledComposite( tabFolder, SWT.V_SCROLL );
+		scBehaviour.setAlwaysShowScrollBars( true );
+		tbtmBehaviour.setControl( scBehaviour );
+		scBehaviour.setExpandHorizontal( true );
+		scBehaviour.setExpandVertical( true );
 
-		final Composite compBehaviour = new Composite(scBehaviour, SWT.NONE);
-		compBehaviour.setLayout(new GridLayout(1, false));
+		final Composite compBehaviour = new Composite( scBehaviour, SWT.NONE );
+		compBehaviour.setLayout( new GridLayout( 1, false ) );
 
-		btnOverlap = new Button(compBehaviour, SWT.CHECK);
-		btnOverlap.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnOverlap.setText("Allow Room Overlap");
+		btnOverlap = new Button( compBehaviour, SWT.CHECK );
+		btnOverlap.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnOverlap.setText( "Allow Room Overlap" );
 
-		Label lblOverlap = new Label(compBehaviour, SWT.WRAP);
-		lblOverlap.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblOverlap.setText("Disables room collision when checked, allowing them to overlap.");
+		Label lblOverlap = new Label( compBehaviour, SWT.WRAP );
+		lblOverlap.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblOverlap.setText( "Disables room collision when checked, allowing them to overlap." );
 
-		Label separator01 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator01.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+		Label separator01 = new Label( compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator01.setLayoutData( new GridData( SWT.FILL, SWT.TOP, false, false, 1, 1 ) );
 
-		btnOverlapDoors = new Button(compBehaviour, SWT.CHECK);
-		btnOverlapDoors.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnOverlapDoors.setText("Allow Door Overlap");
+		btnOverlapDoors = new Button( compBehaviour, SWT.CHECK );
+		btnOverlapDoors.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnOverlapDoors.setText( "Allow Door Overlap" );
 
-		Label lblOverlapDoor = new Label(compBehaviour, SWT.NONE);
-		lblOverlapDoor.setText("Disables door collision when checked, allowing them to overlap.");
+		Label lblOverlapDoor = new Label( compBehaviour, SWT.NONE );
+		lblOverlapDoor.setText( "Disables door collision when checked, allowing them to overlap." );
 
-		Label separator02 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator02.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+		Label separator02 = new Label( compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator02.setLayoutData( new GridData( SWT.FILL, SWT.TOP, false, false, 1, 1 ) );
 
-		btnLoader = new Button(compBehaviour, SWT.CHECK);
-		btnLoader.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnLoader.setText("Close Ship Loader After Loading");
+		btnLoader = new Button( compBehaviour, SWT.CHECK );
+		btnLoader.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnLoader.setText( "Close Ship Loader After Loading" );
 
-		Label lblLoader = new Label(compBehaviour, SWT.WRAP);
-		lblLoader.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblLoader.setText("Closes the ship loader when a ship is successfully loaded.");
+		Label lblLoader = new Label( compBehaviour, SWT.WRAP );
+		lblLoader.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblLoader.setText( "Closes the ship loader when a ship is successfully loaded." );
 
-		Label separator03 = new Label(compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator03.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+		Label separator03 = new Label( compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator03.setLayoutData( new GridData( SWT.FILL, SWT.TOP, false, false, 1, 1 ) );
 
-		btnResetLinks = new Button(compBehaviour, SWT.CHECK);
-		btnResetLinks.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnResetLinks.setText("Reset Door Links When Door Is Moved");
+		btnResetLinks = new Button( compBehaviour, SWT.CHECK );
+		btnResetLinks.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnResetLinks.setText( "Reset Door Links When Door Is Moved" );
 
-		Label lblResetLinks = new Label(compBehaviour, SWT.WRAP);
-		lblResetLinks.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblResetLinks.setText("Resets the door links when a door is moved, so that no accidental connections will be made.");
-		scBehaviour.setContent(compBehaviour);
+		Label lblResetLinks = new Label( compBehaviour, SWT.WRAP );
+		lblResetLinks.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblResetLinks.setText( "Resets the door links when a door is moved, so that no accidental connections will be made." );
+		scBehaviour.setContent( compBehaviour );
 
 		/*
 		 * ====================
@@ -136,71 +140,73 @@ public class SettingsDialog {
 		 * ====================
 		 */
 
-		TabItem tbtmConfig = new TabItem(tabFolder, SWT.NONE);
-		tbtmConfig.setText("Config");
+		TabItem tbtmConfig = new TabItem( tabFolder, SWT.NONE );
+		tbtmConfig.setText( "Config" );
 
-		final ScrolledComposite scConfig = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
-		scConfig.setExpandHorizontal(true);
-		scConfig.setExpandVertical(true);
-		scConfig.setAlwaysShowScrollBars(true);
-		tbtmConfig.setControl(scConfig);
+		final ScrolledComposite scConfig = new ScrolledComposite( tabFolder, SWT.V_SCROLL );
+		scConfig.setExpandHorizontal( true );
+		scConfig.setExpandVertical( true );
+		scConfig.setAlwaysShowScrollBars( true );
+		tbtmConfig.setControl( scConfig );
 
-		final Composite compConfig = new Composite(scConfig, SWT.NONE);
-		compConfig.setLayout(new GridLayout(1, false));
+		final Composite compConfig = new Composite( scConfig, SWT.NONE );
+		compConfig.setLayout( new GridLayout( 1, false ) );
 
-		btnUpdates = new Button(compConfig, SWT.CHECK);
-		btnUpdates.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnUpdates.setText("Check for Updates on Startup");
+		btnUpdates = new Button( compConfig, SWT.CHECK );
+		btnUpdates.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnUpdates.setText( "Check for Updates on Startup" );
 
-		Label lblUpdates = new Label(compConfig, SWT.WRAP);
-		lblUpdates.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblUpdates.setText("If checked, the editor will check for available updates each time it is started.");
+		Label lblUpdates = new Label( compConfig, SWT.WRAP );
+		lblUpdates.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblUpdates.setText( "If checked, the editor will check for available updates each time it is started." );
 
-		Label separator11 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator11.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		Label separator11 = new Label( compConfig, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator11.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 
-		btnGeometry = new Button(compConfig, SWT.CHECK);
-		btnGeometry.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnGeometry.setText("Remember Window Size");
+		btnGeometry = new Button( compConfig, SWT.CHECK );
+		btnGeometry.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnGeometry.setText( "Remember Window Size" );
 
-		Label lblGeometry = new Label(compConfig, SWT.WRAP);
-		lblGeometry.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblGeometry.setText("If checked, size of the editor's window will be remembered and restored on startup.");
+		Label lblGeometry = new Label( compConfig, SWT.WRAP );
+		lblGeometry.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblGeometry.setText( "If checked, size of the editor's window will be remembered and restored on startup." );
 
-		Label separator12 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator12.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		Label separator12 = new Label( compConfig, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator12.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 
-		btnMaximise = new Button(compConfig, SWT.CHECK);
-		btnMaximise.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnMaximise.setText("Start Maximised");
+		btnMaximise = new Button( compConfig, SWT.CHECK );
+		btnMaximise.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnMaximise.setText( "Start Maximised" );
 
-		Label lblMaximise = new Label(compConfig, SWT.WRAP);
-		lblMaximise.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblMaximise.setText("If checked, the editor window will start maximised. Overrides 'Remember Window Size'");
+		Label lblMaximise = new Label( compConfig, SWT.WRAP );
+		lblMaximise.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblMaximise.setText( "If checked, the editor window will start maximised. Overrides 'Remember Window Size'" );
 
-		Label separator13 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator13.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		Label separator13 = new Label( compConfig, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator13.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 
-		btnSidebar = new Button(compConfig, SWT.CHECK);
-		btnSidebar.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnSidebar.setText("Sidebar on Right Side");
+		btnSidebar = new Button( compConfig, SWT.CHECK );
+		btnSidebar.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnSidebar.setText( "Sidebar on Right Side" );
 
-		Label lblSidebar = new Label(compConfig, SWT.WRAP);
-		lblSidebar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblSidebar.setText("If checked, the sidebar will be located on the right side of the window.");
+		Label lblSidebar = new Label( compConfig, SWT.WRAP );
+		lblSidebar.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblSidebar.setText( "If checked, the sidebar will be located on the right side of the window." );
 
-		Label separator14 = new Label(compConfig, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator14.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		Label separator14 = new Label( compConfig, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator14.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 
-		btnMouse = new Button(compConfig, SWT.CHECK);
-		btnMouse.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		btnMouse.setText("Show Mouse Position Relative to Ship Origin");
+		btnMouse = new Button( compConfig, SWT.CHECK );
+		btnMouse.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnMouse.setText( "Show Mouse Position Relative to Ship Origin" );
 
-		Label lblMouse = new Label(compConfig, SWT.WRAP);
-		lblMouse.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		lblMouse.setText("If checked, the mouse tracker will show the mouse pointer's position " +
-				"relative to the ship origin, instead of top left corner of the viewport.");
-		scConfig.setContent(compConfig);
+		Label lblMouse = new Label( compConfig, SWT.WRAP );
+		lblMouse.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblMouse.setText(
+			"If checked, the mouse tracker will show the mouse pointer's position " +
+				"relative to the ship origin, instead of top left corner of the viewport."
+		);
+		scConfig.setContent( compConfig );
 
 		/*
 		 * ====================
@@ -208,59 +214,59 @@ public class SettingsDialog {
 		 * ====================
 		 */
 
-		TabItem tbtmKeybinds = new TabItem(tabFolder, SWT.NONE);
-		tbtmKeybinds.setText("Keybinds");
+		TabItem tbtmKeybinds = new TabItem( tabFolder, SWT.NONE );
+		tbtmKeybinds.setText( "Keybinds" );
 
-		final ScrolledComposite scKeybinds = new ScrolledComposite(tabFolder, SWT.V_SCROLL);
-		scKeybinds.setAlwaysShowScrollBars(true);
-		tbtmKeybinds.setControl(scKeybinds);
-		scKeybinds.setExpandHorizontal(true);
-		scKeybinds.setExpandVertical(true);
+		final ScrolledComposite scKeybinds = new ScrolledComposite( tabFolder, SWT.V_SCROLL );
+		scKeybinds.setAlwaysShowScrollBars( true );
+		tbtmKeybinds.setControl( scKeybinds );
+		scKeybinds.setExpandHorizontal( true );
+		scKeybinds.setExpandVertical( true );
 
-		compKeybinds = new Composite(scKeybinds, SWT.NONE);
-		compKeybinds.setLayout(new GridLayout(2, false));
+		compKeybinds = new Composite( scKeybinds, SWT.NONE );
+		compKeybinds.setLayout( new GridLayout( 2, false ) );
 
 		Hotkeys[] tools = {
-				Hotkeys.POINTER_TOOL, Hotkeys.CREATE_TOOL, Hotkeys.IMAGES_TOOL,
-				Hotkeys.PROPERTIES_TOOL, Hotkeys.OVERVIEW_TOOL, Hotkeys.ROOM_TOOL,
-				Hotkeys.DOOR_TOOL, Hotkeys.MOUNT_TOOL, Hotkeys.STATION_TOOL
+			Hotkeys.POINTER_TOOL, Hotkeys.CREATE_TOOL, Hotkeys.IMAGES_TOOL,
+			Hotkeys.PROPERTIES_TOOL, Hotkeys.OVERVIEW_TOOL, Hotkeys.ROOM_TOOL,
+			Hotkeys.DOOR_TOOL, Hotkeys.MOUNT_TOOL, Hotkeys.STATION_TOOL
 		};
 		Hotkeys[] commands = {
-				Hotkeys.SEARCH, Hotkeys.DELETE, Hotkeys.PIN, Hotkeys.NEW_SHIP, Hotkeys.LOAD_SHIP, Hotkeys.SAVE_SHIP,
-				Hotkeys.SAVE_SHIP_AS, Hotkeys.CLOSE_SHIP, Hotkeys.LOAD_LEGACY, Hotkeys.MANAGE_MOD,
-				Hotkeys.SETTINGS, Hotkeys.UNDO, Hotkeys.REDO, Hotkeys.CLOAK, Hotkeys.ANIMATE
+			Hotkeys.SEARCH, Hotkeys.DELETE, Hotkeys.PIN, Hotkeys.NEW_SHIP, Hotkeys.LOAD_SHIP, Hotkeys.SAVE_SHIP,
+			Hotkeys.SAVE_SHIP_AS, Hotkeys.CLOSE_SHIP, Hotkeys.LOAD_LEGACY, Hotkeys.MANAGE_MOD,
+			Hotkeys.SETTINGS, Hotkeys.UNDO, Hotkeys.REDO, Hotkeys.CLOAK, Hotkeys.ANIMATE
 		};
 		Hotkeys[] view = {
-				Hotkeys.OPEN_ZOOM, Hotkeys.TOGGLE_GRID, Hotkeys.TOGGLE_HANGAR, Hotkeys.SHOW_ANCHOR,
-				Hotkeys.SHOW_MOUNTS, Hotkeys.SHOW_ROOMS, Hotkeys.SHOW_DOORS, Hotkeys.SHOW_STATIONS,
-				Hotkeys.SHOW_HULL, Hotkeys.SHOW_FLOOR, Hotkeys.SHOW_SHIELD, Hotkeys.SHOW_GIBS
+			Hotkeys.OPEN_ZOOM, Hotkeys.TOGGLE_GRID, Hotkeys.TOGGLE_HANGAR, Hotkeys.SHOW_ANCHOR,
+			Hotkeys.SHOW_MOUNTS, Hotkeys.SHOW_ROOMS, Hotkeys.SHOW_DOORS, Hotkeys.SHOW_STATIONS,
+			Hotkeys.SHOW_HULL, Hotkeys.SHOW_FLOOR, Hotkeys.SHOW_SHIELD, Hotkeys.SHOW_GIBS
 		};
 
-		Label lbl = new Label(compKeybinds, SWT.NONE);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		lbl.setText("Tools:");
-		for (Hotkeys hotkey : tools)
-			hotkeyButton.put(hotkey, createHotkeyButton(hotkey));
+		Label lbl = new Label( compKeybinds, SWT.NONE );
+		lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+		lbl.setText( "Tools:" );
+		for ( Hotkeys hotkey : tools )
+			hotkeyButton.put( hotkey, createHotkeyButton( hotkey ) );
 
-		lbl = new Label(compKeybinds, SWT.NONE); // Separator
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lbl = new Label( compKeybinds, SWT.NONE ); // Separator
+		lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
 
-		lbl = new Label(compKeybinds, SWT.NONE);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		lbl.setText("Commands:");
-		for (Hotkeys hotkey : commands)
-			hotkeyButton.put(hotkey, createHotkeyButton(hotkey));
+		lbl = new Label( compKeybinds, SWT.NONE );
+		lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+		lbl.setText( "Commands:" );
+		for ( Hotkeys hotkey : commands )
+			hotkeyButton.put( hotkey, createHotkeyButton( hotkey ) );
 
-		lbl = new Label(compKeybinds, SWT.NONE); // Separator
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		lbl = new Label( compKeybinds, SWT.NONE ); // Separator
+		lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
 
-		lbl = new Label(compKeybinds, SWT.NONE);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		lbl.setText("View Options:");
-		for (Hotkeys hotkey : view)
-			hotkeyButton.put(hotkey, createHotkeyButton(hotkey));
+		lbl = new Label( compKeybinds, SWT.NONE );
+		lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+		lbl.setText( "View Options:" );
+		for ( Hotkeys hotkey : view )
+			hotkeyButton.put( hotkey, createHotkeyButton( hotkey ) );
 
-		scKeybinds.setContent(compKeybinds);
+		scKeybinds.setContent( compKeybinds );
 
 		/*
 		 * ====================
@@ -268,314 +274,352 @@ public class SettingsDialog {
 		 * ====================
 		 */
 
-		btnUnbind = new Button(shell, SWT.NONE);
-		GridData gd_btnUnbind = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		btnUnbind = new Button( shell, SWT.NONE );
+		GridData gd_btnUnbind = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
 		gd_btnUnbind.widthHint = 80;
-		btnUnbind.setLayoutData(gd_btnUnbind);
-		btnUnbind.setText("Unbind");
-		btnUnbind.setEnabled(false);
-		btnUnbind.setVisible(false);
+		btnUnbind.setLayoutData( gd_btnUnbind );
+		btnUnbind.setText( "Unbind" );
+		btnUnbind.setEnabled( false );
+		btnUnbind.setVisible( false );
 
-		Button btnConfirm = new Button(shell, SWT.NONE);
-		GridData gd_btnConfirm = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false, 1, 1);
+		Button btnConfirm = new Button( shell, SWT.NONE );
+		GridData gd_btnConfirm = new GridData( SWT.RIGHT, SWT.BOTTOM, true, false, 1, 1 );
 		gd_btnConfirm.widthHint = 80;
-		btnConfirm.setLayoutData(gd_btnConfirm);
-		btnConfirm.setText("Confirm");
+		btnConfirm.setLayoutData( gd_btnConfirm );
+		btnConfirm.setText( "Confirm" );
 
-		btnCancel = new Button(shell, SWT.NONE);
-		GridData gd_btnCancel = new GridData(SWT.RIGHT, SWT.BOTTOM, false, false, 1, 1);
+		btnCancel = new Button( shell, SWT.NONE );
+		GridData gd_btnCancel = new GridData( SWT.RIGHT, SWT.BOTTOM, false, false, 1, 1 );
 		gd_btnCancel.widthHint = 80;
-		btnCancel.setLayoutData(gd_btnCancel);
-		btnCancel.setText("Cancel");
+		btnCancel.setLayoutData( gd_btnCancel );
+		btnCancel.setText( "Cancel" );
 
-		btnUnbind.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Hotkey newHotkey = new Hotkey(Manager.getHotkey(currentBinding));
-				newHotkey.setEnabled(false);
-				bind(currentBinding, newHotkey);
-				btnUnbind.setEnabled(false);
+		btnUnbind.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					Hotkey newHotkey = new Hotkey( Manager.getHotkey( currentBinding ) );
+					newHotkey.setEnabled( false );
+					bind( currentBinding, newHotkey );
+					btnUnbind.setEnabled( false );
+				}
 			}
-		});
+		);
 
-		btnConfirm.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// Behaviour
-				Manager.allowRoomOverlap = btnOverlap.getSelection();
-				Manager.allowDoorOverlap = btnOverlapDoors.getSelection();
-				Manager.closeLoader = btnLoader.getSelection();
-				Manager.resetDoorLinksOnMove = btnResetLinks.getSelection();
+		btnConfirm.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					// Behaviour
+					Manager.allowRoomOverlap = btnOverlap.getSelection();
+					Manager.allowDoorOverlap = btnOverlapDoors.getSelection();
+					Manager.closeLoader = btnLoader.getSelection();
+					Manager.resetDoorLinksOnMove = btnResetLinks.getSelection();
 
-				// Config
-				Manager.checkUpdates = btnUpdates.getSelection();
-				Manager.rememberGeometry = btnGeometry.getSelection();
-				Manager.startMaximised = btnMaximise.getSelection();
-				Manager.mouseShipRelative = btnMouse.getSelection();
+					// Config
+					Manager.checkUpdates = btnUpdates.getSelection();
+					Manager.rememberGeometry = btnGeometry.getSelection();
+					Manager.startMaximised = btnMaximise.getSelection();
+					Manager.mouseShipRelative = btnMouse.getSelection();
 
-				// Hotkeys
-				for (Hotkeys id : modifiedHotkeys.keySet()) {
-					Hotkey keybind = Manager.getHotkey(id);
-					Hotkey h = modifiedHotkeys.get(id);
-					keybind.setCommand(h.getCommand());
-					keybind.setShift(h.getShift());
-					keybind.setCtrl(h.getCtrl());
-					keybind.setAlt(h.getAlt());
-					keybind.setKey(h.getKey());
-					keybind.setEnabled(h.isEnabled());
-				}
-				if (modifiedHotkeys.size() > 0)
-					EditorWindow.getInstance().updateHotkeyTooltips();
-
-				if (Manager.sidebarOnRightSide != btnSidebar.getSelection()) {
-					Manager.sidebarOnRightSide = btnSidebar.getSelection();
-					EditorWindow.getInstance().layoutSidebar();
-				}
-
-				ShipContainer container = Manager.getCurrentShip();
-				if (container != null) {
-					ShipController sc = container.getShipController();
-					for (RoomController rc : container.getRoomControllers()) {
-						rc.setCollidable(!Manager.allowRoomOverlap && !sc.isSelected());
+					// Hotkeys
+					for ( Hotkeys id : modifiedHotkeys.keySet() ) {
+						Hotkey keybind = Manager.getHotkey( id );
+						Hotkey h = modifiedHotkeys.get( id );
+						keybind.setCommand( h.getCommand() );
+						keybind.setShift( h.getShift() );
+						keybind.setCtrl( h.getCtrl() );
+						keybind.setAlt( h.getAlt() );
+						keybind.setKey( h.getKey() );
+						keybind.setEnabled( h.isEnabled() );
 					}
-					for (DoorController dc : container.getDoorControllers()) {
-						dc.setCollidable(!Manager.allowDoorOverlap && !sc.isSelected());
+					if ( modifiedHotkeys.size() > 0 )
+						EditorWindow.getInstance().updateHotkeyTooltips();
+
+					if ( Manager.sidebarOnRightSide != btnSidebar.getSelection() ) {
+						Manager.sidebarOnRightSide = btnSidebar.getSelection();
+						EditorWindow.getInstance().layoutSidebar();
+					}
+
+					ShipContainer container = Manager.getCurrentShip();
+					if ( container != null ) {
+						ShipController sc = container.getShipController();
+						for ( RoomController rc : container.getRoomControllers() ) {
+							rc.setCollidable( !Manager.allowRoomOverlap && !sc.isSelected() );
+						}
+						for ( DoorController dc : container.getDoorControllers() ) {
+							dc.setCollidable( !Manager.allowDoorOverlap && !sc.isSelected() );
+						}
+					}
+
+					dispose();
+				}
+			}
+		);
+
+		btnCancel.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					dispose();
+				}
+			}
+		);
+
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					btnCancel.notifyListeners( SWT.Selection, null );
+					e.doit = false;
+				}
+			}
+		);
+
+		tabFolder.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					int i = tabFolder.getSelectionIndex();
+					if ( i == 0 )
+						scBehaviour.forceFocus();
+					else if ( i == 1 )
+						scConfig.forceFocus();
+					else if ( i == 2 )
+						scKeybinds.forceFocus();
+					btnUnbind.setVisible( i == 2 );
+				}
+			}
+		);
+
+		scKeybinds.addControlListener(
+			new ControlAdapter() {
+				public void controlResized( ControlEvent e )
+				{
+					// Recalculate height in case the resize makes texts
+					// wrap or things happen that require it
+					Rectangle r = scKeybinds.getClientArea();
+					scKeybinds.setMinHeight( compKeybinds.computeSize( r.width, SWT.DEFAULT ).y );
+
+					// Set scrolling speed on the vertical scrollbar
+					ScrollBar sb = scKeybinds.getVerticalBar();
+					if ( sb != null ) {
+						sb.setPageIncrement( sb.getThumb() );
+						sb.setIncrement( Math.max( 1, sb.getThumb() / 15 ) );
 					}
 				}
-
-				dispose();
 			}
-		});
+		);
 
-		btnCancel.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				dispose();
-			}
-		});
+		scConfig.addControlListener(
+			new ControlAdapter() {
+				public void controlResized( ControlEvent e )
+				{
+					// Recalculate height in case the resize makes texts
+					// wrap or things happen that require it
+					Rectangle r = scConfig.getClientArea();
+					scConfig.setMinHeight( compConfig.computeSize( r.width, SWT.DEFAULT, true ).y );
 
-		shell.addListener(SWT.Close, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				btnCancel.notifyListeners(SWT.Selection, null);
-				e.doit = false;
-			}
-		});
-
-		tabFolder.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				int i = tabFolder.getSelectionIndex();
-				if (i == 0)
-					scBehaviour.forceFocus();
-				else if (i == 1)
-					scConfig.forceFocus();
-				else if (i == 2)
-					scKeybinds.forceFocus();
-				btnUnbind.setVisible(i == 2);
-			}
-		});
-
-		scKeybinds.addControlListener(new ControlAdapter() {
-			public void controlResized(ControlEvent e) {
-				// Recalculate height in case the resize makes texts
-				// wrap or things happen that require it
-				Rectangle r = scKeybinds.getClientArea();
-				scKeybinds.setMinHeight(compKeybinds.computeSize(r.width, SWT.DEFAULT).y);
-
-				// Set scrolling speed on the vertical scrollbar
-				ScrollBar sb = scKeybinds.getVerticalBar();
-				if (sb != null) {
-					sb.setPageIncrement(sb.getThumb());
-					sb.setIncrement(Math.max(1, sb.getThumb() / 15));
+					// Set scrolling speed on the vertical scrollbar
+					ScrollBar sb = scConfig.getVerticalBar();
+					if ( sb != null ) {
+						sb.setPageIncrement( sb.getThumb() );
+						sb.setIncrement( Math.max( 1, sb.getThumb() / 15 ) );
+					}
 				}
 			}
-		});
+		);
 
-		scConfig.addControlListener(new ControlAdapter() {
-			public void controlResized(ControlEvent e) {
-				// Recalculate height in case the resize makes texts
-				// wrap or things happen that require it
-				Rectangle r = scConfig.getClientArea();
-				scConfig.setMinHeight(compConfig.computeSize(r.width, SWT.DEFAULT, true).y);
+		scBehaviour.addControlListener(
+			new ControlAdapter() {
+				public void controlResized( ControlEvent e )
+				{
+					// Recalculate height in case the resize makes texts
+					// wrap or things happen that require it
+					Rectangle r = scBehaviour.getClientArea();
+					scBehaviour.setMinHeight( compBehaviour.computeSize( r.width, SWT.DEFAULT ).y );
 
-				// Set scrolling speed on the vertical scrollbar
-				ScrollBar sb = scConfig.getVerticalBar();
-				if (sb != null) {
-					sb.setPageIncrement(sb.getThumb());
-					sb.setIncrement(Math.max(1, sb.getThumb() / 15));
+					// Set scrolling speed on the vertical scrollbar
+					ScrollBar sb = scBehaviour.getVerticalBar();
+					if ( sb != null ) {
+						sb.setPageIncrement( sb.getThumb() );
+						sb.setIncrement( Math.max( 1, sb.getThumb() / 15 ) );
+					}
 				}
 			}
-		});
-
-		scBehaviour.addControlListener(new ControlAdapter() {
-			public void controlResized(ControlEvent e) {
-				// Recalculate height in case the resize makes texts
-				// wrap or things happen that require it
-				Rectangle r = scBehaviour.getClientArea();
-				scBehaviour.setMinHeight(compBehaviour.computeSize(r.width, SWT.DEFAULT).y);
-
-				// Set scrolling speed on the vertical scrollbar
-				ScrollBar sb = scBehaviour.getVerticalBar();
-				if (sb != null) {
-					sb.setPageIncrement(sb.getThumb());
-					sb.setIncrement(Math.max(1, sb.getThumb() / 15));
-				}
-			}
-		});
+		);
 
 		// List keys that cannot be bound
 		final ArrayList<Integer> blacklistedKeys = new ArrayList<Integer>();
-		blacklistedKeys.add(SWT.COMMAND);
-		blacklistedKeys.add(SWT.SHIFT);
-		blacklistedKeys.add(SWT.CTRL);
-		blacklistedKeys.add(SWT.ALT);
-		blacklistedKeys.add((int) SWT.DEL);
-		blacklistedKeys.add((int) SWT.CR);
-		blacklistedKeys.add((int) SWT.KEYPAD_CR);
-		blacklistedKeys.add((int) SWT.LF);
-		blacklistedKeys.add(SWT.TRAVERSE_ESCAPE);
-		blacklistedKeys.add(SWT.TRAVERSE_RETURN);
-		blacklistedKeys.add(SWT.TRAVERSE_TAB_NEXT);
-		blacklistedKeys.add(SWT.TRAVERSE_TAB_PREVIOUS);
-		blacklistedKeys.add(SWT.TRAVERSE_ESCAPE);
-		blacklistedKeys.add(SWT.ARROW_UP);
-		blacklistedKeys.add(SWT.ARROW_DOWN);
-		blacklistedKeys.add(SWT.ARROW_LEFT);
-		blacklistedKeys.add(SWT.ARROW_RIGHT);
+		blacklistedKeys.add( SWT.COMMAND );
+		blacklistedKeys.add( SWT.SHIFT );
+		blacklistedKeys.add( SWT.CTRL );
+		blacklistedKeys.add( SWT.ALT );
+		blacklistedKeys.add( (int)SWT.DEL );
+		blacklistedKeys.add( (int)SWT.CR );
+		blacklistedKeys.add( (int)SWT.KEYPAD_CR );
+		blacklistedKeys.add( (int)SWT.LF );
+		blacklistedKeys.add( SWT.TRAVERSE_ESCAPE );
+		blacklistedKeys.add( SWT.TRAVERSE_RETURN );
+		blacklistedKeys.add( SWT.TRAVERSE_TAB_NEXT );
+		blacklistedKeys.add( SWT.TRAVERSE_TAB_PREVIOUS );
+		blacklistedKeys.add( SWT.TRAVERSE_ESCAPE );
+		blacklistedKeys.add( SWT.ARROW_UP );
+		blacklistedKeys.add( SWT.ARROW_DOWN );
+		blacklistedKeys.add( SWT.ARROW_LEFT );
+		blacklistedKeys.add( SWT.ARROW_RIGHT );
 
 		keyListener = new Listener() {
-			public void handleEvent(Event e) {
-				if (currentBinding != null && !blacklistedKeys.contains(e.keyCode)) {
-					Hotkey newHotkey = new Hotkey(Manager.getHotkey(currentBinding));
-					newHotkey.setEnabled(true);
-					newHotkey.setCommand((e.stateMask & SWT.COMMAND) == SWT.COMMAND);
-					newHotkey.setShift((e.stateMask & SWT.SHIFT) == SWT.SHIFT);
-					newHotkey.setCtrl((e.stateMask & SWT.CTRL) == SWT.CTRL);
-					newHotkey.setAlt((e.stateMask & SWT.ALT) == SWT.ALT);
-					newHotkey.setKey(e.keyCode);
-					bind(currentBinding, newHotkey);
-					btnUnbind.setEnabled(false);
+			public void handleEvent( Event e )
+			{
+				if ( currentBinding != null && !blacklistedKeys.contains( e.keyCode ) ) {
+					Hotkey newHotkey = new Hotkey( Manager.getHotkey( currentBinding ) );
+					newHotkey.setEnabled( true );
+					newHotkey.setCommand( ( e.stateMask & SWT.COMMAND ) == SWT.COMMAND );
+					newHotkey.setShift( ( e.stateMask & SWT.SHIFT ) == SWT.SHIFT );
+					newHotkey.setCtrl( ( e.stateMask & SWT.CTRL ) == SWT.CTRL );
+					newHotkey.setAlt( ( e.stateMask & SWT.ALT ) == SWT.ALT );
+					newHotkey.setKey( e.keyCode );
+					bind( currentBinding, newHotkey );
+					btnUnbind.setEnabled( false );
 				}
 
-				if (e.keyCode == SWT.SPACE)
+				if ( e.keyCode == SWT.SPACE )
 					e.doit = false;
 			}
 		};
 
-		display.addFilter(SWT.KeyDown, keyListener);
+		display.addFilter( SWT.KeyDown, keyListener );
 
-		shell.setMinimumSize(400, 300);
-		shell.setSize(550, 400);
+		shell.setMinimumSize( 400, 300 );
+		shell.setSize( 550, 400 );
 
 		Point size = shell.getSize();
 		Point parSize = parent.getSize();
 		Point parLoc = parent.getLocation();
-		shell.setLocation(parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2);
+		shell.setLocation( parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2 );
 
-		tabFolder.notifyListeners(SWT.Selection, null);
+		tabFolder.notifyListeners( SWT.Selection, null );
 	}
 
-	public void open() {
+	public void open()
+	{
 		// Behaviour
-		btnOverlap.setSelection(Manager.allowRoomOverlap);
-		btnOverlapDoors.setSelection(Manager.allowDoorOverlap);
-		btnLoader.setSelection(Manager.closeLoader);
-		btnResetLinks.setSelection(Manager.resetDoorLinksOnMove);
+		btnOverlap.setSelection( Manager.allowRoomOverlap );
+		btnOverlapDoors.setSelection( Manager.allowDoorOverlap );
+		btnLoader.setSelection( Manager.closeLoader );
+		btnResetLinks.setSelection( Manager.resetDoorLinksOnMove );
 
 		// Config
-		btnGeometry.setSelection(Manager.rememberGeometry);
-		btnMaximise.setSelection(Manager.startMaximised);
-		btnUpdates.setSelection(Manager.checkUpdates);
-		btnSidebar.setSelection(Manager.sidebarOnRightSide);
-		btnMouse.setSelection(Manager.mouseShipRelative);
+		btnGeometry.setSelection( Manager.rememberGeometry );
+		btnMaximise.setSelection( Manager.startMaximised );
+		btnUpdates.setSelection( Manager.checkUpdates );
+		btnSidebar.setSelection( Manager.sidebarOnRightSide );
+		btnMouse.setSelection( Manager.mouseShipRelative );
 
 		shell.open();
 	}
 
-	private Button createHotkeyButton(Hotkeys hotkey) {
-		Label label = new Label(compKeybinds, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		label.setText(hotkey.toString());
+	private Button createHotkeyButton( Hotkeys hotkey )
+	{
+		Label label = new Label( compKeybinds, SWT.NONE );
+		label.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, false, false, 1, 1 ) );
+		label.setText( hotkey.toString() );
 
-		Button button = new Button(compKeybinds, SWT.TOGGLE);
-		Hotkey h = Manager.getHotkey(hotkey);
-		button.setText(h.isEnabled() ? h.toString() : "(Not bound)");
-		button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		button.setData(hotkey);
+		Button button = new Button( compKeybinds, SWT.TOGGLE );
+		Hotkey h = Manager.getHotkey( hotkey );
+		button.setText( h.isEnabled() ? h.toString() : "(Not bound)" );
+		button.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
+		button.setData( hotkey );
 
-		button.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Button self = (Button) e.getSource();
+		button.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					Button self = (Button)e.getSource();
 
-				if (self.getSelection()) {
-					currentBinding = (Hotkeys) self.getData();
-					self.setText("(Press any key)");
+					if ( self.getSelection() ) {
+						currentBinding = (Hotkeys)self.getData();
+						self.setText( "(Press any key)" );
 
-					for (Hotkeys h : hotkeyButton.keySet()) {
-						if (h != self.getData()) {
-							Hotkey hotkey = getHotkey(h);
-							hotkeyButton.get(h).setSelection(false);
-							hotkeyButton.get(h).setText(hotkey.isEnabled() ? hotkey.toString() : "(Not bound)");
+						for ( Hotkeys h : hotkeyButton.keySet() ) {
+							if ( h != self.getData() ) {
+								Hotkey hotkey = getHotkey( h );
+								hotkeyButton.get( h ).setSelection( false );
+								hotkeyButton.get( h ).setText( hotkey.isEnabled() ? hotkey.toString() : "(Not bound)" );
+							}
 						}
+						btnUnbind.setEnabled( true );
 					}
-					btnUnbind.setEnabled(true);
-				} else {
-					currentBinding = null;
-					Hotkey hotkey = getHotkey((Hotkeys) self.getData());
-					self.setText(hotkey.toString());
-					btnUnbind.setEnabled(false);
+					else {
+						currentBinding = null;
+						Hotkey hotkey = getHotkey( (Hotkeys)self.getData() );
+						self.setText( hotkey.toString() );
+						btnUnbind.setEnabled( false );
+					}
 				}
 			}
-		});
+		);
 
 		return button;
 	}
 
-	private void bind(Hotkeys h, Hotkey newHotkey) {
-		if (newHotkey.isEnabled() && hotkeyCollides(newHotkey)) {
+	private void bind( Hotkeys h, Hotkey newHotkey )
+	{
+		if ( newHotkey.isEnabled() && hotkeyCollides( newHotkey ) ) {
 			String msg = "The key combination you've selected is already bound to another command.\n" +
-					"Please choose another combination, or unbind it first.";
-			UIUtils.showWarningDialog(shell, null, msg);
+				"Please choose another combination, or unbind it first.";
+			UIUtils.showWarningDialog( shell, null, msg );
 
-		} else {
-			Button b = hotkeyButton.get(h);
-			b.setSelection(false);
-			b.setText(newHotkey.isEnabled() ? newHotkey.toString() : "(Not bound)");
+		}
+		else {
+			Button b = hotkeyButton.get( h );
+			b.setSelection( false );
+			b.setText( newHotkey.isEnabled() ? newHotkey.toString() : "(Not bound)" );
 
-			modifiedHotkeys.put(h, newHotkey);
+			modifiedHotkeys.put( h, newHotkey );
 			currentBinding = null;
 		}
 	}
 
-	private Hotkey getHotkey(Hotkeys h) {
-		Hotkey result = modifiedHotkeys.get(h);
-		if (result == null)
-			result = Manager.getHotkey(h);
+	private Hotkey getHotkey( Hotkeys h )
+	{
+		Hotkey result = modifiedHotkeys.get( h );
+		if ( result == null )
+			result = Manager.getHotkey( h );
 
 		return result;
 	}
 
-	private boolean hotkeyCollides(Hotkey newHotkey) {
-		for (Hotkeys h : Hotkeys.values()) {
-			Hotkey hotkey = getHotkey(h);
-			if (h != currentBinding && hotkey.isEnabled() && hotkey.collides(newHotkey))
+	private boolean hotkeyCollides( Hotkey newHotkey )
+	{
+		for ( Hotkeys h : Hotkeys.values() ) {
+			Hotkey hotkey = getHotkey( h );
+			if ( h != currentBinding && hotkey.isEnabled() && hotkey.collides( newHotkey ) )
 				return true;
 		}
 		return false;
 	}
 
-	public static SettingsDialog getInstance() {
+	public static SettingsDialog getInstance()
+	{
 		return instance;
 	}
 
-	public boolean isActive() {
+	public boolean isActive()
+	{
 		return !shell.isDisposed() && shell.isVisible();
 	}
 
-	public void dispose() {
-		display.removeFilter(SWT.KeyDown, keyListener);
+	public void dispose()
+	{
+		display.removeFilter( SWT.KeyDown, keyListener );
 		shell.dispose();
 		instance = null;
 	}

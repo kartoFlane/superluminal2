@@ -24,7 +24,9 @@ import org.eclipse.swt.widgets.Shell;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.core.Cache;
 
-public class AboutDialog {
+
+public class AboutDialog
+{
 	private static AboutDialog instance;
 
 	private String message = "";
@@ -39,138 +41,156 @@ public class AboutDialog {
 	private Composite container;
 	private Button btnOk;
 
-	public AboutDialog(Shell parent) {
-		if (instance != null)
-			throw new IllegalStateException("Previous instance has not been disposed!");
+
+	public AboutDialog( Shell parent )
+	{
+		if ( instance != null )
+			throw new IllegalStateException( "Previous instance has not been disposed!" );
 		instance = this;
 
 		Display display = parent.getDisplay();
 
-		shell = new Shell(parent, SWT.TITLE | SWT.APPLICATION_MODAL);
-		shell.setText(Superluminal.APP_NAME + " - About");
-		GridLayout gl_shell = new GridLayout(1, false);
+		shell = new Shell( parent, SWT.TITLE | SWT.APPLICATION_MODAL );
+		shell.setText( Superluminal.APP_NAME + " - About" );
+		GridLayout gl_shell = new GridLayout( 1, false );
 		gl_shell.verticalSpacing = 0;
 		gl_shell.marginWidth = 0;
 		gl_shell.marginHeight = 0;
 		gl_shell.horizontalSpacing = 0;
-		shell.setLayout(gl_shell);
+		shell.setLayout( gl_shell );
 
-		color = Cache.checkOutColor(this, new RGB(255, 255, 255));
+		color = Cache.checkOutColor( this, new RGB( 255, 255, 255 ) );
 
-		Composite composite = new Composite(shell, SWT.NONE);
-		composite.setBackground(color);
-		GridLayout gl_composite = new GridLayout(2, false);
+		Composite composite = new Composite( shell, SWT.NONE );
+		composite.setBackground( color );
+		GridLayout gl_composite = new GridLayout( 2, false );
 		gl_composite.marginWidth = 10;
 		gl_composite.marginHeight = 10;
-		composite.setLayout(gl_composite);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		composite.setLayout( gl_composite );
+		composite.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
-		Label lblIcon = new Label(composite, SWT.NONE);
-		lblIcon.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 2));
-		lblIcon.setImage(display.getSystemImage(SWT.ICON_INFORMATION));
-		lblIcon.setBackground(color);
+		Label lblIcon = new Label( composite, SWT.NONE );
+		lblIcon.setLayoutData( new GridData( SWT.FILL, SWT.TOP, false, false, 1, 2 ) );
+		lblIcon.setImage( display.getSystemImage( SWT.ICON_INFORMATION ) );
+		lblIcon.setBackground( color );
 
-		lblText = new Label(composite, SWT.NONE);
-		lblText.setBackground(color);
-		lblText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		lblText = new Label( composite, SWT.NONE );
+		lblText.setBackground( color );
+		lblText.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
-		linkWidget = new Link(composite, SWT.NONE);
-		linkWidget.setBackground(color);
-		linkWidget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		linkWidget = new Link( composite, SWT.NONE );
+		linkWidget.setBackground( color );
+		linkWidget.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
-		container = new Composite(shell, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		container = new Composite( shell, SWT.NONE );
+		container.setLayout( new GridLayout( 1, false ) );
+		container.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, false, 1, 1 ) );
 
-		btnOk = new Button(container, SWT.NONE);
-		GridData gd_btnOk = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		btnOk = new Button( container, SWT.NONE );
+		GridData gd_btnOk = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_btnOk.widthHint = 80;
-		btnOk.setLayoutData(gd_btnOk);
-		btnOk.setText("OK");
+		btnOk.setLayoutData( gd_btnOk );
+		btnOk.setText( "OK" );
 
-		btnOk.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				dispose();
+		btnOk.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					dispose();
+				}
 			}
-		});
+		);
 
-		shell.addListener(SWT.Close, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				btnOk.notifyListeners(SWT.Selection, null);
-				e.doit = false;
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					btnOk.notifyListeners( SWT.Selection, null );
+					e.doit = false;
+				}
 			}
-		});
+		);
 	}
 
-	public int open() {
+	public int open()
+	{
 		Composite parent = shell.getParent();
 		Display display = parent.getDisplay();
 
-		lblText.setText(message);
+		lblText.setText( message );
 
 		String link = "";
-		if (linkURL != null) {
+		if ( linkURL != null ) {
 			link = linkURL.toString();
-			linkWidget.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					Program.launch(linkURL.toString());
+			linkWidget.addSelectionListener(
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected( SelectionEvent e )
+					{
+						Program.launch( linkURL.toString() );
+					}
 				}
-			});
+			);
 		}
-		linkWidget.setText("<a href=\"" + link + "\">" + linkFaceText + "</a>");
+		linkWidget.setText( "<a href=\"" + link + "\">" + linkFaceText + "</a>" );
 
 		shell.pack();
 
 		Monitor primary = display.getPrimaryMonitor();
 		Rectangle bounds = primary.getBounds();
 		Rectangle rect = shell.getBounds();
-		int x = bounds.x + (bounds.width - rect.width) / 2;
-		int y = bounds.y + (bounds.height - rect.height) / 2;
-		shell.setLocation(x, y);
+		int x = bounds.x + ( bounds.width - rect.width ) / 2;
+		int y = bounds.y + ( bounds.height - rect.height ) / 2;
+		shell.setLocation( x, y );
 
 		shell.open();
 
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
+		while ( !shell.isDisposed() ) {
+			if ( !display.readAndDispatch() )
 				display.sleep();
 		}
 
-		Cache.checkInColor(this, color.getRGB());
+		Cache.checkInColor( this, color.getRGB() );
 
 		return SWT.OK;
 	}
 
-	public boolean isActive() {
+	public boolean isActive()
+	{
 		return !shell.isDisposed() && shell.isVisible();
 	}
 
-	public String getMessage() {
+	public String getMessage()
+	{
 		return message;
 	}
 
-	public void setMessage(String string) {
-		if (string == null)
-			throw new IllegalArgumentException("Message cannot be null.");
+	public void setMessage( String string )
+	{
+		if ( string == null )
+			throw new IllegalArgumentException( "Message cannot be null." );
 		message = string;
 	}
 
-	public void setLink(URL link, String faceText) {
-		if (link == null)
-			throw new IllegalArgumentException("URL cannot be null.");
-		if (faceText == null)
-			throw new IllegalArgumentException("Face text cannot be null.");
+	public void setLink( URL link, String faceText )
+	{
+		if ( link == null )
+			throw new IllegalArgumentException( "URL cannot be null." );
+		if ( faceText == null )
+			throw new IllegalArgumentException( "Face text cannot be null." );
 		linkFaceText = faceText;
 		linkURL = link;
 	}
 
-	public static AboutDialog getInstance() {
+	public static AboutDialog getInstance()
+	{
 		return instance;
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		shell.dispose();
 		instance = null;
 	}

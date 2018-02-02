@@ -11,8 +11,9 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
-public class MountObject extends GameObject implements Alias, Movable, Indexable, Comparable<MountObject> {
 
+public class MountObject extends GameObject implements Alias, Movable, Indexable, Comparable<MountObject>
+{
 	private int locX = 0;
 	private int locY = 0;
 
@@ -26,107 +27,130 @@ public class MountObject extends GameObject implements Alias, Movable, Indexable
 
 	private String alias = null;
 
-	public MountObject() {
-		setDeletable(true);
-		setWeapon(Database.DEFAULT_WEAPON_OBJ);
+
+	public MountObject()
+	{
+		setDeletable( true );
+		setWeapon( Database.DEFAULT_WEAPON_OBJ );
 	}
 
-	public void update() {
+	public void update()
+	{
 		ShipController shipC = Manager.getCurrentShip().getShipController();
 		ShipObject ship = shipC.getGameObject();
 		locX = model.getX() - shipC.getX() - ship.getXOffset() * ShipContainer.CELL_SIZE - ship.getHullOffset().x;
 		locY = model.getY() - shipC.getY() - ship.getYOffset() * ShipContainer.CELL_SIZE - ship.getHullOffset().y;
 	}
 
-	public void setId(int id) {
+	public void setId( int id )
+	{
 		this.id = id;
 	}
 
-	public int getId() {
+	public int getId()
+	{
 		return id;
 	}
 
-	public void setWeapon(WeaponObject weapon) {
+	public void setWeapon( WeaponObject weapon )
+	{
 		this.weapon = weapon;
 	}
 
-	public WeaponObject getWeapon() {
+	public WeaponObject getWeapon()
+	{
 		return weapon;
 	}
 
 	@Override
-	public boolean setLocation(int x, int y) {
+	public boolean setLocation( int x, int y )
+	{
 		locX = x;
 		locY = y;
 		return true;
 	}
 
 	@Override
-	public boolean translate(int dx, int dy) {
+	public boolean translate( int dx, int dy )
+	{
 		locX += dx;
 		locY += dy;
 		return true;
 	}
 
 	@Override
-	public Point getLocation() {
-		return new Point(locX, locY);
+	public Point getLocation()
+	{
+		return new Point( locX, locY );
 	}
 
 	@Override
-	public int getX() {
+	public int getX()
+	{
 		return locX;
 	}
 
 	@Override
-	public int getY() {
+	public int getY()
+	{
 		return locY;
 	}
 
 	@Override
-	public String getAlias() {
+	public String getAlias()
+	{
 		return alias;
 	}
 
 	@Override
-	public void setAlias(String alias) {
+	public void setAlias( String alias )
+	{
 		this.alias = alias;
 	}
 
-	public void setMirrored(boolean mirrored) {
+	public void setMirrored( boolean mirrored )
+	{
 		this.mirrored = mirrored;
 	}
 
-	public boolean isMirrored() {
+	public boolean isMirrored()
+	{
 		return mirrored;
 	}
 
-	public void setRotated(boolean rotated) {
+	public void setRotated( boolean rotated )
+	{
 		this.rotated = rotated;
 	}
 
-	public boolean isRotated() {
+	public boolean isRotated()
+	{
 		return rotated;
 	}
 
-	public void setGib(GibObject gib) {
+	public void setGib( GibObject gib )
+	{
 		this.gib = gib;
 	}
 
-	public GibObject getGib() {
+	public GibObject getGib()
+	{
 		return gib;
 	}
 
-	public void setDirection(Directions direction) {
+	public void setDirection( Directions direction )
+	{
 		this.direction = direction;
 	}
 
-	public Directions getDirection() {
+	public Directions getDirection()
+	{
 		return direction;
 	}
 
 	@Override
-	public int compareTo(MountObject o) {
+	public int compareTo( MountObject o )
+	{
 		return id - o.id;
 	}
 }

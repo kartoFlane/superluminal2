@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum LayoutObjects {
+public enum LayoutObjects
+{
 	X_OFFSET,
 	Y_OFFSET,
 	HORIZONTAL,

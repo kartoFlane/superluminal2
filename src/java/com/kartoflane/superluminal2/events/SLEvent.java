@@ -1,9 +1,8 @@
 package com.kartoflane.superluminal2.events;
 
-public abstract class SLEvent {
-
+public abstract class SLEvent
+{
 	// @formatter:off
-	
 	public static final int NONE         =  0;
 	/** Indicates that the sender was moved. Data is a point. */
 	public static final int MOVE         =  1;
@@ -35,7 +34,6 @@ public abstract class SLEvent {
 	public static final int VISIBLE      = 14;
 	/** Indicates that the sender's direction has been changed. Data is a direction. */
 	public static final int DIRECTION    = 15;
-
 	// @formatter:on
 
 	/** Type of the event, dictating how the data field should be interpreted. */
@@ -48,6 +46,7 @@ public abstract class SLEvent {
 	 */
 	public final Object data;
 
+
 	/**
 	 * Constructs a new event with the specified parameters.
 	 * 
@@ -58,17 +57,19 @@ public abstract class SLEvent {
 	 * @param data
 	 *            the data of the event, that can be used to pass information that is important to the event
 	 */
-	public SLEvent(int type, Object source, Object data) {
-		checkType(type);
-		if (source == null)
-			throw new IllegalArgumentException("Source must not be null.");
+	public SLEvent( int type, Object source, Object data )
+	{
+		checkType( type );
+		if ( source == null )
+			throw new IllegalArgumentException( "Source must not be null." );
 		this.type = type;
 		this.source = source;
 		this.data = data;
 	}
 
-	public static final void checkType(int type) {
-		switch (type) {
+	public static final void checkType( int type )
+	{
+		switch ( type ) {
 			case NONE:
 			case MOVE:
 			case RESIZE:
@@ -87,13 +88,14 @@ public abstract class SLEvent {
 			case DIRECTION:
 				break;
 			default:
-				throw new IllegalArgumentException("Incorrect event type value: " + type);
+				throw new IllegalArgumentException( "Incorrect event type value: " + type );
 		}
 	}
 
-	public static String typeToString(int type) {
-		checkType(type);
-		switch (type) {
+	public static String typeToString( int type )
+	{
+		checkType( type );
+		switch ( type ) {
 			case NONE:
 				return "None";
 			case MOVE:
@@ -130,15 +132,16 @@ public abstract class SLEvent {
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		StringBuilder buf = new StringBuilder();
-		buf.append("SLEvent: { type: ");
-		buf.append(typeToString(type));
-		buf.append(", source: ");
-		buf.append(source);
-		buf.append(", data: ");
-		buf.append(data);
-		buf.append(" }");
+		buf.append( "SLEvent: { type: " );
+		buf.append( typeToString( type ) );
+		buf.append( ", source: " );
+		buf.append( source );
+		buf.append( ", data: " );
+		buf.append( data );
+		buf.append( " }" );
 		return buf.toString();
 	}
 }

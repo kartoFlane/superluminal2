@@ -6,8 +6,8 @@ import java.io.File;
 /**
  * This describes how to download the file.
  */
-public abstract class SPGetTask implements SPResultTask<File> {
-
+public abstract class SPGetTask implements SPResultTask<File>
+{
 	protected SPTaskObserver observer;
 	protected File downloadedFile;
 	protected boolean success = false;
@@ -20,14 +20,16 @@ public abstract class SPGetTask implements SPResultTask<File> {
 	 * Observer gets notified of the task's progress, status, and when
 	 * it is completed or aborted.
 	 */
-	public void setObserver( SPTaskObserver observer ) {
+	public void setObserver( SPTaskObserver observer )
+	{
 		this.observer = observer;
 	}
 
 	/**
 	 * Returns the result of the task.
 	 */
-	public File getResult() {
+	public File getResult()
+	{
 		return downloadedFile;
 	}
 
@@ -38,7 +40,8 @@ public abstract class SPGetTask implements SPResultTask<File> {
 	 * to manually check the isInterrupted() method at various stages
 	 * during the task's execution.
 	 */
-	public void interrupt() {
+	public void interrupt()
+	{
 		interrupted = true;
 	}
 
@@ -47,14 +50,16 @@ public abstract class SPGetTask implements SPResultTask<File> {
 	 * 
 	 * Implementation has to set the success field.
 	 */
-	public boolean isSuccess() {
+	public boolean isSuccess()
+	{
 		return success;
 	}
 
 	/**
 	 * Returns true if the task has been interrupted, false otherwise.
 	 */
-	public boolean isInterrupted() {
+	public boolean isInterrupted()
+	{
 		return interrupted;
 	}
 }

@@ -3,20 +3,22 @@ package com.kartoflane.common.selfpatch;
 import java.io.File;
 
 
-public class SelfPatcher {
-
+public class SelfPatcher
+{
 	private final SPGetTask getTask;
 	private final SPPatchTask patchTask;
 	private final SPRunTask runTask;
 
 
-	public SelfPatcher( SPGetTask get, SPPatchTask patch, SPRunTask run ) {
+	public SelfPatcher( SPGetTask get, SPPatchTask patch, SPRunTask run )
+	{
 		getTask = get;
 		patchTask = patch;
 		runTask = run;
 	}
 
-	public void patch( SPDownloadWindow window ) {
+	public void patch( SPDownloadWindow window )
+	{
 		if ( window == null ) {
 			window = new SPSwingDownloadDialog();
 		}

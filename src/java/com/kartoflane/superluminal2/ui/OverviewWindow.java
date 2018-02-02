@@ -68,8 +68,9 @@ import com.kartoflane.superluminal2.undo.UndoableOrderEdit;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
-public class OverviewWindow implements SLListener {
 
+public class OverviewWindow implements SLListener
+{
 	private static final OverviewWindow instance = new OverviewWindow();
 
 	private ShipContainer ship;
@@ -97,463 +98,519 @@ public class OverviewWindow implements SLListener {
 	private DragSource dragSource;
 	private DropTarget dropTarget;
 
-	private OverviewWindow() {
+
+	private OverviewWindow()
+	{
 	}
 
 	/**
 	 * @wbp.parser.entryPoint
 	 */
-	public void init(Shell parent) {
-		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
+	public void init( Shell parent )
+	{
+		Image helpImage = Cache.checkOutImage( this, "cpath:/assets/help.png" );
 
-		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE);
-		shell.setText(String.format("%s - Ship Overview", Superluminal.APP_NAME));
-		shell.setLayout(new GridLayout(2, false));
+		shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.RESIZE );
+		shell.setText( String.format( "%s - Ship Overview", Superluminal.APP_NAME ) );
+		shell.setLayout( new GridLayout( 2, false ) );
 
-		toolBar = new ToolBar(shell, SWT.FLAT | SWT.RIGHT);
-		toolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+		toolBar = new ToolBar( shell, SWT.FLAT | SWT.RIGHT );
+		toolBar.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 
-		Label lblHelp = new Label(shell, SWT.NONE);
-		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblHelp.setImage(helpImage);
+		Label lblHelp = new Label( shell, SWT.NONE );
+		lblHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblHelp.setImage( helpImage );
 		String msg = "Alias is a short name to help you distinguish between objects.";
-		UIUtils.addTooltip(lblHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+		UIUtils.addTooltip( lblHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		tltmAlias = new ToolItem(toolBar, SWT.NONE);
-		tltmAlias.setToolTipText("Set Alias");
-		tltmAlias.setImage(Cache.checkOutImage(this, "cpath:/assets/alias.png"));
+		tltmAlias = new ToolItem( toolBar, SWT.NONE );
+		tltmAlias.setToolTipText( "Set Alias" );
+		tltmAlias.setImage( Cache.checkOutImage( this, "cpath:/assets/alias.png" ) );
 
-		tltmRemove = new ToolItem(toolBar, SWT.NONE);
-		tltmRemove.setToolTipText("Remove Alias");
-		tltmRemove.setImage(Cache.checkOutImage(this, "cpath:/assets/noalias.png"));
+		tltmRemove = new ToolItem( toolBar, SWT.NONE );
+		tltmRemove.setToolTipText( "Remove Alias" );
+		tltmRemove.setImage( Cache.checkOutImage( this, "cpath:/assets/noalias.png" ) );
 
-		tltmToggleVis = new ToolItem(toolBar, SWT.NONE);
-		tltmToggleVis.setToolTipText("Show/Hide");
-		tltmToggleVis.setImage(Cache.checkOutImage(this, "cpath:/assets/cloak.png"));
+		tltmToggleVis = new ToolItem( toolBar, SWT.NONE );
+		tltmToggleVis.setToolTipText( "Show/Hide" );
+		tltmToggleVis.setImage( Cache.checkOutImage( this, "cpath:/assets/cloak.png" ) );
 
-		tree = new Tree(shell, SWT.BORDER | SWT.FULL_SELECTION);
-		tree.setLinesVisible(true);
-		tree.setHeaderVisible(true);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		tree = new Tree( shell, SWT.BORDER | SWT.FULL_SELECTION );
+		tree.setLinesVisible( true );
+		tree.setHeaderVisible( true );
+		tree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 2, 1 ) );
 
 		RGB rgb = tree.getBackground().getRGB();
-		rgb.red = (int) (0.85 * rgb.red);
-		rgb.green = (int) (0.85 * rgb.green);
-		rgb.blue = (int) (0.85 * rgb.blue);
-		disabledColor = Cache.checkOutColor(this, rgb);
+		rgb.red = (int)( 0.85 * rgb.red );
+		rgb.green = (int)( 0.85 * rgb.green );
+		rgb.blue = (int)( 0.85 * rgb.blue );
+		disabledColor = Cache.checkOutColor( this, rgb );
 
-		trclmnName = new TreeColumn(tree, SWT.NONE);
-		trclmnName.setWidth(175);
-		trclmnName.setText("Name");
+		trclmnName = new TreeColumn( tree, SWT.NONE );
+		trclmnName.setWidth( 175 );
+		trclmnName.setText( "Name" );
 
-		trclmnAlias = new TreeColumn(tree, SWT.RIGHT);
-		trclmnAlias.setWidth(100);
-		trclmnAlias.setText("Alias");
+		trclmnAlias = new TreeColumn( tree, SWT.RIGHT );
+		trclmnAlias.setWidth( 100 );
+		trclmnAlias.setText( "Alias" );
 
-		trtmRooms = new TreeItem(tree, SWT.NONE);
-		trtmRooms.setText("Rooms");
+		trtmRooms = new TreeItem( tree, SWT.NONE );
+		trtmRooms.setText( "Rooms" );
 
-		trtmDoors = new TreeItem(tree, SWT.NONE);
-		trtmDoors.setText("Doors");
+		trtmDoors = new TreeItem( tree, SWT.NONE );
+		trtmDoors.setText( "Doors" );
 
-		trtmMounts = new TreeItem(tree, SWT.NONE);
-		trtmMounts.setText("Mounts");
+		trtmMounts = new TreeItem( tree, SWT.NONE );
+		trtmMounts.setText( "Mounts" );
 
-		trtmGibs = new TreeItem(tree, SWT.NONE);
-		trtmGibs.setText("Gibs");
+		trtmGibs = new TreeItem( tree, SWT.NONE );
+		trtmGibs.setText( "Gibs" );
 
 		// Need to specify a transfer type, even if it's not used, because
 		// otherwise it's not even possible to initiate drag and drop...
 		Transfer[] sourceTypes = new Transfer[] { TextTransfer.getInstance() };
-		dragSource = new DragSource(tree, DND.DROP_MOVE);
-		dragSource.setTransfer(sourceTypes);
+		dragSource = new DragSource( tree, DND.DROP_MOVE );
+		dragSource.setTransfer( sourceTypes );
 
 		Transfer[] dropTypes = new Transfer[] { TextTransfer.getInstance(), FileTransfer.getInstance() };
-		dropTarget = new DropTarget(tree, DND.DROP_MOVE | DND.DROP_DEFAULT);
-		dropTarget.setTransfer(dropTypes);
+		dropTarget = new DropTarget( tree, DND.DROP_MOVE | DND.DROP_DEFAULT );
+		dropTarget.setTransfer( dropTypes );
 
 		// Overview popup menu
-		overviewMenu = new Menu(tree);
-		tree.setMenu(overviewMenu);
+		overviewMenu = new Menu( tree );
+		tree.setMenu( overviewMenu );
 
-		final MenuItem mntmSetAlias = new MenuItem(overviewMenu, SWT.NONE);
-		mntmSetAlias.setText("Set Alias");
+		final MenuItem mntmSetAlias = new MenuItem( overviewMenu, SWT.NONE );
+		mntmSetAlias.setText( "Set Alias" );
 
-		final MenuItem mntmRemoveAlias = new MenuItem(overviewMenu, SWT.NONE);
-		mntmRemoveAlias.setText("Remove Alias");
+		final MenuItem mntmRemoveAlias = new MenuItem( overviewMenu, SWT.NONE );
+		mntmRemoveAlias.setText( "Remove Alias" );
 
-		dragSource.addDragListener(new DragSourceListener() {
-			@Override
-			public void dragStart(DragSourceEvent e) {
-				TreeItem[] selection = tree.getSelection();
-				if (selection.length > 0 && selection[0].getData() instanceof Indexable) {
-					e.doit = true;
-					dragItem = selection[0];
-					dragData = (ObjectController) dragItem.getData();
-				} else {
-					e.doit = false;
+		dragSource.addDragListener(
+			new DragSourceListener() {
+				@Override
+				public void dragStart( DragSourceEvent e )
+				{
+					TreeItem[] selection = tree.getSelection();
+					if ( selection.length > 0 && selection[0].getData() instanceof Indexable ) {
+						e.doit = true;
+						dragItem = selection[0];
+						dragData = (ObjectController)dragItem.getData();
+					}
+					else {
+						e.doit = false;
+					}
+				}
+
+				@Override
+				public void dragSetData( DragSourceEvent e )
+				{
+					e.data = "whatever"; // This needs not be an empty string, otherwise the drag mechanism freaks out...
+				}
+
+				@Override
+				public void dragFinished( DragSourceEvent e )
+				{
+					dragItem = null;
+					dragData = null;
 				}
 			}
+		);
 
-			@Override
-			public void dragSetData(DragSourceEvent e) {
-				e.data = "whatever"; // This needs not be an empty string, otherwise the drag mechanism freaks out...
-			}
+		dropTarget.addDropListener(
+			new DropTargetAdapter() {
+				@Override
+				public void dragOver( DropTargetEvent e )
+				{
+					e.detail = DND.DROP_MOVE;
+					e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
 
-			@Override
-			public void dragFinished(DragSourceEvent e) {
-				dragItem = null;
-				dragData = null;
-			}
-		});
+					if ( dragItem != null ) {
+						Point p = tree.toControl( e.x, e.y );
+						TreeItem item = tree.getItem( p );
 
-		dropTarget.addDropListener(new DropTargetAdapter() {
-			@Override
-			public void dragOver(DropTargetEvent e) {
-				e.detail = DND.DROP_MOVE;
-				e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
-
-				if (dragItem != null) {
-					Point p = tree.toControl(e.x, e.y);
-					TreeItem item = tree.getItem(p);
-
-					if (item == null) {
-						e.detail = DND.DROP_NONE;
-						e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
-					} else {
-						TreeItem parent = item.getParentItem();
-						if (canDrop(parent, dragData)) {
-							e.detail = DND.DROP_MOVE;
-							Rectangle bounds = item.getBounds();
-							if (p.y < bounds.y + bounds.height / 2) {
-								e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL | DND.FEEDBACK_INSERT_BEFORE;
-							} else {
-								e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL | DND.FEEDBACK_INSERT_AFTER;
-							}
-						} else {
+						if ( item == null ) {
 							e.detail = DND.DROP_NONE;
-							e.feedback |= DND.FEEDBACK_NONE;
+							e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
+						}
+						else {
+							TreeItem parent = item.getParentItem();
+							if ( canDrop( parent, dragData ) ) {
+								e.detail = DND.DROP_MOVE;
+								Rectangle bounds = item.getBounds();
+								if ( p.y < bounds.y + bounds.height / 2 ) {
+									e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL | DND.FEEDBACK_INSERT_BEFORE;
+								}
+								else {
+									e.feedback = DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL | DND.FEEDBACK_INSERT_AFTER;
+								}
+							}
+							else {
+								e.detail = DND.DROP_NONE;
+								e.feedback |= DND.FEEDBACK_NONE;
+							}
 						}
 					}
 				}
-			}
 
-			@Override
-			public void drop(DropTargetEvent e) {
-				if (dragData != null) {
-					if ((e.detail & DND.DROP_MOVE) == DND.DROP_MOVE) {
-						Point p = tree.toControl(e.x, e.y);
-						TreeItem item = tree.getItem(p);
-						if (item != null) {
-							Rectangle bounds = item.getBounds();
-							TreeItem parent = item.getParentItem();
-							if (parent != null) {
-								ShipContainer container = Manager.getCurrentShip();
-								TreeItem[] items = parent.getItems();
-								int from = indexOf(items, dragItem);
-								int to = indexOf(items, item);
+				@Override
+				public void drop( DropTargetEvent e )
+				{
+					if ( dragData != null ) {
+						if ( ( e.detail & DND.DROP_MOVE ) == DND.DROP_MOVE ) {
+							Point p = tree.toControl( e.x, e.y );
+							TreeItem item = tree.getItem( p );
+							if ( item != null ) {
+								Rectangle bounds = item.getBounds();
+								TreeItem parent = item.getParentItem();
+								if ( parent != null ) {
+									ShipContainer container = Manager.getCurrentShip();
+									TreeItem[] items = parent.getItems();
+									int from = indexOf( items, dragItem );
+									int to = indexOf( items, item );
 
-								if (dragItem != item) {
-									if (p.y > bounds.y + bounds.height / 2) {
-										to += from > to ? 1 : 0;
-									} else {
-										to += from > to ? 0 : -1;
+									if ( dragItem != item ) {
+										if ( p.y > bounds.y + bounds.height / 2 ) {
+											to += from > to ? 1 : 0;
+										}
+										else {
+											to += from > to ? 0 : -1;
+										}
 									}
+
+									Indexable[] array = new Indexable[items.length];
+									for ( int i = 0; i < items.length; i++ ) {
+										array[i] = (Indexable)items[i].getData();
+									}
+
+									UndoableOrderEdit edit = new UndoableOrderEdit( array.clone() );
+									edit.setOld( from );
+									edit.setCurrent( to );
+									container.postEdit( edit );
+
+									Utils.reorder( array, from, to );
+									container.sort();
+									update();
 								}
-
-								Indexable[] array = new Indexable[items.length];
-								for (int i = 0; i < items.length; i++) {
-									array[i] = (Indexable) items[i].getData();
-								}
-
-								UndoableOrderEdit edit = new UndoableOrderEdit(array.clone());
-								edit.setOld(from);
-								edit.setCurrent(to);
-								container.postEdit(edit);
-
-								Utils.reorder(array, from, to);
-								container.sort();
-								update();
 							}
 						}
 					}
 				}
 			}
-		});
+		);
 
-		shell.addListener(SWT.Close, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				dispose();
-				event.doit = false;
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event event )
+				{
+					dispose();
+					event.doit = false;
+				}
 			}
-		});
+		);
 
 		ControlAdapter resizer = new ControlAdapter() {
 			@Override
-			public void controlResized(ControlEvent e) {
+			public void controlResized( ControlEvent e )
+			{
 				final int BORDER_OFFSET = tree.getBorderWidth();
-				if (trclmnName.getWidth() > tree.getClientArea().width - BORDER_OFFSET)
-					trclmnName.setWidth(tree.getClientArea().width - BORDER_OFFSET);
-				trclmnAlias.setWidth(tree.getClientArea().width - trclmnName.getWidth() - BORDER_OFFSET);
+				if ( trclmnName.getWidth() > tree.getClientArea().width - BORDER_OFFSET )
+					trclmnName.setWidth( tree.getClientArea().width - BORDER_OFFSET );
+				trclmnAlias.setWidth( tree.getClientArea().width - trclmnName.getWidth() - BORDER_OFFSET );
 			}
 		};
-		tree.addControlListener(resizer);
-		trclmnName.addControlListener(resizer);
+		tree.addControlListener( resizer );
+		trclmnName.addControlListener( resizer );
 
-		tree.addListener(SWT.MouseMove, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				if (Manager.getSelectedToolId() == Tools.POINTER) {
-					TreeItem item = tree.getItem(new Point(e.x, e.y));
-					ObjectController controller = null;
-					if (item != null && item.getData() != null)
-						controller = (ObjectController) item.getData();
+		tree.addListener(
+			SWT.MouseMove, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					if ( Manager.getSelectedToolId() == Tools.POINTER ) {
+						TreeItem item = tree.getItem( new Point( e.x, e.y ) );
+						ObjectController controller = null;
+						if ( item != null && item.getData() != null )
+							controller = (ObjectController)item.getData();
 
-					highlightController(controller);
-				}
-			}
-		});
-
-		tree.addListener(SWT.MouseExit, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				highlightController(null);
-			}
-		});
-
-		tree.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ObjectController controller = null;
-
-				if (tree.getSelectionCount() != 0) {
-					TreeItem item = tree.getSelection()[0];
-					controller = (ObjectController) item.getData();
-				}
-
-				if (Manager.getSelectedToolId() == Tools.POINTER) {
-					ManipulationTool tool = (ManipulationTool) Manager.getSelectedTool();
-					if (tool.isStateManipulate() && (controller == null || controller.isVisible())) {
-						Manager.setSelected(controller);
-					} else {
-						AbstractController selected = Manager.getSelected();
-						if (tool.isStateDoorLinkLeft() || tool.isStateDoorLinkRight())
-							tool.linkDoor(selected, controller);
-						else if (tool.isStateMountGibLink())
-							tool.linkGib(selected, controller);
-						if (selected != null && selected != controller)
-							CursorController.getInstance().setVisible(false);
+						highlightController( controller );
 					}
 				}
-
-				tltmAlias.setEnabled(controller != null);
-				tltmRemove.setEnabled(controller != null && controller.getAlias() != null && !controller.getAlias().equals(""));
-				tltmToggleVis.setEnabled(controller != null);
 			}
-		});
+		);
 
-		tree.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				if (e.button == 1 && tree.getSelectionCount() != 0) {
-					TreeItem selectedItem = tree.getSelection()[0];
-					if (selectedItem.getItemCount() != 0 && selectedItem.getBounds().contains(e.x, e.y))
-						selectedItem.setExpanded(!selectedItem.getExpanded());
+		tree.addListener(
+			SWT.MouseExit, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					highlightController( null );
 				}
 			}
-		});
+		);
 
-		tree.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_RETURN && tree.getSelectionCount() != 0) {
-					TreeItem sel = tree.getSelection()[0];
-					if (sel.getItemCount() != 0)
-						sel.setExpanded(!sel.getExpanded());
+		tree.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					ObjectController controller = null;
+
+					if ( tree.getSelectionCount() != 0 ) {
+						TreeItem item = tree.getSelection()[0];
+						controller = (ObjectController)item.getData();
+					}
+
+					if ( Manager.getSelectedToolId() == Tools.POINTER ) {
+						ManipulationTool tool = (ManipulationTool)Manager.getSelectedTool();
+						if ( tool.isStateManipulate() && ( controller == null || controller.isVisible() ) ) {
+							Manager.setSelected( controller );
+						}
+						else {
+							AbstractController selected = Manager.getSelected();
+							if ( tool.isStateDoorLinkLeft() || tool.isStateDoorLinkRight() )
+								tool.linkDoor( selected, controller );
+							else if ( tool.isStateMountGibLink() )
+								tool.linkGib( selected, controller );
+							if ( selected != null && selected != controller )
+								CursorController.getInstance().setVisible( false );
+						}
+					}
+
+					tltmAlias.setEnabled( controller != null );
+					tltmRemove.setEnabled( controller != null && controller.getAlias() != null && !controller.getAlias().equals( "" ) );
+					tltmToggleVis.setEnabled( controller != null );
 				}
 			}
-		});
+		);
 
-		overviewMenu.addMenuListener(new MenuAdapter() {
-			@Override
-			public void menuShown(MenuEvent e) {
-				if (tree.getSelectionCount() == 0 || tree.getSelection()[0].getData() == null) {
-					overviewMenu.setVisible(false);
+		tree.addMouseListener(
+			new MouseAdapter() {
+				@Override
+				public void mouseDoubleClick( MouseEvent e )
+				{
+					if ( e.button == 1 && tree.getSelectionCount() != 0 ) {
+						TreeItem selectedItem = tree.getSelection()[0];
+						if ( selectedItem.getItemCount() != 0 && selectedItem.getBounds().contains( e.x, e.y ) )
+							selectedItem.setExpanded( !selectedItem.getExpanded() );
+					}
 				}
 			}
-		});
+		);
+
+		tree.addTraverseListener(
+			new TraverseListener() {
+				@Override
+				public void keyTraversed( TraverseEvent e )
+				{
+					if ( e.detail == SWT.TRAVERSE_RETURN && tree.getSelectionCount() != 0 ) {
+						TreeItem sel = tree.getSelection()[0];
+						if ( sel.getItemCount() != 0 )
+							sel.setExpanded( !sel.getExpanded() );
+					}
+				}
+			}
+		);
+
+		overviewMenu.addMenuListener(
+			new MenuAdapter() {
+				@Override
+				public void menuShown( MenuEvent e )
+				{
+					if ( tree.getSelectionCount() == 0 || tree.getSelection()[0].getData() == null ) {
+						overviewMenu.setVisible( false );
+					}
+				}
+			}
+		);
 
 		SelectionAdapter setAliasListener = new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Alias alias = (Alias) tree.getSelection()[0].getData();
-				AliasDialog dialog = new AliasDialog(shell);
-				dialog.setAlias(alias);
+			public void widgetSelected( SelectionEvent e )
+			{
+				Alias alias = (Alias)tree.getSelection()[0].getData();
+				AliasDialog dialog = new AliasDialog( shell );
+				dialog.setAlias( alias );
 				dialog.open();
 			}
 		};
-		mntmSetAlias.addSelectionListener(setAliasListener);
-		tltmAlias.addSelectionListener(setAliasListener);
+		mntmSetAlias.addSelectionListener( setAliasListener );
+		tltmAlias.addSelectionListener( setAliasListener );
 
 		SelectionAdapter removeAliasListener = new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Alias alias = (Alias) tree.getSelection()[0].getData();
-				alias.setAlias(null);
-				update(tree.getSelection()[0]);
+			public void widgetSelected( SelectionEvent e )
+			{
+				Alias alias = (Alias)tree.getSelection()[0].getData();
+				alias.setAlias( null );
+				update( tree.getSelection()[0] );
 			}
 		};
-		mntmRemoveAlias.addSelectionListener(removeAliasListener);
-		tltmRemove.addSelectionListener(removeAliasListener);
+		mntmRemoveAlias.addSelectionListener( removeAliasListener );
+		tltmRemove.addSelectionListener( removeAliasListener );
 
-		tltmToggleVis.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (tree.getSelectionCount() != 0) {
-					AbstractController ac = (AbstractController) tree.getSelection()[0].getData();
-					if (ac != null) {
-						ac.setVisible(!ac.isVisible());
-						tree.getSelection()[0].setBackground(ac.isVisible() ? null : disabledColor);
+		tltmToggleVis.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( tree.getSelectionCount() != 0 ) {
+						AbstractController ac = (AbstractController)tree.getSelection()[0].getData();
+						if ( ac != null ) {
+							ac.setVisible( !ac.isVisible() );
+							tree.getSelection()[0].setBackground( ac.isVisible() ? null : disabledColor );
+						}
 					}
 				}
 			}
-		});
+		);
 
 		registerHotkeys();
 
-		shell.setSize(300, 600);
+		shell.setSize( 300, 600 );
 		Point size = shell.getSize();
 		Point pSize = parent.getSize();
 		Point pLoc = parent.getLocation();
-		shell.setLocation(pLoc.x + pSize.x - size.x, pLoc.y + 50);
+		shell.setLocation( pLoc.x + pSize.x - size.x, pLoc.y + 50 );
 	}
 
-	public void open() {
+	public void open()
+	{
 		shell.open();
 		update();
 
-		shell.setMinimized(false);
+		shell.setMinimized( false );
 	}
 
-	public void update() {
-		if (isDisposed())
+	public void update()
+	{
+		if ( isDisposed() )
 			return;
 
 		ship = Manager.getCurrentShip();
 
 		AbstractController prevSelection = Manager.getSelected();
-		if (!controllerMap.containsKey(prevSelection))
+		if ( !controllerMap.containsKey( prevSelection ) )
 			prevSelection = null;
-		if (Manager.getSelectedToolId() != Tools.POINTER && tree.getSelectionCount() == 1 && tree.getSelection()[0] != null)
-			prevSelection = (AbstractController) tree.getSelection()[0].getData();
+		if ( Manager.getSelectedToolId() != Tools.POINTER && tree.getSelectionCount() == 1 && tree.getSelection()[0] != null )
+			prevSelection = (AbstractController)tree.getSelection()[0].getData();
 
-		for (TreeItem it : trtmRooms.getItems())
+		for ( TreeItem it : trtmRooms.getItems() )
 			it.dispose();
-		for (TreeItem it : trtmDoors.getItems())
+		for ( TreeItem it : trtmDoors.getItems() )
 			it.dispose();
-		for (TreeItem it : trtmMounts.getItems())
+		for ( TreeItem it : trtmMounts.getItems() )
 			it.dispose();
-		for (TreeItem it : trtmGibs.getItems())
+		for ( TreeItem it : trtmGibs.getItems() )
 			it.dispose();
 		controllerMap.clear();
 
-		if (ship != null) {
-			for (RoomController r : ship.getRoomControllers())
-				createItem(r, -1);
-			trtmRooms.setText(String.format("Rooms (%s)", trtmRooms.getItemCount()));
-			for (DoorController d : ship.getDoorControllers())
-				createItem(d, -1);
-			trtmDoors.setText(String.format("Doors (%s)", trtmDoors.getItemCount()));
-			for (MountController m : ship.getMountControllers())
-				createItem(m, -1);
-			trtmMounts.setText(String.format("Mounts (%s)", trtmMounts.getItemCount()));
-			for (int i = 1; i <= ship.getGibControllers().length; i++) {
-				GibController g = ship.getGibControllerById(i);
-				if (g != null)
-					createItem(g, -1);
+		if ( ship != null ) {
+			for ( RoomController r : ship.getRoomControllers() )
+				createItem( r, -1 );
+			trtmRooms.setText( String.format( "Rooms (%s)", trtmRooms.getItemCount() ) );
+			for ( DoorController d : ship.getDoorControllers() )
+				createItem( d, -1 );
+			trtmDoors.setText( String.format( "Doors (%s)", trtmDoors.getItemCount() ) );
+			for ( MountController m : ship.getMountControllers() )
+				createItem( m, -1 );
+			trtmMounts.setText( String.format( "Mounts (%s)", trtmMounts.getItemCount() ) );
+			for ( int i = 1; i <= ship.getGibControllers().length; i++ ) {
+				GibController g = ship.getGibControllerById( i );
+				if ( g != null )
+					createItem( g, -1 );
 			}
-			trtmGibs.setText(String.format("Gibs (%s)", trtmGibs.getItemCount()));
+			trtmGibs.setText( String.format( "Gibs (%s)", trtmGibs.getItemCount() ) );
 		}
 
-		TreeItem item = controllerMap.get(prevSelection);
-		if (item == null) {
-			tree.select(trtmRooms);
-		} else {
-			tree.select(item);
+		TreeItem item = controllerMap.get( prevSelection );
+		if ( item == null ) {
+			tree.select( trtmRooms );
+		}
+		else {
+			tree.select( item );
 			Rectangle b = item.getBounds();
-			if (!tree.getClientArea().contains(b.x, b.y))
-				tree.setTopItem(item);
+			if ( !tree.getClientArea().contains( b.x, b.y ) )
+				tree.setTopItem( item );
 		}
 
 		String alias = null;
-		if (controllerMap.containsKey(prevSelection))
-			alias = ((Alias) prevSelection).getAlias();
-		tltmAlias.setEnabled(prevSelection != null);
-		tltmRemove.setEnabled(alias != null && !alias.equals(""));
-		tltmToggleVis.setEnabled(prevSelection != null);
+		if ( controllerMap.containsKey( prevSelection ) )
+			alias = ( (Alias)prevSelection ).getAlias();
+		tltmAlias.setEnabled( prevSelection != null );
+		tltmRemove.setEnabled( alias != null && !alias.equals( "" ) );
+		tltmToggleVis.setEnabled( prevSelection != null );
 	}
 
-	public void update(ObjectController controller) {
-		if (controller == null)
-			throw new IllegalArgumentException("Argument must not be null.");
+	public void update( ObjectController controller )
+	{
+		if ( controller == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
 
-		TreeItem item = controllerMap.get(controller);
+		TreeItem item = controllerMap.get( controller );
 
-		if (item == null && !controller.isDeleted()) {
-			item = createItem(controller, -1);
-		} else if (item != null) {
-			update(item);
+		if ( item == null && !controller.isDeleted() ) {
+			item = createItem( controller, -1 );
+		}
+		else if ( item != null ) {
+			update( item );
 		}
 	}
 
-	private void update(TreeItem item) {
-		if (item.getData() instanceof ObjectController == false)
+	private void update( TreeItem item )
+	{
+		if ( item.getData() instanceof ObjectController == false )
 			return;
 
-		ObjectController oc = (ObjectController) item.getData();
+		ObjectController oc = (ObjectController)item.getData();
 
-		if (oc.isDeleted()) {
+		if ( oc.isDeleted() ) {
 			item.dispose();
-			controllerMap.remove(oc);
-		} else {
-			if (oc instanceof RoomController) {
-				RoomController controller = (RoomController) oc;
-				item.setText(0, controller.getGameObject().toStringNoAlias());
-			} else if (oc instanceof DoorController) {
-				DoorController controller = (DoorController) oc;
-				item.setText(0, "Door " + (controller.isHorizontal() ? "H" : "V"));
-			} else if (oc instanceof MountController) {
-				MountController controller = (MountController) oc;
-				item.setText(0, "Mount " + controller.getId());
-			} else if (oc instanceof GibController) {
-				GibController controller = (GibController) oc;
-				item.setText(0, "Gib " + controller.getId());
+			controllerMap.remove( oc );
+		}
+		else {
+			if ( oc instanceof RoomController ) {
+				RoomController controller = (RoomController)oc;
+				item.setText( 0, controller.getGameObject().toStringNoAlias() );
+			}
+			else if ( oc instanceof DoorController ) {
+				DoorController controller = (DoorController)oc;
+				item.setText( 0, "Door " + ( controller.isHorizontal() ? "H" : "V" ) );
+			}
+			else if ( oc instanceof MountController ) {
+				MountController controller = (MountController)oc;
+				item.setText( 0, "Mount " + controller.getId() );
+			}
+			else if ( oc instanceof GibController ) {
+				GibController controller = (GibController)oc;
+				item.setText( 0, "Gib " + controller.getId() );
 			}
 
 			String alias = oc.getAlias();
-			item.setText(1, alias == null ? "" : alias);
+			item.setText( 1, alias == null ? "" : alias );
 
-			item.setBackground(oc.isVisible() ? null : disabledColor);
+			item.setBackground( oc.isVisible() ? null : disabledColor );
 
-			if (oc.isSelected()) {
-				tree.select(item);
+			if ( oc.isSelected() ) {
+				tree.select( item );
 				Rectangle b = item.getBounds();
-				if (!tree.getClientArea().contains(b.x, b.y))
-					tree.setTopItem(item);
+				if ( !tree.getClientArea().contains( b.x, b.y ) )
+					tree.setTopItem( item );
 			}
 		}
 
-		tltmAlias.setEnabled(oc != null);
-		tltmRemove.setEnabled(oc != null && oc.getAlias() != null && !oc.getAlias().equals(""));
-		tltmToggleVis.setEnabled(oc != null);
+		tltmAlias.setEnabled( oc != null );
+		tltmRemove.setEnabled( oc != null && oc.getAlias() != null && !oc.getAlias().equals( "" ) );
+		tltmToggleVis.setEnabled( oc != null );
 	}
 
 	/**
 	 * Updates the overview window if it exists, or does nothing if it does not.
 	 */
-	public static void staticUpdate() {
-		if (instance != null && !instance.isDisposed()) {
+	public static void staticUpdate()
+	{
+		if ( instance != null && !instance.isDisposed() ) {
 			instance.update();
 		}
 	}
@@ -561,126 +618,143 @@ public class OverviewWindow implements SLListener {
 	/**
 	 * Updates the overview window if it exists, or does nothing if it does not.
 	 */
-	public static void staticUpdate(ObjectController controller) {
-		if (instance != null && !instance.isDisposed()) {
-			instance.update(controller);
+	public static void staticUpdate( ObjectController controller )
+	{
+		if ( instance != null && !instance.isDisposed() ) {
+			instance.update( controller );
 		}
 	}
 
-	public static OverviewWindow getInstance() {
+	public static OverviewWindow getInstance()
+	{
 		return instance;
 	}
 
-	public void setEnabled(boolean b) {
-		tree.setEnabled(b);
-		if (highlightedController != null && highlightedController.isHighlighted())
-			highlightedController.setHighlighted(false);
+	public void setEnabled( boolean b )
+	{
+		tree.setEnabled( b );
+		if ( highlightedController != null && highlightedController.isHighlighted() )
+			highlightedController.setHighlighted( false );
 	}
 
-	public boolean isEnabled() {
+	public boolean isEnabled()
+	{
 		return !isDisposed() && tree.isEnabled();
 	}
 
-	public boolean isActive() {
+	public boolean isActive()
+	{
 		return !isDisposed() && tree.isFocusControl();
 	}
 
-	public boolean isDisposed() {
+	public boolean isDisposed()
+	{
 		return shell == null || shell.isDisposed();
 	}
 
-	private boolean canDrop(TreeItem newParent, ObjectController data) {
-		return (newParent == trtmRooms && data instanceof RoomController) ||
-				(newParent == trtmMounts && data instanceof MountController) ||
-				(newParent == trtmGibs && data instanceof GibController);
+	private boolean canDrop( TreeItem newParent, ObjectController data )
+	{
+		return ( newParent == trtmRooms && data instanceof RoomController ) ||
+			( newParent == trtmMounts && data instanceof MountController ) ||
+			( newParent == trtmGibs && data instanceof GibController );
 	}
 
-	private int indexOf(TreeItem[] items, TreeItem item) {
-		if (items == null)
-			throw new IllegalArgumentException("Array must not be null.");
-		if (item == null)
-			throw new IllegalArgumentException("Item must not be null.");
+	private int indexOf( TreeItem[] items, TreeItem item )
+	{
+		if ( items == null )
+			throw new IllegalArgumentException( "Array must not be null." );
+		if ( item == null )
+			throw new IllegalArgumentException( "Item must not be null." );
 		int result = -1;
-		for (int i = 0; i < items.length && result == -1; i++) {
-			if (items[i] == item)
+		for ( int i = 0; i < items.length && result == -1; i++ ) {
+			if ( items[i] == item )
 				result = i;
 		}
 		return result;
 	}
 
-	private TreeItem createItem(AbstractController controller, int index) {
-		TreeItem parent = identifyParent(controller);
-		if (parent == null)
+	private TreeItem createItem( AbstractController controller, int index )
+	{
+		TreeItem parent = identifyParent( controller );
+		if ( parent == null )
 			return null;
 
 		TreeItem item = null;
-		if (index < 0 || parent.getItemCount() >= index) {
-			item = new TreeItem(parent, SWT.NONE);
-		} else {
-			item = new TreeItem(parent, SWT.NONE, index);
+		if ( index < 0 || parent.getItemCount() >= index ) {
+			item = new TreeItem( parent, SWT.NONE );
 		}
-		item.setData(controller);
+		else {
+			item = new TreeItem( parent, SWT.NONE, index );
+		}
+		item.setData( controller );
 
-		update(item);
+		update( item );
 
-		controllerMap.put(controller, item);
+		controllerMap.put( controller, item );
 		return item;
 	}
 
-	private TreeItem identifyParent(AbstractController controller) {
-		if (controller instanceof RoomController)
+	private TreeItem identifyParent( AbstractController controller )
+	{
+		if ( controller instanceof RoomController )
 			return trtmRooms;
-		else if (controller instanceof DoorController)
+		else if ( controller instanceof DoorController )
 			return trtmDoors;
-		else if (controller instanceof MountController)
+		else if ( controller instanceof MountController )
 			return trtmMounts;
-		else if (controller instanceof GibController)
+		else if ( controller instanceof GibController )
 			return trtmGibs;
 		else
 			return null;
 	}
 
-	public void dispose() {
-		Cache.checkInColor(this, disabledColor.getRGB());
+	public void dispose()
+	{
+		Cache.checkInColor( this, disabledColor.getRGB() );
 		disabledColor = null;
-		Cache.checkInImage(this, "cpath:/assets/help.png");
-		Cache.checkInImage(this, "cpath:/assets/alias.png");
-		Cache.checkInImage(this, "cpath:/assets/noalias.png");
-		Cache.checkInImage(this, "cpath:/assets/cloak.png");
+		Cache.checkInImage( this, "cpath:/assets/help.png" );
+		Cache.checkInImage( this, "cpath:/assets/alias.png" );
+		Cache.checkInImage( this, "cpath:/assets/noalias.png" );
+		Cache.checkInImage( this, "cpath:/assets/cloak.png" );
 
-		Manager.unhookHotkeys(shell);
+		Manager.unhookHotkeys( shell );
 		shell.dispose();
 
 		controllerMap.clear();
 	}
 
 	@Override
-	public void handleEvent(SLEvent e) {
-		if (e.data instanceof ObjectController) {
-			ObjectController data = (ObjectController) e.data;
-			if (e instanceof SLDeleteEvent) {
-				update(data);
-			} else if (e instanceof SLRestoreEvent) {
+	public void handleEvent( SLEvent e )
+	{
+		if ( e.data instanceof ObjectController ) {
+			ObjectController data = (ObjectController)e.data;
+			if ( e instanceof SLDeleteEvent ) {
+				update( data );
+			}
+			else if ( e instanceof SLRestoreEvent ) {
 				update();
-			} else if (e instanceof SLDisposeEvent) {
-				data.removeListener(this);
+			}
+			else if ( e instanceof SLDisposeEvent ) {
+				data.removeListener( this );
 			}
 		}
 	}
 
-	private void highlightController(ObjectController controller) {
-		if (highlightedController != null && highlightedController != controller && highlightedController.isHighlighted())
-			highlightedController.setHighlighted(false);
-		if (controller != null && !controller.isHighlighted())
-			controller.setHighlighted(true);
+	private void highlightController( ObjectController controller )
+	{
+		if ( highlightedController != null && highlightedController != controller && highlightedController.isHighlighted() )
+			highlightedController.setHighlighted( false );
+		if ( controller != null && !controller.isHighlighted() )
+			controller.setHighlighted( true );
 		highlightedController = controller;
 	}
 
-	private void registerHotkeys() {
-		Hotkey h = Manager.getHotkey(Hotkeys.UNDO);
-		Manager.hookHotkey(shell, h);
+	private void registerHotkeys()
+	{
+		Hotkey h = Manager.getHotkey( Hotkeys.UNDO );
+		Manager.hookHotkey( shell, h );
 
-		h = Manager.getHotkey(Hotkeys.REDO);
-		Manager.hookHotkey(shell, h);
+		h = Manager.getHotkey( Hotkeys.REDO );
+		Manager.hookHotkey( shell, h );
 	}
 }

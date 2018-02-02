@@ -3,8 +3,8 @@ package com.kartoflane.common.selfpatch;
 /**
  * Appropriated from Slipstream Mod Manager's ModPatchObserver.
  */
-public interface SPTaskObserver {
-
+public interface SPTaskObserver
+{
 	/**
 	 * Updates a progress bar.
 	 *

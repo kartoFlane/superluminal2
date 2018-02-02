@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.components.interfaces;
 
 import java.util.Set;
 
+
 /**
  * Classes implementing this interface can be followed by classes implementing
  * the {@link Follower} interface.<br>
@@ -11,13 +12,14 @@ import java.util.Set;
  * @author kartoFlane
  * 
  */
-public interface Followable extends Movable {
+public interface Followable extends Movable
+{
 	/** @return a set containing all Followers of this object. */
 	public Set<Follower> getFollowers();
 
-	public boolean addFollower(Follower fol);
+	public boolean addFollower( Follower fol );
 
-	public boolean removeFollower(Follower fol);
+	public boolean removeFollower( Follower fol );
 
 	/** @return the number of Followers currently following this object. */
 	public int getFollowerCount();
@@ -26,7 +28,7 @@ public interface Followable extends Movable {
 	 * Sets whether the Followable is currently active, ie. notifying its followers.<br>
 	 * True by default.
 	 */
-	public void setFollowActive(boolean active);
+	public void setFollowActive( boolean active );
 
 	/**
 	 * @return whether the Followable is currently active, ie. notifying its followers.<br>

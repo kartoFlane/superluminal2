@@ -36,8 +36,10 @@ import net.vhati.ftldat.FTLDat.FTLPack;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
 
-public class Superluminal {
-	public static final Logger log = LogManager.getLogger(Superluminal.class);
+
+public class Superluminal
+{
+	public static final Logger log = LogManager.getLogger( Superluminal.class );
 
 	public static final String APP_NAME = "Superluminal";
 	public static final ComparableVersion APP_VERSION = new ComparableVersion("2.1.2b");
@@ -55,6 +57,7 @@ public class Superluminal {
 	 * accepted before splitting up the word / moving it to next line
 	 */
 	public static final int WRAP_TOLERANCE = 9;
+
 
 	/**
 	 * TODO:
@@ -78,12 +81,17 @@ public class Superluminal {
 	 * - detachable sidebar elements?
 	 */
 
-	public static void main(String[] args) {
-		log.debug(String.format("%s v%s", APP_NAME, APP_VERSION));
-		log.debug(String.format("%s %s", System.getProperty("os.name"), System.getProperty("os.version")));
-		log.debug(String.format("%s, %s, %s", System.getProperty("java.vm.name"),
-				System.getProperty("java.version"), System.getProperty("os.arch")));
-		log.debug(String.format("SWT v%s", SWT.getVersion()));
+	public static void main( String[] args )
+	{
+		log.debug( String.format( "%s v%s", APP_NAME, APP_VERSION ) );
+		log.debug( String.format( "%s %s", System.getProperty( "os.name" ), System.getProperty( "os.version" ) ) );
+		log.debug(
+			String.format(
+				"%s, %s, %s", System.getProperty( "java.vm.name" ),
+				System.getProperty( "java.version" ), System.getProperty( "os.arch" )
+			)
+		);
+		log.debug( String.format( "SWT v%s", SWT.getVersion() ) );
 		System.out.println();
 
 		try {
@@ -91,249 +99,278 @@ public class Superluminal {
 			// However, in order to work, it has to be called before any instance of
 			// Display is created (via Display#getCurrent() or #getDefault())
 			// Also tests whether the correct version of the editor is installed (since SWT code is platform-specific)
-			Display.setAppName(APP_NAME);
-			Display.setAppVersion(APP_VERSION.toString());
-		} catch (Throwable t) {
-			log.error("Failed to retrieve display - wrong version of the editor has been downloaded.");
+			Display.setAppName( APP_NAME );
+			Display.setAppVersion( APP_VERSION.toString() );
+		}
+		catch ( Throwable t ) {
+			log.error( "Failed to retrieve display - wrong version of the editor has been downloaded." );
 
 			OS os = OS.identifyOS();
-			if (os.isUnknown())
-				log.error(String.format("Your system (%s %s) was not recognized, or is not supported :(",
-						System.getProperty("os.name"), System.getProperty("sun.arch.data.model")));
-			else
-				log.error("You should download version for " + os.toString());
+			if ( os.isUnknown() ) {
+				log.error(
+					String.format(
+						"Your system (%s %s) was not recognized, or is not supported :(",
+						System.getProperty( "os.name" ), System.getProperty( "sun.arch.data.model" )
+					)
+				);
+			}
+			else {
+				log.error( "You should download version for " + os.toString() );
+			}
 
 			String msg = "";
 			msg += "You have downloaded a wrong version of the editor for your system.\n";
 			msg += "\n";
-			if (os.isUnknown()) {
-				msg += String.format("Your system (%s %s) was not recognized, or is not supported :(",
-						System.getProperty("os.name"), System.getProperty("sun.arch.data.model"));
-			} else {
+			if ( os.isUnknown() ) {
+				msg += String.format(
+					"Your system (%s %s) was not recognized, or is not supported :(",
+					System.getProperty( "os.name" ), System.getProperty( "sun.arch.data.model" )
+				);
+			}
+			else {
 				msg += "You should download version for: " + os.toString();
 			}
 
-			UIUtils.showSwingDialog(APP_NAME + " - Wrong version", msg);
-			System.exit(1);
+			UIUtils.showSwingDialog( APP_NAME + " - Wrong version", msg );
+			System.exit( 1 );
 		}
 
 		Display display = Display.getDefault();
-		File configFile = new File(CONFIG_FILE);
-		SuperluminalConfig appConfig = new SuperluminalConfig(configFile);
+		File configFile = new File( CONFIG_FILE );
+		SuperluminalConfig appConfig = new SuperluminalConfig( configFile );
 
 		// Read the config file
 		InputStreamReader reader = null;
 		try {
-			if (configFile.exists()) {
-				log.trace("Loading properties from config file...");
-				reader = new InputStreamReader(new FileInputStream(configFile), "UTF-8");
-				appConfig.load(reader);
+			if ( configFile.exists() ) {
+				log.trace( "Loading properties from config file..." );
+				reader = new InputStreamReader( new FileInputStream( configFile ), "UTF-8" );
+				appConfig.load( reader );
 			}
-		} catch (IOException e) {
-			log.error("Error loading config.", e);
-			UIUtils.showErrorDialog(null, null, "Error loading config from " + configFile.getPath());
-		} finally {
+		}
+		catch ( IOException e ) {
+			log.error( "Error loading config.", e );
+			UIUtils.showErrorDialog( null, null, "Error loading config from " + configFile.getPath() );
+		}
+		finally {
 			try {
-				if (reader != null)
+				if ( reader != null )
 					reader.close();
-			} catch (IOException e) {
+			}
+			catch ( IOException e ) {
 			}
 		}
 
 		// Read config values
-		Manager.sidebarOnRightSide = appConfig.getPropertyAsBoolean(SuperluminalConfig.SIDEBAR_SIDE, false);
-		Manager.rememberGeometry = appConfig.getPropertyAsBoolean(SuperluminalConfig.SAVE_GEOMETRY, true);
-		Manager.checkUpdates = appConfig.getPropertyAsBoolean(SuperluminalConfig.CHECK_UPDATES, true);
-		Manager.startMaximised = appConfig.getPropertyAsBoolean(SuperluminalConfig.START_MAX, false);
-		Manager.closeLoader = appConfig.getPropertyAsBoolean(SuperluminalConfig.CLOSE_LOADER, false);
-		Manager.allowRoomOverlap = appConfig.getPropertyAsBoolean(SuperluminalConfig.ALLOW_OVERLAP, false);
-		Manager.allowDoorOverlap = appConfig.getPropertyAsBoolean(SuperluminalConfig.ALLOW_OVERLAP_DOOR, false);
-		Manager.resetDoorLinksOnMove = appConfig.getPropertyAsBoolean(SuperluminalConfig.RESET_LINKS, true);
-		Manager.mouseShipRelative = appConfig.getPropertyAsBoolean(SuperluminalConfig.MOUSE_SHIP_RELATIVE, false);
+		Manager.sidebarOnRightSide = appConfig.getPropertyAsBoolean( SuperluminalConfig.SIDEBAR_SIDE, false );
+		Manager.rememberGeometry = appConfig.getPropertyAsBoolean( SuperluminalConfig.SAVE_GEOMETRY, true );
+		Manager.checkUpdates = appConfig.getPropertyAsBoolean( SuperluminalConfig.CHECK_UPDATES, true );
+		Manager.startMaximised = appConfig.getPropertyAsBoolean( SuperluminalConfig.START_MAX, false );
+		Manager.closeLoader = appConfig.getPropertyAsBoolean( SuperluminalConfig.CLOSE_LOADER, false );
+		Manager.allowRoomOverlap = appConfig.getPropertyAsBoolean( SuperluminalConfig.ALLOW_OVERLAP, false );
+		Manager.allowDoorOverlap = appConfig.getPropertyAsBoolean( SuperluminalConfig.ALLOW_OVERLAP_DOOR, false );
+		Manager.resetDoorLinksOnMove = appConfig.getPropertyAsBoolean( SuperluminalConfig.RESET_LINKS, true );
+		Manager.mouseShipRelative = appConfig.getPropertyAsBoolean( SuperluminalConfig.MOUSE_SHIP_RELATIVE, false );
 
-		Manager.shownSlotWarning = appConfig.getPropertyAsBoolean(SuperluminalConfig.SLOT_WARNING, false);
-		Manager.shownArtilleryWarning = appConfig.getPropertyAsBoolean(SuperluminalConfig.ARTILLERY_WARNING, false);
-		Manager.windowSize = appConfig.getPropertyAsPoint(SuperluminalConfig.GEOMETRY, 0, 0);
+		Manager.shownSlotWarning = appConfig.getPropertyAsBoolean( SuperluminalConfig.SLOT_WARNING, false );
+		Manager.shownArtilleryWarning = appConfig.getPropertyAsBoolean( SuperluminalConfig.ARTILLERY_WARNING, false );
+		Manager.windowSize = appConfig.getPropertyAsPoint( SuperluminalConfig.GEOMETRY, 0, 0 );
 
 		initHotkeys();
 		Manager.loadDefaultHotkeys();
 
-		File hotkeysFile = new File(HOTKEYS_FILE);
-		if (hotkeysFile.exists())
-			loadHotkeys(hotkeysFile);
+		File hotkeysFile = new File( HOTKEYS_FILE );
+		if ( hotkeysFile.exists() )
+			loadHotkeys( hotkeysFile );
 
 		// Read FTL resources path
 		File datsDir = null;
-		Manager.resourcePath = appConfig.getProperty(SuperluminalConfig.FTL_RESOURCE, "");
+		Manager.resourcePath = appConfig.getProperty( SuperluminalConfig.FTL_RESOURCE, "" );
 
-		if (Manager.resourcePath.length() > 0) {
-			log.info("Using FTL dats path from config: " + Manager.resourcePath);
-			datsDir = new File(Manager.resourcePath);
-			if (FTLUtilities.isDatsDirValid(datsDir) == false) {
-				log.error("The config's ftlResourcePath does not exist, or it lacks data.dat.");
+		if ( Manager.resourcePath.length() > 0 ) {
+			log.info( "Using FTL dats path from config: " + Manager.resourcePath );
+			datsDir = new File( Manager.resourcePath );
+			if ( FTLUtilities.isDatsDirValid( datsDir ) == false ) {
+				log.error( "The config's ftlResourcePath does not exist, or it lacks data.dat." );
 				datsDir = null;
 			}
-		} else {
-			log.trace("No FTL dats path previously set.");
+		}
+		else {
+			log.trace( "No FTL dats path previously set." );
 		}
 
 		// Create the main window instance
 		EditorWindow editorWindow = null;
 		try {
-			editorWindow = new EditorWindow(display);
-		} catch (Exception e) {
-			log.error("Exception occured while creating EditorWindow: ", e);
+			editorWindow = new EditorWindow( display );
+		}
+		catch ( Exception e ) {
+			log.error( "Exception occured while creating EditorWindow: ", e );
 
 			String msg = "An error has occured while creating the editor's GUI:\n" +
-					e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n" +
-					"Check the log for details.";
-			UIUtils.showErrorDialog(null, null, Utils.wrap(msg, 50, 5));
-			System.exit(1);
+				e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n" +
+				"Check the log for details.";
+			UIUtils.showErrorDialog( null, null, Utils.wrap( msg, 50, 5 ) );
+			System.exit( 1 );
 		}
 
 		// Find / prompt for the path to set in the config
-		if (datsDir == null) {
+		if ( datsDir == null ) {
 			datsDir = FTLUtilities.findDatsDir();
-			if (datsDir != null) {
-				MessageBox box = new MessageBox(editorWindow.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-				box.setText("Confirm");
-				box.setMessage("FTL resources were found in:\n" + datsDir.getPath() + "\nIs this correct?");
+			if ( datsDir != null ) {
+				MessageBox box = new MessageBox( editorWindow.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO );
+				box.setText( "Confirm" );
+				box.setMessage( "FTL resources were found in:\n" + datsDir.getPath() + "\nIs this correct?" );
 				int response = box.open();
-				if (response == SWT.NO)
+				if ( response == SWT.NO )
 					datsDir = null;
 			}
 
-			if (datsDir == null) {
-				log.debug("FTL dats path was not located automatically. Prompting user for location.");
-				datsDir = UIUtils.promptForDatsDir(editorWindow.getShell());
+			if ( datsDir == null ) {
+				log.debug( "FTL dats path was not located automatically. Prompting user for location." );
+				datsDir = UIUtils.promptForDatsDir( editorWindow.getShell() );
 			}
 
-			if (datsDir != null) {
+			if ( datsDir != null ) {
 				Manager.resourcePath = datsDir.getAbsolutePath();
-				appConfig.setProperty(SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath);
-				log.info("FTL dats located at: " + Manager.resourcePath);
+				appConfig.setProperty( SuperluminalConfig.FTL_RESOURCE, Manager.resourcePath );
+				log.info( "FTL dats located at: " + Manager.resourcePath );
 			}
 		}
 
 		// Show a warning if no dats were selected, or load them if they were
-		if (datsDir == null) {
-			UIUtils.showWarningDialog(editorWindow.getShell(), null, "FTL resources were not found.\n" +
+		if ( datsDir == null ) {
+			UIUtils.showWarningDialog(
+				editorWindow.getShell(), null, "FTL resources were not found.\n" +
 					"The editor will not be able to load any data from the game,\n" +
-					"and may crash unexpectedly.");
-			log.debug("No FTL dats path found - creating empty Database.");
+					"and may crash unexpectedly."
+			);
+			log.debug( "No FTL dats path found - creating empty Database." );
 			new Database();
-		} else {
+		}
+		else {
 			try {
-				log.trace("Loading dat archives...");
-				File dataFile = new File(datsDir + "/data.dat");
-				File resourceFile = new File(datsDir + "/resource.dat");
-				FTLPack data = new FTLPack(dataFile, "r");
-				FTLPack resource = new FTLPack(resourceFile, "r");
+				log.trace( "Loading dat archives..." );
+				File dataFile = new File( datsDir + "/data.dat" );
+				File resourceFile = new File( datsDir + "/resource.dat" );
+				FTLPack data = new FTLPack( dataFile, "r" );
+				FTLPack resource = new FTLPack( resourceFile, "r" );
 
-				final Database db = new Database(data, resource);
-				final List<String> argsList = Arrays.asList(args);
+				final Database db = new Database( data, resource );
+				final List<String> argsList = Arrays.asList( args );
 
-				log.trace("Loading database...");
+				log.trace( "Loading database..." );
 
-				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new Runnable() {
-					public void run() {
-						db.getCore().load();
+				UIUtils.showLoadDialog(
+					editorWindow.getShell(), null, null, new Runnable() {
+						public void run()
+						{
+							db.getCore().load();
 
-						for (String arg : argsList) {
-							File f = new File(arg);
+							for ( String arg : argsList ) {
+								File f = new File( arg );
 
-							if (!f.exists()) {
-								log.warn(String.format("'%s' was not loaded because the specified file could not be found.", arg));
-								continue;
-							}
-							if (!arg.endsWith(".ftl") && !arg.endsWith(".zip")) {
-								log.warn(String.format("'%s' was not loaded because the specified file is not a .zip or .ftl.",
-										f.getName()));
-								continue;
-							}
-
-							try {
-								DatabaseEntry de = new DatabaseEntry(f);
-								DatabaseEntry[] dbEntries = db.getEntries();
-								if (de == db.getCore())
+								if ( !f.exists() ) {
+									log.warn( String.format( "'%s' was not loaded because the specified file could not be found.", arg ) );
 									continue;
-								if (!Utils.contains(dbEntries, de))
-									db.addEntry(de);
-							} catch (Exception e) {
-								log.warn(String.format("Could not create a database entry for file '%s': ", arg), e);
-							}
-						}
+								}
+								if ( !arg.endsWith( ".ftl" ) && !arg.endsWith( ".zip" ) ) {
+									log.warn(
+										String.format(
+											"'%s' was not loaded because the specified file is not a .zip or .ftl.",
+											f.getName()
+										)
+									);
+									continue;
+								}
 
-						db.cacheAnimations();
+								try {
+									DatabaseEntry de = new DatabaseEntry( f );
+									DatabaseEntry[] dbEntries = db.getEntries();
+									if ( de == db.getCore() )
+										continue;
+									if ( !Utils.contains( dbEntries, de ) )
+										db.addEntry( de );
+								}
+								catch ( Exception e ) {
+									log.warn( String.format( "Could not create a database entry for file '%s': ", arg ), e );
+								}
+							}
+
+							db.cacheAnimations();
+						}
 					}
-				});
-			} catch (Exception e) {
-				log.error("An error occured while loading dat archives:", e);
+				);
+			}
+			catch ( Exception e ) {
+				log.error( "An error occured while loading dat archives:", e );
 
 				String msg = "An error has occured while loading the game's resources.\n\n" +
-						"Please check editor-log.txt in the editor's directory, and post\n" +
-						"it in the editor's thread at the FTL forums.";
-				UIUtils.showErrorDialog(editorWindow.getShell(), null, msg);
-				System.exit(1);
+					"Please check editor-log.txt in the editor's directory, and post\n" +
+					"it in the editor's thread at the FTL forums.";
+				UIUtils.showErrorDialog( editorWindow.getShell(), null, msg );
+				System.exit( 1 );
 			}
 		}
 
 		KeyboardInputDispatcher kid = new KeyboardInputDispatcher();
-		display.addFilter(SWT.KeyDown, kid);
-		display.addFilter(SWT.KeyUp, kid);
+		display.addFilter( SWT.KeyDown, kid );
+		display.addFilter( SWT.KeyUp, kid );
 
 		// Open the main window's shell, making it visible
 		editorWindow.open();
 
-		if (Manager.checkUpdates) {
-			checkForUpdates(false); // Automatic update check
+		if ( Manager.checkUpdates ) {
+			checkForUpdates( false ); // Automatic update check
 		}
 
-		log.info("Running...");
+		log.info( "Running..." );
 
 		try {
-			while (!editorWindow.getShell().isDisposed()) {
-				if (!display.readAndDispatch())
+			while ( !editorWindow.getShell().isDisposed() ) {
+				if ( !display.readAndDispatch() )
 					display.sleep();
 			}
-		} catch (Throwable t) {
+		}
+		catch ( Throwable t ) {
 			String msg = APP_NAME + " has encountered a problem and needs to close.\n\n" +
-					"Please check editor-log.txt in the editor's directory, and post " +
-					"it in the editor's thread at the FTL forums.";
+				"Please check editor-log.txt in the editor's directory, and post " +
+				"it in the editor's thread at the FTL forums.";
 
 			ShipContainer ship = Manager.getCurrentShip();
-			if (ship != null) {
+			if ( ship != null ) {
 				String name = "crash_" + System.currentTimeMillis() + ".ftl";
 				msg += "\n\nThe ship you had loaded has been saved in the editor's directory as '" +
-						name + "'.";
-				ship.save(new File(name));
+					name + "'.";
+				ship.save( new File( name ) );
 			}
 
-			log.error("An error has occured and the editor was forced to terminate.", t);
-			UIUtils.showErrorDialog(editorWindow.getShell(), null, msg);
+			log.error( "An error has occured and the editor was forced to terminate.", t );
+			UIUtils.showErrorDialog( editorWindow.getShell(), null, msg );
 		}
 
-		log.info("Exiting...");
+		log.info( "Exiting..." );
 
-		saveHotkeys(hotkeysFile);
+		saveHotkeys( hotkeysFile );
 
 		// Save config
 		try {
 			appConfig.setCurrent();
 			appConfig.writeConfig();
-		} catch (IOException e) {
-			String errorMsg = String.format("Error writing config to \"%s\".", configFile.getPath());
-			log.error(errorMsg, e);
-			UIUtils.showErrorDialog(editorWindow.getShell(), null, errorMsg);
+		}
+		catch ( IOException e ) {
+			String errorMsg = String.format( "Error writing config to \"%s\".", configFile.getPath() );
+			log.error( errorMsg, e );
+			UIUtils.showErrorDialog( editorWindow.getShell(), null, errorMsg );
 		}
 
 		editorWindow.dispose();
 		display.dispose();
 
-		log.info("Bye");
+		log.info( "Bye" );
 		// Prevents the application from lingering on MacOSX when the window is closed,
 		// makes no difference on Windows/Linux
-		System.exit(0);
+		System.exit( 0 );
 	}
 
 	/**
@@ -341,14 +378,16 @@ public class Superluminal {
 	 * @param manual
 	 *            if true, an information dialog will pop up even if the program is up to date
 	 */
-	public static void checkForUpdates(boolean manual) {
+	public static void checkForUpdates( boolean manual )
+	{
 		new UpdateCheckWorker( manual ).execute();
 	}
 
 	/** Create a dummy Hotkey object for each hotkey, and store them in the hotkey map. */
-	private static void initHotkeys() {
-		for (Hotkeys keyId : Hotkeys.values())
-			Manager.putHotkey(keyId, new Hotkey());
+	private static void initHotkeys()
+	{
+		for ( Hotkeys keyId : Hotkeys.values() )
+			Manager.putHotkey( keyId, new Hotkey() );
 	}
 
 	/**
@@ -357,15 +396,16 @@ public class Superluminal {
 	 * @param f
 	 *            File from which hotkey config will be read.
 	 */
-	private static void loadHotkeys(File f) {
+	private static void loadHotkeys( File f )
+	{
 		try {
-			Document keyDoc = IOUtils.readFileXML(f);
+			Document keyDoc = IOUtils.readFileXML( f );
 
 			Element root = keyDoc.getRootElement();
-			for (Element bind : root.getChildren("bind")) {
+			for ( Element bind : root.getChildren( "bind" ) ) {
 				String actionName = bind.getValue();
-				if (actionName == null) {
-					log.warn(HOTKEYS_FILE + " contained a bind without an assigned action.");
+				if ( actionName == null ) {
+					log.warn( HOTKEYS_FILE + " contained a bind without an assigned action." );
 					continue;
 				}
 
@@ -373,60 +413,74 @@ public class Superluminal {
 				String loading = null;
 				String attr = null;
 				try {
-					action = Hotkeys.valueOf(actionName);
-				} catch (IllegalArgumentException e) {
-					log.warn("Action '" + actionName + "' was not recognised, and was not loaded.");
+					action = Hotkeys.valueOf( actionName );
+				}
+				catch ( IllegalArgumentException e ) {
+					log.warn( "Action '" + actionName + "' was not recognised, and was not loaded." );
 					continue;
 				}
 				try {
 					loading = "shift";
-					attr = bind.getAttributeValue(loading);
-					boolean shift = attr != null && Boolean.valueOf(attr);
+					attr = bind.getAttributeValue( loading );
+					boolean shift = attr != null && Boolean.valueOf( attr );
 
 					loading = "ctrl";
-					attr = bind.getAttributeValue(loading);
-					boolean ctrl = attr != null && Boolean.valueOf(attr);
+					attr = bind.getAttributeValue( loading );
+					boolean ctrl = attr != null && Boolean.valueOf( attr );
 
 					loading = "alt";
-					attr = bind.getAttributeValue(loading);
-					boolean alt = attr != null && Boolean.valueOf(attr);
+					attr = bind.getAttributeValue( loading );
+					boolean alt = attr != null && Boolean.valueOf( attr );
 
 					loading = "cmd";
-					attr = bind.getAttributeValue(loading);
-					boolean cmd = attr != null && Boolean.valueOf(attr);
+					attr = bind.getAttributeValue( loading );
+					boolean cmd = attr != null && Boolean.valueOf( attr );
 
 					loading = "char";
-					attr = bind.getAttributeValue(loading);
-					if (attr == null)
+					attr = bind.getAttributeValue( loading );
+					if ( attr == null )
 						throw new NullPointerException();
-					if (attr.length() > 1)
-						throw new IllegalArgumentException(action + " keybind has invalid 'char' attribute: " + attr);
+					if ( attr.length() > 1 )
+						throw new IllegalArgumentException( action + " keybind has invalid 'char' attribute: " + attr );
 					boolean enabled = attr.length() == 1;
 					int ch = '\0';
-					if (enabled)
-						ch = attr.charAt(0);
+					if ( enabled )
+						ch = attr.charAt( 0 );
 
-					Hotkey h = Manager.getHotkey(action);
-					h.setEnabled(enabled);
-					h.setShift(shift);
-					h.setCtrl(ctrl);
-					h.setAlt(alt);
-					h.setCommand(cmd);
-					h.setKey(ch);
-				} catch (IllegalArgumentException e) {
-					log.warn(String.format("Keybind for action %s had invalid '%s' attribute and was not loaded.",
-							action.name(), loading));
-				} catch (NullPointerException e) {
-					log.warn(String.format("Keybind for action %s was missing '%s' attribute and was not loaded.",
-							action.name(), loading));
+					Hotkey h = Manager.getHotkey( action );
+					h.setEnabled( enabled );
+					h.setShift( shift );
+					h.setCtrl( ctrl );
+					h.setAlt( alt );
+					h.setCommand( cmd );
+					h.setKey( ch );
+				}
+				catch ( IllegalArgumentException e ) {
+					log.warn(
+						String.format(
+							"Keybind for action %s had invalid '%s' attribute and was not loaded.",
+							action.name(), loading
+						)
+					);
+				}
+				catch ( NullPointerException e ) {
+					log.warn(
+						String.format(
+							"Keybind for action %s was missing '%s' attribute and was not loaded.",
+							action.name(), loading
+						)
+					);
 				}
 			}
-		} catch (FileNotFoundException ex) {
-			log.error("Keybind file could not be found: " + f.getAbsolutePath());
-		} catch (IOException ex) {
-			log.error("An error has occured while loading keybind file: ", ex);
-		} catch (JDOMParseException ex) {
-			log.error("JDOM exception occured while loading file " + f.getAbsolutePath(), ex);
+		}
+		catch ( FileNotFoundException ex ) {
+			log.error( "Keybind file could not be found: " + f.getAbsolutePath() );
+		}
+		catch ( IOException ex ) {
+			log.error( "An error has occured while loading keybind file: ", ex );
+		}
+		catch ( JDOMParseException ex ) {
+			log.error( "JDOM exception occured while loading file " + f.getAbsolutePath(), ex );
 		}
 	}
 
@@ -436,32 +490,34 @@ public class Superluminal {
 	 * @param f
 	 *            File in which hotkey config will be saved.
 	 */
-	private static void saveHotkeys(File f) {
+	private static void saveHotkeys( File f )
+	{
 		Document keyDoc = new Document();
 
-		Element wrapper = new Element("wrapper");
-		Element root = new Element("keybinds");
+		Element wrapper = new Element( "wrapper" );
+		Element root = new Element( "keybinds" );
 
-		for (Hotkeys action : Hotkeys.values()) {
-			Hotkey h = Manager.getHotkey(action);
-			Element bind = new Element("bind");
-			bind.setText(action.name());
-			bind.setAttribute("shift", "" + h.getShift());
-			bind.setAttribute("ctrl", "" + h.getCtrl());
-			bind.setAttribute("alt", "" + h.getAlt());
-			bind.setAttribute("cmd", "" + h.getCommand());
-			bind.setAttribute("char", "" + (h.isEnabled() ? h.getKeyString() : ""));
+		for ( Hotkeys action : Hotkeys.values() ) {
+			Hotkey h = Manager.getHotkey( action );
+			Element bind = new Element( "bind" );
+			bind.setText( action.name() );
+			bind.setAttribute( "shift", "" + h.getShift() );
+			bind.setAttribute( "ctrl", "" + h.getCtrl() );
+			bind.setAttribute( "alt", "" + h.getAlt() );
+			bind.setAttribute( "cmd", "" + h.getCommand() );
+			bind.setAttribute( "char", "" + ( h.isEnabled() ? h.getKeyString() : "" ) );
 
-			root.addContent(bind);
+			root.addContent( bind );
 		}
 
-		wrapper.addContent(root);
-		keyDoc.setRootElement(wrapper);
+		wrapper.addContent( root );
+		keyDoc.setRootElement( wrapper );
 
 		try {
-			IOUtils.writeFileXML(keyDoc, f);
-		} catch (IOException e) {
-			log.error("An error occured while saving hotkeys file: ", e);
+			IOUtils.writeFileXML( keyDoc, f );
+		}
+		catch ( IOException e ) {
+			log.error( "An error occured while saving hotkeys file: ", e );
 		}
 	}
 }

@@ -6,11 +6,12 @@ package com.kartoflane.ftl.layout;
  * @author kartoFlane
  *
  */
-public class DoorLayoutObject extends LayoutObject {
-
+public class DoorLayoutObject extends LayoutObject
+{
 	/** h = 0 means horizontal, 1 means vertical */
-	public DoorLayoutObject(int x, int y, int lid, int rid, int h) {
-		super(LOType.DOOR, 5);
+	public DoorLayoutObject( int x, int y, int lid, int rid, int h )
+	{
+		super( LOType.DOOR, 5 );
 		values[0] = x;
 		values[1] = y;
 		values[2] = lid;
@@ -18,27 +19,33 @@ public class DoorLayoutObject extends LayoutObject {
 		values[4] = h;
 	}
 
-	public int getX() {
+	public int getX()
+	{
 		return values[0];
 	}
 
-	public int getY() {
+	public int getY()
+	{
 		return values[1];
 	}
 
-	public int getLeftIndex() {
+	public int getLeftIndex()
+	{
 		return values[2];
 	}
 
-	public int getRightIndex() {
+	public int getRightIndex()
+	{
 		return values[3];
 	}
 
-	public int getHorizontal() {
+	public int getHorizontal()
+	{
 		return values[4];
 	}
 
-	public boolean isHorizontal() {
+	public boolean isHorizontal()
+	{
 		return values[4] == 0;
 	}
 }

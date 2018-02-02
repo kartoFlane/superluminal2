@@ -29,8 +29,9 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
-public class GibDataComposite extends Composite implements DataComposite {
 
+public class GibDataComposite extends Composite implements DataComposite
+{
 	private static boolean valueControlsVisible = false;
 
 	private GibController controller = null;
@@ -49,264 +50,301 @@ public class GibDataComposite extends Composite implements DataComposite {
 	private Button btnFollowHull;
 	private Label lblFollowHelp;
 
-	public GibDataComposite(Composite parent, GibController control) {
-		super(parent, SWT.NONE);
-		setLayout(new GridLayout(3, false));
 
-		Image helpImage = Cache.checkOutImage(this, "cpath:/assets/help.png");
+	public GibDataComposite( Composite parent, GibController control )
+	{
+		super( parent, SWT.NONE );
+		setLayout( new GridLayout( 3, false ) );
+
+		Image helpImage = Cache.checkOutImage( this, "cpath:/assets/help.png" );
 
 		controller = control;
 		gibContainer = Manager.getCurrentShip().getGibContainer();
 
-		label = new Label(this, SWT.NONE);
-		label.setAlignment(SWT.CENTER);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		label = new Label( this, SWT.NONE );
+		label.setAlignment( SWT.CENTER );
+		label.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
 
-		Label lblHelp = new Label(this, SWT.NONE);
-		lblHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblHelp.setImage(helpImage);
+		Label lblHelp = new Label( this, SWT.NONE );
+		lblHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblHelp.setImage( helpImage );
 		String msg = "- Click on the controls button to open controls selection menu\n" +
-				"- Alternatively, right-click on the gib to open the menu\n" +
-				"- You can drag the controls around to modify the selected property";
-		UIUtils.addTooltip(lblHelp, msg);
+			"- Alternatively, right-click on the gib to open the menu\n" +
+			"- You can drag the controls around to modify the selected property";
+		UIUtils.addTooltip( lblHelp, msg );
 
-		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		Label separator = new Label( this, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
 
-		btnFollowHull = new Button(this, SWT.CHECK);
-		btnFollowHull.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
-		btnFollowHull.setText("Follow Hull");
+		btnFollowHull = new Button( this, SWT.CHECK );
+		btnFollowHull.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, true, false, 2, 1 ) );
+		btnFollowHull.setText( "Follow Hull" );
 
-		lblFollowHelp = new Label(this, SWT.NONE);
-		lblFollowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblFollowHelp.setImage(helpImage);
+		lblFollowHelp = new Label( this, SWT.NONE );
+		lblFollowHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblFollowHelp.setImage( helpImage );
 		msg = "When checked, this object will follow the hull image, so that " +
-				"when hull is moved, this object is moved as well.";
-		UIUtils.addTooltip(lblFollowHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+			"when hull is moved, this object is moved as well.";
+		UIUtils.addTooltip( lblFollowHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		btnFollowHull.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (btnFollowHull.getSelection()) {
-					controller.setParent(Manager.getCurrentShip().getImageController(Images.HULL));
-				} else {
-					controller.setParent(Manager.getCurrentShip().getShipController());
+		btnFollowHull.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( btnFollowHull.getSelection() ) {
+						controller.setParent( Manager.getCurrentShip().getImageController( Images.HULL ) );
+					}
+					else {
+						controller.setParent( Manager.getCurrentShip().getShipController() );
+					}
+					controller.updateFollowOffset();
 				}
-				controller.updateFollowOffset();
 			}
-		});
+		);
 
-		new Label(this, SWT.NONE);
-		new Label(this, SWT.NONE);
-		new Label(this, SWT.NONE);
+		new Label( this, SWT.NONE );
+		new Label( this, SWT.NONE );
+		new Label( this, SWT.NONE );
 
-		Label lblShowControls = new Label(this, SWT.NONE);
-		lblShowControls.setText("Show Controls:");
+		Label lblShowControls = new Label( this, SWT.NONE );
+		lblShowControls.setText( "Show Controls:" );
 
-		btnControls = new Button(this, SWT.NONE);
-		GridData gd_btnControls = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
+		btnControls = new Button( this, SWT.NONE );
+		GridData gd_btnControls = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 2, 1 );
 		gd_btnControls.widthHint = 100;
-		btnControls.setLayoutData(gd_btnControls);
+		btnControls.setLayoutData( gd_btnControls );
 
-		btnShow = new Button(this, SWT.TOGGLE);
-		GridData gd_btnShow = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+		btnShow = new Button( this, SWT.TOGGLE );
+		GridData gd_btnShow = new GridData( SWT.LEFT, SWT.CENTER, false, false, 2, 1 );
 		gd_btnShow.widthHint = 160;
-		btnShow.setLayoutData(gd_btnShow);
-		btnShow.setSelection(valueControlsVisible);
-		if (valueControlsVisible)
-			btnShow.setText("Hide Raw Controls");
+		btnShow.setLayoutData( gd_btnShow );
+		btnShow.setSelection( valueControlsVisible );
+		if ( valueControlsVisible )
+			btnShow.setText( "Hide Raw Controls" );
 		else
-			btnShow.setText("Show Raw Controls");
+			btnShow.setText( "Show Raw Controls" );
 
-		Label lblShowHelp = new Label(this, SWT.NONE);
-		lblShowHelp.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblShowHelp.setImage(helpImage);
+		Label lblShowHelp = new Label( this, SWT.NONE );
+		lblShowHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblShowHelp.setImage( helpImage );
 		msg = "Displays a set of advanced widgets containing raw data, allowing you to " +
-				"directly modify each value without having to use the graphical controls.";
-		UIUtils.addTooltip(lblShowHelp, Utils.wrapOSNot(msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX()));
+			"directly modify each value without having to use the graphical controls.";
+		UIUtils.addTooltip( lblShowHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-		grpValueControls = new Group(this, SWT.NONE);
-		grpValueControls.setLayout(new GridLayout(2, false));
-		grpValueControls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-		grpValueControls.setText("Raw Value Controls");
+		grpValueControls = new Group( this, SWT.NONE );
+		grpValueControls.setLayout( new GridLayout( 2, false ) );
+		grpValueControls.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, false, 3, 1 ) );
+		grpValueControls.setText( "Raw Value Controls" );
 
-		Label lblDirection = new Label(grpValueControls, SWT.NONE);
-		lblDirection.setText("Direction:");
+		Label lblDirection = new Label( grpValueControls, SWT.NONE );
+		lblDirection.setText( "Direction:" );
 
-		spDirMin = new Spinner(grpValueControls, SWT.BORDER);
-		GridData gd_spDirMin = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		spDirMin = new Spinner( grpValueControls, SWT.BORDER );
+		GridData gd_spDirMin = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_spDirMin.widthHint = 25;
-		spDirMin.setLayoutData(gd_spDirMin);
-		spDirMin.setMaximum(360);
-		spDirMin.setMinimum(-360);
+		spDirMin.setLayoutData( gd_spDirMin );
+		spDirMin.setMaximum( 360 );
+		spDirMin.setMinimum( -360 );
 
-		spDirMax = new Spinner(grpValueControls, SWT.BORDER);
-		GridData gd_spDirMax = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1);
+		spDirMax = new Spinner( grpValueControls, SWT.BORDER );
+		GridData gd_spDirMax = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 2, 1 );
 		gd_spDirMax.widthHint = 25;
-		spDirMax.setLayoutData(gd_spDirMax);
-		spDirMax.setMaximum(360);
-		spDirMax.setMinimum(-360);
+		spDirMax.setLayoutData( gd_spDirMax );
+		spDirMax.setMaximum( 360 );
+		spDirMax.setMinimum( -360 );
 
-		Label lblLinear = new Label(grpValueControls, SWT.NONE);
-		lblLinear.setText("Linear Velocity:");
+		Label lblLinear = new Label( grpValueControls, SWT.NONE );
+		lblLinear.setText( "Linear Velocity:" );
 
-		spLinMin = new Spinner(grpValueControls, SWT.BORDER);
-		spLinMin.setDigits(2);
-		spLinMin.setMaximum(500);
-		GridData gd_spLinMin = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		spLinMin = new Spinner( grpValueControls, SWT.BORDER );
+		spLinMin.setDigits( 2 );
+		spLinMin.setMaximum( 500 );
+		GridData gd_spLinMin = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_spLinMin.widthHint = 25;
-		spLinMin.setLayoutData(gd_spLinMin);
+		spLinMin.setLayoutData( gd_spLinMin );
 
-		Label lblLinHelp = new Label(grpValueControls, SWT.NONE);
-		lblLinHelp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-		lblLinHelp.setImage(helpImage);
-		msg = String.format("1.00 = %s pixels per second%n(Death animation lasts %s seconds)",
-				Database.GIB_LINEAR_SPEED, Database.GIB_DEATH_ANIM_TIME);
-		UIUtils.addTooltip(lblLinHelp, msg);
+		Label lblLinHelp = new Label( grpValueControls, SWT.NONE );
+		lblLinHelp.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 ) );
+		lblLinHelp.setImage( helpImage );
+		msg = String.format(
+			"1.00 = %s pixels per second%n(Death animation lasts %s seconds)",
+			Database.GIB_LINEAR_SPEED, Database.GIB_DEATH_ANIM_TIME
+		);
+		UIUtils.addTooltip( lblLinHelp, msg );
 
-		spLinMax = new Spinner(grpValueControls, SWT.BORDER);
-		spLinMax.setMaximum(500);
-		spLinMax.setDigits(2);
-		GridData gd_spLinMax = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		spLinMax = new Spinner( grpValueControls, SWT.BORDER );
+		spLinMax.setMaximum( 500 );
+		spLinMax.setDigits( 2 );
+		GridData gd_spLinMax = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_spLinMax.widthHint = 25;
-		spLinMax.setLayoutData(gd_spLinMax);
+		spLinMax.setLayoutData( gd_spLinMax );
 
-		Label lblAngular = new Label(grpValueControls, SWT.NONE);
-		lblAngular.setText("Angular Velocity:");
+		Label lblAngular = new Label( grpValueControls, SWT.NONE );
+		lblAngular.setText( "Angular Velocity:" );
 
-		spAngMin = new Spinner(grpValueControls, SWT.BORDER);
-		spAngMin.setMaximum(500);
-		spAngMin.setMinimum(-500);
-		spAngMin.setDigits(2);
-		GridData gd_spAngMin = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		spAngMin = new Spinner( grpValueControls, SWT.BORDER );
+		spAngMin.setMaximum( 500 );
+		spAngMin.setMinimum( -500 );
+		spAngMin.setDigits( 2 );
+		GridData gd_spAngMin = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_spAngMin.widthHint = 25;
-		spAngMin.setLayoutData(gd_spAngMin);
+		spAngMin.setLayoutData( gd_spAngMin );
 
-		Label lblAngHelp = new Label(grpValueControls, SWT.NONE);
-		lblAngHelp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-		lblAngHelp.setImage(helpImage);
-		msg = String.format("1.00 = %s degrees per second%n(Death animation lasts %s seconds)",
-				Math.round(Math.toDegrees(Database.GIB_ANGULAR_SPEED)), Database.GIB_DEATH_ANIM_TIME);
-		UIUtils.addTooltip(lblAngHelp, msg);
+		Label lblAngHelp = new Label( grpValueControls, SWT.NONE );
+		lblAngHelp.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 ) );
+		lblAngHelp.setImage( helpImage );
+		msg = String.format(
+			"1.00 = %s degrees per second%n(Death animation lasts %s seconds)",
+			Math.round( Math.toDegrees( Database.GIB_ANGULAR_SPEED ) ), Database.GIB_DEATH_ANIM_TIME
+		);
+		UIUtils.addTooltip( lblAngHelp, msg );
 
-		spAngMax = new Spinner(grpValueControls, SWT.BORDER);
-		spAngMax.setDigits(2);
-		spAngMax.setMaximum(500);
-		spAngMax.setMinimum(-500);
-		GridData gd_spAngMax = new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1);
+		spAngMax = new Spinner( grpValueControls, SWT.BORDER );
+		spAngMax.setDigits( 2 );
+		spAngMax.setMaximum( 500 );
+		spAngMax.setMinimum( -500 );
+		GridData gd_spAngMax = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_spAngMax.widthHint = 25;
-		spAngMax.setLayoutData(gd_spAngMax);
+		spAngMax.setLayoutData( gd_spAngMax );
 
-		btnShow.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				valueControlsVisible = btnShow.getSelection();
-				grpValueControls.setVisible(valueControlsVisible);
-				if (valueControlsVisible)
-					btnShow.setText("Hide Raw Controls");
-				else
-					btnShow.setText("Show Raw Controls");
-			}
-		});
-
-		btnControls.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ShipContainer container = Manager.getCurrentShip();
-				Point p = btnControls.getLocation();
-				GibControlsMenu propMenu = new GibControlsMenu(container.getParent().getShell());
-				propMenu.setLocation(toDisplay(p.x, p.y + btnControls.getSize().y));
-				PropControls result = propMenu.open();
-				if (result != null) {
-					container.getGibContainer().showControls(result);
-					container.getParent().updateSidebarContent();
-					btnControls.setText(result.toString());
+		btnShow.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					valueControlsVisible = btnShow.getSelection();
+					grpValueControls.setVisible( valueControlsVisible );
+					if ( valueControlsVisible )
+						btnShow.setText( "Hide Raw Controls" );
+					else
+						btnShow.setText( "Show Raw Controls" );
 				}
 			}
-		});
+		);
 
-		spDirMin.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controller.setDirectionMin(spDirMin.getSelection());
-				Manager.getCurrentShip().getGibContainer().setCurrentController(controller);
+		btnControls.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					ShipContainer container = Manager.getCurrentShip();
+					Point p = btnControls.getLocation();
+					GibControlsMenu propMenu = new GibControlsMenu( container.getParent().getShell() );
+					propMenu.setLocation( toDisplay( p.x, p.y + btnControls.getSize().y ) );
+					PropControls result = propMenu.open();
+					if ( result != null ) {
+						container.getGibContainer().showControls( result );
+						container.getParent().updateSidebarContent();
+						btnControls.setText( result.toString() );
+					}
+				}
 			}
-		});
-		spDirMax.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controller.setDirectionMax(spDirMax.getSelection());
-				Manager.getCurrentShip().getGibContainer().setCurrentController(controller);
-			}
-		});
+		);
 
-		spLinMin.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controller.setLinearVelocityMin(spLinMin.getSelection() / 100f);
-				Manager.getCurrentShip().getGibContainer().setCurrentController(controller);
-				spLinMax.setMinimum(spLinMin.getSelection());
+		spDirMin.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					controller.setDirectionMin( spDirMin.getSelection() );
+					Manager.getCurrentShip().getGibContainer().setCurrentController( controller );
+				}
 			}
-		});
-		spLinMax.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controller.setLinearVelocityMax(spLinMax.getSelection() / 100f);
-				Manager.getCurrentShip().getGibContainer().setCurrentController(controller);
-				spLinMin.setMaximum(spLinMax.getSelection());
+		);
+		spDirMax.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					controller.setDirectionMax( spDirMax.getSelection() );
+					Manager.getCurrentShip().getGibContainer().setCurrentController( controller );
+				}
 			}
-		});
+		);
 
-		spAngMin.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controller.setAngularVelocityMin(spAngMin.getSelection() / 100f);
-				Manager.getCurrentShip().getGibContainer().setCurrentController(controller);
+		spLinMin.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					controller.setLinearVelocityMin( spLinMin.getSelection() / 100f );
+					Manager.getCurrentShip().getGibContainer().setCurrentController( controller );
+					spLinMax.setMinimum( spLinMin.getSelection() );
+				}
 			}
-		});
-		spAngMax.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controller.setAngularVelocityMax(spAngMax.getSelection() / 100f);
-				Manager.getCurrentShip().getGibContainer().setCurrentController(controller);
+		);
+		spLinMax.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					controller.setLinearVelocityMax( spLinMax.getSelection() / 100f );
+					Manager.getCurrentShip().getGibContainer().setCurrentController( controller );
+					spLinMin.setMaximum( spLinMax.getSelection() );
+				}
 			}
-		});
+		);
 
-		grpValueControls.setVisible(valueControlsVisible);
+		spAngMin.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					controller.setAngularVelocityMin( spAngMin.getSelection() / 100f );
+					Manager.getCurrentShip().getGibContainer().setCurrentController( controller );
+				}
+			}
+		);
+		spAngMax.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					controller.setAngularVelocityMax( spAngMax.getSelection() / 100f );
+					Manager.getCurrentShip().getGibContainer().setCurrentController( controller );
+				}
+			}
+		);
+
+		grpValueControls.setVisible( valueControlsVisible );
 		updateData();
 	}
 
 	@Override
-	public void updateData() {
+	public void updateData()
+	{
 		String alias = controller.getAlias();
-		label.setText("Gib #" + controller.getId() + (alias == null ? "" : " (" + alias + ")"));
+		label.setText( "Gib #" + controller.getId() + ( alias == null ? "" : " (" + alias + ")" ) );
 
-		btnFollowHull.setSelection(controller.getParent() == Manager.getCurrentShip().getImageController(Images.HULL));
+		btnFollowHull.setSelection( controller.getParent() == Manager.getCurrentShip().getImageController( Images.HULL ) );
 
-		btnControls.setText(Manager.getCurrentShip().getGibContainer().getShownControls().toString());
-		spDirMin.setSelection(controller.getDirectionMin());
-		spDirMax.setSelection(controller.getDirectionMax());
+		btnControls.setText( Manager.getCurrentShip().getGibContainer().getShownControls().toString() );
+		spDirMin.setSelection( controller.getDirectionMin() );
+		spDirMax.setSelection( controller.getDirectionMax() );
 		// In SWT, there's no way to pass floating point values to a spinner.
 		// Instead, the decimal value is acquired by dividing the input of setSelection()
 		// by 10^n, where n is the number of decimal digits ---> Spinner.getDigits()
 		// Here we have two decimal digits, hence 10^2 = 100
-		spLinMin.setSelection((int) Math.round(controller.getLinearVelocityMin() * 100));
-		spLinMax.setSelection((int) Math.round(controller.getLinearVelocityMax() * 100));
-		spLinMin.setMaximum(spLinMax.getSelection());
-		spLinMax.setMinimum(spLinMin.getSelection());
-		spAngMin.setSelection((int) Math.round(controller.getAngularVelocityMin() * 100));
-		spAngMax.setSelection((int) Math.round(controller.getAngularVelocityMax() * 100));
+		spLinMin.setSelection( (int)Math.round( controller.getLinearVelocityMin() * 100 ) );
+		spLinMax.setSelection( (int)Math.round( controller.getLinearVelocityMax() * 100 ) );
+		spLinMin.setMaximum( spLinMax.getSelection() );
+		spLinMax.setMinimum( spLinMin.getSelection() );
+		spAngMin.setSelection( (int)Math.round( controller.getAngularVelocityMin() * 100 ) );
+		spAngMax.setSelection( (int)Math.round( controller.getAngularVelocityMax() * 100 ) );
 
-		OverviewWindow.staticUpdate(controller);
+		OverviewWindow.staticUpdate( controller );
 	}
 
 	@Override
-	public void setController(AbstractController controller) {
-		this.controller = (GibController) controller;
-		gibContainer.setCurrentController(this.controller);
-		gibContainer.showControls(gibContainer.getShownControls());
+	public void setController( AbstractController controller )
+	{
+		this.controller = (GibController)controller;
+		gibContainer.setCurrentController( this.controller );
+		gibContainer.showControls( gibContainer.getShownControls() );
 	}
 
-	public void reloadController() {
+	public void reloadController()
+	{
 	}
 }

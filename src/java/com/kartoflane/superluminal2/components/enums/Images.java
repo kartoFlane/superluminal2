@@ -2,15 +2,23 @@ package com.kartoflane.superluminal2.components.enums;
 
 import com.kartoflane.superluminal2.ftl.ShipObject;
 
-public enum Images {
-	SHIELD, HULL, FLOOR, CLOAK, THUMBNAIL, HANGAR;
+
+public enum Images
+{
+	SHIELD,
+	HULL,
+	FLOOR,
+	CLOAK,
+	THUMBNAIL,
+	HANGAR;
 
 	/**
 	 * @return all Images, sans {@link #HANGAR}
 	 */
-	public static Images[] getShipImages() {
+	public static Images[] getShipImages()
+	{
 		return new Images[] {
-				SHIELD, HULL, FLOOR, CLOAK, THUMBNAIL
+			SHIELD, HULL, FLOOR, CLOAK, THUMBNAIL
 		};
 	}
 
@@ -28,12 +36,13 @@ public enum Images {
 	 *            go to different folders depending on the type of the ship)
 	 * @return the dat-relative path for this image type
 	 */
-	public String getDatRelativePath(ShipObject ship) {
-		if (ship == null)
-			throw new IllegalArgumentException("Argument must not be null.");
-		switch (this) {
+	public String getDatRelativePath( ShipObject ship )
+	{
+		if ( ship == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
+		switch ( this ) {
 			case HULL:
-				if (ship.isPlayerShip())
+				if ( ship.isPlayerShip() )
 					return "img/ship/";
 				else
 					return "img/ships_glow/";
@@ -47,10 +56,11 @@ public enum Images {
 	/**
 	 * @return true if this image type should be exported for the given ship, false otherwie.
 	 */
-	public boolean shouldSave(ShipObject ship) {
-		if (ship == null)
-			throw new IllegalArgumentException("Argument must not be null.");
-		switch (this) {
+	public boolean shouldSave( ShipObject ship )
+	{
+		if ( ship == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
+		switch ( this ) {
 			case SHIELD:
 			case FLOOR:
 			case THUMBNAIL:
@@ -63,8 +73,9 @@ public enum Images {
 	/**
 	 * @return the prefix to the ship's image namespace for this image type.
 	 */
-	public String getPrefix() {
-		switch (this) {
+	public String getPrefix()
+	{
+		switch ( this ) {
 			case THUMBNAIL:
 				return "miniship_";
 			default:
@@ -75,8 +86,9 @@ public enum Images {
 	/**
 	 * @return the suffix to the ship's image namespace for this image type.
 	 */
-	public String getSuffix() {
-		switch (this) {
+	public String getSuffix()
+	{
+		switch ( this ) {
 			case SHIELD:
 				return "_shields1";
 			case HULL:
@@ -93,14 +105,16 @@ public enum Images {
 	/**
 	 * @return the name of the file this image should be exported as
 	 */
-	public String getFilename(ShipObject ship) {
-		if (ship == null)
-			throw new IllegalArgumentException("Argument must not be null.");
+	public String getFilename( ShipObject ship )
+	{
+		if ( ship == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
 		return getPrefix() + ship.getImageNamespace() + getSuffix() + ".png";
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return name().toLowerCase();
 	}
 }

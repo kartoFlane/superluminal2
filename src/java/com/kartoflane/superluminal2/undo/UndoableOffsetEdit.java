@@ -6,6 +6,7 @@ import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
+
 /**
  * An undoable edit that represents modification of the ship's thick offset by shift-dragging the origin.<br>
  * <br>
@@ -16,9 +17,10 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
  *
  */
 @SuppressWarnings("serial")
-public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
-
+public class UndoableOffsetEdit extends ValueUndoableEdit<Point>
+{
 	private final ShipContainer data;
+
 
 	/**
 	 * Constructs a new UndoableOffsetEdit.<br>
@@ -29,73 +31,77 @@ public class UndoableOffsetEdit extends ValueUndoableEdit<Point> {
 	 * @param ac
 	 *            the controller whom this edit concerns
 	 */
-	public UndoableOffsetEdit(ShipContainer container) {
-		if (container == null)
-			throw new IllegalArgumentException("Argument must not be null.");
+	public UndoableOffsetEdit( ShipContainer container )
+	{
+		if ( container == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
 
 		data = container;
 	}
 
 	@Override
-	public String getPresentationName() {
+	public String getPresentationName()
+	{
 		return "modify offset";
 	}
 
 	@Override
-	public void doUndo() {
-		if (old == null)
-			throw new IllegalStateException("Old offset is null!");
+	public void doUndo()
+	{
+		if ( old == null )
+			throw new IllegalStateException( "Old offset is null!" );
 
 		ShipController shipC = data.getShipController();
 		// Disable Bounded state to prevent the undo from bugging out,
 		// since sometimes the bounding area doesn't get updated correctlyF
-		shipC.setBounded(false);
+		shipC.setBounded( false );
 		// ShipController.select() modifies its children's collidablity
 		shipC.select();
 		// Temporarily prevent the object from updating its Followers
-		shipC.setFollowActive(false);
+		shipC.setFollowActive( false );
 
-		shipC.reposition(old);
+		shipC.reposition( old );
 
 		Point offset = data.findShipOffset();
 		offset.x /= ShipContainer.CELL_SIZE;
 		offset.y /= ShipContainer.CELL_SIZE;
-		data.setShipOffset(offset.x, offset.y);
+		data.setShipOffset( offset.x, offset.y );
 		data.updateBoundingArea();
 
-		shipC.setBounded(true);
-		shipC.setFollowActive(true);
+		shipC.setBounded( true );
+		shipC.setFollowActive( true );
 		// Don't deselect if it was actually selected by the user
-		if (Manager.getSelected() != shipC)
+		if ( Manager.getSelected() != shipC )
 			shipC.deselect();
 	}
 
 	@Override
-	public void doRedo() {
-		if (cur == null)
-			throw new IllegalStateException("Current offset is null!");
+	public void doRedo()
+	{
+		if ( cur == null )
+			throw new IllegalStateException( "Current offset is null!" );
 
 		ShipController shipC = data.getShipController();
 		// Disable Bounded state to prevent the undo from bugging out,
 		// since sometimes the bounding area doesn't get updated correctlyF
-		shipC.setBounded(false);
+		shipC.setBounded( false );
 		// ShipController.select() modifies its children's collidablity
 		shipC.select();
 		// Temporarily prevent the object from updating its Followers
-		shipC.setFollowActive(false);
+		shipC.setFollowActive( false );
 
-		shipC.reposition(cur);
+		shipC.reposition( cur );
 
 		Point offset = data.findShipOffset();
 		offset.x /= ShipContainer.CELL_SIZE;
 		offset.y /= ShipContainer.CELL_SIZE;
-		data.setShipOffset(offset.x, offset.y);
+		data.setShipOffset( offset.x, offset.y );
 		data.updateBoundingArea();
 
-		shipC.setBounded(true);
-		shipC.setFollowActive(true);
+		shipC.setBounded( true );
+		shipC.setFollowActive( true );
 		// Don't deselect if it was actually selected by the user
-		if (Manager.getSelected() != shipC)
+		if ( Manager.getSelected() != shipC )
 			shipC.deselect();
 	}
 }

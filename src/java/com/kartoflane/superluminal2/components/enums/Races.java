@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum Races {
+public enum Races
+{
 	NO_CREW,
 	HUMAN,
 	ENGI,
@@ -14,8 +15,9 @@ public enum Races {
 	RANDOM;
 
 	@Override
-	public String toString() {
-		switch (this) {
+	public String toString()
+	{
+		switch ( this ) {
 			case NO_CREW:
 				return "<No Crew>";
 			case ENERGY:
@@ -24,7 +26,7 @@ public enum Races {
 				return "Lanius";
 			default:
 				String s = name();
-				s = s.substring(0, 1) + s.substring(1).toLowerCase();
+				s = s.substring( 0, 1 ) + s.substring( 1 ).toLowerCase();
 				return s;
 		}
 	}
@@ -32,22 +34,24 @@ public enum Races {
 	/**
 	 * @return an array containing all races, sans NO_CREW
 	 */
-	public static Races[] getRaces() {
+	public static Races[] getRaces()
+	{
 		return new Races[] {
-				HUMAN, ENGI, ENERGY, ROCK,
-				MANTIS, SLUG, CRYSTAL,
-				ANAEROBIC, GHOST, RANDOM
+			HUMAN, ENGI, ENERGY, ROCK,
+			MANTIS, SLUG, CRYSTAL,
+			ANAEROBIC, GHOST, RANDOM
 		};
 	}
 
 	/**
 	 * @return an array containing all races, sans NO_CREW and RANDOM
 	 */
-	public static Races[] getPlayerRaces() {
+	public static Races[] getPlayerRaces()
+	{
 		return new Races[] {
-				HUMAN, ENGI, ENERGY, ROCK,
-				MANTIS, SLUG, CRYSTAL,
-				ANAEROBIC, GHOST
+			HUMAN, ENGI, ENERGY, ROCK,
+			MANTIS, SLUG, CRYSTAL,
+			ANAEROBIC, GHOST
 		};
 	}
 }

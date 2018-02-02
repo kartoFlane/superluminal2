@@ -7,8 +7,8 @@ package com.kartoflane.ftl.layout.located;
  * @author kartoFlane
  *
  */
-public interface LocatedLayoutObject {
-
+public interface LocatedLayoutObject
+{
 	/**
 	 * @return the line number at which the object is located.
 	 */

@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
+
 /**
  * A general search dialog framework. Allows to construct a filter for the specified type.<br>
  * <br>
@@ -23,13 +24,14 @@ import com.kartoflane.superluminal2.utils.UIUtils;
  * @param <T>
  *            the type of objects that this dialog filters
  */
-public abstract class AbstractSearchDialog<T> {
-
+public abstract class AbstractSearchDialog<T>
+{
 	/**
 	 * Indicates that the default filter should be used.
 	 */
 	public static final Predicate<?> RESULT_DEFAULT = new Predicate<Object>() {
-		public boolean accept(Object object) {
+		public boolean accept( Object object )
+		{
 			return false;
 		}
 	};
@@ -38,7 +40,8 @@ public abstract class AbstractSearchDialog<T> {
 	 * Indicates that no changes should be made to the filter as a result of this dialog.
 	 */
 	public static final Predicate<?> RESULT_UNCHANGED = new Predicate<Object>() {
-		public boolean accept(Object object) {
+		public boolean accept( Object object )
+		{
 			return false;
 		}
 	};
@@ -46,6 +49,7 @@ public abstract class AbstractSearchDialog<T> {
 	private Predicate<?> result = RESULT_DEFAULT;
 
 	protected Shell shell = null;
+
 
 	/**
 	 * Child classes should always call this constructor.
@@ -55,11 +59,12 @@ public abstract class AbstractSearchDialog<T> {
 	 * @throws IllegalStateException
 	 *             if the shell is null (must be used for {@link #open()} to work)
 	 */
-	public AbstractSearchDialog(Shell parent) {
-		createContents(parent);
+	public AbstractSearchDialog( Shell parent )
+	{
+		createContents( parent );
 
-		if (shell == null)
-			throw new IllegalStateException("Shell must be instantiated!");
+		if ( shell == null )
+			throw new IllegalStateException( "Shell must be instantiated!" );
 	}
 
 	/**
@@ -69,7 +74,7 @@ public abstract class AbstractSearchDialog<T> {
 	 * @param parent
 	 *            parent of this dialog
 	 */
-	public abstract void createContents(Shell parent);
+	public abstract void createContents( Shell parent );
 
 	/**
 	 * @return the predicate that is used as filter, ie. result of the dialog
@@ -79,21 +84,24 @@ public abstract class AbstractSearchDialog<T> {
 	/**
 	 * Sets the result of the dialog to a newly constructed filter, based on parameters selected in the dialog.
 	 */
-	protected final void setResultCurrent() {
+	protected final void setResultCurrent()
+	{
 		result = getFilter();
 	}
 
 	/**
 	 * Sets the result of the dialog to a constant indicating that the default filter is to be used.
 	 */
-	protected final void setResultDefault() {
+	protected final void setResultDefault()
+	{
 		result = RESULT_DEFAULT;
 	}
 
 	/**
 	 * Sets the result of the dialog to a constant indicating that the previous filter is to be used.
 	 */
-	protected final void setResultUnchanged() {
+	protected final void setResultUnchanged()
+	{
 		result = RESULT_UNCHANGED;
 	}
 
@@ -105,7 +113,8 @@ public abstract class AbstractSearchDialog<T> {
 	 * - {@link #setResultDefault()} to return a constant indicating that the default filter should be used.<br>
 	 * - {@link #setResultUnchanged()} to return a constant indicating that the previous filter should be used.
 	 */
-	public void dispose() {
+	public void dispose()
+	{
 		shell.dispose();
 	}
 
@@ -117,18 +126,19 @@ public abstract class AbstractSearchDialog<T> {
 	 *             if the result is null
 	 */
 	@SuppressWarnings("unchecked")
-	public Predicate<T> open() {
+	public Predicate<T> open()
+	{
 		shell.open();
 
 		Display display = UIUtils.getDisplay();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
+		while ( !shell.isDisposed() ) {
+			if ( !display.readAndDispatch() )
 				display.sleep();
 		}
 
-		if (result == null)
-			throw new IllegalStateException("Result must not be null!");
+		if ( result == null )
+			throw new IllegalStateException( "Result must not be null!" );
 
-		return (Predicate<T>) result;
+		return (Predicate<T>)result;
 	}
 }

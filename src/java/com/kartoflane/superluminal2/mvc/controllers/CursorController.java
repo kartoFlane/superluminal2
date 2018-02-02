@@ -8,54 +8,63 @@ import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.CursorView;
 
-public class CursorController extends AbstractController {
 
+public class CursorController extends AbstractController
+{
 	private static CursorController instance = null;
 
 	private int mouseX = 0;
 	private int mouseY = 0;
 
-	private CursorController(BaseModel model, CursorView view) {
-		super();
-		setModel(model);
-		setView(view);
 
-		setSelectable(false);
-		setBounded(false);
+	private CursorController( BaseModel model, CursorView view )
+	{
+		super();
+		setModel( model );
+		setView( view );
+
+		setSelectable( false );
+		setBounded( false );
 
 		instance = this;
 	}
 
-	public static CursorController newInstance() {
-		if (instance != null)
-			throw new IllegalStateException("Cursor already exists.");
+	public static CursorController newInstance()
+	{
+		if ( instance != null )
+			throw new IllegalStateException( "Cursor already exists." );
 
 		BaseModel model = new BaseModel();
 		CursorView view = new CursorView();
-		CursorController controller = new CursorController(model, view);
+		CursorController controller = new CursorController( model, view );
 
 		return controller;
 	}
 
-	public static CursorController getInstance() {
+	public static CursorController getInstance()
+	{
 		return instance;
 	}
 
 	@Override
-	public void setView(View view) {
-		super.setView(view);
-		this.view.addToPainter(Layers.CURSOR);
+	public void setView( View view )
+	{
+		super.setView( view );
+		this.view.addToPainter( Layers.CURSOR );
 	}
 
-	public Point getMouseLocation() {
-		return new Point(mouseX, mouseY);
+	public Point getMouseLocation()
+	{
+		return new Point( mouseX, mouseY );
 	}
 
-	public int getMouseX() {
+	public int getMouseX()
+	{
 		return mouseX;
 	}
 
-	public int getMouseY() {
+	public int getMouseY()
+	{
 		return mouseY;
 	}
 
@@ -65,19 +74,22 @@ public class CursorController extends AbstractController {
 	 */
 
 	@Override
-	public void mouseMove(MouseEvent e) {
+	public void mouseMove( MouseEvent e )
+	{
 		mouseX = e.x;
 		mouseY = e.y;
 	}
 
 	@Override
-	public void mouseDown(MouseEvent e) {
+	public void mouseDown( MouseEvent e )
+	{
 		mouseX = e.x;
 		mouseY = e.y;
 	}
 
 	@Override
-	public void mouseUp(MouseEvent e) {
+	public void mouseUp( MouseEvent e )
+	{
 		mouseX = e.x;
 		mouseY = e.y;
 	}

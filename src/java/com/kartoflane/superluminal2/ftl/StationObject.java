@@ -2,8 +2,9 @@ package com.kartoflane.superluminal2.ftl;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
 
-public class StationObject extends GameObject {
 
+public class StationObject extends GameObject
+{
 	/**
 	 * Id of the tile on which the station will be located.<br>
 	 * -2 = use default value<br>
@@ -17,10 +18,13 @@ public class StationObject extends GameObject {
 	protected int slotId = -2;
 	protected Directions slotDirection = Directions.UP;
 
-	public StationObject(SystemObject object) {
+
+	public StationObject( SystemObject object )
+	{
 	}
 
-	public void update() {
+	public void update()
+	{
 		// Nothing to do here
 	}
 
@@ -34,21 +38,25 @@ public class StationObject extends GameObject {
 	 * [ 2 3 ]
 	 * </p>
 	 */
-	public void setSlotId(int id) {
+	public void setSlotId( int id )
+	{
 		slotId = id;
 	}
 
-	public int getSlotId() {
+	public int getSlotId()
+	{
 		return slotId;
 	}
 
-	public void setSlotDirection(Directions dir) {
-		if (dir == null)
-			throw new IllegalArgumentException("Direction must not be null.");
+	public void setSlotDirection( Directions dir )
+	{
+		if ( dir == null )
+			throw new IllegalArgumentException( "Direction must not be null." );
 		slotDirection = dir;
 	}
 
-	public Directions getSlotDirection() {
+	public Directions getSlotDirection()
+	{
 		return slotDirection;
 	}
 }

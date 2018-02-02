@@ -5,38 +5,43 @@ import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.RGB;
 
 
-public class HSV {
-
+public class HSV
+{
 	public float h;
 	public float s;
 	public float v;
 
 
-	public HSV( float h, float s, float v ) {
+	public HSV( float h, float s, float v )
+	{
 		this.h = h;
 		this.s = s;
 		this.v = v;
 	}
 
-	public HSV( HSV hsv ) {
+	public HSV( HSV hsv )
+	{
 		this.h = hsv.h;
 		this.s = hsv.s;
 		this.v = hsv.v;
 	}
 
-	public HSV( RGB rgb ) {
+	public HSV( RGB rgb )
+	{
 		float[] hsv = rgb.getHSB();
 		h = hsv[0] / 360f;
 		s = hsv[1];
 		v = hsv[2];
 	}
 
-	public Color toColor( Device d ) {
+	public Color toColor( Device d )
+	{
 		RGB rgb = toRGB();
 		return new Color( d, rgb.red, rgb.green, rgb.blue );
 	}
 
-	public RGB toRGB() {
+	public RGB toRGB()
+	{
 		try {
 			int[] rgb = toRGB( h, s, v );
 			return new RGB( rgb[0], rgb[1], rgb[2] );
@@ -46,11 +51,13 @@ public class HSV {
 		}
 	}
 
-	public String toString() {
+	public String toString()
+	{
 		return "HSV { " + h + ", " + s + ", " + v + " }";
 	}
 
-	private static int[] toRGB( float hue, float saturation, float value ) {
+	private static int[] toRGB( float hue, float saturation, float value )
+	{
 		if ( hue == 1.0f )
 			hue = 0.9999999f;
 		else if ( hue == 0.0f )

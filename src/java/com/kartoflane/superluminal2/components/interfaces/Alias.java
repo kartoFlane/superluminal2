@@ -7,8 +7,9 @@ package com.kartoflane.superluminal2.components.interfaces;
  * @author kartoFlane
  * 
  */
-public interface Alias {
+public interface Alias
+{
 	public String getAlias();
 
-	public void setAlias(String alias);
+	public void setAlias( String alias );
 }

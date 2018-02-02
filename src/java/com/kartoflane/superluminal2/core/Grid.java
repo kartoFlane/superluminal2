@@ -8,6 +8,9 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.mvc.controllers.CellController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
+import javafx.scene.control.Cell;
+
+
 /**
  * A class representing the grid, consisting of individual {@link Cell} objects.
  * 
@@ -15,9 +18,10 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
  * 
  * @author kartoFlane
  */
-public class Grid {
-
-	public enum Snapmodes {
+public class Grid
+{
+	public enum Snapmodes
+	{
 		/** No snapping occurs. */
 		FREE,
 		/** Snaps to the center of the nearest grid cell. */
@@ -50,18 +54,22 @@ public class Grid {
 		CORNER_BR;
 	}
 
+
 	private static final Grid instance = new Grid();
 
 	private boolean drawGrid = true;
 	private Rectangle bounds = null;
 	private ArrayList<ArrayList<CellController>> cells = null;
 
-	private Grid() {
+
+	private Grid()
+	{
 		cells = new ArrayList<ArrayList<CellController>>();
-		bounds = new Rectangle(0, 0, 0, 0);
+		bounds = new Rectangle( 0, 0, 0, 0 );
 	}
 
-	public static Grid getInstance() {
+	public static Grid getInstance()
+	{
 		return instance;
 	}
 
@@ -73,8 +81,9 @@ public class Grid {
 	 * @param h
 	 *            height of the grid, in grid cells
 	 */
-	public void setCells(int w, int h) {
-		updateBounds(w * ShipContainer.CELL_SIZE, h * ShipContainer.CELL_SIZE);
+	public void setCells( int w, int h )
+	{
+		updateBounds( w * ShipContainer.CELL_SIZE, h * ShipContainer.CELL_SIZE );
 	}
 
 	/**
@@ -86,23 +95,24 @@ public class Grid {
 	 * @param height
 	 *            new height of the grid, in pixels
 	 */
-	public void updateBounds(int width, int height) {
+	public void updateBounds( int width, int height )
+	{
 		// Add one after the division so that cells fill all of the available space
-		bounds.width = (width / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
-		bounds.height = (height / ShipContainer.CELL_SIZE + 1) * ShipContainer.CELL_SIZE;
+		bounds.width = ( width / ShipContainer.CELL_SIZE + 1 ) * ShipContainer.CELL_SIZE;
+		bounds.height = ( height / ShipContainer.CELL_SIZE + 1 ) * ShipContainer.CELL_SIZE;
 
-		for (int i = 1; i <= bounds.width / ShipContainer.CELL_SIZE; i++) {
-			if (cells.size() < i)
-				cells.add(new ArrayList<CellController>());
-			for (int j = 1; j <= bounds.height / ShipContainer.CELL_SIZE; j++)
-				if (cells.get(i - 1).size() < j)
-					cells.get(i - 1).add(CellController.newInstance(i - 1, j - 1));
+		for ( int i = 1; i <= bounds.width / ShipContainer.CELL_SIZE; i++ ) {
+			if ( cells.size() < i )
+				cells.add( new ArrayList<CellController>() );
+			for ( int j = 1; j <= bounds.height / ShipContainer.CELL_SIZE; j++ )
+				if ( cells.get( i - 1 ).size() < j )
+					cells.get( i - 1 ).add( CellController.newInstance( i - 1, j - 1 ) );
 		}
 
-		for (ArrayList<CellController> list : cells) {
-			for (CellController c : list) {
+		for ( ArrayList<CellController> list : cells ) {
+			for ( CellController c : list ) {
 				Rectangle b = c.getBounds();
-				c.setVisible(bounds.contains(b.x + 1, b.y + 1) && bounds.contains(b.x + b.width - 2, b.y + b.height - 2));
+				c.setVisible( bounds.contains( b.x + 1, b.y + 1 ) && bounds.contains( b.x + b.width - 2, b.y + b.height - 2 ) );
 			}
 		}
 	}
@@ -110,66 +120,75 @@ public class Grid {
 	/**
 	 * @return the rectangle describing the grid's area relative to the canvas, in pixels.
 	 */
-	public Rectangle getBounds() {
-		return new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+	public Rectangle getBounds()
+	{
+		return new Rectangle( bounds.x, bounds.y, bounds.width, bounds.height );
 	}
 
 	/**
 	 * @return size of the grid, in pixels
 	 */
-	public Point getSize() {
-		return new Point(bounds.width, bounds.height);
+	public Point getSize()
+	{
+		return new Point( bounds.width, bounds.height );
 	}
 
-	public void setVisible(boolean visible) {
+	public void setVisible( boolean visible )
+	{
 		drawGrid = visible;
-		for (ArrayList<CellController> list : cells) {
-			for (CellController c : list)
+		for ( ArrayList<CellController> list : cells ) {
+			for ( CellController c : list )
 				c.redraw();
 		}
 	}
 
-	public boolean isVisible() {
+	public boolean isVisible()
+	{
 		return drawGrid;
 	}
 
 	/** @return a Cell at the given coordinates, or null if out of grid. */
-	public CellController getCellAt(int x, int y) {
-		return getCell(x / ShipContainer.CELL_SIZE, y / ShipContainer.CELL_SIZE);
+	public CellController getCellAt( int x, int y )
+	{
+		return getCell( x / ShipContainer.CELL_SIZE, y / ShipContainer.CELL_SIZE );
 	}
 
 	/**
 	 * Intended to only be used when the coordinates fall outside of the grid.
 	 * If the coordinates are inside the grid, use {@link #getCellAt(int, int)} instead.
 	 */
-	public CellController getClosestCell(int x, int y) {
+	public CellController getClosestCell( int x, int y )
+	{
 		int width = bounds.width - bounds.width % ShipContainer.CELL_SIZE - ShipContainer.CELL_SIZE;
 		int height = bounds.height - bounds.height % ShipContainer.CELL_SIZE - ShipContainer.CELL_SIZE;
 
 		x = x < width ? x / ShipContainer.CELL_SIZE : width / ShipContainer.CELL_SIZE - 1;
 		y = y < height ? y / ShipContainer.CELL_SIZE : height / ShipContainer.CELL_SIZE - 1;
 
-		return getCell(x, y);
+		return getCell( x, y );
 	}
 
 	/**
 	 * @return a Cell with the given position in the grid.
 	 */
-	public CellController getCell(int i, int j) {
+	public CellController getCell( int i, int j )
+	{
 		try {
-			int sx = Math.min(i, cells.size() - 1);
-			int sy = Math.min(j, cells.get(sx).size() - 1);
-			return cells.get(sx).get(sy);
-		} catch (Exception e) {
-			return cells.get(0).get(0);
+			int sx = Math.min( i, cells.size() - 1 );
+			int sy = Math.min( j, cells.get( sx ).size() - 1 );
+			return cells.get( sx ).get( sy );
+		}
+		catch ( Exception e ) {
+			return cells.get( 0 ).get( 0 );
 		}
 	}
 
 	/**
 	 * @return true if a visible {@link CellController} can be found at the given coordinates, false otherwise.
 	 */
-	public boolean isLocAccessible(int x, int y) {
-		CellController c = getCellAt(x, y);
+	public boolean isLocAccessible( int x, int y )
+	{
+		CellController c = getCellAt( x, y );
 		return c != null && c.isVisible();
 	}
 
@@ -195,20 +214,21 @@ public class Grid {
 	 * @see Snapmodes#CORNER_BL
 	 * @see Snapmodes#CORNER_BR
 	 */
-	public Point snapToGrid(int x, int y, Snapmodes snapmode) {
+	public Point snapToGrid( int x, int y, Snapmodes snapmode )
+	{
 		// Don't want values outside of the canvas area
-		x = Math.min(Math.max(x, 0), bounds.width);
-		y = Math.min(Math.max(y, 0), bounds.height);
+		x = Math.min( Math.max( x, 0 ), bounds.width );
+		y = Math.min( Math.max( y, 0 ), bounds.height );
 
-		Point p = new Point(x, y);
+		Point p = new Point( x, y );
 		// Try to find a cell at the given coordinates
-		CellController c = getCellAt(x, y);
+		CellController c = getCellAt( x, y );
 
 		// If none is found (ie. point is outside of grid area), try to find the closest one
-		if (c == null || !c.isVisible())
-			c = getClosestCell(x, y);
+		if ( c == null || !c.isVisible() )
+			c = getClosestCell( x, y );
 
-		switch (snapmode) {
+		switch ( snapmode ) {
 			case FREE:
 				break;
 			case CELL:
@@ -218,24 +238,24 @@ public class Grid {
 				p.y--;
 				break;
 			case LINE_H:
-				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + ShipContainer.CELL_SIZE - y))
+				if ( Math.abs( c.getBounds().y - y ) < Math.abs( c.getBounds().y + ShipContainer.CELL_SIZE - y ) )
 					p.y = c.getBounds().y;
 				else
 					p.y = c.getBounds().y + ShipContainer.CELL_SIZE;
 				break;
 			case LINE_V:
-				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + ShipContainer.CELL_SIZE - x))
+				if ( Math.abs( c.getBounds().x - x ) < Math.abs( c.getBounds().x + ShipContainer.CELL_SIZE - x ) )
 					p.x = c.getBounds().x;
 				else
 					p.x = c.getBounds().x + ShipContainer.CELL_SIZE;
 				break;
 			case CROSS:
-				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + ShipContainer.CELL_SIZE - x))
+				if ( Math.abs( c.getBounds().x - x ) < Math.abs( c.getBounds().x + ShipContainer.CELL_SIZE - x ) )
 					p.x = c.getBounds().x + 1;
 				else
 					p.x = c.getBounds().x + ShipContainer.CELL_SIZE + 1;
 
-				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + ShipContainer.CELL_SIZE - y))
+				if ( Math.abs( c.getBounds().y - y ) < Math.abs( c.getBounds().y + ShipContainer.CELL_SIZE - y ) )
 					p.y = c.getBounds().y + 1;
 				else
 					p.y = c.getBounds().y + ShipContainer.CELL_SIZE + 1;
@@ -243,7 +263,7 @@ public class Grid {
 			case EDGE_H:
 				p.x = c.getLocation().x - 1;
 
-				if (Math.abs(c.getBounds().y - y) < Math.abs(c.getBounds().y + ShipContainer.CELL_SIZE - y))
+				if ( Math.abs( c.getBounds().y - y ) < Math.abs( c.getBounds().y + ShipContainer.CELL_SIZE - y ) )
 					p.y = c.getBounds().y + 1;
 				else
 					p.y = c.getBounds().y + ShipContainer.CELL_SIZE + 1;
@@ -251,16 +271,16 @@ public class Grid {
 			case EDGE_V:
 				p.y = c.getLocation().y - 1;
 
-				if (Math.abs(c.getBounds().x - x) < Math.abs(c.getBounds().x + ShipContainer.CELL_SIZE - x))
+				if ( Math.abs( c.getBounds().x - x ) < Math.abs( c.getBounds().x + ShipContainer.CELL_SIZE - x ) )
 					p.x = c.getBounds().x + 1;
 				else
 					p.x = c.getBounds().x + ShipContainer.CELL_SIZE + 1;
 				break;
 			case EDGES:
-				Point a = snapToGrid(x, y, Snapmodes.EDGE_H);
-				Point b = snapToGrid(x, y, Snapmodes.EDGE_V);
+				Point a = snapToGrid( x, y, Snapmodes.EDGE_H );
+				Point b = snapToGrid( x, y, Snapmodes.EDGE_V );
 
-				if (Math.sqrt(Math.pow(a.x - x, 2) + Math.pow(a.y - y, 2)) < Math.sqrt(Math.pow(b.x - x, 2) + Math.pow(b.y - y, 2)))
+				if ( Math.sqrt( Math.pow( a.x - x, 2 ) + Math.pow( a.y - y, 2 ) ) < Math.sqrt( Math.pow( b.x - x, 2 ) + Math.pow( b.y - y, 2 ) ) )
 					p = a;
 				else
 					p = b;
@@ -301,7 +321,7 @@ public class Grid {
 				break;
 
 			default:
-				throw new IllegalArgumentException("Invalid snap mode.");
+				throw new IllegalArgumentException( "Invalid snap mode." );
 		}
 
 		return p;
@@ -310,16 +330,18 @@ public class Grid {
 	/**
 	 * {@linkplain #snapToGrid(int, int, Snapmodes)}
 	 */
-	public Point snapToGrid(Point p, Snapmodes snapmode) {
-		return snapToGrid(p.x, p.y, snapmode);
+	public Point snapToGrid( Point p, Snapmodes snapmode )
+	{
+		return snapToGrid( p.x, p.y, snapmode );
 	}
 
 	/**
 	 * Disposes of the grid, clearing all cells and lists.
 	 */
-	public void dispose() {
-		for (ArrayList<CellController> list : cells) {
-			for (CellController c : list)
+	public void dispose()
+	{
+		for ( ArrayList<CellController> list : cells ) {
+			for ( CellController c : list )
 				c.dispose();
 			list.clear();
 			list = null;

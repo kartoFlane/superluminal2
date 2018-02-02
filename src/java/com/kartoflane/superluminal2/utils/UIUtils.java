@@ -22,6 +22,7 @@ import com.kartoflane.superluminal2.ui.LoadingDialog;
 
 import net.vhati.modmanager.core.FTLUtilities;
 
+
 /**
  * This class contains methods that are used to show customizable dialogs
  * and UI prompts to the user.
@@ -29,14 +30,15 @@ import net.vhati.modmanager.core.FTLUtilities;
  * @author kartoFlane
  * 
  */
-public class UIUtils {
-
+public class UIUtils
+{
 	/**
 	 * Displays a Swing message dialog.<br>
 	 * Used when the user has downloaded incorrect version of the editor for their system/architecture.
 	 */
-	public static void showSwingDialog(String title, String message) {
-		JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+	public static void showSwingDialog( String title, String message )
+	{
+		JOptionPane.showMessageDialog( null, message, title, JOptionPane.INFORMATION_MESSAGE );
 	}
 
 	/**
@@ -51,27 +53,28 @@ public class UIUtils {
 	 *            the message that will be displayed to the user. Must not be null.
 	 * 
 	 */
-	public static void showErrorDialog(Shell parentShell, String title, String message) {
+	public static void showErrorDialog( Shell parentShell, String title, String message )
+	{
 		boolean dispose = false;
 
-		if (title == null)
+		if ( title == null )
 			title = Superluminal.APP_NAME + " - Error";
-		if (message == null)
-			throw new IllegalArgumentException("Message must not be null.");
+		if ( message == null )
+			throw new IllegalArgumentException( "Message must not be null." );
 
-		if (parentShell == null) {
-			parentShell = new Shell(UIUtils.getDisplay());
+		if ( parentShell == null ) {
+			parentShell = new Shell( UIUtils.getDisplay() );
 			dispose = true;
 		}
 
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_ERROR | SWT.OK);
+		MessageBox box = new MessageBox( parentShell, SWT.ICON_ERROR | SWT.OK );
 
-		box.setText(title);
-		box.setMessage(message);
+		box.setText( title );
+		box.setMessage( message );
 
 		box.open();
 
-		if (dispose)
+		if ( dispose )
 			parentShell.dispose();
 	}
 
@@ -87,27 +90,28 @@ public class UIUtils {
 	 *            the message that will be displayed to the user. Must not be null.
 	 * 
 	 */
-	public static void showWarningDialog(Shell parentShell, String title, String message) {
+	public static void showWarningDialog( Shell parentShell, String title, String message )
+	{
 		boolean dispose = false;
 
-		if (title == null)
+		if ( title == null )
 			title = Superluminal.APP_NAME + " - Warning";
-		if (message == null)
-			throw new IllegalArgumentException("Message must not be null.");
+		if ( message == null )
+			throw new IllegalArgumentException( "Message must not be null." );
 
-		if (parentShell == null) {
-			parentShell = new Shell(UIUtils.getDisplay());
+		if ( parentShell == null ) {
+			parentShell = new Shell( UIUtils.getDisplay() );
 			dispose = true;
 		}
 
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_WARNING | SWT.OK);
+		MessageBox box = new MessageBox( parentShell, SWT.ICON_WARNING | SWT.OK );
 
-		box.setText(title);
-		box.setMessage(message);
+		box.setText( title );
+		box.setMessage( message );
 
 		box.open();
 
-		if (dispose)
+		if ( dispose )
 			parentShell.dispose();
 	}
 
@@ -123,27 +127,28 @@ public class UIUtils {
 	 *            the message that will be displayed to the user. Must not be null.
 	 * 
 	 */
-	public static void showInfoDialog(Shell parentShell, String title, String message) {
+	public static void showInfoDialog( Shell parentShell, String title, String message )
+	{
 		boolean dispose = false;
 
-		if (title == null)
+		if ( title == null )
 			title = Superluminal.APP_NAME + " - Information";
-		if (message == null)
-			throw new IllegalArgumentException("Message must not be null.");
+		if ( message == null )
+			throw new IllegalArgumentException( "Message must not be null." );
 
-		if (parentShell == null) {
-			parentShell = new Shell(UIUtils.getDisplay());
+		if ( parentShell == null ) {
+			parentShell = new Shell( UIUtils.getDisplay() );
 			dispose = true;
 		}
 
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
+		MessageBox box = new MessageBox( parentShell, SWT.ICON_INFORMATION | SWT.OK );
 
-		box.setText(title);
-		box.setMessage(message);
+		box.setText( title );
+		box.setMessage( message );
 
 		box.open();
 
-		if (dispose)
+		if ( dispose )
 			parentShell.dispose();
 	}
 
@@ -159,27 +164,28 @@ public class UIUtils {
 	 * 
 	 * @return true if the user selected "Yes", false otherwise.
 	 */
-	public static boolean showYesNoDialog(Shell parentShell, String title, String message) {
+	public static boolean showYesNoDialog( Shell parentShell, String title, String message )
+	{
 		boolean dispose = false;
 
-		if (title == null)
-			throw new IllegalArgumentException("Title must not be null.");
-		if (message == null)
-			throw new IllegalArgumentException("Message must not be null.");
+		if ( title == null )
+			throw new IllegalArgumentException( "Title must not be null." );
+		if ( message == null )
+			throw new IllegalArgumentException( "Message must not be null." );
 
-		if (parentShell == null) {
-			parentShell = new Shell(UIUtils.getDisplay());
+		if ( parentShell == null ) {
+			parentShell = new Shell( UIUtils.getDisplay() );
 			dispose = true;
 		}
 
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
+		MessageBox box = new MessageBox( parentShell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO );
 
-		box.setText(title);
-		box.setMessage(message);
+		box.setText( title );
+		box.setMessage( message );
 
 		boolean result = box.open() == SWT.YES;
 
-		if (dispose)
+		if ( dispose )
 			parentShell.dispose();
 
 		return result;
@@ -198,27 +204,28 @@ public class UIUtils {
 	 * @return int value equal to {@link SWT.YES} is the user selected "Yes", {@link SWT.NO} is the user selected "No",
 	 *         and {@link SWT.CANCEL} is the user selected "Cancel",
 	 */
-	public static int showYesNoCancelDialog(Shell parentShell, String title, String message) {
+	public static int showYesNoCancelDialog( Shell parentShell, String title, String message )
+	{
 		boolean dispose = false;
 
-		if (title == null)
-			throw new IllegalArgumentException("Title must not be null.");
-		if (message == null)
-			throw new IllegalArgumentException("Message must not be null.");
+		if ( title == null )
+			throw new IllegalArgumentException( "Title must not be null." );
+		if ( message == null )
+			throw new IllegalArgumentException( "Message must not be null." );
 
-		if (parentShell == null) {
-			parentShell = new Shell(UIUtils.getDisplay());
+		if ( parentShell == null ) {
+			parentShell = new Shell( UIUtils.getDisplay() );
 			dispose = true;
 		}
 
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO | SWT.CANCEL);
+		MessageBox box = new MessageBox( parentShell, SWT.ICON_INFORMATION | SWT.YES | SWT.NO | SWT.CANCEL );
 
-		box.setText(title);
-		box.setMessage(message);
+		box.setText( title );
+		box.setMessage( message );
 
 		int result = box.open();
 
-		if (dispose)
+		if ( dispose )
 			parentShell.dispose();
 
 		return result;
@@ -238,19 +245,21 @@ public class UIUtils {
 	 *            May be null for the system's default path.
 	 * @return the selected directory, or null if not selected.
 	 */
-	public static File promptForDirectory(Shell parentShell, String title, String message, String defaultPath) {
+	public static File promptForDirectory( Shell parentShell, String title, String message, String defaultPath )
+	{
 		File result = null;
-		DirectoryDialog dialog = new DirectoryDialog(parentShell);
-		dialog.setFilterPath(defaultPath);
-		dialog.setText(title);
-		dialog.setMessage(message);
+		DirectoryDialog dialog = new DirectoryDialog( parentShell );
+		dialog.setFilterPath( defaultPath );
+		dialog.setText( title );
+		dialog.setMessage( message );
 
 		String path = dialog.open();
-		if (path == null) {
+		if ( path == null ) {
 			// User aborted selection
 			// Nothing to do here
-		} else {
-			result = new File(path);
+		}
+		else {
+			result = new File( path );
 		}
 
 		return result;
@@ -271,21 +280,23 @@ public class UIUtils {
 	 *            Usage: <code>new String[] { "*.txt" }</code>
 	 * @return the selected file, or null if not selected.
 	 */
-	public static File promptForSaveFile(Shell parentShell, String title, String defaultPath, String[] extensions) {
+	public static File promptForSaveFile( Shell parentShell, String title, String defaultPath, String[] extensions )
+	{
 		File result = null;
-		FileDialog dialog = new FileDialog(parentShell, SWT.SAVE);
-		dialog.setFilterExtensions(extensions);
-		dialog.setFilterPath(defaultPath);
-		dialog.setFileName(defaultPath);
-		dialog.setText(title);
-		dialog.setOverwrite(true);
+		FileDialog dialog = new FileDialog( parentShell, SWT.SAVE );
+		dialog.setFilterExtensions( extensions );
+		dialog.setFilterPath( defaultPath );
+		dialog.setFileName( defaultPath );
+		dialog.setText( title );
+		dialog.setOverwrite( true );
 
 		String path = dialog.open();
-		if (path == null) {
+		if ( path == null ) {
 			// User aborted selection
 			// Nothing to do here
-		} else {
-			result = new File(path);
+		}
+		else {
+			result = new File( path );
 		}
 
 		return result;
@@ -306,20 +317,22 @@ public class UIUtils {
 	 *            Usage: <code>new String[] { "*.txt" }</code>
 	 * @return the selected file, or null if not selected.
 	 */
-	public static File promptForLoadFile(Shell parentShell, String title, String defaultPath, String[] extensions) {
+	public static File promptForLoadFile( Shell parentShell, String title, String defaultPath, String[] extensions )
+	{
 		File result = null;
-		FileDialog dialog = new FileDialog(parentShell, SWT.OPEN);
-		dialog.setFilterExtensions(extensions);
-		dialog.setFilterPath(defaultPath);
-		dialog.setFileName(defaultPath);
-		dialog.setText(title);
+		FileDialog dialog = new FileDialog( parentShell, SWT.OPEN );
+		dialog.setFilterExtensions( extensions );
+		dialog.setFilterPath( defaultPath );
+		dialog.setFileName( defaultPath );
+		dialog.setText( title );
 
 		String path = dialog.open();
-		if (path == null) {
+		if ( path == null ) {
 			// User aborted selection
 			// Nothing to do here
-		} else {
-			result = new File(path);
+		}
+		else {
+			result = new File( path );
 		}
 
 		return result;
@@ -334,7 +347,8 @@ public class UIUtils {
 	 * @author Vhati - original method wth Swing dialogs
 	 * @author kartoFlane - modified to work with SWT dialogs
 	 */
-	public static File promptForDatsDir(Shell parentShell) {
+	public static File promptForDatsDir( Shell parentShell )
+	{
 		File result = null;
 
 		String message = "";
@@ -342,33 +356,35 @@ public class UIUtils {
 		message += "Select '(FTL dir)/resources/data.dat'.\n";
 		message += "Or 'FTL.app', if you're on OSX.";
 
-		MessageBox box = new MessageBox(parentShell, SWT.ICON_INFORMATION | SWT.OK);
-		box.setText("Find FTL");
-		box.setMessage(message);
+		MessageBox box = new MessageBox( parentShell, SWT.ICON_INFORMATION | SWT.OK );
+		box.setText( "Find FTL" );
+		box.setMessage( message );
 
-		FileDialog fd = new FileDialog(parentShell, SWT.OPEN);
-		fd.setText("Find data.dat or FTL.app");
-		fd.setFilterExtensions(new String[] { "*.dat", "*.app" });
-		fd.setFilterNames(new String[] { "FTL Data File - (FTL dir)/resources/data.dat", "FTL Application Bundle" });
+		FileDialog fd = new FileDialog( parentShell, SWT.OPEN );
+		fd.setText( "Find data.dat or FTL.app" );
+		fd.setFilterExtensions( new String[] { "*.dat", "*.app" } );
+		fd.setFilterNames( new String[] { "FTL Data File - (FTL dir)/resources/data.dat", "FTL Application Bundle" } );
 
 		String filePath = fd.open();
 
-		if (filePath == null) {
+		if ( filePath == null ) {
 			// User aborted selection
 			// Nothing to do here
-		} else {
-			File f = new File(filePath);
-			if (f.getName().equals("data.dat")) {
+		}
+		else {
+			File f = new File( filePath );
+			if ( f.getName().equals( "data.dat" ) ) {
 				result = f.getParentFile();
-			} else if (f.getName().endsWith(".app")) {
-				File contentsPath = new File(f, "Contents");
-				if (contentsPath.exists() && contentsPath.isDirectory() && new File(contentsPath, "Resources").exists())
-					result = new File(contentsPath, "Resources");
+			}
+			else if ( f.getName().endsWith( ".app" ) ) {
+				File contentsPath = new File( f, "Contents" );
+				if ( contentsPath.exists() && contentsPath.isDirectory() && new File( contentsPath, "Resources" ).exists() )
+					result = new File( contentsPath, "Resources" );
 				// TODO test whether this works on OSX
 			}
 		}
 
-		if (result != null && FTLUtilities.isDatsDirValid(result)) {
+		if ( result != null && FTLUtilities.isDatsDirValid( result ) ) {
 			return result;
 		}
 
@@ -385,11 +401,14 @@ public class UIUtils {
 	 * Usage:
 	 * 
 	 * <pre>
-	 * showLoadDialog(shell, title, message, new Action() {
-	 * 	public void execute() {
-	 * 		// your code here...
+	 * showLoadDialog(
+	 * 	shell, title, message, new Action() {
+	 * 		public void execute()
+	 * 		{
+	 * 			// your code here...
+	 * 		}
 	 * 	}
-	 * });
+	 * );
 	 * </pre>
 	 * 
 	 * @param parentShell
@@ -406,20 +425,23 @@ public class UIUtils {
 	 * @throws IllegalArgumentException
 	 *             when the parent shell is null.
 	 */
-	public static void showLoadDialog(Shell parentShell, String title, String message, final Runnable task) throws IllegalArgumentException {
-		if (task == null)
+	public static void showLoadDialog( Shell parentShell, String title, String message, final Runnable task ) throws IllegalArgumentException
+	{
+		if ( task == null )
 			return;
 
-		if (parentShell == null)
-			throw new IllegalArgumentException("Parent shell must not be null.");
+		if ( parentShell == null )
+			throw new IllegalArgumentException( "Parent shell must not be null." );
 
-		final LoadingDialog dialog = new LoadingDialog(parentShell, title, message);
+		final LoadingDialog dialog = new LoadingDialog( parentShell, title, message );
 		Thread loadThread = new Thread() {
 			@Override
-			public void run() {
+			public void run()
+			{
 				try {
 					task.run();
-				} finally {
+				}
+				finally {
 					dialog.dispose();
 				}
 			}
@@ -436,8 +458,9 @@ public class UIUtils {
 	 * 
 	 * @see #addTooltip(Control, String, String)
 	 */
-	public static void addTooltip(Control c, String message) {
-		addTooltip(c, "", message);
+	public static void addTooltip( Control c, String message )
+	{
+		addTooltip( c, "", message );
 	}
 
 	/**
@@ -452,33 +475,43 @@ public class UIUtils {
 	 * @param tooltipMessage
 	 *            tooltip's message
 	 */
-	public static void addTooltip(final Control c, String tooltipText, String tooltipMessage) {
-		final ToolTip tip = new ToolTip(c.getShell(), SWT.NONE);
-		tip.setText(tooltipText);
-		tip.setMessage(tooltipMessage);
-		tip.setAutoHide(false);
+	public static void addTooltip( final Control c, String tooltipText, String tooltipMessage )
+	{
+		final ToolTip tip = new ToolTip( c.getShell(), SWT.NONE );
+		tip.setText( tooltipText );
+		tip.setMessage( tooltipMessage );
+		tip.setAutoHide( false );
 
-		c.addListener(SWT.MouseHover, new Listener() {
-			public void handleEvent(Event e) {
-				Point p = c.toDisplay(e.x, e.y);
-				tip.setLocation(p.x, p.y + 20);
-				tip.setVisible(true);
+		c.addListener(
+			SWT.MouseHover, new Listener() {
+				public void handleEvent( Event e )
+				{
+					Point p = c.toDisplay( e.x, e.y );
+					tip.setLocation( p.x, p.y + 20 );
+					tip.setVisible( true );
+				}
 			}
-		});
+		);
 
-		c.addListener(SWT.MouseExit, new Listener() {
-			public void handleEvent(Event e) {
-				tip.setVisible(false);
+		c.addListener(
+			SWT.MouseExit, new Listener() {
+				public void handleEvent( Event e )
+				{
+					tip.setVisible( false );
+				}
 			}
-		});
+		);
 
-		c.addListener(SWT.Dispose, new Listener() {
-			public void handleEvent(Event e) {
-				if (!tip.isDisposed())
-					tip.setVisible(false);
-				tip.dispose();
+		c.addListener(
+			SWT.Dispose, new Listener() {
+				public void handleEvent( Event e )
+				{
+					if ( !tip.isDisposed() )
+						tip.setVisible( false );
+					tip.dispose();
+				}
 			}
-		});
+		);
 	}
 
 	/**
@@ -495,23 +528,26 @@ public class UIUtils {
 	 * @see MenuItem#setAccelerator(int)
 	 * @see MenuItem#setText(String)
 	 */
-	public static void addHotkeyText(MenuItem mntm, String hotkeyText) {
+	public static void addHotkeyText( MenuItem mntm, String hotkeyText )
+	{
 		// Bug with SWT-GTK: MenuItem.setText() changes the widget's accelerator,
 		// contrary to the Javadoc. The accelerator consumes the key event that triggers
 		// it, therefore the application is never informed about the event.
 		// (Text after \t is the accelerator text)
 		// Fix is to use brackets instead of \t (ugly workaround)
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("linux") || os.contains("nix")) {
-			mntm.setText(String.format("%s [%s]", mntm.getText(), hotkeyText));
-		} else {
-			mntm.setText(mntm.getText() + "\t" + hotkeyText);
+		String os = System.getProperty( "os.name" ).toLowerCase();
+		if ( os.contains( "linux" ) || os.contains( "nix" ) ) {
+			mntm.setText( String.format( "%s [%s]", mntm.getText(), hotkeyText ) );
+		}
+		else {
+			mntm.setText( mntm.getText() + "\t" + hotkeyText );
 		}
 	}
 
-	public static Display getDisplay() {
+	public static Display getDisplay()
+	{
 		Display display = Display.getCurrent(); // Can sometimes return null
-		if (display == null)
+		if ( display == null )
 			display = Display.getDefault();
 		return display;
 	}

@@ -24,8 +24,8 @@ import com.kartoflane.common.swt.graphics.HSV;
  * @author kartoFlane
  *
  */
-public class ShadePicker extends Composite {
-
+public class ShadePicker extends Composite
+{
 	int selHalfSize;
 	float currentHue;
 	Color selectionBorderColor;
@@ -35,7 +35,8 @@ public class ShadePicker extends Composite {
 	float selectedBrightness = 1.0f;
 
 
-	public ShadePicker( Composite parent, int style ) {
+	public ShadePicker( Composite parent, int style )
+	{
 		super( parent, style );
 
 		selHalfSize = 5;
@@ -44,17 +45,21 @@ public class ShadePicker extends Composite {
 
 		canvas = new Canvas( this, SWT.BORDER | SWT.NO_FOCUS | SWT.DOUBLE_BUFFERED );
 
-		canvas.addPaintListener( new PaintListener() {
-			@Override
-			public void paintControl( PaintEvent e ) {
-				paintShades( e );
-				paintSelectionIndicator( e );
+		canvas.addPaintListener(
+			new PaintListener() {
+				@Override
+				public void paintControl( PaintEvent e )
+				{
+					paintShades( e );
+					paintSelectionIndicator( e );
+				}
 			}
-		} );
+		);
 
 		final MouseMoveListener mml = new MouseMoveListener() {
 			@Override
-			public void mouseMove( MouseEvent e ) {
+			public void mouseMove( MouseEvent e )
+			{
 				if ( ( e.stateMask & SWT.BUTTON1 ) != 0 ) {
 					canvas.forceFocus();
 					final float width = canvas.getClientArea().width;
@@ -66,51 +71,60 @@ public class ShadePicker extends Composite {
 			}
 		};
 		canvas.addMouseMoveListener( mml );
-		canvas.addMouseListener( new MouseAdapter() {
-			@Override
-			public void mouseDown( MouseEvent e ) {
-				if ( e.button == 1 ) {
-					e.stateMask = SWT.BUTTON1;
-					mml.mouseMove( e );
+		canvas.addMouseListener(
+			new MouseAdapter() {
+				@Override
+				public void mouseDown( MouseEvent e )
+				{
+					if ( e.button == 1 ) {
+						e.stateMask = SWT.BUTTON1;
+						mml.mouseMove( e );
+					}
 				}
 			}
-		} );
+		);
 	}
 
 	@Override
-	public void setSize( int w, int h ) {
+	public void setSize( int w, int h )
+	{
 		super.setSize( w, h );
 		canvas.setSize( w, h );
 	}
 
 	@Override
-	public void setBounds( int x, int y, int w, int h ) {
+	public void setBounds( int x, int y, int w, int h )
+	{
 		super.setBounds( x, y, w, h );
 		canvas.setBounds( x, y, w - selHalfSize, h - selHalfSize );
 	}
 
-	public void setHue( float hue ) {
+	public void setHue( float hue )
+	{
 		if ( hue < 0 || hue > 1.0f )
 			throw new IllegalArgumentException( "0 < " + hue + " < 1.0" );
 		currentHue = hue;
 		canvas.redraw();
 	}
 
-	public void setHue( RGB rgb ) {
+	public void setHue( RGB rgb )
+	{
 		if ( rgb == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
 		HSV hsv = new HSV( rgb );
 		setHue( hsv.h );
 	}
 
-	public void setHue( Color color ) {
+	public void setHue( Color color )
+	{
 		if ( color == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
 		HSV hsv = new HSV( color.getRGB() );
 		setHue( hsv.h );
 	}
 
-	public void setSelection( float saturation, float brightness ) {
+	public void setSelection( float saturation, float brightness )
+	{
 		if ( saturation < 0 || saturation > 1.0f )
 			throw new IllegalArgumentException( "Saturation: 0 < " + saturation + " < 1.0" );
 		if ( brightness < 0 || brightness > 1.0f )
@@ -122,14 +136,16 @@ public class ShadePicker extends Composite {
 		notifyListeners( SWT.Selection, new Event() );
 	}
 
-	public void setSelection( RGB rgb ) {
+	public void setSelection( RGB rgb )
+	{
 		if ( rgb == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
 		HSV hsv = new HSV( rgb );
 		setSelection( hsv.s, hsv.v );
 	}
 
-	public void setSelection( Color color ) {
+	public void setSelection( Color color )
+	{
 		if ( color == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
 
@@ -137,19 +153,23 @@ public class ShadePicker extends Composite {
 		setSelection( hsv.s, hsv.v );
 	}
 
-	public HSV getSelection() {
+	public HSV getSelection()
+	{
 		return new HSV( currentHue, selectedSaturation, selectedBrightness );
 	}
 
-	public void addSelectionListener( SelectionListener listener ) {
+	public void addSelectionListener( SelectionListener listener )
+	{
 		addListener( SWT.Selection, new TypedListener( listener ) );
 	}
 
-	public void removeListener( SelectionListener listener ) {
+	public void removeListener( SelectionListener listener )
+	{
 		removeListener( SWT.Selection, listener );
 	}
 
-	void paintShades( PaintEvent e ) {
+	void paintShades( PaintEvent e )
+	{
 		final Display d = getDisplay();
 		final int width = canvas.getClientArea().width;
 		final int height = canvas.getClientArea().height;
@@ -177,7 +197,8 @@ public class ShadePicker extends Composite {
 		}
 	}
 
-	void paintSelectionIndicator( PaintEvent e ) {
+	void paintSelectionIndicator( PaintEvent e )
+	{
 		final int width = canvas.getClientArea().width;
 		final int height = canvas.getClientArea().height;
 
@@ -195,7 +216,8 @@ public class ShadePicker extends Composite {
 		e.gc.drawOval( s - selHalfSize, b - selHalfSize, selHalfSize * 2, selHalfSize * 2 );
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		selectionBorderColor.dispose();
 		canvas.dispose();
 		super.dispose();

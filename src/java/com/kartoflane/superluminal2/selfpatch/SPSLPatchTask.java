@@ -13,13 +13,14 @@ import com.kartoflane.common.selfpatch.SPPatchTask;
 import com.kartoflane.superluminal2.components.enums.OS;
 
 
-public class SPSLPatchTask implements SPPatchTask {
-
+public class SPSLPatchTask implements SPPatchTask
+{
 	private static final int bufferSize = 1024 * 16;
 
 
 	@Override
-	public void patch( File downloadedFile ) {
+	public void patch( File downloadedFile )
+	{
 		OS os = OS.identifyOS();
 
 		if ( os.isWindows() ) {

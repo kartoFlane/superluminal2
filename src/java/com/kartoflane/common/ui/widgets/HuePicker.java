@@ -28,8 +28,8 @@ import com.kartoflane.common.swt.graphics.HSV;
  * @author kartoFlane
  *
  */
-public class HuePicker extends Composite {
-
+public class HuePicker extends Composite
+{
 	int triangleSize;
 
 	Color selectionFillColor;
@@ -39,7 +39,8 @@ public class HuePicker extends Composite {
 	float selectedHue = 1.0f;
 
 
-	public HuePicker( Composite parent, int style ) {
+	public HuePicker( Composite parent, int style )
+	{
 		super( parent, style );
 
 		triangleSize = 8;
@@ -56,23 +57,30 @@ public class HuePicker extends Composite {
 		canvas = new Canvas( this, SWT.DOUBLE_BUFFERED | SWT.NO_FOCUS | SWT.BORDER );
 		canvas.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
-		canvas.addPaintListener( new PaintListener() {
-			@Override
-			public void paintControl( PaintEvent e ) {
-				paintHues( e );
+		canvas.addPaintListener(
+			new PaintListener() {
+				@Override
+				public void paintControl( PaintEvent e )
+				{
+					paintHues( e );
+				}
 			}
-		} );
+		);
 
-		addPaintListener( new PaintListener() {
-			@Override
-			public void paintControl( PaintEvent e ) {
-				paintSelectionIndicator( e );
+		addPaintListener(
+			new PaintListener() {
+				@Override
+				public void paintControl( PaintEvent e )
+				{
+					paintSelectionIndicator( e );
+				}
 			}
-		} );
+		);
 
 		final MouseMoveListener mml = new MouseMoveListener() {
 			@Override
-			public void mouseMove( MouseEvent e ) {
+			public void mouseMove( MouseEvent e )
+			{
 				if ( ( e.stateMask & SWT.BUTTON1 ) != 0 ) {
 					canvas.forceFocus();
 					final float height = canvas.getClientArea().height;
@@ -82,17 +90,21 @@ public class HuePicker extends Composite {
 			}
 		};
 		canvas.addMouseMoveListener( mml );
-		canvas.addMouseListener( new MouseAdapter() {
-			@Override
-			public void mouseDown( MouseEvent e ) {
-				e.stateMask = SWT.BUTTON1;
-				mml.mouseMove( e );
+		canvas.addMouseListener(
+			new MouseAdapter() {
+				@Override
+				public void mouseDown( MouseEvent e )
+				{
+					e.stateMask = SWT.BUTTON1;
+					mml.mouseMove( e );
+				}
 			}
-		} );
+		);
 	}
 
 	@Override
-	public Point computeSize( int wHint, int hHint, boolean changed ) {
+	public Point computeSize( int wHint, int hHint, boolean changed )
+	{
 		Point p = super.computeSize( wHint, hHint, changed );
 
 		p.x += triangleSize * 2;
@@ -101,7 +113,8 @@ public class HuePicker extends Composite {
 		return p;
 	}
 
-	public void setSelection( float hue ) {
+	public void setSelection( float hue )
+	{
 		if ( hue < 0 || hue > 1.0f )
 			throw new IllegalArgumentException( "0 < " + hue + " < 1.0" );
 
@@ -110,7 +123,8 @@ public class HuePicker extends Composite {
 		notifyListeners( SWT.Selection, new Event() );
 	}
 
-	public void setSelection( RGB rgb ) {
+	public void setSelection( RGB rgb )
+	{
 		if ( rgb == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
 
@@ -118,7 +132,8 @@ public class HuePicker extends Composite {
 		setSelection( hsv.h );
 	}
 
-	public void setSelection( Color color ) {
+	public void setSelection( Color color )
+	{
 		if ( color == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
 
@@ -126,7 +141,8 @@ public class HuePicker extends Composite {
 		setSelection( hsv.h );
 	}
 
-	public float getSelection() {
+	public float getSelection()
+	{
 		return selectedHue;
 	}
 
@@ -134,7 +150,8 @@ public class HuePicker extends Composite {
 	 * Returns the current selection in the form of a color, using the display associated with this control as device.
 	 * Colors in SWT are a system resource, and as such have to be disposed when no longer used.
 	 */
-	public Color getSelectedColor() {
+	public Color getSelectedColor()
+	{
 		return getSelectedColor( getDisplay() );
 	}
 
@@ -142,19 +159,23 @@ public class HuePicker extends Composite {
 	 * Returns the current selection in the form of a color.
 	 * Colors in SWT are a system resource, and as such have to be disposed when no longer used.
 	 */
-	public Color getSelectedColor( Device d ) {
+	public Color getSelectedColor( Device d )
+	{
 		return new HSV( selectedHue, 1.0f, 1.0f ).toColor( d );
 	}
 
-	public void addSelectionListener( SelectionListener listener ) {
+	public void addSelectionListener( SelectionListener listener )
+	{
 		addListener( SWT.Selection, new TypedListener( listener ) );
 	}
 
-	public void removeListener( SelectionListener listener ) {
+	public void removeListener( SelectionListener listener )
+	{
 		removeListener( SWT.Selection, listener );
 	}
 
-	void paintHues( PaintEvent e ) {
+	void paintHues( PaintEvent e )
+	{
 		final Display d = getDisplay();
 		final int width = canvas.getSize().x;
 		final int height = canvas.getClientArea().height;
@@ -172,21 +193,22 @@ public class HuePicker extends Composite {
 		}
 	}
 
-	void paintSelectionIndicator( PaintEvent e ) {
+	void paintSelectionIndicator( PaintEvent e )
+	{
 		final int width = canvas.getSize().x;
 		final int height = canvas.getClientArea().height;
 
 		final int hOffset = (int)( ( 1 - selectedHue ) * height );
 
 		int[] leftTriangle = new int[] {
-				0, hOffset - 2 + triangleSize / 2,
-				0, hOffset + 6 + triangleSize / 2,
-				triangleSize, hOffset + triangleSize / 2 + 2
+			0, hOffset - 2 + triangleSize / 2,
+			0, hOffset + 6 + triangleSize / 2,
+			triangleSize, hOffset + triangleSize / 2 + 2
 		};
 		int[] rightTriangle = new int[] {
-				width + triangleSize * 2 - 1, hOffset - 2 + triangleSize / 2,
-				width + triangleSize * 2 - 1, hOffset + 6 + triangleSize / 2,
-				width + triangleSize - 1, hOffset + triangleSize / 2 + 2
+			width + triangleSize * 2 - 1, hOffset - 2 + triangleSize / 2,
+			width + triangleSize * 2 - 1, hOffset + 6 + triangleSize / 2,
+			width + triangleSize - 1, hOffset + triangleSize / 2 + 2
 		};
 
 		e.gc.setBackground( selectionFillColor );
@@ -197,7 +219,8 @@ public class HuePicker extends Composite {
 		e.gc.drawPolygon( rightTriangle );
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		canvas.dispose();
 		selectionFillColor.dispose();
 		selectionBorderColor.dispose();

@@ -44,8 +44,8 @@ import com.kartoflane.common.swt.ui.widgets.ShadePicker;
  * @author kartoFlane
  *
  */
-public class SquareColorPickerDialog extends Dialog {
-
+public class SquareColorPickerDialog extends Dialog
+{
 	private static final int shadeWidth = 270;
 	private static final int shadeHeight = 270;
 	private static final int hueWidth = 25;
@@ -81,7 +81,8 @@ public class SquareColorPickerDialog extends Dialog {
 	private ModifyListener ml;
 
 
-	public SquareColorPickerDialog( Shell parent ) {
+	public SquareColorPickerDialog( Shell parent )
+	{
 		super( parent );
 		setText( "Color Picker" );
 	}
@@ -92,7 +93,8 @@ public class SquareColorPickerDialog extends Dialog {
 	 * 
 	 * When this method returns, the dialog is already disposed.
 	 */
-	public RGB open( RGB current ) {
+	public RGB open( RGB current )
+	{
 		Shell parent = getParent();
 
 		if ( current == null )
@@ -122,7 +124,8 @@ public class SquareColorPickerDialog extends Dialog {
 		return result;
 	}
 
-	private void createWidgets() {
+	private void createWidgets()
+	{
 		shadePicker = new ShadePicker( shell, SWT.NONE );
 		GridData gd_spShade = new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 );
 		gd_spShade.heightHint = shadeHeight;
@@ -131,12 +134,15 @@ public class SquareColorPickerDialog extends Dialog {
 		shadePicker.setHue( current );
 		shadePicker.setSelection( current );
 
-		shadePicker.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				updateColorSelection();
+		shadePicker.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					updateColorSelection();
+				}
 			}
-		} );
+		);
 
 		huePicker = new HuePicker( shell, SWT.NONE );
 		GridData gd_hpHue = new GridData( SWT.FILL, SWT.TOP, false, false, 1, 1 );
@@ -145,13 +151,16 @@ public class SquareColorPickerDialog extends Dialog {
 		huePicker.setLayoutData( gd_hpHue );
 		huePicker.setSelection( current );
 
-		huePicker.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				shadePicker.setHue( huePicker.getSelectedColor() );
-				updateColorSelection();
+		huePicker.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					shadePicker.setHue( huePicker.getSelectedColor() );
+					updateColorSelection();
+				}
 			}
-		} );
+		);
 
 		coControls = new Composite( shell, SWT.NONE );
 		coControls.setLayout( new GridLayout( 5, false ) );
@@ -306,58 +315,73 @@ public class SquareColorPickerDialog extends Dialog {
 		coControls.setTabList( new Control[] { txtR, txtG, txtB, txtH, txtS, txtV, txtHex } );
 		shell.setTabList( new Control[] { coControls, coButtons } );
 
-		lblColorCurrent.addMouseListener( new MouseAdapter() {
-			@Override
-			public void mouseDown( MouseEvent e ) {
-				if ( e.button == 1 ) {
-					huePicker.setSelection( current );
-					shadePicker.setSelection( current );
-					updateColorSelection();
+		lblColorCurrent.addMouseListener(
+			new MouseAdapter() {
+				@Override
+				public void mouseDown( MouseEvent e )
+				{
+					if ( e.button == 1 ) {
+						huePicker.setSelection( current );
+						shadePicker.setSelection( current );
+						updateColorSelection();
+					}
 				}
 			}
-		} );
+		);
 
-		btnConfirm.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				dispose();
+		btnConfirm.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					dispose();
+				}
 			}
-		} );
+		);
 
-		btnCancel.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				result = null;
-				dispose();
+		btnCancel.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					result = null;
+					dispose();
+				}
 			}
-		} );
+		);
 
-		shell.addListener( SWT.Close, new Listener() {
-			@Override
-			public void handleEvent( Event e ) {
-				e.doit = false;
-				result = null;
-				dispose();
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					e.doit = false;
+					result = null;
+					dispose();
+				}
 			}
-		} );
+		);
 
 		vl = new VerifyListener() {
 			@Override
-			public void verifyText( VerifyEvent e ) {
+			public void verifyText( VerifyEvent e )
+			{
 				e.doit = verifyInput( e.getSource(), e.character );
 			}
 		};
 
 		ml = new ModifyListener() {
 			@Override
-			public void modifyText( ModifyEvent e ) {
+			public void modifyText( ModifyEvent e )
+			{
 				setInput( e.getSource() );
 			}
 		};
 
 		FocusListener fl = new FocusAdapter() {
 			@Override
-			public void focusGained( FocusEvent e ) {
+			public void focusGained( FocusEvent e )
+			{
 				if ( e.getSource() == txtHex ) {
 					String t = txtHex.getText();
 					if ( t.length() % 2 == 1 )
@@ -377,7 +401,8 @@ public class SquareColorPickerDialog extends Dialog {
 		updateColorSelection();
 	}
 
-	private void updateColorSelection() {
+	private void updateColorSelection()
+	{
 		// Updating the txt fields while listeners are registered results in a
 		// huge amount of lag. Remove the listeners temporarily, and re-register
 		// them when we're done.
@@ -419,28 +444,31 @@ public class SquareColorPickerDialog extends Dialog {
 		addListeners();
 	}
 
-	private void removeListeners() {
+	private void removeListeners()
+	{
 		for ( Text t : txtFields ) {
 			t.removeVerifyListener( vl );
 			t.removeModifyListener( ml );
 		}
 	}
 
-	private void addListeners() {
+	private void addListeners()
+	{
 		for ( Text t : txtFields ) {
 			t.addVerifyListener( vl );
 			t.addModifyListener( ml );
 		}
 	}
 
-	private boolean verifyInput( Object src, char ch ) {
+	private boolean verifyInput( Object src, char ch )
+	{
 		if ( ch == '\b' || ch == 127 ) // Backspace and delete keys
 			return true;
 
 		Text t = (Text)src;
 		if ( src == txtHex ) {
 			return ( t.getText().length() < 6 || t.getSelectionCount() > 0 ) &&
-					( ( ch >= '0' && ch <= '9' ) || ( ch >= 'a' && ch <= 'f' ) ||
+				( ( ch >= '0' && ch <= '9' ) || ( ch >= 'a' && ch <= 'f' ) ||
 					( ch >= 'A' && ch <= 'F' ) );
 		}
 		else if ( src == txtR || src == txtG || src == txtB ) {
@@ -454,7 +482,8 @@ public class SquareColorPickerDialog extends Dialog {
 		return false;
 	}
 
-	private void setInput( Object src ) {
+	private void setInput( Object src )
+	{
 		if ( src == txtHex ) {
 			String text = ( (Text)src ).getText();
 			RGB rgb = new RGB( 0, 0, 0 );
@@ -523,7 +552,8 @@ public class SquareColorPickerDialog extends Dialog {
 		}
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		lblColorCurrent.getBackground().dispose();
 		shell.dispose();
 	}

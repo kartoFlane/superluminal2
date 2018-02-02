@@ -9,10 +9,11 @@ import com.kartoflane.common.selfpatch.SPRunTask;
 import com.kartoflane.superluminal2.components.enums.OS;
 
 
-public class SPSLRunTask extends SPRunTask {
-
+public class SPSLRunTask extends SPRunTask
+{
 	@Override
-	public void run() {
+	public void run()
+	{
 		ProcessBuilder pb = new ProcessBuilder();
 		pb.redirectErrorStream( true );
 		pb.directory( null );
@@ -47,7 +48,8 @@ public class SPSLRunTask extends SPRunTask {
 		}
 	}
 
-	private void scanRec( File dir, List<File> result ) {
+	private void scanRec( File dir, List<File> result )
+	{
 		if ( dir.getName().endsWith( ".tmp" ) ) {
 			result.add( dir );
 			return;

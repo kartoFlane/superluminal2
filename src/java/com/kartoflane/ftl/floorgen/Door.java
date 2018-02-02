@@ -4,26 +4,32 @@ package com.kartoflane.ftl.floorgen;
  * Similarily to rooms, doors' coordinates indicate a tile -- however, they always "hug" the
  * left (if vertical) or top (if horizontal) wall of the tile they are positioned on.
  */
-class Door {
+class Door
+{
 	private final int x;
 	private final int y;
 	private boolean horizontal;
 
-	Door(int x, int y, boolean h) {
+
+	Door( int x, int y, boolean h )
+	{
 		this.x = x;
 		this.y = y;
 		horizontal = h;
 	}
 
-	protected int getX() {
+	protected int getX()
+	{
 		return x;
 	}
 
-	protected int getY() {
+	protected int getY()
+	{
 		return y;
 	}
 
-	protected boolean isHorizontal() {
+	protected boolean isHorizontal()
+	{
 		return horizontal;
 	}
 }

@@ -5,82 +5,94 @@ import org.eclipse.swt.events.MouseEvent;
 import com.kartoflane.superluminal2.components.interfaces.MouseInputListener;
 import com.kartoflane.superluminal2.tools.Tool;
 
+
 /**
  * Listens for mouse-related events and then delegates them to the currently selected tool.
  * 
  * @author kartoFlane
  *
  */
-public class MouseInputDispatcher implements MouseInputListener {
-
+public class MouseInputDispatcher implements MouseInputListener
+{
 	private static MouseInputDispatcher instance = null;
 	private Tool currentTool = null;
 
-	public MouseInputDispatcher() {
+
+	public MouseInputDispatcher()
+	{
 		instance = this;
 	}
 
-	public void setCurrentTool(Tool tool) {
+	public void setCurrentTool( Tool tool )
+	{
 		currentTool = tool;
 	}
 
-	public static MouseInputDispatcher getInstance() {
+	public static MouseInputDispatcher getInstance()
+	{
 		return instance;
 	}
 
 	@Override
-	public void mouseDown(MouseEvent e) {
-		if (e.button == 1)
+	public void mouseDown( MouseEvent e )
+	{
+		if ( e.button == 1 )
 			Manager.leftMouseDown = true;
-		if (e.button == 2)
+		if ( e.button == 2 )
 			Manager.midMouseDown = true;
-		if (e.button == 3)
+		if ( e.button == 3 )
 			Manager.rightMouseDown = true;
 
-		if (currentTool != null)
-			currentTool.mouseDown(e);
+		if ( currentTool != null )
+			currentTool.mouseDown( e );
 	}
 
 	@Override
-	public void mouseUp(MouseEvent e) {
-		if (e.button == 1)
+	public void mouseUp( MouseEvent e )
+	{
+		if ( e.button == 1 )
 			Manager.leftMouseDown = false;
-		if (e.button == 2)
+		if ( e.button == 2 )
 			Manager.midMouseDown = false;
-		if (e.button == 3)
+		if ( e.button == 3 )
 			Manager.rightMouseDown = false;
 
-		if (currentTool != null)
-			currentTool.mouseUp(e);
+		if ( currentTool != null )
+			currentTool.mouseUp( e );
 	}
 
 	@Override
-	public void mouseMove(MouseEvent e) {
-		if (currentTool != null)
-			currentTool.mouseMove(e);
+	public void mouseMove( MouseEvent e )
+	{
+		if ( currentTool != null )
+			currentTool.mouseMove( e );
 	}
 
 	@Override
-	public void mouseDoubleClick(MouseEvent e) {
-		if (currentTool != null)
-			currentTool.mouseDoubleClick(e);
+	public void mouseDoubleClick( MouseEvent e )
+	{
+		if ( currentTool != null )
+			currentTool.mouseDoubleClick( e );
 	}
 
 	@Override
-	public void mouseEnter(MouseEvent e) {
-		if (currentTool != null)
-			currentTool.mouseEnter(e);
+	public void mouseEnter( MouseEvent e )
+	{
+		if ( currentTool != null )
+			currentTool.mouseEnter( e );
 	}
 
 	@Override
-	public void mouseExit(MouseEvent e) {
-		if (currentTool != null)
-			currentTool.mouseExit(e);
+	public void mouseExit( MouseEvent e )
+	{
+		if ( currentTool != null )
+			currentTool.mouseExit( e );
 	}
 
 	@Override
-	public void mouseHover(MouseEvent e) {
-		if (currentTool != null)
-			currentTool.mouseHover(e);
+	public void mouseHover( MouseEvent e )
+	{
+		if ( currentTool != null )
+			currentTool.mouseHover( e );
 	}
 }

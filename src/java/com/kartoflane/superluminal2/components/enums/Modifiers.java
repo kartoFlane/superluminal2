@@ -11,7 +11,8 @@ package com.kartoflane.superluminal2.components.enums;
  * @see {@link org.eclipse.swt.SWT#COMMAND SWT.COMMAND}
  *
  */
-public enum Modifiers {
+public enum Modifiers
+{
 	// @formatter:off
 	ALT     (1 << 16),
 	SHIFT   (1 << 17),
@@ -21,21 +22,26 @@ public enum Modifiers {
 
 	private final int id;
 
-	private Modifiers(int id) {
+
+	private Modifiers( int id )
+	{
 		this.id = id;
 	}
 
-	public int id() {
+	public int id()
+	{
 		return id;
 	}
 
-	public int getSWTMask() {
+	public int getSWTMask()
+	{
 		return id;
 	}
 
 	@Override
-	public String toString() {
-		switch (this) {
+	public String toString()
+	{
+		switch ( this ) {
 			case ALT:
 				return "Alt";
 			case SHIFT:

@@ -4,32 +4,38 @@ import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 
-@SuppressWarnings("serial")
-public class UndoableGibLinkEdit extends ValueUndoableEdit<GibObject> {
 
+@SuppressWarnings("serial")
+public class UndoableGibLinkEdit extends ValueUndoableEdit<GibObject>
+{
 	private final MountController data;
 
-	public UndoableGibLinkEdit(MountController mc) {
-		if (mc == null)
-			throw new IllegalArgumentException("Argument must not be null.");
+
+	public UndoableGibLinkEdit( MountController mc )
+	{
+		if ( mc == null )
+			throw new IllegalArgumentException( "Argument must not be null." );
 
 		data = mc;
 	}
 
 	@Override
-	public String getPresentationName() {
-		return String.format("link %s", data.getClass().getSimpleName());
+	public String getPresentationName()
+	{
+		return String.format( "link %s", data.getClass().getSimpleName() );
 	}
 
 	@Override
-	public void doUndo() {
-		data.setGib(old);
+	public void doUndo()
+	{
+		data.setGib( old );
 		EditorWindow.getInstance().updateSidebarContent();
 	}
 
 	@Override
-	public void doRedo() {
-		data.setGib(cur);
+	public void doRedo()
+	{
+		data.setGib( cur );
 		EditorWindow.getInstance().updateSidebarContent();
 	}
 }

@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum DroneStats {
+public enum DroneStats
+{
 	/** Chance to avoid colliding with a projectile and getting destroyed */
 	DODGE_CHANCE,
 	/** The blueprint's rarity */
@@ -14,8 +15,9 @@ public enum DroneStats {
 	/** The flying speed of the drone, and attack speed for combat drones */
 	SPEED;
 
-	public String getTagName() {
-		switch (this) {
+	public String getTagName()
+	{
+		switch ( this ) {
 			case POWER_COST:
 				return "power";
 			case SCRAP_COST:
@@ -27,19 +29,20 @@ public enum DroneStats {
 		}
 	}
 
-	public String formatValue(float value) {
-		switch (this) {
+	public String formatValue( float value )
+	{
+		switch ( this ) {
 			case POWER_COST:
 			case SCRAP_COST:
 			case SPEED:
-				return "" + (int) value;
+				return "" + (int)value;
 			case COOLDOWN:
-				return (int) value + " ms";
+				return (int)value + " ms";
 			case DODGE_CHANCE:
-				return "" + (((int) value) * 10) + "%";
+				return "" + ( ( (int)value ) * 10 ) + "%";
 			case RARITY:
-				int r = (int) value;
-				switch (r) {
+				int r = (int)value;
+				switch ( r ) {
 					case 0:
 						return "Unobtainable (0)";
 					case 1:
@@ -53,15 +56,16 @@ public enum DroneStats {
 					case 5:
 						return "Very Rare (5)";
 					default:
-						throw new IllegalArgumentException("Incorrect rarity value: " + value);
+						throw new IllegalArgumentException( "Incorrect rarity value: " + value );
 				}
 			default:
 				return "" + value;
 		}
 	}
 
-	public boolean doesApply(DroneTypes type) {
-		switch (this) {
+	public boolean doesApply( DroneTypes type )
+	{
+		switch ( this ) {
 			case COOLDOWN:
 				return type == DroneTypes.DEFENSE || type == DroneTypes.SHIELD;
 			case DODGE_CHANCE:
@@ -73,8 +77,9 @@ public enum DroneStats {
 	}
 
 	@Override
-	public String toString() {
-		switch (this) {
+	public String toString()
+	{
+		switch ( this ) {
 			case DODGE_CHANCE:
 				return "Dodge Chance";
 			case POWER_COST:
@@ -83,7 +88,7 @@ public enum DroneStats {
 				return "Cost";
 			default:
 				String s = getTagName();
-				s = s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+				s = s.substring( 0, 1 ).toUpperCase() + s.substring( 1 ).toLowerCase();
 				return s;
 		}
 	}

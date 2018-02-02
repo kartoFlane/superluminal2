@@ -20,8 +20,8 @@ import com.kartoflane.common.selfpatch.SPDownloadWindow;
 import com.kartoflane.superluminal2.Superluminal;
 
 
-public class DownloadDialog implements SPDownloadWindow {
-
+public class DownloadDialog implements SPDownloadWindow
+{
 	private static DownloadDialog instance = null;
 
 	private Shell shell = null;
@@ -37,7 +37,8 @@ public class DownloadDialog implements SPDownloadWindow {
 	private boolean succeeded = false;
 
 
-	public DownloadDialog( Shell parent ) {
+	public DownloadDialog( Shell parent )
+	{
 		if ( instance != null )
 			throw new IllegalStateException( "Previous instance has not been disposed!" );
 		instance = this;
@@ -71,23 +72,30 @@ public class DownloadDialog implements SPDownloadWindow {
 		Point parLoc = parent.getLocation();
 		shell.setLocation( parLoc.x + parSize.x / 2 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2 );
 
-		btnContinue.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				dispose();
+		btnContinue.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					dispose();
+				}
 			}
-		} );
+		);
 
-		shell.addListener( SWT.Close, new Listener() {
-			@Override
-			public void handleEvent( Event e ) {
-				e.doit = false;
-				dispose();
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					e.doit = false;
+					dispose();
+				}
 			}
-		} );
+		);
 	}
 
-	private void setIndeterminate( boolean indeterminate ) {
+	private void setIndeterminate( boolean indeterminate )
+	{
 		progressIndeterminate = indeterminate;
 		if ( barProgress != null && !barProgress.isDisposed() )
 			barProgress.dispose();
@@ -101,15 +109,20 @@ public class DownloadDialog implements SPDownloadWindow {
 	 * @param message
 	 *            a string, or null
 	 */
-	public void setStatusTextLater( final String message ) {
-		shell.getDisplay().asyncExec( new Runnable() {
-			public void run() {
-				setStatusText( message != null ? message : "..." );
+	public void setStatusTextLater( final String message )
+	{
+		shell.getDisplay().asyncExec(
+			new Runnable() {
+				public void run()
+				{
+					setStatusText( message != null ? message : "..." );
+				}
 			}
-		} );
+		);
 	}
 
-	protected void setStatusText( String message ) {
+	protected void setStatusText( String message )
+	{
 		txtStatus.setText( message != null ? message : "..." );
 	}
 
@@ -121,22 +134,26 @@ public class DownloadDialog implements SPDownloadWindow {
 	 * @param value
 	 *            the new value
 	 */
-	public void setProgressLater( final int value ) {
-		shell.getDisplay().asyncExec( new Runnable() {
-			@Override
-			public void run() {
-				if ( value >= 0 ) {
-					if ( progressIndeterminate )
-						setIndeterminate( false );
-					barProgress.setSelection( value );
-				}
-				else {
-					if ( !progressIndeterminate )
-						setIndeterminate( true );
-					barProgress.setSelection( 0 );
+	public void setProgressLater( final int value )
+	{
+		shell.getDisplay().asyncExec(
+			new Runnable() {
+				@Override
+				public void run()
+				{
+					if ( value >= 0 ) {
+						if ( progressIndeterminate )
+							setIndeterminate( false );
+						barProgress.setSelection( value );
+					}
+					else {
+						if ( !progressIndeterminate )
+							setIndeterminate( true );
+						barProgress.setSelection( 0 );
+					}
 				}
 			}
-		} );
+		);
 	}
 
 	/**
@@ -149,27 +166,31 @@ public class DownloadDialog implements SPDownloadWindow {
 	 * @param max
 	 *            the new maximum
 	 */
-	public void setProgressLater( final int value, final int max ) {
-		shell.getDisplay().asyncExec( new Runnable() {
-			@Override
-			public void run() {
-				if ( value >= 0 && max >= 0 ) {
-					if ( progressIndeterminate )
-						setIndeterminate( false );
+	public void setProgressLater( final int value, final int max )
+	{
+		shell.getDisplay().asyncExec(
+			new Runnable() {
+				@Override
+				public void run()
+				{
+					if ( value >= 0 && max >= 0 ) {
+						if ( progressIndeterminate )
+							setIndeterminate( false );
 
-					if ( barProgress.getMaximum() != max ) {
-						barProgress.setSelection( 0 );
-						barProgress.setMaximum( max );
+						if ( barProgress.getMaximum() != max ) {
+							barProgress.setSelection( 0 );
+							barProgress.setMaximum( max );
+						}
+						barProgress.setSelection( value );
 					}
-					barProgress.setSelection( value );
-				}
-				else {
-					if ( !progressIndeterminate )
-						setIndeterminate( true );
-					barProgress.setSelection( 0 );
+					else {
+						if ( !progressIndeterminate )
+							setIndeterminate( true );
+						barProgress.setSelection( 0 );
+					}
 				}
 			}
-		} );
+		);
 	}
 
 	/**
@@ -177,16 +198,21 @@ public class DownloadDialog implements SPDownloadWindow {
 	 *
 	 * If anything went wrong, e may be non-null.
 	 */
-	public void setTaskOutcomeLater( final boolean success, final Exception e ) {
-		shell.getDisplay().asyncExec( new Runnable() {
-			@Override
-			public void run() {
-				setTaskOutcome( success, e );
+	public void setTaskOutcomeLater( final boolean success, final Exception e )
+	{
+		shell.getDisplay().asyncExec(
+			new Runnable() {
+				@Override
+				public void run()
+				{
+					setTaskOutcome( success, e );
+				}
 			}
-		} );
+		);
 	}
 
-	protected void setTaskOutcome( final boolean outcome, final Exception e ) {
+	protected void setTaskOutcome( final boolean outcome, final Exception e )
+	{
 		done = true;
 		succeeded = outcome;
 
@@ -200,22 +226,26 @@ public class DownloadDialog implements SPDownloadWindow {
 	}
 
 	@Override
-	public void taskProgress( int value, int max ) {
+	public void taskProgress( int value, int max )
+	{
 		this.setProgressLater( value, max );
 	}
 
 	@Override
-	public void taskStatus( String message ) {
+	public void taskStatus( String message )
+	{
 		setStatusTextLater( message != null ? message : "..." );
 	}
 
 	@Override
-	public void taskFinished( boolean outcome, Exception e ) {
+	public void taskFinished( boolean outcome, Exception e )
+	{
 		setTaskOutcomeLater( outcome, e );
 	}
 
 	@Override
-	public void spShow() {
+	public void spShow()
+	{
 		shell.open();
 
 		Display display = shell.getDisplay();
@@ -226,11 +256,13 @@ public class DownloadDialog implements SPDownloadWindow {
 	}
 
 	@Override
-	public void setTaskThread( Thread thread ) {
+	public void setTaskThread( Thread thread )
+	{
 		taskThread = thread;
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		if ( !done ) {
 			if ( taskThread != null ) {
 				taskThread.interrupt();

@@ -29,8 +29,8 @@ import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
 
-public class FloorgenDialog {
-
+public class FloorgenDialog
+{
 	private static FloorgenDialog instance = null;
 	private static RGB currentBorder = null;
 	private static RGB currentFloor = null;
@@ -48,7 +48,8 @@ public class FloorgenDialog {
 	private boolean initd = false;
 
 
-	public FloorgenDialog( final Shell parent ) {
+	public FloorgenDialog( final Shell parent )
+	{
 		if ( instance != null )
 			throw new IllegalStateException( "Previous instance has not been disposed!" );
 		instance = this;
@@ -173,105 +174,135 @@ public class FloorgenDialog {
 		updateUI();
 		btnConfirm.forceFocus();
 
-		sclBorder.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				result.setBorderWidth( sclBorder.getSelection() );
+		sclBorder.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					result.setBorderWidth( sclBorder.getSelection() );
+				}
 			}
-		} );
+		);
 
-		sclMargin.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				result.setFloorMargin( sclMargin.getSelection() );
-				sclCorner.setMaximum( Math.max( 1, result.getFloorMargin() ) );
-				sclCorner.setEnabled( result.getFloorMargin() > 0 );
-				result.setCornerSize( Math.max( 0, result.getFloorMargin() - sclCorner.getSelection() ) );
+		sclMargin.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					result.setFloorMargin( sclMargin.getSelection() );
+					sclCorner.setMaximum( Math.max( 1, result.getFloorMargin() ) );
+					sclCorner.setEnabled( result.getFloorMargin() > 0 );
+					result.setCornerSize( Math.max( 0, result.getFloorMargin() - sclCorner.getSelection() ) );
+				}
 			}
-		} );
+		);
 
-		sclCorner.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				result.setCornerSize( Math.max( 0, result.getFloorMargin() - sclCorner.getSelection() ) );
+		sclCorner.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					result.setCornerSize( Math.max( 0, result.getFloorMargin() - sclCorner.getSelection() ) );
+				}
 			}
-		} );
+		);
 
-		btnCancel.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				result = null;
-				dispose();
+		btnCancel.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					result = null;
+					dispose();
+				}
 			}
-		} );
+		);
 
-		btnConfirm.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				lastResult = result;
-				dispose();
+		btnConfirm.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					lastResult = result;
+					dispose();
+				}
 			}
-		} );
+		);
 
-		btnDefault.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				result = new FloorImageFactory();
-				updateUI();
-			}
-		} );
-
-		btnSelectColorBorder.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				SquareColorPickerDialog cpd = new SquareColorPickerDialog( shell );
-				cpd.setText( Superluminal.APP_NAME + " - Color Picker (Border Color)" );
-				java.awt.Color c = result.getBorderColor();
-				RGB input = new RGB( c.getRed(), c.getGreen(), c.getBlue() );
-				RGB rgb = cpd.open( input );
-				if ( rgb != null ) {
-					java.awt.Color color = new java.awt.Color( rgb.red, rgb.green, rgb.blue );
-					result.setBorderColor( color );
+		btnDefault.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					result = new FloorImageFactory();
 					updateUI();
 				}
 			}
-		} );
+		);
 
-		btnSelectColorFloor.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected( SelectionEvent e ) {
-				SquareColorPickerDialog cpd = new SquareColorPickerDialog( shell );
-				cpd.setText( Superluminal.APP_NAME + " - Color Picker (Floor Color)" );
-				java.awt.Color c = result.getFloorColor();
-				RGB input = new RGB( c.getRed(), c.getGreen(), c.getBlue() );
-				RGB rgb = cpd.open( input );
-				if ( rgb != null ) {
-					java.awt.Color color = new java.awt.Color( rgb.red, rgb.green, rgb.blue );
-					result.setFloorColor( color );
-					updateUI();
+		btnSelectColorBorder.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					SquareColorPickerDialog cpd = new SquareColorPickerDialog( shell );
+					cpd.setText( Superluminal.APP_NAME + " - Color Picker (Border Color)" );
+					java.awt.Color c = result.getBorderColor();
+					RGB input = new RGB( c.getRed(), c.getGreen(), c.getBlue() );
+					RGB rgb = cpd.open( input );
+					if ( rgb != null ) {
+						java.awt.Color color = new java.awt.Color( rgb.red, rgb.green, rgb.blue );
+						result.setBorderColor( color );
+						updateUI();
+					}
 				}
 			}
-		} );
+		);
 
-		shell.addListener( SWT.Close, new Listener() {
-			@Override
-			public void handleEvent( Event e ) {
-				e.doit = false;
-				result = null;
-				dispose();
-			}
-		} );
-
-		shell.addControlListener( new ControlAdapter() {
-			@Override
-			public void controlMoved( ControlEvent e ) {
-				if ( initd ) {
-					lastPosition = shell.getLocation();
-					lastPosition.x -= parent.getLocation().x;
-					lastPosition.y -= parent.getLocation().y;
+		btnSelectColorFloor.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					SquareColorPickerDialog cpd = new SquareColorPickerDialog( shell );
+					cpd.setText( Superluminal.APP_NAME + " - Color Picker (Floor Color)" );
+					java.awt.Color c = result.getFloorColor();
+					RGB input = new RGB( c.getRed(), c.getGreen(), c.getBlue() );
+					RGB rgb = cpd.open( input );
+					if ( rgb != null ) {
+						java.awt.Color color = new java.awt.Color( rgb.red, rgb.green, rgb.blue );
+						result.setFloorColor( color );
+						updateUI();
+					}
 				}
 			}
-		} );
+		);
+
+		shell.addListener(
+			SWT.Close, new Listener() {
+				@Override
+				public void handleEvent( Event e )
+				{
+					e.doit = false;
+					result = null;
+					dispose();
+				}
+			}
+		);
+
+		shell.addControlListener(
+			new ControlAdapter() {
+				@Override
+				public void controlMoved( ControlEvent e )
+				{
+					if ( initd ) {
+						lastPosition = shell.getLocation();
+						lastPosition.x -= parent.getLocation().x;
+						lastPosition.y -= parent.getLocation().y;
+					}
+				}
+			}
+		);
 
 		if ( lastPosition != null ) {
 			Point p = parent.getLocation();
@@ -290,7 +321,8 @@ public class FloorgenDialog {
 		initd = true;
 	}
 
-	public FloorImageFactory open() {
+	public FloorImageFactory open()
+	{
 		shell.open();
 
 		Display d = shell.getDisplay();
@@ -302,7 +334,8 @@ public class FloorgenDialog {
 		return result;
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		Cache.checkInColor( this, currentBorder );
 		Cache.checkInColor( this, currentFloor );
 		Cache.checkInImage( this, "cpath:/assets/help.png" );
@@ -310,7 +343,8 @@ public class FloorgenDialog {
 		shell.dispose();
 	}
 
-	private void updateUI() {
+	private void updateUI()
+	{
 		sclBorder.setSelection( result.getBorderWidth() );
 		sclMargin.setSelection( result.getFloorMargin() );
 		sclCorner.setMaximum( Math.max( 1, result.getFloorMargin() ) );
@@ -330,7 +364,8 @@ public class FloorgenDialog {
 		lblColorFloor.setBackground( color );
 	}
 
-	private RGB rgb( java.awt.Color color ) {
+	private RGB rgb( java.awt.Color color )
+	{
 		return new RGB( color.getRed(), color.getGreen(), color.getBlue() );
 	}
 }

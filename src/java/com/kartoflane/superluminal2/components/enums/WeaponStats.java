@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum WeaponStats {
+public enum WeaponStats
+{
 	/** Amount of damage dealt to the ship's hull, systems, and crew in hit room */
 	DAMAGE,
 	/** Amount of power bars that become locked down when a system is hit by this weapon */
@@ -42,8 +43,9 @@ public enum WeaponStats {
 	/** For BURST type weapons, determines the area of effect of the weapon */
 	RADIUS;
 
-	public String getTagName() {
-		switch (this) {
+	public String getTagName()
+	{
+		switch ( this ) {
 			case ION_DAMAGE:
 				return "ion";
 			case PERS_DAMAGE:
@@ -73,8 +75,9 @@ public enum WeaponStats {
 		}
 	}
 
-	public String formatValue(float value) {
-		switch (this) {
+	public String formatValue( float value )
+	{
+		switch ( this ) {
 			case DAMAGE:
 			case ION_DAMAGE:
 			case PERS_DAMAGE:
@@ -88,17 +91,17 @@ public enum WeaponStats {
 			case SPEED:
 			case LENGTH:
 			case STUN:
-				return "" + (int) value;
+				return "" + (int)value;
 			case FIRE_CHANCE:
 			case BREACH_CHANCE:
 			case STUN_CHANCE:
-				return "" + (((int) value) * 10) + "%";
+				return "" + ( ( (int)value ) * 10 ) + "%";
 			case HULL_BUST:
 			case LOCKDOWN:
-				return "" + (((int) value) == 1 ? "Yes" : "No");
+				return "" + ( ( (int)value ) == 1 ? "Yes" : "No" );
 			case RARITY:
-				int r = (int) value;
-				switch (r) {
+				int r = (int)value;
+				switch ( r ) {
 					case 0:
 						return "Unobtainable (0)";
 					case 1:
@@ -112,15 +115,16 @@ public enum WeaponStats {
 					case 5:
 						return "Very Rare (5)";
 					default:
-						throw new IllegalArgumentException("Incorrect rarity value: " + value);
+						throw new IllegalArgumentException( "Incorrect rarity value: " + value );
 				}
 			default:
 				return "" + value;
 		}
 	}
 
-	public boolean doesApply(WeaponTypes type) {
-		switch (this) {
+	public boolean doesApply( WeaponTypes type )
+	{
+		switch ( this ) {
 			case PIERCING:
 			case SPEED:
 				return type != WeaponTypes.BOMB;
@@ -139,8 +143,9 @@ public enum WeaponStats {
 	}
 
 	@Override
-	public String toString() {
-		switch (this) {
+	public String toString()
+	{
+		switch ( this ) {
 			case ION_DAMAGE:
 				return "Ion Damage";
 			case PERS_DAMAGE:
@@ -167,7 +172,7 @@ public enum WeaponStats {
 				return "Stun Duration";
 			default:
 				String s = getTagName();
-				s = s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+				s = s.substring( 0, 1 ).toUpperCase() + s.substring( 1 ).toLowerCase();
 				return s;
 		}
 	}

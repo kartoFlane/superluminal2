@@ -3,13 +3,15 @@ package com.kartoflane.superluminal2.components.interfaces;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
-public interface Resizable extends Movable {
+
+public interface Resizable extends Movable
+{
 	/**
 	 * Change size of the object to the specified values
 	 * 
 	 * @return true if size was changed, false otherwise
 	 */
-	public boolean setSize(int w, int h);
+	public boolean setSize( int w, int h );
 
 	/**
 	 * @return size of the object
@@ -25,7 +27,7 @@ public interface Resizable extends Movable {
 	/** @return the redraw bounds of the box. <b>NOT</b> the same as location and size. */
 	public Rectangle getBounds();
 
-	public boolean contains(int x, int y);
+	public boolean contains( int x, int y );
 
-	public boolean intersects(Rectangle rect);
+	public boolean intersects( Rectangle rect );
 }

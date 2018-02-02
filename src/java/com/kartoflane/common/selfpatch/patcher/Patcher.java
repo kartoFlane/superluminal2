@@ -6,9 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Patcher {
-
-	public static void main( String[] args ) {
+public class Patcher
+{
+	public static void main( String[] args )
+	{
 		if ( args.length % 2 == 0 ) {
 			System.err.println( "Number of args is even. Patcher will now exit." );
 			System.exit( 1 );

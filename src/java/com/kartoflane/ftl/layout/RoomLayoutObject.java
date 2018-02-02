@@ -6,10 +6,11 @@ package com.kartoflane.ftl.layout;
  * @author kartoFlane
  *
  */
-public class RoomLayoutObject extends LayoutObject {
-
-	public RoomLayoutObject(int index, int x, int y, int w, int h) {
-		super(LOType.ROOM, 5);
+public class RoomLayoutObject extends LayoutObject
+{
+	public RoomLayoutObject( int index, int x, int y, int w, int h )
+	{
+		super( LOType.ROOM, 5 );
 		values[0] = index;
 		values[1] = x;
 		values[2] = y;
@@ -17,23 +18,28 @@ public class RoomLayoutObject extends LayoutObject {
 		values[4] = h;
 	}
 
-	public int getIndex() {
+	public int getIndex()
+	{
 		return values[0];
 	}
 
-	public int getX() {
+	public int getX()
+	{
 		return values[1];
 	}
 
-	public int getY() {
+	public int getY()
+	{
 		return values[2];
 	}
 
-	public int getW() {
+	public int getW()
+	{
 		return values[3];
 	}
 
-	public int getH() {
+	public int getH()
+	{
 		return values[4];
 	}
 }

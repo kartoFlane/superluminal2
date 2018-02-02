@@ -4,6 +4,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.models.BaseModel;
 import com.kartoflane.superluminal2.mvc.views.props.ArcPropView;
 
+
 /**
  * A prop that serves to visualise a range of values in the form of a (partial) circle.
  * Think pie chart.<br>
@@ -24,10 +25,12 @@ import com.kartoflane.superluminal2.mvc.views.props.ArcPropView;
  * @author kartoFlane
  *
  */
-public class ArcPropController extends PropController {
+public class ArcPropController extends PropController
+{
 	private int startAngle = 0;
 	private int arcSpan = 0;
 	private boolean rim = false;
+
 
 	/**
 	 * Creates a new arc prop controller.
@@ -37,8 +40,9 @@ public class ArcPropController extends PropController {
 	 * @param id
 	 *            the string used to identify and distinguish this prop
 	 */
-	public ArcPropController(AbstractController parent, String id) {
-		super(parent, new BaseModel(), new ArcPropView(), id);
+	public ArcPropController( AbstractController parent, String id )
+	{
+		super( parent, new BaseModel(), new ArcPropView(), id );
 	}
 
 	/**
@@ -47,7 +51,8 @@ public class ArcPropController extends PropController {
 	 * <br>
 	 * Note: 0 degrees points <b>north</b>, angles increase <b>counter-clockwise</b>
 	 */
-	public void setStartAngle(int angle) {
+	public void setStartAngle( int angle )
+	{
 		startAngle = angle;
 	}
 
@@ -59,7 +64,8 @@ public class ArcPropController extends PropController {
 	 * 
 	 * @return the starting angle, in degrees
 	 */
-	public int getStartAngle() {
+	public int getStartAngle()
+	{
 		return startAngle;
 	}
 
@@ -69,7 +75,8 @@ public class ArcPropController extends PropController {
 	 * <br>
 	 * Note: 0 degrees points <b>north</b>, angles increase <b>counter-clockwise</b>
 	 */
-	public void setArcSpan(int angle) {
+	public void setArcSpan( int angle )
+	{
 		arcSpan = angle;
 	}
 
@@ -81,7 +88,8 @@ public class ArcPropController extends PropController {
 	 * 
 	 * @return the arc span
 	 */
-	public int getArcSpan() {
+	public int getArcSpan()
+	{
 		return arcSpan;
 	}
 
@@ -92,14 +100,16 @@ public class ArcPropController extends PropController {
 	 * @param rim
 	 *            true if the prop should appear as a ring, false if it should appear as a filled circle.
 	 */
-	public void setPaintRim(boolean rim) {
+	public void setPaintRim( boolean rim )
+	{
 		this.rim = rim;
 	}
 
 	/**
 	 * @return true if the prop appears as a ring, false if it appears as a filled circle.
 	 */
-	public boolean getPaintRim() {
+	public boolean getPaintRim()
+	{
 		return rim;
 	}
 }

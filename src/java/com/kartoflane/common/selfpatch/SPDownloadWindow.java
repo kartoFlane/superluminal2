@@ -3,8 +3,8 @@ package com.kartoflane.common.selfpatch;
 /**
  * This describes how to run the program anew after it's been patched
  */
-public interface SPDownloadWindow extends SPTaskObserver {
-
+public interface SPDownloadWindow extends SPTaskObserver
+{
 	/**
 	 * Opens and shows the UI window. This method must block until the window is dismissed.
 	 */

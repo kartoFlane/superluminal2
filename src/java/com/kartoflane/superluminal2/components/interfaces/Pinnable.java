@@ -1,13 +1,13 @@
 package com.kartoflane.superluminal2.components.interfaces;
 
-public interface Pinnable {
-
+public interface Pinnable
+{
 	/**
 	 * Set whether the object is pinned.
 	 * Pinned objects cannot be moved or resized.<br>
 	 * False by default.
 	 */
-	public void setPinned(boolean pin);
+	public void setPinned( boolean pin );
 
 	/**
 	 * False by default.

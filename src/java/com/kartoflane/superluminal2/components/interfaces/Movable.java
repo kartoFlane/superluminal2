@@ -2,13 +2,15 @@ package com.kartoflane.superluminal2.components.interfaces;
 
 import org.eclipse.swt.graphics.Point;
 
+
 /**
  * Classes implementing this interface can be positioned on canvas and moved around.
  * 
  * @author kartoFlane
  * 
  */
-public interface Movable {
+public interface Movable
+{
 	/**
 	 * Sets the location of the object to the given coordinates
 	 * 
@@ -18,7 +20,7 @@ public interface Movable {
 	 *            the y coordinate of the new location
 	 * @return true if location was changed, false otherwise
 	 */
-	public boolean setLocation(int x, int y);
+	public boolean setLocation( int x, int y );
 
 	/**
 	 * Moves the object by the given displacement vector.
@@ -29,7 +31,7 @@ public interface Movable {
 	 *            displacement on the Y axis. Positive values move downwards, negative - upwards.
 	 * @return true if location was changed, false otherwise
 	 */
-	public boolean translate(int dx, int dy);
+	public boolean translate( int dx, int dy );
 
 	/** @return a new point representing the location of the object */
 	public Point getLocation();

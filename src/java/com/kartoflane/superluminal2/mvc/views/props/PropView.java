@@ -6,70 +6,78 @@ import com.kartoflane.superluminal2.components.enums.Shapes;
 import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.mvc.views.BaseView;
 
-public class PropView extends BaseView {
 
+public class PropView extends BaseView
+{
 	protected Shapes shape = Shapes.RECTANGLE;
 
-	public PropView() {
+
+	public PropView()
+	{
 		super();
 	}
 
-	protected PropController getController() {
-		return (PropController) controller;
+	protected PropController getController()
+	{
+		return (PropController)controller;
 	}
 
 	@Override
-	public void paintControl(PaintEvent e) {
-		if (alpha > 0) {
-			switch (shape) {
+	public void paintControl( PaintEvent e )
+	{
+		if ( alpha > 0 ) {
+			switch ( shape ) {
 				case LINE:
 					// Do nothing.
 					break;
 				case RECTANGLE:
-					paintBackgroundSquare(e, backgroundColor, alpha);
+					paintBackgroundSquare( e, backgroundColor, alpha );
 					break;
 				case OVAL:
-					paintBackgroundOval(e, backgroundColor, alpha);
+					paintBackgroundOval( e, backgroundColor, alpha );
 					break;
 				case POLYGON:
-					paintBackgroundPolygon(e, getController().getPolygon().toArray(), backgroundColor, alpha);
+					paintBackgroundPolygon( e, getController().getPolygon().toArray(), backgroundColor, alpha );
 					break;
 			}
 
-			paintImage(e, image, cachedImageBounds, alpha);
+			paintImage( e, image, cachedImageBounds, alpha );
 
-			switch (shape) {
+			switch ( shape ) {
 				case LINE:
 					int sx = controller.getParent().getX(),
-					sy = controller.getParent().getY(),
-					ex = controller.getX(),
-					ey = controller.getY();
+						sy = controller.getParent().getY(),
+						ex = controller.getX(),
+						ey = controller.getY();
 
-					paintLine(e, sx, sy, ex, ey, borderColor, borderThickness, alpha);
+					paintLine( e, sx, sy, ex, ey, borderColor, borderThickness, alpha );
 					break;
 				case RECTANGLE:
-					paintBorderSquare(e, borderColor, borderThickness, alpha);
+					paintBorderSquare( e, borderColor, borderThickness, alpha );
 					break;
 				case OVAL:
-					paintBorderOval(e, borderColor, borderThickness, alpha);
+					paintBorderOval( e, borderColor, borderThickness, alpha );
 					break;
 				case POLYGON:
-					paintBorderPolygon(e, getController().getPolygon().toArray(), borderColor, borderThickness, alpha);
+					paintBorderPolygon( e, getController().getPolygon().toArray(), borderColor, borderThickness, alpha );
 					break;
 			}
 		}
 	}
 
 	@Override
-	public void updateView() {
+	public void updateView()
+	{
 		shape = getController().getShape();
-		if (controller.isSelected()) {
-			setBorderColor(controller.isPinned() ? PIN_RGB : SELECT_RGB);
-		} else if (controller.isHighlighted()) {
-			setBorderColor(HIGHLIGHT_RGB);
-		} else {
-			setBorderColor(defaultBorder);
-			setBackgroundColor(defaultBackground);
+		if ( controller.isSelected() ) {
+			setBorderColor( controller.isPinned() ? PIN_RGB : SELECT_RGB );
+		}
+		else if ( controller.isHighlighted() ) {
+			setBorderColor( HIGHLIGHT_RGB );
+		}
+		else {
+			setBorderColor( defaultBorder );
+			setBackgroundColor( defaultBackground );
 		}
 	}
 }

@@ -1,15 +1,15 @@
 package com.kartoflane.superluminal2.components.interfaces;
 
 /**
- * Classes implementing this interface can collide with other objects.<br>
+ * Classes implementing this interface can collide with other objects.
  * 
  * @author kartoFlane
  * 
  */
-public interface Collidable {
-
+public interface Collidable
+{
 	/** Set whether the object can be collided with or not. */
-	public void setCollidable(boolean collidable);
+	public void setCollidable( boolean collidable );
 
 	/** @return whether or not the object can be collided with. */
 	public boolean isCollidable();
@@ -19,7 +19,7 @@ public interface Collidable {
 	 * 
 	 * @return true if the object collides with the area, false otherwise.
 	 */
-	public boolean collides(int x, int y, int w, int h);
+	public boolean collides( int x, int y, int w, int h );
 
 	/**
 	 * Sets the collision tolerance for this object. The object's collidable
@@ -27,7 +27,7 @@ public interface Collidable {
 	 * 
 	 * @param px
 	 */
-	public void setTolerance(int px);
+	public void setTolerance( int px );
 
 	/**
 	 * @return the collision tolerance for this object. The object's collidable

@@ -4,6 +4,8 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 
+
 public interface MouseInputListener
-		extends MouseListener, MouseMoveListener, MouseTrackListener {
+	extends MouseListener, MouseMoveListener, MouseTrackListener
+{
 }
