@@ -331,7 +331,7 @@ public class SloppyXMLParser
 			int colNum = lineAndCol[1];
 
 			String hint = "";
-			if ( e.getMessage() != null && e.getMessage().indexOf( "not allowed at the document root" ) != -1 ) {
+			if ( e.getMessage() != null && e.getMessage().contains( "not allowed at the document root" ) ) {
 				hint = " (There's likely an extraneous closing tag before this point.)";
 			}
 			SAXParseException cause = new SAXParseException(
