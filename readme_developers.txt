@@ -16,6 +16,19 @@ For example, "mvn package -P win"
 To increment project version, run "mvn versions:set" -- you will then be prompted
 to enter the new version string.
 
+
+When releasing new versions of the program, remember to:
+
+- Increment version:
+	- Update version string in main Superluminal.java class (APP_VERSION)
+	- Update version string for Macs in: skels/mac/Superluminal2.app/Contents/Info.plist
+	- Run "mvn versions:set" to bump version numbers coherently
+	- Update version string in: skels/common/auto_update.xml
+		This change then needs to be pushed to the main repository in order to trigger client-side notification to update.
+- Update the changelog:
+	- Complete changelog: skels/common/readme_changelog.txt
+	- Brief rundown of important changes in XML format: skels/common/auto_update.xml
+
 ================================================
 This project depends on the following libraries:
 - JDOM 2.x
