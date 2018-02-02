@@ -36,7 +36,6 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
-import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
@@ -365,8 +364,8 @@ public class ShipLoaderDialog {
 
 		// Register hotkeys
 		Hotkey h = new Hotkey();
-		h.setOnPress(new Action() {
-			public void execute() {
+		h.setOnPress(new Runnable() {
+			public void run() {
 				if (tree.getSelectionCount() != 0) {
 					TreeItem selectedItem = tree.getSelection()[0];
 					if (selectedItem.getItemCount() == 0 && btnLoad.isEnabled())

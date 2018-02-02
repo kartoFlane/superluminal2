@@ -5,8 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-import net.vhati.ftldat.FTLDat.FTLPack;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
@@ -55,7 +53,6 @@ import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Modifiers;
-import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
@@ -94,6 +91,8 @@ import com.kartoflane.superluminal2.utils.SHPUtils;
 import com.kartoflane.superluminal2.utils.SWTFontUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
+
+import net.vhati.ftldat.FTLDat.FTLPack;
 
 @SuppressWarnings("serial")
 public class EditorWindow {
@@ -625,8 +624,8 @@ public class EditorWindow {
 			public void widgetSelected(SelectionEvent e) {
 				final Exception[] ex = new Exception[1];
 				ex[0] = null;
-				UIUtils.showLoadDialog(shell, null, null, new Action() {
-					public void execute() {
+				UIUtils.showLoadDialog(shell, null, null, new Runnable() {
+					public void run() {
 						log.debug("Reloading Database...");
 
 						try {
@@ -961,8 +960,8 @@ public class EditorWindow {
 						}
 
 						// Already ensured that all items are .ftl or .zip
-						UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new Action() {
-							public void execute() {
+						UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new Runnable() {
+							public void run() {
 								for (String path : fileList) {
 									DatabaseEntry de;
 									try {
@@ -1670,8 +1669,8 @@ public class EditorWindow {
 		Manager.hookHotkey(shell, h);
 
 		h = Manager.getHotkey(Hotkeys.PIN);
-		h.setOnPress(new Action() {
-			public void execute() {
+		h.setOnPress(new Runnable() {
+			public void run() {
 				if (Manager.getSelectedToolId() == Tools.POINTER) {
 					AbstractController selected = Manager.getSelected();
 					if (selected != null) {
@@ -1755,8 +1754,8 @@ public class EditorWindow {
 	}
 
 	private void addNudgeAction(final Hotkey h, final int amountX, final int amountY) {
-		h.setOnPress(new Action() {
-			public void execute() {
+		h.setOnPress(new Runnable() {
+			public void run() {
 				AbstractController selected = Manager.getSelected();
 				if (selected != null && !selected.isPinned() && selected.isLocModifiable()) {
 					Point p = selected.getPresentedLocation();
@@ -1784,8 +1783,8 @@ public class EditorWindow {
 	}
 
 	private void addCreateToolAction(Hotkey h, final Tools tool) {
-		h.setOnPress(new Action() {
-			public void execute() {
+		h.setOnPress(new Runnable() {
+			public void run() {
 				if (tltmCreation.isEnabled()) {
 					if (!tltmCreation.getSelection())
 						tltmCreation.notifyListeners(SWT.Selection, null);
@@ -1799,49 +1798,49 @@ public class EditorWindow {
 	private void addModifierAction(Hotkey h, Modifiers modifier) {
 		switch (modifier) {
 			case SHIFT:
-				h.setOnPress(new Action() {
-					public void execute() {
+				h.setOnPress(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModShiftEvent(EditorWindow.this, true));
 					}
 				});
-				h.setOnRelease(new Action() {
-					public void execute() {
+				h.setOnRelease(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModShiftEvent(EditorWindow.this, false));
 					}
 				});
 				break;
 			case CONTROL:
-				h.setOnPress(new Action() {
-					public void execute() {
+				h.setOnPress(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModControlEvent(EditorWindow.this, true));
 					}
 				});
-				h.setOnRelease(new Action() {
-					public void execute() {
+				h.setOnRelease(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModControlEvent(EditorWindow.this, false));
 					}
 				});
 				break;
 			case ALT:
-				h.setOnPress(new Action() {
-					public void execute() {
+				h.setOnPress(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModAltEvent(EditorWindow.this, true));
 					}
 				});
-				h.setOnRelease(new Action() {
-					public void execute() {
+				h.setOnRelease(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModAltEvent(EditorWindow.this, false));
 					}
 				});
 				break;
 			case COMMAND:
-				h.setOnPress(new Action() {
-					public void execute() {
+				h.setOnPress(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModCommandEvent(EditorWindow.this, true));
 					}
 				});
-				h.setOnRelease(new Action() {
-					public void execute() {
+				h.setOnRelease(new Runnable() {
+					public void run() {
 						eventHandler.sendEvent(new SLModCommandEvent(EditorWindow.this, false));
 					}
 				});

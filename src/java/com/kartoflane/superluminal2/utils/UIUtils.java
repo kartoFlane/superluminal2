@@ -4,8 +4,6 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
-import net.vhati.modmanager.core.FTLUtilities;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
@@ -20,8 +18,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolTip;
 
 import com.kartoflane.superluminal2.Superluminal;
-import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.ui.LoadingDialog;
+
+import net.vhati.modmanager.core.FTLUtilities;
 
 /**
  * This class contains methods that are used to show customizable dialogs
@@ -407,7 +406,7 @@ public class UIUtils {
 	 * @throws IllegalArgumentException
 	 *             when the parent shell is null.
 	 */
-	public static void showLoadDialog(Shell parentShell, String title, String message, final Action task) throws IllegalArgumentException {
+	public static void showLoadDialog(Shell parentShell, String title, String message, final Runnable task) throws IllegalArgumentException {
 		if (task == null)
 			return;
 
@@ -419,7 +418,7 @@ public class UIUtils {
 			@Override
 			public void run() {
 				try {
-					task.execute();
+					task.run();
 				} finally {
 					dialog.dispose();
 				}

@@ -4,8 +4,6 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import com.kartoflane.superluminal2.components.interfaces.Action;
-
 /**
  * A base class for undoable operations that change a single value.
  * Subclasses should override {@link #doUndo()} and {@link #doRedo()} in order
@@ -14,7 +12,7 @@ import com.kartoflane.superluminal2.components.interfaces.Action;
  * After instantiation, use {@link #setOld(Object)} and {@link #setCurrent(Object)} to set up the values
  * for before and after the operation, respectively. <br>
  * <br>
- * Optional callbacks can be added using {@link #setUndoCallback(Action)} and {@link #setRedoCallback(Action)}<br>
+ * Optional callbacks can be added using {@link #setUndoCallback(Runnable)} and {@link #setRedoCallback(Runnable)}<br>
  * to have the undo manager perform additional tasks once the undo/redo operation itself is completed.
  * 
  * @author kartoFlane
@@ -25,8 +23,8 @@ import com.kartoflane.superluminal2.components.interfaces.Action;
 @SuppressWarnings("serial")
 public abstract class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 
-	private Action undoCallback = null;
-	private Action redoCallback = null;
+	private Runnable undoCallback = null;
+	private Runnable redoCallback = null;
 
 	protected T old;
 	protected T cur;
@@ -86,7 +84,7 @@ public abstract class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 		doUndo();
 
 		if (undoCallback != null)
-			undoCallback.execute();
+			undoCallback.run();
 	}
 
 	/**
@@ -102,14 +100,14 @@ public abstract class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 		doRedo();
 
 		if (redoCallback != null)
-			redoCallback.execute();
+			redoCallback.run();
 	}
 
 	/**
 	 * Adds an action that will be executed after {@link #doUndo()}.<br>
 	 * Can be null to remove the callback.
 	 */
-	public void setUndoCallback(Action a) {
+	public void setUndoCallback(Runnable a) {
 		undoCallback = a;
 	}
 
@@ -117,7 +115,7 @@ public abstract class ValueUndoableEdit<T> extends AbstractUndoableEdit {
 	 * Adds an action that will be executed after {@link #doRedo()}.<br>
 	 * Can be null to remove the callback.
 	 */
-	public void setRedoCallback(Action a) {
+	public void setRedoCallback(Runnable a) {
 		redoCallback = a;
 	}
 

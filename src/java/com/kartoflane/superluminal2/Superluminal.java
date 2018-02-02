@@ -13,10 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.vhati.ftldat.FTLDat.FTLPack;
-import net.vhati.modmanager.core.ComparableVersion;
-import net.vhati.modmanager.core.FTLUtilities;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
@@ -31,7 +27,6 @@ import com.kartoflane.common.selfpatch.SelfPatcher;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.OS;
-import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
@@ -46,6 +41,10 @@ import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
+
+import net.vhati.ftldat.FTLDat.FTLPack;
+import net.vhati.modmanager.core.ComparableVersion;
+import net.vhati.modmanager.core.FTLUtilities;
 
 public class Superluminal {
 	public static final Logger log = LogManager.getLogger(Superluminal.class);
@@ -246,8 +245,8 @@ public class Superluminal {
 
 				log.trace("Loading database...");
 
-				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new Action() {
-					public void execute() {
+				UIUtils.showLoadDialog(editorWindow.getShell(), null, null, new Runnable() {
+					public void run() {
 						db.getCore().load();
 
 						for (String arg : argsList) {
@@ -354,7 +353,7 @@ public class Superluminal {
 	 */
 	public static void checkForUpdates(boolean manual) {
 		log.info("Checking for updates...");
-
+		
 		final String[] downloadLink = new String[1];
 		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
 		final ArrayList<String> changes = new ArrayList<String>();
@@ -362,8 +361,8 @@ public class Superluminal {
 
 		String msg = "Checking for updates, please wait..." + (manual ? "" : "\n(You can disable this in Edit > Settings)");
 
-		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", msg, new Action() {
-			public void execute() {
+		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", msg, new Runnable() {
+			public void run() {
 				InputStream is = null;
 				try {
 					URL url = new URL(APP_UPDATE_FETCH_URL);

@@ -9,7 +9,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Orientations;
-import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
@@ -211,8 +210,8 @@ public class RoomController extends ObjectController implements Indexable, Compa
 			super.mouseDown(e);
 
 			if (currentEdit != null) {
-				Action a = new Action() {
-					public void execute() {
+				Runnable a = new Runnable() {
+					public void run() {
 						container.getParent().updateSidebarContent();
 						container.updateBoundingArea();
 					}
@@ -259,8 +258,8 @@ public class RoomController extends ObjectController implements Indexable, Compa
 						container.getParent().updateSidebarContent();
 						container.updateBoundingArea();
 
-						Action a = new Action() {
-							public void execute() {
+						Runnable a = new Runnable() {
+							public void run() {
 								container.getParent().updateSidebarContent();
 								container.updateBoundingArea();
 							}

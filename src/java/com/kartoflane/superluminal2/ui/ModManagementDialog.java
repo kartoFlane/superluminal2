@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
-import com.kartoflane.superluminal2.components.interfaces.Action;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.DatabaseEntry;
@@ -310,8 +309,8 @@ public class ModManagementDialog {
 		btnConfirm.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new Action() {
-					public void execute() {
+				UIUtils.showLoadDialog(shell, null, "Loading mods, please wait...", new Runnable() {
+					public void run() {
 						// Load added entries
 						DatabaseEntry[] dbEntries = db.getEntries();
 						for (DatabaseEntry de : entries) {

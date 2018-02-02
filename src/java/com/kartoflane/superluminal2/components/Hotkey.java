@@ -5,11 +5,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolItem;
 
-import com.kartoflane.superluminal2.components.interfaces.Action;
-
 public class Hotkey {
-	private Action onPressAction;
-	private Action onReleaseAction;
+	private Runnable onPressAction;
+	private Runnable onReleaseAction;
 	private boolean enabled = true;
 	private boolean shift = false;
 	private boolean ctrl = false;
@@ -21,7 +19,7 @@ public class Hotkey {
 	public Hotkey() {
 	}
 
-	public Hotkey(Action onPress, Action onRelease) {
+	public Hotkey(Runnable onPress, Runnable onRelease) {
 		onPressAction = onPress;
 		onReleaseAction = onRelease;
 	}
@@ -47,20 +45,20 @@ public class Hotkey {
 	public void executePress() {
 		if (onPressAction == null)
 			return;
-		onPressAction.execute();
+		onPressAction.run();
 	}
 
 	public void executeRelease() {
 		if (onReleaseAction == null)
 			return;
-		onReleaseAction.execute();
+		onReleaseAction.run();
 	}
 
-	public void setOnPress(Action action) {
+	public void setOnPress(Runnable action) {
 		this.onPressAction = action;
 	}
 
-	public void setOnRelease(Action action) {
+	public void setOnRelease(Runnable action) {
 		this.onReleaseAction = action;
 	}
 
@@ -242,8 +240,8 @@ public class Hotkey {
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
 	public void addNotifyAction(final MenuItem item, boolean onPress) {
-		Action a = new Action() {
-			public void execute() {
+		Runnable a = new Runnable() {
+			public void run() {
 				if (item.isEnabled())
 					item.notifyListeners(SWT.Selection, null);
 			}
@@ -259,8 +257,8 @@ public class Hotkey {
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
 	public void addNotifyAction(final ToolItem item, boolean onPress) {
-		Action a = new Action() {
-			public void execute() {
+		Runnable a = new Runnable() {
+			public void run() {
 				if (item.isEnabled())
 					item.notifyListeners(SWT.Selection, null);
 			}
@@ -276,8 +274,8 @@ public class Hotkey {
 	 * Adds an action to send the widget specified in the argument a Selection event, if it is enabled.
 	 */
 	public void addNotifyAction(final Button item, boolean onPress) {
-		Action a = new Action() {
-			public void execute() {
+		Runnable a = new Runnable() {
+			public void run() {
 				if (item.isEnabled())
 					item.notifyListeners(SWT.Selection, null);
 			}
@@ -293,8 +291,8 @@ public class Hotkey {
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
 	public void addNotifyAndToggleAction(final MenuItem item, boolean onPress) {
-		Action a = new Action() {
-			public void execute() {
+		Runnable a = new Runnable() {
+			public void run() {
 				if (item.isEnabled()) {
 					item.setSelection(!item.getSelection());
 					item.notifyListeners(SWT.Selection, null);
@@ -312,8 +310,8 @@ public class Hotkey {
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
 	public void addNotifyAndToggleAction(final ToolItem item, boolean onPress) {
-		Action a = new Action() {
-			public void execute() {
+		Runnable a = new Runnable() {
+			public void run() {
 				if (item.isEnabled()) {
 					item.setSelection(!item.getSelection());
 					item.notifyListeners(SWT.Selection, null);
@@ -331,8 +329,8 @@ public class Hotkey {
 	 * Adds an action to send the widget specified in the argument a Selection event and toggle it, if it is enabled.
 	 */
 	public void addNotifyAndToggleAction(final Button item, boolean onPress) {
-		Action a = new Action() {
-			public void execute() {
+		Runnable a = new Runnable() {
+			public void run() {
 				if (item.isEnabled()) {
 					item.setSelection(!item.getSelection());
 					item.notifyListeners(SWT.Selection, null);
