@@ -1,15 +1,10 @@
 package com.kartoflane.superluminal2;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,10 +15,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.common.selfpatch.SelfPatcher;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.OS;
@@ -32,10 +25,7 @@ import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
-import com.kartoflane.superluminal2.selfpatch.SPSLGetTask;
-import com.kartoflane.superluminal2.selfpatch.SPSLPatchTask;
-import com.kartoflane.superluminal2.selfpatch.SPSLRunTask;
-import com.kartoflane.superluminal2.ui.DownloadDialog;
+import com.kartoflane.superluminal2.core.UpdateCheckWorker;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.IOUtils;
@@ -352,145 +342,7 @@ public class Superluminal {
 	 *            if true, an information dialog will pop up even if the program is up to date
 	 */
 	public static void checkForUpdates(boolean manual) {
-		log.info("Checking for updates...");
-		
-		final String[] downloadLink = new String[1];
-		final ComparableVersion[] remoteVersion = new ComparableVersion[1];
-		final ArrayList<String> changes = new ArrayList<String>();
-		final Exception[] lastException = new Exception[1];
-
-		String msg = "Checking for updates, please wait..." + (manual ? "" : "\n(You can disable this in Edit > Settings)");
-
-		UIUtils.showLoadDialog(EditorWindow.getInstance().getShell(), "Checking Updates...", msg, new Runnable() {
-			public void run() {
-				InputStream is = null;
-				try {
-					URL url = new URL(APP_UPDATE_FETCH_URL);
-					is = url.openStream();
-
-					Document updateDoc = IOUtils.readStreamXML(is, "auto-update");
-					Element root = updateDoc.getRootElement();
-					Element latest = root.getChild("latest");
-					String id = latest.getAttributeValue("id");
-
-					downloadLink[0] = latest.getAttributeValue("url");
-					remoteVersion[0] = new ComparableVersion(id);
-
-					Element changelog = root.getChild("changelog");
-					for (Element version : changelog.getChildren("version")) {
-						ComparableVersion vId = new ComparableVersion(version.getAttributeValue("id"));
-						if (vId.compareTo(APP_VERSION) > 0) {
-							for (Element change : version.getChildren("change")) {
-								changes.add(change.getValue());
-							}
-						}
-					}
-				} catch (UnknownHostException e) {
-					log.error("Update check failed -- connection to the repository could not be estabilished.");
-					lastException[0] = e;
-				} catch (JDOMException e) {
-					log.error("Udpate check failed -- an error has occured while parsing update file.", e);
-					lastException[0] = e;
-				} catch (Exception e) {
-					log.error("An error occured while checking for updates.", e);
-					lastException[0] = e;
-				} finally {
-					try {
-						if (is != null)
-							is.close();
-					} catch (IOException e) {
-					}
-				}
-			}
-		});
-
-		if (lastException[0] != null) {
-			UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null,
-					String.format("An error occurred while checking for updates:%n%n%s: %s",
-							lastException[0].getClass().getSimpleName(), lastException[0].getMessage()));
-		}
-
-		if (remoteVersion[0] == null) {
-			// Version check failed, already logged by previous catches
-		} else if (APP_VERSION.compareTo(remoteVersion[0]) < 0) {
-			try {
-				log.info("Update is available, user version: " + APP_VERSION + ", remote version: " + remoteVersion[0]);
-
-				MessageBox box = new MessageBox(EditorWindow.getInstance().getShell(),
-						SWT.ICON_INFORMATION | SWT.YES | SWT.NO);
-				box.setText(APP_NAME + " - Update Available");
-
-				StringBuilder buf = new StringBuilder();
-				buf.append("A new version of the editor is available: v.");
-				buf.append(remoteVersion[0].toString());
-				buf.append("\n\n");
-				if (changes.size() > 0) {
-					int count = 0;
-					for (String change : changes) {
-						if (count < 5) {
-							buf.append(" - ");
-							buf.append(change);
-							buf.append("\n");
-							count++;
-						} else {
-							buf.append("...and ");
-							buf.append(changes.size() - count);
-							buf.append(" more - check changelog for details.\n");
-							break;
-						}
-					}
-					buf.append("\n");
-				}
-
-				buf.append("Would you like to download it now?");
-				box.setMessage(buf.toString());
-
-				if (box.open() == SWT.YES) {
-					try {
-						SelfPatcher sp = new SelfPatcher(new SPSLGetTask(), new SPSLPatchTask(), new SPSLRunTask());
-						DownloadDialog dd = new DownloadDialog(EditorWindow.getInstance().getShell());
-						sp.patch(dd);
-					} catch (Exception e) {
-						log.error("Self-patching failed!", e);
-
-						box = new MessageBox(EditorWindow.getInstance().getShell(),
-								SWT.ICON_ERROR | SWT.YES | SWT.NO);
-						box.setText(APP_NAME + " - Auto-Update Failed");
-						box.setMessage("Whoops! Something went terribly wrong, and the editor was unable to patch itself.\n" +
-								"Do you want to download and update the editor manually?");
-
-						if (box.open() == SWT.YES) {
-							URL url = new URL(downloadLink[0] == null ? APP_FORUM_URL : downloadLink[0]);
-							Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-							if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-								try {
-									desktop.browse(url.toURI());
-								}
-								catch (Exception ex) {
-									log.error("An error has occured while opening web browser.", ex);
-								}
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-				log.error("An error has occured while displaying update result.", e);
-				UIUtils.showWarningDialog(EditorWindow.getInstance().getShell(), null,
-						String.format("An error has occured while displaying update result:%n%n%s: %s",
-								e.getClass().getSimpleName(), e.getMessage()));
-			}
-		} else {
-			if (APP_VERSION.compareTo(remoteVersion[0]) == 0) {
-				log.info("Program is up to date.");
-			} else {
-				log.info("Program is up to date. (actually ahead)");
-			}
-			if (manual) {
-				// The user manually initiated the version check, so probably expects some kind of
-				// response in either case.
-				UIUtils.showInfoDialog(EditorWindow.getInstance().getShell(), null, APP_NAME + " is up to date.");
-			}
-		}
+		new UpdateCheckWorker( manual ).execute();
 	}
 
 	/** Create a dummy Hotkey object for each hotkey, and store them in the hotkey map. */
