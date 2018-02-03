@@ -21,6 +21,13 @@ public class SPSLGetTask extends SPGetTask
 {
 	private static final int bufferSize = 1024 * 16;
 
+	private String latestUrl;
+
+
+	public SPSLGetTask( String latestUrl )
+	{
+		this.latestUrl = latestUrl;
+	}
 
 	@Override
 	public void run()
@@ -35,7 +42,7 @@ public class SPSLGetTask extends SPGetTask
 			if ( observer != null )
 				observer.taskStatus( "Connecting..." );
 
-			URL url = new URL( "https://github.com/kartoFlane/superluminal2/releases/latest" );
+			URL url = new URL( latestUrl );
 
 			connection = (HttpURLConnection)url.openConnection();
 			int responseCode = connection.getResponseCode();

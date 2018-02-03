@@ -203,7 +203,11 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 
 						if ( box.open() == SWT.YES ) {
 							try {
-								SelfPatcher sp = new SelfPatcher( new SPSLGetTask(), new SPSLPatchTask(), new SPSLRunTask() );
+								SelfPatcher sp = new SelfPatcher(
+									new SPSLGetTask( ud.downloadLink ),
+									new SPSLPatchTask(),
+									new SPSLRunTask()
+								);
 								DownloadDialog dd = new DownloadDialog( EditorWindow.getInstance().getShell() );
 								sp.patch( dd );
 							}
