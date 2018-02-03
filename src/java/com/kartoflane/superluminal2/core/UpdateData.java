@@ -12,7 +12,7 @@ public class UpdateData
 {
 	/** The link from which the newest release can be downloaded */
 	public final String downloadLink;
-	/** The newest available version */
+	/** The newest available version number */
 	public final ComparableVersion remoteVersion;
 	/** List with changes since the local version */
 	public final List<String> changes;
@@ -37,7 +37,7 @@ public class UpdateData
 	 * @param downloadLink
 	 *            the link from which the newest release can be downloaded
 	 * @param remoteVersion
-	 *            the newest available version
+	 *            the newest available version number
 	 * @param changes
 	 *            list with changes since the local version
 	 */
@@ -52,6 +52,7 @@ public class UpdateData
 		if ( changes == null ) {
 			throw new IllegalArgumentException( "List instance must not be null." );
 		}
+
 		this.lastException = null;
 		this.downloadLink = downloadLink;
 		this.remoteVersion = remoteVersion;

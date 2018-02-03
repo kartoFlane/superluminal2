@@ -150,7 +150,7 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 			UpdateData ud = get();
 
 			if ( ud.lastException != null ) {
-				// Update check failed, inform the user about that
+				// Update fetch failed, inform the user about that
 				UIUtils.showWarningDialog(
 					EditorWindow.getInstance().getShell(),
 					null,
@@ -161,7 +161,7 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 				);
 			}
 			else {
-				// Update check successful
+				// Update fetch successful
 				if ( Superluminal.APP_VERSION.compareTo( ud.remoteVersion ) < 0 ) {
 					try {
 						log.info(
