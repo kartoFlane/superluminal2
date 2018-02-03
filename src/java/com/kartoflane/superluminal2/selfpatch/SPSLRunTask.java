@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.kartoflane.common.selfpatch.SPRunTask;
 import com.kartoflane.superluminal2.components.enums.OS;
+import com.kartoflane.superluminal2.ui.EditorWindow;
 
 
 public class SPSLRunTask extends SPRunTask
@@ -35,6 +36,9 @@ public class SPSLRunTask extends SPRunTask
 		catch ( IOException e ) {
 			e.printStackTrace();
 		}
+
+		// Dispose the main window shell, allowing the editor to close gracefully.
+		EditorWindow.getInstance().getShell().dispose();
 	}
 
 	private void scheduleFilesToPatch( List<String> commands )
