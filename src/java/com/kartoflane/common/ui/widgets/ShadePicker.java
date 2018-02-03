@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.TypedListener;
 
-import com.kartoflane.common.swt.graphics.HSV;
+import com.kartoflane.common.graphics.HSV;
 
 
 /**

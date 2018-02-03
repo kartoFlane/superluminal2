@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Shell;
 
-import com.kartoflane.common.swt.ui.SquareColorPickerDialog;
+import com.kartoflane.common.ui.SquareColorPickerDialog;
 import com.kartoflane.ftl.floorgen.FloorImageFactory;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.OS;

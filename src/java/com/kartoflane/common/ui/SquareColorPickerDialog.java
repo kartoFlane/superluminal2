@@ -33,9 +33,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.kartoflane.common.swt.graphics.HSV;
-import com.kartoflane.common.swt.ui.widgets.HuePicker;
-import com.kartoflane.common.swt.ui.widgets.ShadePicker;
+import com.kartoflane.common.graphics.HSV;
+import com.kartoflane.common.ui.widgets.HuePicker;
+import com.kartoflane.common.ui.widgets.ShadePicker;
 
 
 /**
