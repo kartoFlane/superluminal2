@@ -23,8 +23,8 @@
 	
 	<repositories>
 		<repository>
-      <id>maven-eclipse-repo</id>
-      <url>http://maven-eclipse.github.io/maven</url>
+			<id>maven-eclipse-repo</id>
+			<url>http://maven-eclipse.github.io/maven</url>
 		</repository>
 	</repositories>
 
@@ -92,6 +92,7 @@
 			</activation>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/win32</module>
 				<module>modules/win64</module>
 				<module>modules/mac</module>
@@ -100,9 +101,16 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>patcher</id>
+			<modules>
+				<module>modules/patcher</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>win</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/win32</module>
 				<module>modules/win64</module>
 			</modules>
@@ -111,6 +119,7 @@
 			<id>linux</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/linux32</module>
 				<module>modules/linux64</module>
 			</modules>
@@ -119,6 +128,7 @@
 			<id>mac</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/mac</module>
 			</modules>
 		</profile>
@@ -126,6 +136,7 @@
 			<id>compile</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 			</modules>
 		</profile>
 	</profiles>
