@@ -40,10 +40,9 @@ public class SelfPatcher
 		else if ( getTask.isSuccess() ) {
 			System.out.println( "Patching..." );
 			patchTask.patch( downloadedFile );
+
 			System.out.println( "Running..." );
 			runTask.run();
-			System.out.println( "Exiting..." );
-			System.exit( 0 );
 		}
 		else {
 			System.err.println( "Download task was not finished successfully." );

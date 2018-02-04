@@ -62,13 +62,12 @@
 									<Built-By>kartoFlane</Built-By>
 								</manifestEntries>
 							</archive>
-							<!-- Both Mac distributions share a skel, so they need a commonly named jar -->
 							<finalName>superluminal2-mac</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 					</execution>
 					
-					<!-- Build zip archive -->
+					<!-- Build tar.gz archive -->
 					<execution>
 						<id>dist-mac-64</id>
 						<phase>package</phase>

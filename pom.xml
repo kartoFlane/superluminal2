@@ -18,13 +18,14 @@
 		<jdk.version>1.6</jdk.version>
 		<swt.version>4.6.1</swt.version>
 		<log4j.version>2.0-rc1</log4j.version>
+		<compress.version>1.8</compress.version>
 		<jdom2.version>2.0.5</jdom2.version>
 	</properties>
 	
 	<repositories>
 		<repository>
-      <id>maven-eclipse-repo</id>
-      <url>http://maven-eclipse.github.io/maven</url>
+			<id>maven-eclipse-repo</id>
+			<url>http://maven-eclipse.github.io/maven</url>
 		</repository>
 	</repositories>
 
@@ -45,6 +46,11 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.apache.commons</groupId>
+    		<artifactId>commons-compress</artifactId>
+    		<version>${compress.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
@@ -92,6 +98,7 @@
 			</activation>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/win32</module>
 				<module>modules/win64</module>
 				<module>modules/mac</module>
@@ -100,9 +107,16 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>patcher</id>
+			<modules>
+				<module>modules/patcher</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>win</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/win32</module>
 				<module>modules/win64</module>
 			</modules>
@@ -111,6 +125,7 @@
 			<id>linux</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/linux32</module>
 				<module>modules/linux64</module>
 			</modules>
@@ -119,6 +134,7 @@
 			<id>mac</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 				<module>modules/mac</module>
 			</modules>
 		</profile>
@@ -126,6 +142,7 @@
 			<id>compile</id>
 			<modules>
 				<module>modules/core</module>
+				<module>modules/patcher</module>
 			</modules>
 		</profile>
 	</profiles>

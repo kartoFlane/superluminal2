@@ -67,7 +67,7 @@
 						</configuration>
 					</execution>
 					
-					<!-- Build zip archive -->
+					<!-- Build tar.gz archive -->
 					<execution>
 						<id>dist-linux-32</id>
 						<phase>package</phase>

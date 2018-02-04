@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.kartoflane.common</groupId>
+	<artifactId>patcher</artifactId>
+	<version>2</version>
+
+	<packaging>jar</packaging>
+	<name>Patcher</name>
+
+	<build>
+		<finalName>patcher</finalName>
+		<sourceDirectory>../../src/java/com/kartoflane/common/selfpatch</sourceDirectory>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<!-- Build jar -->
+					<execution>
+						<id>patcher-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>com.kartoflane.common.selfpatch.patcher.Patcher</mainClass>
+								</manifest>
+								<manifestEntries>
+									<Built-By>kartoFlane</Built-By>
+								</manifestEntries>
+							</archive>
+							<finalName>patcher</finalName>
+							<outputDirectory>../../skels/common</outputDirectory>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
