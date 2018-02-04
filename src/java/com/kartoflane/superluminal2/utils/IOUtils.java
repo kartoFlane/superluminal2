@@ -314,6 +314,25 @@ public class IOUtils
 	}
 
 	/**
+	 * Copies data from the input stream to the output stream.
+	 * 
+	 * @param in
+	 * @param out
+	 */
+	public static void copy( InputStream in, OutputStream out )
+	{
+		try {
+			byte[] buffer = new byte[1024 * 10];
+			int len;
+			while ( ( len = in.read( buffer ) ) != -1 ) {
+				out.write( buffer, 0, len );
+			}
+		}
+		catch ( IOException e ) {
+		}
+	}
+
+	/**
 	 * Writes the contents of the input stream to the output stream.<br>
 	 * This method fully reads the input stream, and as such after this method has been invoked,
 	 * the stream will have reached EOF.<br>

@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.core;
 
 import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -203,9 +204,10 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 
 						if ( box.open() == SWT.YES ) {
 							try {
+								File outputDir = new File( "" );
 								SelfPatcher sp = new SelfPatcher(
-									new SPSLGetTask( ud.downloadLink ),
-									new SPSLPatchTask(),
+									new SPSLGetTask( ud.downloadLink, outputDir ),
+									new SPSLPatchTask( outputDir ),
 									new SPSLRunTask()
 								);
 								DownloadDialog dd = new DownloadDialog( EditorWindow.getInstance().getShell() );

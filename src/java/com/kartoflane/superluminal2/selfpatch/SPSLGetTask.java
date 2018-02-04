@@ -22,11 +22,13 @@ public class SPSLGetTask extends SPGetTask
 	private static final int bufferSize = 1024 * 16;
 
 	private String latestUrl;
+	private File outputDir;
 
 
-	public SPSLGetTask( String latestUrl )
+	public SPSLGetTask( String latestUrl, File outputDir )
 	{
 		this.latestUrl = latestUrl;
+		this.outputDir = outputDir;
 	}
 
 	@Override
@@ -117,9 +119,8 @@ public class SPSLGetTask extends SPGetTask
 						}
 
 						inputStream = connection.getInputStream();
-						String saveFilePath = "." + "/" + fileName;
-						downloadedFile = new File( saveFilePath );
-						tmpFile = new File( saveFilePath + ".tmp" );
+						downloadedFile = new File( outputDir, fileName );
+						tmpFile = new File( outputDir, fileName + ".tmp" );
 
 						outputStream = new FileOutputStream( tmpFile );
 
