@@ -568,59 +568,64 @@ public class FloorImageFactory
 
 		Scanner sc = new Scanner( is );
 
-		while ( sc.hasNext() ) {
-			String line = sc.nextLine();
+		try {
+			while ( sc.hasNext() ) {
+				String line = sc.nextLine();
 
-			if ( line.trim().equals( "" ) )
-				continue;
-
-			LayoutObjects layoutObject = null;
-			try {
-				layoutObject = LayoutObjects.valueOf( line );
-			}
-			catch ( IllegalArgumentException e ) {
-				try {
-					// Not a layout object -- has to be integer value
-					// Check if it is, in fact, a number to verify syntax
-					Integer.parseInt( line );
+				if ( line.trim().equals( "" ) )
 					continue;
-				}
-				catch ( NumberFormatException ex ) {
-					// Not a layout object or integer value - syntax error
-					// Intercept the exception to throw a more meaningful one...
-					throw new IllegalArgumentException( "TXT layout syntax error on line: \n" + line );
-				}
-			}
 
-			switch ( layoutObject ) {
-				case X_OFFSET:
-				case Y_OFFSET:
-				case HORIZONTAL:
-				case VERTICAL:
-				case ELLIPSE:
-					// Ignore
-					break;
-				case ROOM:
-					// Id
-					sc.nextInt();
-					// x, y, w, h
-					rooms.add( new Rectangle( sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt() ) );
-					break;
-				case DOOR:
-					// x, y
-					Point p = new Point( sc.nextInt(), sc.nextInt() );
-					// Left Id
-					int l = sc.nextInt();
-					// Right Id
-					int r = sc.nextInt();
-
-					// If either ID is -1, then the door is an airlock
-					if ( l == -1 || r == -1 ) {
-						// Horizontal if 0, vertical if 1
-						airlocks.add( new Door( p.x, p.y, sc.nextInt() == 0 ) );
+				LayoutObjects layoutObject = null;
+				try {
+					layoutObject = LayoutObjects.valueOf( line );
+				}
+				catch ( IllegalArgumentException e ) {
+					try {
+						// Not a layout object -- has to be integer value
+						// Check if it is, in fact, a number to verify syntax
+						Integer.parseInt( line );
+						continue;
 					}
-					break;
+					catch ( NumberFormatException ex ) {
+						// Not a layout object or integer value - syntax error
+						// Intercept the exception to throw a more meaningful one...
+						throw new IllegalArgumentException( "TXT layout syntax error on line: \n" + line );
+					}
+				}
+
+				switch ( layoutObject ) {
+					case X_OFFSET:
+					case Y_OFFSET:
+					case HORIZONTAL:
+					case VERTICAL:
+					case ELLIPSE:
+						// Ignore
+						break;
+					case ROOM:
+						// Id
+						sc.nextInt();
+						// x, y, w, h
+						rooms.add( new Rectangle( sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt() ) );
+						break;
+					case DOOR:
+						// x, y
+						Point p = new Point( sc.nextInt(), sc.nextInt() );
+						// Left Id
+						int l = sc.nextInt();
+						// Right Id
+						int r = sc.nextInt();
+
+						// If either ID is -1, then the door is an airlock
+						if ( l == -1 || r == -1 ) {
+							// Horizontal if 0, vertical if 1
+							airlocks.add( new Door( p.x, p.y, sc.nextInt() == 0 ) );
+						}
+						break;
+				}
 			}
+		}
+		finally {
+			sc.close();
 		}
 
 		return new Layout( rooms, airlocks );
