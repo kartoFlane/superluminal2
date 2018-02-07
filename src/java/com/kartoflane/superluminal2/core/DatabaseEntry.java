@@ -739,11 +739,13 @@ public class DatabaseEntry
 				glowSetMap.put( set.getIdentifier(), set );
 			}
 			else if ( s1.endsWith( "1.png" ) ) {
+				// Might be a part of a glow image set.
+				// Check if _2 and _3 exist as well. If they do, it's a glow set.
 				String namespace = s1.replaceAll( "[0-9]\\.png", "" );
-				String s2 = find( eligiblePaths, namespace + "2.png" );
-				String s3 = find( eligiblePaths, namespace + "3.png" );
+				String s2 = namespace + "2.png";
+				String s3 = namespace + "3.png";
 
-				if ( s1 != null && s2 != null && s3 != null ) {
+				if ( eligiblePaths.contains( s1 ) && eligiblePaths.contains( s2 ) && eligiblePaths.contains( s3 ) ) {
 					namespace = namespace.replace( "img/ship/interior/", "" );
 					GlowSet set = new GlowSet( namespace );
 					set.setImage( Glows.BLUE, "db:" + s1 );
@@ -753,18 +755,6 @@ public class DatabaseEntry
 				}
 			}
 		}
-	}
-
-	private static String find( TreeSet<String> list, String name )
-	{
-		for ( String s : list ) {
-			if ( s.equals( name ) )
-				return s;
-			// Break if the current string is greater than the sought one
-			else if ( s.compareTo( name ) > 0 )
-				break;
-		}
-		return null;
 	}
 
 	@Override
