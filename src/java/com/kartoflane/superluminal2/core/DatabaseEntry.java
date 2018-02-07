@@ -461,8 +461,11 @@ public class DatabaseEntry
 		String[] extensions = { ".xml", ".xml.append", ".append.xml", ".xml.rawappend", ".rawappend.xml" };
 		InputStream is = null;
 
-		String[] blueprintFiles = { "data/blueprints", "data/autoBlueprints",
-			"data/dlcBlueprints", "data/dlcBlueprintsOverwrite" };
+		String[] blueprintFiles = {
+			"data/blueprints", "data/autoBlueprints",
+			"data/dlcBlueprints", "data/dlcBlueprintsOverwrite",
+			"data/dlcPirateBlueprints"
+		};
 
 		for ( String innerPath : blueprintFiles ) {
 			boolean found = false;
