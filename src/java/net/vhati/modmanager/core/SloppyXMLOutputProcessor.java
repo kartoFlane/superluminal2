@@ -168,7 +168,18 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor
 	public static void sloppyPrint( Document doc, Writer writer, String encoding, boolean allowEscaping ) throws IOException
 	{
 		Format format = Format.getPrettyFormat();
-		format.setTextMode( Format.TextMode.PRESERVE );  // Permit leading/trailing space.
+
+		// TODO: XML output bug
+		// Setting PRESERVE for some reason causes XML to be printed in a minified
+		// way. Can't figure out why this happens, so just gonna keep it at default
+		// for pretty format (TRIM).
+		// This is especially confusing since this doesn't happen to SMM, and this
+		// XML-printing code is directly copied from it.
+		// Since the editor doesn't print XML data with leading/trailing spaces
+		// anyway, making sure the files stay readable is more valuable *shrug*
+
+		// format.setTextMode( Format.TextMode.PRESERVE ); // Permit leading/trailing space.
+
 		format.setExpandEmptyElements( false );
 		format.setOmitDeclaration( false );
 		format.setIndent( "\t" );
