@@ -179,13 +179,13 @@ public class ShipSearchDialog extends AbstractSearchDialog<ShipMetadata>
 
 				if ( caseSensitive ) {
 					result &= o.getBlueprintName().contains( blue );
-					result &= o.getShipClass().contains( clazz );
-					result &= o.getShipName().contains( name );
+					result &= o.getShipClass().toString().contains( clazz );
+					result &= o.getShipName().toString().contains( name );
 				}
 				else {
 					result &= o.getBlueprintName().toLowerCase().contains( blue.toLowerCase() );
-					result &= o.getShipClass().toLowerCase().contains( clazz.toLowerCase() );
-					result &= o.getShipName().toLowerCase().contains( name.toLowerCase() );
+					result &= o.getShipClass().toString().toLowerCase().contains( clazz.toLowerCase() );
+					result &= o.getShipName().toString().toLowerCase().contains( name.toLowerCase() );
 				}
 
 				return result;

@@ -26,6 +26,7 @@ import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
+import com.kartoflane.superluminal2.ftl.NamedText;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
@@ -55,6 +56,10 @@ public abstract class AbstractDatabaseEntry
 	 * need to be loaded before weaponAnims, which reference them
 	 */
 	protected HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
+	/**
+	 * Temporary map to hold DeferredTexts.
+	 */
+	protected Map<String, String> textLookupMap = new HashMap<String, String>();
 
 
 	/**
@@ -159,14 +164,17 @@ public abstract class AbstractDatabaseEntry
 		weaponMap.put( weapon.getIdentifier(), weapon );
 	}
 
+	protected void store( NamedText text )
+	{
+		textLookupMap.put( text.getId(), text.getText() );
+	}
+
 	// ===============================================================================================
 
 	/**
-	 * This method should not be used. It's been made public only to be
-	 * accessible by {@link DataUtils#loadAnim(BasePre16DatabaseEntry, Element)},
-	 * and is used only during the preloading of anim sheets.
+	 * Used to preload anim sheets.
 	 */
-	public Element getAnimSheetElement( String anim )
+	Element getAnimSheetElement( String anim )
 	{
 		return animSheetMap.get( anim );
 	}
@@ -331,6 +339,16 @@ public abstract class AbstractDatabaseEntry
 		return weaponListMap.values().toArray( new WeaponList[0] );
 	}
 
+	/**
+	 * @param id
+	 *            id of the text to look up
+	 * @return the looked-up value, or null if not found.
+	 */
+	public String lookupText( String id )
+	{
+		return textLookupMap.get( id );
+	}
+
 	// ===============================================================================================
 
 	/**
@@ -371,6 +389,66 @@ public abstract class AbstractDatabaseEntry
 			"data/dlcPirateBlueprints"
 		};
 
+		String[] textLookupFiles = {
+			// FTL 1.5.4-1.5.13.
+			"data/misc",
+			// FTL 1.6.1.
+			"data/text_achievements", // Not interested.
+			"data/text_blueprints",
+			"data/text_events", // Not interested.
+			"data/text_misc",
+			"data/text_sectorname", // Not interested.
+			"data/text_tooltips",
+			"data/text_tutorial"
+		};
+
+		log.info( "Reading texts..." );
+
+		for ( String innerPath : textLookupFiles ) {
+			boolean found = false;
+			for ( String ext : extensions ) {
+				try {
+					is = getInputStream( innerPath + ext );
+					DecodeResult dr = IOUtils.decodeText( is, null );
+					ArrayList<Element> elements = DataUtils.findTagsNamed( dr.text, "text" );
+					for ( Element e : elements ) {
+						try {
+							store( DatParser.loadNamedText( e ) );
+						}
+						catch ( IllegalArgumentException ex ) {
+							log.warn( getName() + ": could not load named text: " + ex.getMessage() );
+						}
+					}
+					found = true;
+				}
+				catch ( FileNotFoundException e ) {
+					// Spammy and not very useful.
+					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
+				}
+				catch ( IOException e ) {
+					log.error( String.format( "%s: an error occured while loading file '%s': ", getName(), innerPath ), e );
+					found = true;
+				}
+				catch ( JDOMParseException e ) {
+					log.error( String.format( "%s: an error occured while parsing file '%s': ", getName(), innerPath ), e );
+					found = true;
+				}
+				finally {
+					try {
+						if ( is != null )
+							is.close();
+					}
+					catch ( IOException e ) {
+						log.error( getName() + ": an error occured while closing stream", e );
+					}
+				}
+			}
+			if ( !found )
+				log.trace( String.format( "%s did not contain file %s", getName(), innerPath ) );
+		}
+
+		log.info( "Reading blueprints..." );
+
 		for ( String innerPath : blueprintFiles ) {
 			boolean found = false;
 			for ( String ext : extensions ) {
@@ -381,7 +459,7 @@ public abstract class AbstractDatabaseEntry
 					ArrayList<Element> elements = DataUtils.findTagsNamed( dr.text, "shipBlueprint" );
 					for ( Element e : elements ) {
 						try {
-							store( DataUtils.loadShipMetadata( e ) );
+							store( DatParser.loadShipMetadata( e ) );
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load ship metadata: " + ex.getMessage() );
@@ -393,7 +471,7 @@ public abstract class AbstractDatabaseEntry
 					elements = DataUtils.findTagsNamed( dr.text, "weaponBlueprint" );
 					for ( Element e : elements ) {
 						try {
-							store( DataUtils.loadWeapon( e ) );
+							store( DatParser.loadWeapon( e ) );
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load weapon: " + ex.getMessage() );
@@ -405,7 +483,7 @@ public abstract class AbstractDatabaseEntry
 					elements = DataUtils.findTagsNamed( dr.text, "droneBlueprint" );
 					for ( Element e : elements ) {
 						try {
-							store( DataUtils.loadDrone( e ) );
+							store( DatParser.loadDrone( e ) );
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load drone: " + ex.getMessage() );
@@ -417,7 +495,7 @@ public abstract class AbstractDatabaseEntry
 					elements = DataUtils.findTagsNamed( dr.text, "augBlueprint" );
 					for ( Element e : elements ) {
 						try {
-							store( DataUtils.loadAugment( e ) );
+							store( DatParser.loadAugment( e ) );
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load augment: " + ex.getMessage() );
@@ -462,7 +540,7 @@ public abstract class AbstractDatabaseEntry
 					ArrayList<Element> elements = DataUtils.findTagsNamed( dr.text, "blueprintList" );
 					for ( Element e : elements ) {
 						try {
-							store( DataUtils.loadList( e ) );
+							store( DatParser.loadList( e ) );
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load blueprint list: " + ex.getMessage() );
@@ -503,7 +581,7 @@ public abstract class AbstractDatabaseEntry
 				ArrayList<Element> elements = DataUtils.findTagsNamed( dr.text, "roomLayout" );
 				for ( Element e : elements ) {
 					try {
-						store( DataUtils.loadGlow( e ) );
+						store( DatParser.loadGlow( e ) );
 					}
 					catch ( IllegalArgumentException ex ) {
 						log.warn( getName() + ": could not load glow object: " + ex.getMessage() );
@@ -569,7 +647,7 @@ public abstract class AbstractDatabaseEntry
 					// Load and store weaponAnims
 					for ( Element e : root.getChildren( "weaponAnim" ) ) {
 						try {
-							store( DataUtils.loadAnim( this, e ) );
+							store( DatParser.loadAnim( this, e ) );
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load animation: " + ex.getMessage() );

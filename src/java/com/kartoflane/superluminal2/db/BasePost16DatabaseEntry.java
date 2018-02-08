@@ -17,7 +17,7 @@ import net.vhati.ftldat.PkgPack;
  */
 public class BasePost16DatabaseEntry extends AbstractDatabaseEntry
 {
-	private static final Logger log = LogManager.getLogger( BasePost16DatabaseEntry.class );
+	private static final Logger log = LogManager.getLogger();
 
 	private final PkgPack data;
 

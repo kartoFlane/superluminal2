@@ -39,6 +39,7 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
+import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
@@ -74,15 +75,15 @@ public class SHPUtils
 
 		v = string( getFieldValueByName( shipInstance, "shipName" ) );
 		if ( v != null )
-			ship.setShipName( v );
+			ship.setShipName( new VerbatimText( v ) );
 
 		v = string( getFieldValueByName( shipInstance, "shipClass" ) );
 		if ( v != null )
-			ship.setShipClass( v );
+			ship.setShipClass( new VerbatimText( v ) );
 
 		v = string( getFieldValueByName( shipInstance, "descr" ) );
 		if ( v != null )
-			ship.setShipDescription( v );
+			ship.setShipDescription( new VerbatimText( v ) );
 
 		v = string( getFieldValueByName( shipInstance, "imageName" ) );
 		if ( v != null )

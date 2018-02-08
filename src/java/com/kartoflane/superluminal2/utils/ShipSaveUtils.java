@@ -368,19 +368,19 @@ public class ShipSaveUtils
 		// The ship's class name, used for flavor only on player ships,
 		// but on enemy ships it is used as the enemy ship's name
 		e = new Element( "class" );
-		attr = ship.getShipClass();
+		attr = ship.getShipClass().getTextId(); // TODO select save mode (pre/post 1.6)
 		e.setText( attr == null ? "" : attr );
 		shipBlueprint.addContent( e );
 
 		// Name and description only affect player ships
 		if ( ship.isPlayerShip() ) {
 			e = new Element( "name" );
-			attr = ship.getShipName();
+			attr = ship.getShipName().getTextId(); // TODO select save mode (pre/post 1.6)
 			e.setText( attr == null ? "" : attr );
 			shipBlueprint.addContent( e );
 
 			e = new Element( "desc" );
-			attr = ship.getShipDescription();
+			attr = ship.getShipDescription().getTextId(); // TODO select save mode (pre/post 1.6)
 			e.setText( attr == null ? "" : attr );
 			shipBlueprint.addContent( e );
 		}

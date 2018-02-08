@@ -21,6 +21,7 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.db.DatParser;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -34,6 +35,7 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
+import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
@@ -157,7 +159,7 @@ public class ShipLoadUtils
 		child = e.getChild( "class" );
 		if ( child == null )
 			throw new IllegalArgumentException( "Missing <class> tag." );
-		ship.setShipClass( child.getValue() );
+		ship.setShipClass( DatParser.readTextElement( child ) );
 
 		// Get the name of the ship
 		// Exclusive to player ships
@@ -165,7 +167,7 @@ public class ShipLoadUtils
 			child = e.getChild( "name" );
 			if ( child == null )
 				throw new IllegalArgumentException( "Missing <name> tag." );
-			ship.setShipName( child.getValue() );
+			ship.setShipName( DatParser.readTextElement( child ) );
 		}
 
 		// Get the description of the ship
@@ -173,9 +175,9 @@ public class ShipLoadUtils
 		if ( isPlayer ) {
 			child = e.getChild( "desc" );
 			if ( child == null )
-				ship.setShipDescription( "<desc> tag was missing!" );
+				ship.setShipDescription( new VerbatimText( "<desc> tag was missing!" ) );
 			else
-				ship.setShipDescription( child.getValue() );
+				ship.setShipDescription( DatParser.readTextElement( child ) );
 		}
 
 		// Get the list of systems installed on the ship

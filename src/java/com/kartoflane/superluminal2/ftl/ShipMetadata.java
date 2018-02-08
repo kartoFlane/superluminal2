@@ -11,10 +11,10 @@ public class ShipMetadata
 	private final Element element;
 	private final boolean isPlayer;
 	private final String blueprintName;
-	private String shipClass = "";
-	private String shipName = "";
-	private String description = "";
 	private String imageNamespace = "";
+	private IDeferredText shipClass = IDeferredText.EMPTY;
+	private IDeferredText shipName = IDeferredText.EMPTY;
+	private IDeferredText description = IDeferredText.EMPTY;
 
 
 	public ShipMetadata( Element element, String blueprintName )
@@ -39,38 +39,38 @@ public class ShipMetadata
 		return blueprintName;
 	}
 
-	public void setShipClass( String className )
+	public void setShipClass( IDeferredText className )
 	{
 		if ( className == null )
 			throw new IllegalArgumentException( "Class name must not be null." );
 		shipClass = className;
 	}
 
-	public String getShipClass()
+	public IDeferredText getShipClass()
 	{
 		return shipClass;
 	}
 
-	public void setShipName( String name )
+	public void setShipName( IDeferredText name )
 	{
 		if ( name == null )
 			throw new IllegalArgumentException( "Ship name must not be null." );
 		shipName = name;
 	}
 
-	public String getShipName()
+	public IDeferredText getShipName()
 	{
 		return shipName;
 	}
 
-	public void setShipDescription( String desc )
+	public void setShipDescription( IDeferredText desc )
 	{
 		if ( desc == null )
 			throw new IllegalArgumentException( "Description must not be null." );
 		description = desc;
 	}
 
-	public String getShipDescription()
+	public IDeferredText getShipDescription()
 	{
 		return description;
 	}

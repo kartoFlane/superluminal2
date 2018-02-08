@@ -511,6 +511,16 @@ public class Database
 		return result;
 	}
 
+	public String lookupString( String id )
+	{
+		String result = null;
+		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			result = de.lookupText( id );
+		}
+		return result;
+	}
+
 	/**
 	 * @param innerPath
 	 *            the sought innerPath

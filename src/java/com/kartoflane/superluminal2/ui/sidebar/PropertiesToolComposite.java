@@ -36,6 +36,7 @@ import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
+import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -189,7 +190,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					@Override
 					public void modifyText( ModifyEvent e )
 					{
-						ship.setShipName( txtName.getText() );
+						ship.setShipName( new VerbatimText( txtName.getText() ) );
 					}
 				}
 			);
@@ -227,7 +228,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				@Override
 				public void modifyText( ModifyEvent e )
 				{
-					ship.setShipClass( txtClass.getText() );
+					ship.setShipClass( new VerbatimText( txtClass.getText() ) );
 				}
 			}
 		);
@@ -248,7 +249,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					public void modifyText( ModifyEvent e )
 					{
 						lblDesc.setText( "Description: (" + txtDesc.getText().length() + "/255)" );
-						ship.setShipDescription( txtDesc.getText() );
+						ship.setShipDescription( new VerbatimText( txtDesc.getText() ) );
 					}
 				}
 			);
@@ -894,7 +895,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		String content = null;
 		// General tab
 
-		content = ship.getShipClass();
+		content = ship.getShipClass().toString();
 		txtClass.setText( content == null ? "Ship Class" : content );
 
 		content = ship.getLayout();
@@ -910,10 +911,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			int index = cmbShips.indexOf( ship.getBlueprintName() );
 			cmbShips.select( index == -1 ? 0 : index );
 
-			content = ship.getShipName();
+			content = ship.getShipName().toString();
 			txtName.setText( ship.isPlayerShip() && content == null ? "The Nameless One" : content );
 
-			content = ship.getShipDescription();
+			content = ship.getShipDescription().toString();
 			txtDesc.setText( ship.isPlayerShip() && content == null ? "Ship Class" : content );
 			lblDesc.setText( "Description: (" + txtDesc.getText().length() + "/255)" );
 		}

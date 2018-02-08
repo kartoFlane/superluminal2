@@ -468,7 +468,7 @@ public class DroneSelectionDialog
 
 				trtm = new TreeItem( typeItem, SWT.NONE );
 				trtm.setText( 0, drone.getBlueprintName() );
-				trtm.setText( 1, drone.getTitle() );
+				trtm.setText( 1, drone.getTitle().toString() );
 				trtm.setData( drone );
 
 				if ( result == drone )
@@ -518,7 +518,7 @@ public class DroneSelectionDialog
 			for ( DroneObject drone : list ) {
 				TreeItem droneItem = new TreeItem( trtm, SWT.NONE );
 				droneItem.setText( 0, drone.getBlueprintName() );
-				droneItem.setText( 1, drone.getTitle() );
+				droneItem.setText( 1, drone.getTitle().toString() );
 				droneItem.setData( drone );
 			}
 		}
@@ -547,7 +547,7 @@ public class DroneSelectionDialog
 			}
 			statTable.setVisible( true );
 			statTable.updateColumnWidth();
-			txtDesc.setText( result.getDescription() );
+			txtDesc.setText( result.getDescription().toString() );
 		}
 		else {
 			statTable.clear();

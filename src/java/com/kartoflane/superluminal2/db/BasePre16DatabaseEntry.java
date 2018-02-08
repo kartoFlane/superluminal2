@@ -17,7 +17,7 @@ import net.vhati.ftldat.FTLPack;
  */
 public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
 {
-	private static final Logger log = LogManager.getLogger( BasePre16DatabaseEntry.class );
+	private static final Logger log = LogManager.getLogger();
 
 	private final FTLPack data;
 	private final FTLPack resource;
