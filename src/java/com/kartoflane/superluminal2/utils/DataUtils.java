@@ -18,8 +18,8 @@ import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
+import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.BlueprintList;
@@ -169,7 +169,7 @@ public class DataUtils
 		return metadata;
 	}
 
-	public static AnimationObject loadAnim( DatabaseEntry de, Element e )
+	public static AnimationObject loadAnim( AbstractDatabaseEntry de, Element e )
 	{
 		if ( e == null )
 			throw new IllegalArgumentException( "Element must not be null." );

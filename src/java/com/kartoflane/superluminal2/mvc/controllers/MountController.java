@@ -6,8 +6,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
-import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.events.SLDeleteEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.GibObject;

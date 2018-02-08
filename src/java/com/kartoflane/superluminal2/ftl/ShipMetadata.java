@@ -2,7 +2,7 @@ package com.kartoflane.superluminal2.ftl;
 
 import org.jdom2.Element;
 
-import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.utils.IOUtils;
 
 

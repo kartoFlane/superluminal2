@@ -6,8 +6,8 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
-import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 

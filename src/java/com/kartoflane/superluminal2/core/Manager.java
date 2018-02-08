@@ -32,6 +32,7 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.KeybindHandler;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;

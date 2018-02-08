@@ -36,9 +36,10 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
+import com.kartoflane.superluminal2.db.Database;
+import com.kartoflane.superluminal2.db.ModDatabaseEntry;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
@@ -50,10 +51,10 @@ public class ModManagementDialog
 	private static ModManagementDialog instance = null;
 	private static String prevPath = null;
 
-	private ArrayList<DatabaseEntry> entries = null;
+	private ArrayList<AbstractDatabaseEntry> entries = null;
 
 	private TreeItem dragItem = null;
-	private DatabaseEntry dragData = null;
+	private AbstractDatabaseEntry dragData = null;
 
 	private Shell shell;
 	private Tree tree;
@@ -74,7 +75,7 @@ public class ModManagementDialog
 		instance = this;
 
 		final Database db = Database.getInstance();
-		entries = new ArrayList<DatabaseEntry>();
+		entries = new ArrayList<AbstractDatabaseEntry>();
 
 		shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL );
 		shell.setText( Superluminal.APP_NAME + " - Mod Management" );
@@ -128,7 +129,7 @@ public class ModManagementDialog
 		btnCancel.setLayoutData( gd_btnCancel );
 		btnCancel.setText( "Cancel" );
 
-		for ( DatabaseEntry de : db.getEntries() ) {
+		for ( AbstractDatabaseEntry de : db.getEntries() ) {
 			if ( de == db.getCore() )
 				continue;
 			createTreeItem( de );
@@ -154,7 +155,7 @@ public class ModManagementDialog
 				public void dragSetData( DragSourceEvent e )
 				{
 					e.data = "whatever"; // This needs not be an empty string, otherwise the drag mechanism freaks out...
-					dragData = (DatabaseEntry)dragItem.getData();
+					dragData = (AbstractDatabaseEntry)dragItem.getData();
 				}
 
 				@Override
@@ -304,16 +305,7 @@ public class ModManagementDialog
 					if ( results != null ) {
 						for ( File f : results ) {
 							prevPath = f.getParent();
-							try {
-								DatabaseEntry de = new DatabaseEntry( f );
-								if ( !entries.contains( de ) ) {
-									createTreeItem( de );
-									entries.add( de );
-								}
-							}
-							catch ( IOException ex ) {
-								log.warn( String.format( "An error has occured while loading mod file '%s': ", f.getName() ), ex );
-							}
+							addEntry( f );
 						}
 					}
 				}
@@ -326,7 +318,7 @@ public class ModManagementDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					for ( TreeItem trtm : tree.getSelection() ) {
-						DatabaseEntry de = (DatabaseEntry)trtm.getData();
+						AbstractDatabaseEntry de = (AbstractDatabaseEntry)trtm.getData();
 						if ( de == db.getCore() ) // Redundant check to make sure that the core database is never unloaded
 							continue;
 						trtm.dispose();
@@ -348,22 +340,22 @@ public class ModManagementDialog
 							public void run()
 							{
 								// Load added entries
-								DatabaseEntry[] dbEntries = db.getEntries();
-								for ( DatabaseEntry de : entries ) {
+								AbstractDatabaseEntry[] dbEntries = db.getEntries();
+								for ( AbstractDatabaseEntry de : entries ) {
 									if ( de == db.getCore() )
 										continue;
 									if ( !Utils.contains( dbEntries, de ) )
 										db.addEntry( de );
 								}
 								// Unload deleted entries
-								for ( DatabaseEntry de : db.getEntries() ) {
+								for ( AbstractDatabaseEntry de : db.getEntries() ) {
 									if ( de == db.getCore() )
 										continue;
 									if ( !entries.contains( de ) )
 										db.removeEntry( de );
 								}
 								// Reorder entries to match user input
-								for ( DatabaseEntry de : entries ) {
+								for ( AbstractDatabaseEntry de : entries ) {
 									if ( de == db.getCore() )
 										continue;
 									db.reorderEntry( de, entries.indexOf( de ) + 1 );
@@ -438,7 +430,7 @@ public class ModManagementDialog
 			throw new IllegalArgumentException( "Argument must be a .zip or .ftl file." );
 
 		try {
-			DatabaseEntry de = new DatabaseEntry( file );
+			AbstractDatabaseEntry de = new ModDatabaseEntry( file );
 			if ( !entries.contains( de ) ) {
 				createTreeItem( de );
 				entries.add( de );
@@ -464,12 +456,12 @@ public class ModManagementDialog
 		return !shell.isDisposed() && shell.isVisible();
 	}
 
-	private TreeItem createTreeItem( DatabaseEntry de )
+	private TreeItem createTreeItem( AbstractDatabaseEntry de )
 	{
 		return createTreeItem( de, tree.getItemCount() );
 	}
 
-	private TreeItem createTreeItem( DatabaseEntry de, int index )
+	private TreeItem createTreeItem( AbstractDatabaseEntry de, int index )
 	{
 		TreeItem trtm = new TreeItem( tree, SWT.NONE, index );
 		trtm.setText( de.getName() );

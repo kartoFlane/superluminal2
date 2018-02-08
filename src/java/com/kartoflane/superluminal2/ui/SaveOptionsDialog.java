@@ -22,8 +22,9 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
+import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
+import com.kartoflane.superluminal2.db.Database;
+import com.kartoflane.superluminal2.db.ModDatabaseEntry;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
@@ -34,7 +35,7 @@ public class SaveOptionsDialog
 	private static String prevPath = System.getProperty( "user.home" );
 
 	private File resultFile = null;
-	private DatabaseEntry resultMod = null;
+	private ModDatabaseEntry resultMod = null;
 
 	private Shell shell = null;
 	private Button btnCancel;
@@ -108,16 +109,15 @@ public class SaveOptionsDialog
 		msg = "Selecting a mod here will bundle it with your ship.";
 
 		Database db = Database.getInstance();
-		DatabaseEntry[] des = db.getEntries();
+		AbstractDatabaseEntry[] des = db.getEntries();
 		if ( des.length <= 1 ) {
 			cmbInclude.setEnabled( false );
 			msg += "\nDisabled: no mods are currently loaded.";
 		}
 		else {
-			for ( DatabaseEntry de : des ) {
-				if ( de == db.getCore() )
-					continue;
-				cmbInclude.add( de.getName() );
+			for ( AbstractDatabaseEntry de : des ) {
+				if ( de instanceof ModDatabaseEntry )
+					cmbInclude.add( de.getName() );
 			}
 		}
 		UIUtils.addTooltip( lblIncludeInfo, msg );
@@ -188,7 +188,7 @@ public class SaveOptionsDialog
 					}
 					else {
 						Database db = Database.getInstance();
-						resultMod = db.getEntries()[i];
+						resultMod = (ModDatabaseEntry)db.getEntries()[i];
 					}
 				}
 			}
@@ -297,7 +297,7 @@ public class SaveOptionsDialog
 	public static class SaveOptions
 	{
 		public final File file;
-		public final DatabaseEntry mod;
+		public final ModDatabaseEntry mod;
 
 
 		public SaveOptions( File f )
@@ -306,13 +306,13 @@ public class SaveOptionsDialog
 			mod = null;
 		}
 
-		public SaveOptions( File f, DatabaseEntry de )
+		public SaveOptions( File f, ModDatabaseEntry de )
 		{
 			file = f;
 			mod = de;
 		}
 
-		public SaveOptions( DatabaseEntry de )
+		public SaveOptions( ModDatabaseEntry de )
 		{
 			mod = de;
 			file = de.getFile();

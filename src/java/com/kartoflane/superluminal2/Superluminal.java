@@ -20,12 +20,13 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.OS;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.KeyboardInputDispatcher;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.SuperluminalConfig;
 import com.kartoflane.superluminal2.core.UpdateCheckWorker;
+import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
+import com.kartoflane.superluminal2.db.Database;
+import com.kartoflane.superluminal2.db.ModDatabaseEntry;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import com.kartoflane.superluminal2.utils.IOUtils;
@@ -285,11 +286,8 @@ public class Superluminal
 								}
 
 								try {
-									DatabaseEntry de = new DatabaseEntry( f );
-									DatabaseEntry[] dbEntries = db.getEntries();
-									if ( de == db.getCore() )
-										continue;
-									if ( !Utils.contains( dbEntries, de ) )
+									AbstractDatabaseEntry de = new ModDatabaseEntry( f );
+									if ( !Utils.contains( db.getEntries(), de ) )
 										db.addEntry( de );
 								}
 								catch ( Exception e ) {

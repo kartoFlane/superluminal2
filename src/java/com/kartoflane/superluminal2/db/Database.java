@@ -1,4 +1,4 @@
-package com.kartoflane.superluminal2.core;
+package com.kartoflane.superluminal2.db;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class Database
 	private HashMap<String, String> shipFileMap = new HashMap<String, String>();
 
 	// Dynamically loaded
-	private ArrayList<DatabaseEntry> dataEntries = new ArrayList<DatabaseEntry>();
+	private ArrayList<AbstractDatabaseEntry> dataEntries = new ArrayList<AbstractDatabaseEntry>();
 
 
 	/**
@@ -165,7 +165,7 @@ public class Database
 	/**
 	 * @return the first DatabaseEntry in the Database, ie. the DatabaseEntry associated with base game archives.
 	 */
-	public DatabaseEntry getCore()
+	public AbstractDatabaseEntry getCore()
 	{
 		return dataEntries.size() > 0 ? dataEntries.get( 0 ) : null;
 	}
@@ -182,7 +182,7 @@ public class Database
 	{
 		if ( dataEntries.size() > 0 )
 			dataEntries.remove( 0 );
-		DatabaseEntry core = new DatabaseEntry( data, resource );
+		AbstractDatabaseEntry core = new BasePre16DatabaseEntry( data, resource );
 		core.store( DEFAULT_ANIM_OBJ );
 		dataEntries.add( 0, core );
 	}
@@ -197,7 +197,7 @@ public class Database
 	 */
 	public boolean verify()
 	{
-		DatabaseEntry core = getCore();
+		AbstractDatabaseEntry core = getCore();
 		if ( core == null )
 			throw new IllegalStateException( "Database has not been initialised yet." );
 
@@ -220,16 +220,16 @@ public class Database
 	 * @return all database entries currently installed in the database, in the order in which they take effect.
 	 *         Entry at index 0 is the core entry (ie. represents the content of the game's archives)
 	 */
-	public DatabaseEntry[] getEntries()
+	public AbstractDatabaseEntry[] getEntries()
 	{
-		return dataEntries.toArray( new DatabaseEntry[0] );
+		return dataEntries.toArray( new AbstractDatabaseEntry[0] );
 	}
 
 	/**
 	 * Adds a new database entry to the database.<br>
 	 * {@link #cacheAnimations()} should be called afterwards to update weapon sprites and animations.
 	 */
-	public void addEntry( DatabaseEntry de )
+	public void addEntry( AbstractDatabaseEntry de )
 	{
 		dataEntries.add( de );
 		de.load();
@@ -239,15 +239,10 @@ public class Database
 	 * Removes the specified database entry from the database.<br>
 	 * {@link #cacheAnimations()} should be called afterwards to update weapon sprites and animations.
 	 */
-	public void removeEntry( DatabaseEntry de )
+	public void removeEntry( AbstractDatabaseEntry de )
 	{
-		try {
-			dataEntries.remove( de );
-			de.dispose();
-		}
-		catch ( IOException e ) {
-			log.error( String.format( "An error has occured while closing database entry '%s': ", de.getName() ), e );
-		}
+		dataEntries.remove( de );
+		de.dispose();
 	}
 
 	/**
@@ -261,7 +256,7 @@ public class Database
 	 * @throws IndexOutOfBoundsException
 	 *             if the index is out of range (index < 0 || index > size())
 	 */
-	public void reorderEntry( DatabaseEntry de, int index ) throws IndexOutOfBoundsException
+	public void reorderEntry( AbstractDatabaseEntry de, int index ) throws IndexOutOfBoundsException
 	{
 		if ( index < 0 || index > dataEntries.size() )
 			throw new IndexOutOfBoundsException();
@@ -310,8 +305,8 @@ public class Database
 	{
 		AnimationObject result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
-			result = de.getAnimation( animName );
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			result = de.getAnim( animName );
 		}
 		return result;
 	}
@@ -320,7 +315,7 @@ public class Database
 	{
 		AugmentObject result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getAugment( blueprintName );
 		}
 		return result;
@@ -330,7 +325,7 @@ public class Database
 	{
 		ArrayList<AugmentObject> result = new ArrayList<AugmentObject>();
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( AugmentObject o : de.getAugments() )
 				if ( !result.contains( o ) )
 					result.add( o );
@@ -342,7 +337,7 @@ public class Database
 	{
 		ArrayList<DroneList> result = new ArrayList<DroneList>();
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( DroneList o : de.getDroneLists() )
 				if ( !result.contains( o ) )
 					result.add( o );
@@ -354,7 +349,7 @@ public class Database
 	{
 		DroneList result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getDroneList( name );
 		}
 		return result;
@@ -365,7 +360,7 @@ public class Database
 	{
 		DroneObject result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getDrone( blueprint );
 		}
 		return result;
@@ -375,7 +370,7 @@ public class Database
 	{
 		ArrayList<DroneObject> result = new ArrayList<DroneObject>();
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( DroneObject o : de.getDronesByType( type ) )
 				if ( !result.contains( o ) )
 					result.add( o );
@@ -387,7 +382,7 @@ public class Database
 	{
 		GlowObject result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getGlow( id );
 		}
 		return result;
@@ -397,7 +392,7 @@ public class Database
 	{
 		ArrayList<GlowObject> result = new ArrayList<GlowObject>();
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( GlowObject o : de.getGlows() )
 				if ( !result.contains( o ) )
 					result.add( o );
@@ -409,7 +404,7 @@ public class Database
 	{
 		GlowSet result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getGlowSet( id );
 		}
 		return result;
@@ -419,7 +414,7 @@ public class Database
 	{
 		ArrayList<GlowSet> result = new ArrayList<GlowSet>();
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( GlowSet o : de.getGlowSets() )
 				if ( !result.contains( o ) )
 					result.add( o );
@@ -430,7 +425,7 @@ public class Database
 	public HashMap<String, ArrayList<ShipMetadata>> getShipMetadata()
 	{
 		HashMap<String, ArrayList<ShipMetadata>> map = new HashMap<String, ArrayList<ShipMetadata>>();
-		for ( DatabaseEntry de : dataEntries ) {
+		for ( AbstractDatabaseEntry de : dataEntries ) {
 			for ( ShipMetadata metadata : de.getShipMetadata() ) {
 				ArrayList<ShipMetadata> list = map.get( metadata.getBlueprintName() );
 				if ( list == null )
@@ -446,7 +441,7 @@ public class Database
 	{
 		ArrayList<WeaponList> result = new ArrayList<WeaponList>();
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( WeaponList o : de.getWeaponLists() )
 				if ( !result.contains( o ) )
 					result.add( o );
@@ -458,7 +453,7 @@ public class Database
 	{
 		WeaponList result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getWeaponList( name );
 		}
 		return result;
@@ -468,7 +463,7 @@ public class Database
 	{
 		WeaponObject result = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getWeapon( blueprint );
 		}
 		return result;
@@ -478,7 +473,7 @@ public class Database
 	{
 		ArrayList<WeaponObject> result = new ArrayList<WeaponObject>();
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( WeaponObject o : de.getWeaponsByType( type ) )
 				if ( !result.contains( o ) )
 					result.add( o );
@@ -495,7 +490,7 @@ public class Database
 	{
 		boolean result = false;
 		for ( int i = dataEntries.size() - 1; i >= 0 && !result; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.contains( innerPath );
 		}
 		return result;
@@ -516,7 +511,7 @@ public class Database
 	{
 		InputStream is = null;
 		for ( int i = dataEntries.size() - 1; i >= 0 && is == null; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
+			AbstractDatabaseEntry de = dataEntries.get( i );
 			if ( de.contains( innerPath ) )
 				is = de.getInputStream( innerPath );
 		}
@@ -530,8 +525,8 @@ public class Database
 		List<String> result = new ArrayList<String>();
 
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
-			DatabaseEntry de = dataEntries.get( i );
-			for ( String innerPath : de.list() ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			for ( String innerPath : de.listInnerPaths() ) {
 				if ( !result.contains( innerPath ) && ( filter == null || filter.accept( innerPath ) ) )
 					result.add( innerPath );
 			}
