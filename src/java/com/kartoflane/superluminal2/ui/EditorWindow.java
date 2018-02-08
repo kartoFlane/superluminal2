@@ -94,8 +94,6 @@ import com.kartoflane.superluminal2.utils.SWTFontUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
-import net.vhati.ftldat.FTLDat.FTLPack;
-
 
 @SuppressWarnings("serial")
 public class EditorWindow
@@ -705,11 +703,7 @@ public class EditorWindow
 									db.removeEntry( db.getCore() );
 
 									File datsDir = new File( Manager.resourcePath );
-									File dataFile = new File( datsDir + "/data.dat" );
-									File resourceFile = new File( datsDir + "/resource.dat" );
-									FTLPack data = new FTLPack( dataFile, "r" );
-									FTLPack resource = new FTLPack( resourceFile, "r" );
-									db.loadCore( data, resource );
+									db.loadCore( datsDir );
 									db.getCore().load();
 
 									// Reload modded files

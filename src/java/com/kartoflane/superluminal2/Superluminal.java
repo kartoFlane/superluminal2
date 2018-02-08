@@ -33,7 +33,6 @@ import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.UIUtils;
 import com.kartoflane.superluminal2.utils.Utils;
 
-import net.vhati.ftldat.FTLDat.FTLPack;
 import net.vhati.modmanager.core.ComparableVersion;
 import net.vhati.modmanager.core.FTLUtilities;
 
@@ -251,13 +250,9 @@ public class Superluminal
 		}
 		else {
 			try {
-				log.trace( "Loading dat archives..." );
-				File dataFile = new File( datsDir + "/data.dat" );
-				File resourceFile = new File( datsDir + "/resource.dat" );
-				FTLPack data = new FTLPack( dataFile, "r" );
-				FTLPack resource = new FTLPack( resourceFile, "r" );
+				log.trace( "Creating database..." );
 
-				final Database db = new Database( data, resource );
+				final Database db = new Database( datsDir );
 				final List<String> argsList = Arrays.asList( args );
 
 				log.trace( "Loading database..." );
@@ -338,12 +333,12 @@ public class Superluminal
 			ShipContainer ship = Manager.getCurrentShip();
 			if ( ship != null ) {
 				String name = "crash_" + System.currentTimeMillis() + ".ftl";
-				msg += "\n\nThe ship you had loaded has been saved in the editor's directory as '" +
+				msg += "\n\nThe ship you had been working on has been saved in the editor's directory as '" +
 					name + "'.";
 				ship.save( new File( name ) );
 			}
 
-			log.error( "An error has occured and the editor was forced to terminate.", t );
+			log.error( "An unexpected error has occured and the editor was forced to terminate.", t );
 			UIUtils.showErrorDialog( editorWindow.getShell(), null, msg );
 		}
 

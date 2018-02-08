@@ -1,5 +1,6 @@
 package com.kartoflane.superluminal2.db;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,8 @@ import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
-import net.vhati.ftldat.FTLDat.FTLPack;
+import net.vhati.ftldat.FTLPack;
+import net.vhati.ftldat.PkgPack;
 
 
 public class Database
@@ -73,6 +75,7 @@ public class Database
 	private static Database instance;
 
 	// Constant
+	// Maps blueprint names to file names in which these blueprints should be saved.
 	private HashMap<String, String> shipFileMap = new HashMap<String, String>();
 
 	// Dynamically loaded
@@ -145,16 +148,14 @@ public class Database
 	/**
 	 * Creates a new Database and fills it with data from the specified archives.
 	 * 
-	 * @param data
-	 *            the FTLPack representing the data.dat archive
-	 * @param resource
-	 *            the FTLPack representing the resource.dat archive
+	 * @param ftlDir
+	 *            file pointing to FTL's base installation directory.
 	 */
-	public Database( FTLPack data, FTLPack resource ) throws FileNotFoundException, IOException
+	public Database( File ftlDir ) throws FileNotFoundException, IOException
 	{
 		this();
 
-		loadCore( data, resource );
+		loadCore( ftlDir );
 	}
 
 	public static Database getInstance()
@@ -173,16 +174,45 @@ public class Database
 	/**
 	 * Reloads the core of the Database using the specified archives.
 	 * 
-	 * @param data
-	 *            the FTLPack representing the data.dat archive
-	 * @param resource
-	 *            the FTLPack representing the resource.dat archive
+	 * @param datsDir
+	 *            file pointing to the directory containing FTL's .dat files
+	 *            In FTL 1.01-1.5.13 this is the /resources directory.
+	 *            In FTL 1.6.1 this is the base directory.
 	 */
-	public void loadCore( FTLPack data, FTLPack resource )
+	public void loadCore( File datsDir ) throws IOException
 	{
 		if ( dataEntries.size() > 0 )
 			dataEntries.remove( 0 );
-		AbstractDatabaseEntry core = new BasePre16DatabaseEntry( data, resource );
+
+		File ftlDatFile = new File( datsDir, "ftl.dat" );
+		File dataDatFile = new File( datsDir, "data.dat" );
+		File resourceDatFile = new File( datsDir, "resource.dat" );
+
+		AbstractDatabaseEntry core = null;
+
+		if ( ftlDatFile.exists() ) {
+			// FTL 1.6.1
+			log.info( "Detected FTL version 1.6.1+" );
+			PkgPack data = new PkgPack( ftlDatFile, "r" );
+			core = new BasePost16DatabaseEntry( data );
+		}
+		else if ( dataDatFile.exists() && resourceDatFile.exists() ) {
+			// FTL 1.01-1.5.13
+			log.info( "Detected FTL version 1.01-1.5.13" );
+			FTLPack data = new FTLPack( dataDatFile, "r" );
+			FTLPack resource = new FTLPack( resourceDatFile, "r" );
+			core = new BasePre16DatabaseEntry( data, resource );
+		}
+		else {
+			// Error -- could not find any of the archives
+			throw new IOException(
+				String.format(
+					"Could not find either \"%s\" or both \"%s\" and \"%s\"",
+					ftlDatFile, dataDatFile, resourceDatFile
+				)
+			);
+		}
+
 		core.store( DEFAULT_ANIM_OBJ );
 		dataEntries.add( 0, core );
 	}

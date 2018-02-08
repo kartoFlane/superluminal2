@@ -85,7 +85,7 @@ public class ModManagementDialog
 		tree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 4, 1 ) );
 
 		trtmCore = new TreeItem( tree, SWT.NONE );
-		trtmCore.setText( "DatabaseCore" );
+		trtmCore.setText( "Base Game" );
 		trtmCore.setData( db.getCore() );
 		RGB rgb = trtmCore.getBackground().getRGB();
 		rgb.red = (int)( 0.85 * rgb.red );
