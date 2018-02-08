@@ -380,8 +380,12 @@ public abstract class AbstractDatabaseEntry
 		preloadAnims( log );
 		loadGlowSets( log );
 
-		String[] extensions = { ".xml", ".xml.append", ".append.xml", ".xml.rawappend", ".rawappend.xml" };
-		InputStream is = null;
+		String[] extensions = {
+			".xml",
+			".xml.append", ".append.xml",
+			".xml.rawappend", ".rawappend.xml",
+			".xml.rawclobber", ".rawclobber.xml"
+		};
 
 		String[] blueprintFiles = {
 			"data/blueprints", "data/autoBlueprints",
