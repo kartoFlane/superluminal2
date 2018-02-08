@@ -389,18 +389,22 @@ public abstract class AbstractDatabaseEntry
 			"data/dlcPirateBlueprints"
 		};
 
+		// The only texts relevant to the editor are located in
+		// data/text_blueprints.xml, so we ignore the other files.
 		String[] textLookupFiles = {
 			// FTL 1.5.4-1.5.13.
-			"data/misc",
+			// "data/misc",
 			// FTL 1.6.1.
-			"data/text_achievements", // Not interested.
+			// "data/text_achievements",
 			"data/text_blueprints",
-			"data/text_events", // Not interested.
-			"data/text_misc",
-			"data/text_sectorname", // Not interested.
-			"data/text_tooltips",
-			"data/text_tutorial"
+			// "data/text_events",
+			// "data/text_misc",
+			// "data/text_sectorname",
+			// "data/text_tooltips",
+			// "data/text_tutorial"
 		};
+
+		InputStream is = null;
 
 		log.info( "Reading texts..." );
 
