@@ -119,18 +119,41 @@ public class EditorWindow
 	// UI widgets' variables
 	private Shell shell;
 	private ScrolledComposite sideContainer;
+	private SashForm editorContainer;
 	private Canvas canvas;
+
+	private DropTarget dropTarget;
+	private Label lblCursorLoc;
 
 	private ToolItem tltmPointer;
 	private ToolItem tltmCreation;
 	private ToolItem tltmProperties;
 	private ToolItem tltmImages;
 	private ToolItem tltmManager;
+	private ToolItem tltmCloak;
+	private ToolItem tltmAnimate;
+
+	private MenuItem mntmNewShip;
+	private MenuItem mntmLoadShip;
+	private MenuItem mntmConvertShp;
+	private MenuItem mntmSaveShip;
+	private MenuItem mntmSaveShipAs;
+	private MenuItem mntmModMan;
+	private MenuItem mntmReloadDb;
+	private MenuItem mntmChangeArchives;
+	private MenuItem mntmCloseShip;
 
 	private MenuItem mntmUndo;
 	private MenuItem mntmRedo;
+	private MenuItem mntmResetLinks;
+	private MenuItem mntmOptimalOffset;
+	private MenuItem mntmGenerateFloor;
 	private MenuItem mntmDelete;
+	private MenuItem mntmSettings;
 
+	private MenuItem mntmZoom;
+	private MenuItem mntmGrid;
+	private MenuItem mntmHangar;
 	private MenuItem mntmShowAnchor;
 	private MenuItem mntmShowMounts;
 	private MenuItem mntmShowRooms;
@@ -140,26 +163,6 @@ public class EditorWindow
 	private MenuItem mntmShowFloor;
 	private MenuItem mntmShowShield;
 	private MenuItem mntmShowGibs;
-	private MenuItem mntmNewShip;
-	private MenuItem mntmLoadShip;
-	private MenuItem mntmConvertShp;
-	private MenuItem mntmSettings;
-	private MenuItem mntmGrid;
-	private MenuItem mntmSaveShip;
-	private MenuItem mntmSaveShipAs;
-	private MenuItem mntmCloseShip;
-	private SashForm editorContainer;
-	private MenuItem mntmModMan;
-	private ToolItem tltmCloak;
-	private MenuItem mntmResetLinks;
-	private MenuItem mntmOptimalOffset;
-	private MenuItem mntmReloadDb;
-	private MenuItem mntmHangar;
-	private MenuItem mntmZoom;
-	private MenuItem mntmGenerateFloor;
-	private ToolItem tltmAnimate;
-	private DropTarget dropTarget;
-	private Label lblCursorLoc;
 
 
 	public EditorWindow( Display display )
@@ -234,6 +237,9 @@ public class EditorWindow
 
 		mntmReloadDb = new MenuItem( menuFile, SWT.NONE );
 		mntmReloadDb.setText( "Reload Database" );
+
+		mntmChangeArchives = new MenuItem( menuFile, SWT.NONE );
+		mntmChangeArchives.setText( "Change .dat Files" );
 
 		new MenuItem( menuFile, SWT.SEPARATOR );
 
@@ -678,55 +684,22 @@ public class EditorWindow
 				@Override
 				public void widgetSelected( SelectionEvent e )
 				{
-					final Exception[] ex = new Exception[1];
-					ex[0] = null;
-					UIUtils.showLoadDialog(
-						shell, null, null, new Runnable() {
-							public void run()
-							{
-								log.debug( "Reloading Database..." );
+					reloadDatabase();
+				}
+			}
+		);
 
-								try {
-									Database db = Database.getInstance();
+		mntmChangeArchives.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					File datsDir = UIUtils.promptForDatsDir( getShell() );
 
-									ArrayList<File> entries = new ArrayList<File>();
-
-									// Unload modded files and store them for reloading
-									for ( AbstractDatabaseEntry de : db.getEntries() ) {
-										if ( de instanceof ModDatabaseEntry ) {
-											entries.add( ( (ModDatabaseEntry)de ).getFile() );
-											db.removeEntry( de );
-										}
-									}
-
-									// Reload the base game files.
-									db.removeEntry( db.getCore() );
-
-									File datsDir = new File( Manager.resourcePath );
-									db.loadCore( datsDir );
-									db.getCore().load();
-
-									// Reload modded files
-									for ( File modFile : entries ) {
-										// Need to reopen the entries, since they were closed during removal
-										db.addEntry( new ModDatabaseEntry( modFile ) );
-									}
-
-									db.cacheAnimations();
-								}
-								catch ( Exception e ) {
-									ex[0] = e;
-								}
-							}
-						}
-					);
-
-					if ( ex[0] != null ) {
-						log.error( "An error has occured while reloading the database.", ex[0] );
-						String msg = "An error has occured while reloading the Database:\n" +
-							ex[0].getClass().getSimpleName() + ": " + ex[0].getMessage() + "\n\n" +
-							"Check the log for details.";
-						UIUtils.showErrorDialog( null, null, msg );
+					if ( datsDir != null ) {
+						Manager.resourcePath = datsDir.getAbsolutePath();
+						log.info( "FTL dats path updated to: " + Manager.resourcePath );
+						reloadDatabase();
 					}
 				}
 			}
@@ -1511,6 +1484,7 @@ public class EditorWindow
 		ShipContainer c = Manager.getCurrentShip();
 		mntmModMan.setEnabled( !enable && c == null );
 		mntmReloadDb.setEnabled( !enable && c == null );
+		mntmChangeArchives.setEnabled( !enable && c == null );
 	}
 
 	public boolean isOptionsEnabled()
@@ -1690,6 +1664,60 @@ public class EditorWindow
 			container.save( file, mod );
 
 		return file != null;
+	}
+
+	private void reloadDatabase()
+	{
+		final Exception[] ex = new Exception[1];
+		ex[0] = null;
+		UIUtils.showLoadDialog(
+			shell, null, null, new Runnable() {
+				public void run()
+				{
+					log.debug( "Reloading Database..." );
+
+					try {
+						Database db = Database.getInstance();
+
+						ArrayList<File> entries = new ArrayList<File>();
+
+						// Unload modded files and store them for reloading
+						for ( AbstractDatabaseEntry de : db.getEntries() ) {
+							if ( de instanceof ModDatabaseEntry ) {
+								entries.add( ( (ModDatabaseEntry)de ).getFile() );
+								db.removeEntry( de );
+							}
+						}
+
+						// Reload the base game files.
+						db.removeEntry( db.getCore() );
+
+						File datsDir = new File( Manager.resourcePath );
+						db.loadCore( datsDir );
+						db.getCore().load();
+
+						// Reload modded files
+						for ( File modFile : entries ) {
+							// Need to reopen the entries, since they were closed during removal
+							db.addEntry( new ModDatabaseEntry( modFile ) );
+						}
+
+						db.cacheAnimations();
+					}
+					catch ( Exception e ) {
+						ex[0] = e;
+					}
+				}
+			}
+		);
+
+		if ( ex[0] != null ) {
+			log.error( "An error has occured while reloading the database.", ex[0] );
+			String msg = "An error has occured while reloading the Database:\n" +
+				ex[0].getClass().getSimpleName() + ": " + ex[0].getMessage() + "\n\n" +
+				"Check the log for details.";
+			UIUtils.showErrorDialog( null, null, msg );
+		}
 	}
 
 	private void registerHotkeys()
