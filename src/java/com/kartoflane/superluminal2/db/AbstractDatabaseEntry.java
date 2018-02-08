@@ -1,20 +1,15 @@
-package com.kartoflane.superluminal2.core;
+package com.kartoflane.superluminal2.db;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -38,106 +33,39 @@ import com.kartoflane.superluminal2.utils.DataUtils;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.IOUtils.DecodeResult;
 
-import net.vhati.ftldat.FTLDat.FTLPack;
-
 
 /**
  * A class representing a database entry that can be installed in the
- * {@link com.kartoflane.superluminal2.core.Database Database} to modify its contents.<br>
- * Database entries are basically the editor's representation of .ftl files.
- * 
- * @author kartoFlane
- *
+ * {@link com.kartoflane.superluminal2.db.Database Database} to modify its contents.
  */
-public class DatabaseEntry
+public abstract class AbstractDatabaseEntry
 {
-	private static final Logger log = LogManager.getLogger( DatabaseEntry.class );
+	protected ArrayList<ShipMetadata> shipMetadata = new ArrayList<ShipMetadata>();
 
-	private final File file;
-	private final ZipFile archive;
-	private final FTLPack data;
-	private final FTLPack resource;
-
-	private ArrayList<ShipMetadata> shipMetadata = new ArrayList<ShipMetadata>();
-
-	private Map<String, AnimationObject> animationMap = new HashMap<String, AnimationObject>();
-	private Map<String, WeaponObject> weaponMap = new HashMap<String, WeaponObject>();
-	private Map<String, DroneObject> droneMap = new HashMap<String, DroneObject>();
-	private Map<String, AugmentObject> augmentMap = new HashMap<String, AugmentObject>();
-	private Map<String, GlowObject> glowMap = new HashMap<String, GlowObject>();
-	private Map<String, GlowSet> glowSetMap = new HashMap<String, GlowSet>();
-	private Map<String, WeaponList> weaponListMap = new HashMap<String, WeaponList>();
-	private Map<String, DroneList> droneListMap = new HashMap<String, DroneList>();
-	/** Temporary map to hold anim sheets, since they need to be loaded before weaponAnims, which reference them */
-	private HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
+	protected Map<String, AnimationObject> animationMap = new HashMap<String, AnimationObject>();
+	protected Map<String, WeaponObject> weaponMap = new HashMap<String, WeaponObject>();
+	protected Map<String, DroneObject> droneMap = new HashMap<String, DroneObject>();
+	protected Map<String, AugmentObject> augmentMap = new HashMap<String, AugmentObject>();
+	protected Map<String, GlowObject> glowMap = new HashMap<String, GlowObject>();
+	protected Map<String, GlowSet> glowSetMap = new HashMap<String, GlowSet>();
+	protected Map<String, WeaponList> weaponListMap = new HashMap<String, WeaponList>();
+	protected Map<String, DroneList> droneListMap = new HashMap<String, DroneList>();
+	/**
+	 * Temporary map to hold anim sheets, since they
+	 * need to be loaded before weaponAnims, which reference them
+	 */
+	protected HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
 
 
 	/**
-	 * Creates a DatabaseEntry representing an installed mod.<br>
-	 * The entry then has to be loaded using {@link #load()}
-	 * 
-	 * @param f
-	 *            the .ftl or .zip file from which the data will be read
-	 * @throws ZipException
-	 *             when the file is not a zip archive
-	 * @throws IOException
-	 *             when an IO error occurs
+	 * @return the display name of the database entry
 	 */
-	public DatabaseEntry( File f ) throws ZipException, IOException
-	{
-		file = f;
-		archive = new ZipFile( f );
-		data = null;
-		resource = null;
-	}
-
-	/**
-	 * Creates the default DatabaseEntry, which serves as the core of the database.
-	 * 
-	 * @param data
-	 *            the data.dat archive
-	 * @param resource
-	 *            the resource.dat archive
-	 */
-	public DatabaseEntry( FTLPack data, FTLPack resource )
-	{
-		file = new File( "DatabaseCore" );
-		archive = null;
-		this.data = data;
-		this.resource = resource;
-	}
-
-	/**
-	 * @return the name of the database entry
-	 */
-	public String getName()
-	{
-		return file == null ? "" : file.getName();
-	}
-
-	public File getFile()
-	{
-		return file;
-	}
+	public abstract String getName();
 
 	/**
 	 * @return true if the entry contains the innerPath, false otherwise
 	 */
-	public boolean contains( String innerPath )
-	{
-		if ( innerPath == null )
-			throw new IllegalArgumentException( "Inner path must not be null." );
-
-		if ( archive == null ) {
-			boolean result = data.contains( innerPath );
-			if ( !result )
-				result = resource.contains( innerPath );
-
-			return result;
-		}
-		else
-			return archive.getEntry( innerPath ) != null;
-	}
+	public abstract boolean contains( String innerPath );
 
 	/**
 	 * @param innerPath
@@ -149,96 +77,50 @@ public class DatabaseEntry
 	 * @throws IOException
 	 *             when an IO error occurs
 	 */
-	public InputStream getInputStream( String innerPath ) throws FileNotFoundException, IOException
-	{
-		if ( innerPath == null )
-			throw new IllegalArgumentException( "Inner path must not be null." );
-
-		if ( archive == null ) {
-			if ( innerPath.endsWith( ".txt" ) || innerPath.endsWith( ".xml" ) ||
-				innerPath.endsWith( ".xml.append" ) || innerPath.endsWith( ".append.xml" ) ||
-				innerPath.endsWith( ".xml.rawappend" ) || innerPath.endsWith( ".rawappend.xml" ) )
-				return data.getInputStream( innerPath );
-			else
-				return resource.getInputStream( innerPath );
-		}
-		else {
-			ZipEntry ze = archive.getEntry( innerPath );
-			if ( ze == null )
-				throw new FileNotFoundException( "Inner path not found: " + innerPath );
-			return archive.getInputStream( ze );
-		}
-	}
+	public abstract InputStream getInputStream( String innerPath ) throws FileNotFoundException, IOException;
 
 	/**
-	 * @return a list of all inner paths
+	 * @return a list of all inner paths contained in this DatabaseEntry
 	 */
-	public ArrayList<String> list()
-	{
-		ArrayList<String> result = new ArrayList<String>();
-		if ( archive == null ) {
-			result.addAll( data.list() );
-			result.addAll( resource.list() );
-		}
-		else {
-			Enumeration<? extends ZipEntry> entries = archive.entries();
-			while ( entries.hasMoreElements() ) {
-				ZipEntry ze = entries.nextElement();
-				if ( !ze.isDirectory() )
-					result.add( ze.getName() );
-			}
-		}
-		return result;
-	}
+	public abstract Set<String> listInnerPaths();
 
 	/**
-	 * Clears all data that was loaded and cached in this entry.
+	 * Loads the contents of this database entry.<br>
+	 * This method should not be called directly. Use {@link Database#addEntry(IDatabaseEntry)} instead.
+	 * 
+	 * <pre>
+	 * Loaded data:
+	 *   - weapon anim, animSheets (only temporarily), weapon sprites
+	 *   - ship blueprints
+	 *   - weapon blueprints
+	 *   - drone blueprints
+	 *   - augment blueprints
+	 *   - weapon and drone lists
+	 *   - roomLayout tags (glow objects) from rooms.xml
+	 *   - glow images (glow sets) in img/ship/interior, eg. pilot_glow1-3.png, etc
+	 * </pre>
 	 */
-	public void clear()
-	{
-		shipMetadata.clear();
-		animationMap.clear();
-		weaponMap.clear();
-		droneMap.clear();
-		augmentMap.clear();
-		glowMap.clear();
-		glowSetMap.clear();
-		weaponListMap.clear();
-		droneListMap.clear();
-		animSheetMap.clear();
-		System.gc();
-	}
+	public abstract void load();
 
 	/**
 	 * Closes this entry and releases any system resources associated with the stream.
+	 * Clears all data that was loaded and cached in this entry.
 	 */
-	public void close() throws IOException
-	{
-		if ( archive == null ) {
-			data.close();
-			resource.close();
-		}
-		else
-			archive.close();
-	}
+	public abstract void dispose();
 
-	public void dispose() throws IOException
-	{
-		close();
-		clear();
-	}
+	// ===============================================================================================
 
-	public void store( AnimationObject anim )
+	protected void store( AnimationObject anim )
 	{
 		animationMap.put( anim.getIdentifier(), anim );
 	}
 
-	public void store( AugmentObject augment )
+	protected void store( AugmentObject augment )
 	{
 		augmentMap.put( augment.getIdentifier(), augment );
 	}
 
-	public void store( BlueprintList<?> list )
+	protected void store( BlueprintList<?> list )
 	{
 		if ( list instanceof WeaponList ) {
 			weaponListMap.put( list.getIdentifier(), (WeaponList)list );
@@ -251,37 +133,50 @@ public class DatabaseEntry
 		}
 	}
 
-	public void store( DroneObject drone )
+	protected void store( DroneObject drone )
 	{
 		droneMap.put( drone.getIdentifier(), drone );
 	}
 
-	public void store( GlowObject glow )
+	protected void store( GlowObject glow )
 	{
 		glowMap.put( glow.getIdentifier(), glow );
 	}
 
+	// TODO: Temporarily public until I figure out a better way to add user-defined glow sets.
 	public void store( GlowSet set )
 	{
 		glowSetMap.put( set.getIdentifier(), set );
 	}
 
-	public void store( ShipMetadata metadata )
+	protected void store( ShipMetadata metadata )
 	{
 		shipMetadata.add( metadata );
 	}
 
-	public void store( WeaponObject weapon )
+	protected void store( WeaponObject weapon )
 	{
 		weaponMap.put( weapon.getIdentifier(), weapon );
+	}
+
+	// ===============================================================================================
+
+	/**
+	 * This method should not be used. It's been made public only to be
+	 * accessible by {@link DataUtils#loadAnim(BasePre16DatabaseEntry, Element)},
+	 * and is used only during the preloading of anim sheets.
+	 */
+	public Element getAnimSheetElement( String anim )
+	{
+		return animSheetMap.get( anim );
 	}
 
 	/**
 	 * @param animName
 	 *            the animName of the sought animation (eg. laser_burst_1)
-	 * @return
+	 * @return the object representing the animation, or null if not found.
 	 */
-	public AnimationObject getAnimation( String animName )
+	public AnimationObject getAnim( String animName )
 	{
 		return animationMap.get( animName );
 	}
@@ -291,9 +186,9 @@ public class DatabaseEntry
 	 *            the blueprint name of the sought augment
 	 * @return the augment with the given blueprint, or null if not found
 	 */
-	public AugmentObject getAugment( String blueprint )
+	public AugmentObject getAugment( String blueprintName )
 	{
-		return augmentMap.get( blueprint );
+		return augmentMap.get( blueprintName );
 	}
 
 	/**
@@ -305,6 +200,42 @@ public class DatabaseEntry
 	}
 
 	/**
+	 * @param blueprint
+	 *            the blueprint name of the sought drone
+	 * @return the drone with the given blueprint name, or null if not found
+	 */
+	public DroneObject getDrone( String blueprintName )
+	{
+		return droneMap.get( blueprintName );
+	}
+
+	/**
+	 * @param type
+	 *            the desired type of the drones
+	 * @return an array containing all drones of the given type in this entry
+	 */
+	public DroneObject[] getDronesByType( DroneTypes type )
+	{
+		ArrayList<DroneObject> typeDrones = new ArrayList<DroneObject>();
+		for ( DroneObject drone : droneMap.values() ) {
+			if ( drone.getType() == type )
+				typeDrones.add( drone );
+		}
+
+		return typeDrones.toArray( new DroneObject[0] );
+	}
+
+	/**
+	 * @param the
+	 *            name of the blueprint list
+	 * @return the blueprint list with the given name
+	 */
+	public DroneList getDroneList( String listName )
+	{
+		return droneListMap.get( listName );
+	}
+
+	/**
 	 * @return an array of all drone lists in this entry
 	 */
 	public DroneList[] getDroneLists()
@@ -313,49 +244,13 @@ public class DatabaseEntry
 	}
 
 	/**
-	 * @param the
-	 *            name of the blueprint list
-	 * @return the blueprint list with the given name
-	 */
-	public DroneList getDroneList( String name )
-	{
-		return droneListMap.get( name );
-	}
-
-	/**
-	 * @param blueprint
-	 *            the blueprint name of the sought drone
-	 * @return the drone with the given blueprint name, or null if not found
-	 */
-	public DroneObject getDrone( String blueprint )
-	{
-		return droneMap.get( blueprint );
-	}
-
-	/**
-	 * @param type
-	 *            the desired type of the drones
-	 * @return a list containing all drones of the given type in this entry
-	 */
-	public ArrayList<DroneObject> getDronesByType( DroneTypes type )
-	{
-		ArrayList<DroneObject> typeDrones = new ArrayList<DroneObject>();
-		for ( DroneObject drone : droneMap.values() ) {
-			if ( drone.getType() == type )
-				typeDrones.add( drone );
-		}
-
-		return typeDrones;
-	}
-
-	/**
-	 * @param id
+	 * @param glowName
 	 *            the name of the glow object (eg. pilot_1)
-	 * @return the glow object wit the given name, or null if not found
+	 * @return the glow object with the given name, or null if not found
 	 */
-	public GlowObject getGlow( String id )
+	public GlowObject getGlow( String glowName )
 	{
-		return glowMap.get( id );
+		return glowMap.get( glowName );
 	}
 
 	/**
@@ -367,13 +262,13 @@ public class DatabaseEntry
 	}
 
 	/**
-	 * @param id
+	 * @param glowNamespace
 	 *            the namespace of the glow image set (eg. computer1_glow)
 	 * @return the glow image set with the given namespace, or null if not found
 	 */
-	public GlowSet getGlowSet( String id )
+	public GlowSet getGlowSet( String glowNamespace )
 	{
-		return glowSetMap.get( id );
+		return glowSetMap.get( glowNamespace );
 	}
 
 	/**
@@ -393,31 +288,13 @@ public class DatabaseEntry
 	}
 
 	/**
-	 * @return an array of all weapon lists in this entry
-	 */
-	public WeaponList[] getWeaponLists()
-	{
-		return weaponListMap.values().toArray( new WeaponList[0] );
-	}
-
-	/**
-	 * @param the
-	 *            name of the blueprint list
-	 * @return the blueprint list with the given name
-	 */
-	public WeaponList getWeaponList( String name )
-	{
-		return weaponListMap.get( name );
-	}
-
-	/**
-	 * @param blueprint
+	 * @param blueprintName
 	 *            the blueprint name of the sought weapon
 	 * @return the weapon with the given blueprint name, or null if not found
 	 */
-	public WeaponObject getWeapon( String blueprint )
+	public WeaponObject getWeapon( String blueprintName )
 	{
-		return weaponMap.get( blueprint );
+		return weaponMap.get( blueprintName );
 	}
 
 	/**
@@ -425,7 +302,7 @@ public class DatabaseEntry
 	 *            the desired type of the weapons
 	 * @return a list containing all weapons of the given type in this entry
 	 */
-	public ArrayList<WeaponObject> getWeaponsByType( WeaponTypes type )
+	public WeaponObject[] getWeaponsByType( WeaponTypes type )
 	{
 		ArrayList<WeaponObject> typeWeapons = new ArrayList<WeaponObject>();
 		for ( WeaponObject weapon : weaponMap.values() ) {
@@ -433,30 +310,57 @@ public class DatabaseEntry
 				typeWeapons.add( weapon );
 		}
 
-		return typeWeapons;
+		return typeWeapons.toArray( new WeaponObject[0] );
 	}
 
 	/**
-	 * Loads the contents of the database entry.<br>
-	 * This method should not be called directly. Use {@link Database#addEntry(DatabaseEntry)} instead.
-	 * 
-	 * <pre>
-	 * Loaded data:
-	 *   - weapon anim, animSheets (only temporarily), weapon sprites
-	 *   - ship blueprints
-	 *   - weapon blueprints
-	 *   - drone blueprints
-	 *   - augment blueprints
-	 *   - weapon and drone lists
-	 *   - roomLayout tags (glow objects) from rooms.xml
-	 *   - glow images (glow sets) in img/ship/interior, eg. pilot_glow1-3.png, etc
-	 * </pre>
+	 * @param listName
+	 *            the name of the blueprint list
+	 * @return the blueprint list with the given name
 	 */
-	public void load()
+	public WeaponList getWeaponList( String listName )
+	{
+		return weaponListMap.get( listName );
+	}
+
+	/**
+	 * @return an array of all weapon lists in this entry
+	 */
+	public WeaponList[] getWeaponLists()
+	{
+		return weaponListMap.values().toArray( new WeaponList[0] );
+	}
+
+	// ===============================================================================================
+
+	/**
+	 * Clears all data that was loaded and cached in this entry.
+	 */
+	protected void clear()
+	{
+		shipMetadata.clear();
+		animationMap.clear();
+		weaponMap.clear();
+		droneMap.clear();
+		augmentMap.clear();
+		glowMap.clear();
+		glowSetMap.clear();
+		weaponListMap.clear();
+		droneListMap.clear();
+		animSheetMap.clear();
+		System.gc();
+	}
+
+	/**
+	 * @param log
+	 *            logger instance to output messages to
+	 * @see #load()
+	 */
+	protected void load( Logger log )
 	{
 		// Animations need to be loaded before weapons, since they reference them
-		preloadAnims();
-		loadGlowSets();
+		preloadAnims( log );
+		loadGlowSets( log );
 
 		String[] extensions = { ".xml", ".xml.append", ".append.xml", ".xml.rawappend", ".rawappend.xml" };
 		InputStream is = null;
@@ -635,7 +539,7 @@ public class DatabaseEntry
 		log.trace( getName() + " was loaded successfully." );
 	}
 
-	private void preloadAnims()
+	private void preloadAnims( Logger log )
 	{
 		String[] extensions = { ".xml", ".xml.append", ".append.xml", ".xml.rawappend", ".rawappend.xml" };
 		String[] animPaths = new String[] { "data/animations", "data/dlcAnimations" };
@@ -701,17 +605,7 @@ public class DatabaseEntry
 		}
 	}
 
-	/**
-	 * This method should not be used. It's been made public only to be
-	 * accessible by {@link DataUtils#loadAnim(DatabaseEntry, Element)},
-	 * and is used only during the preloading of anim sheets.
-	 */
-	public Element getAnimSheetElement( String anim )
-	{
-		return animSheetMap.get( anim );
-	}
-
-	private void loadGlowSets()
+	private void loadGlowSets( Logger log )
 	{
 		final Pattern glowPtrn = Pattern.compile( "[0-9]\\.png" );
 
@@ -725,7 +619,7 @@ public class DatabaseEntry
 		};
 
 		TreeSet<String> eligiblePaths = new TreeSet<String>();
-		for ( String path : list() ) {
+		for ( String path : listInnerPaths() ) {
 			if ( filter.accept( path ) )
 				eligiblePaths.add( path );
 		}
@@ -755,29 +649,5 @@ public class DatabaseEntry
 				}
 			}
 		}
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return file.hashCode();
-	}
-
-	@Override
-	public boolean equals( Object o )
-	{
-		if ( o instanceof DatabaseEntry ) {
-			DatabaseEntry other = (DatabaseEntry)o;
-			return file.equals( other.file );
-		}
-		else {
-			return super.equals( o );
-		}
-	}
-
-	@Override
-	public String toString()
-	{
-		return getName();
 	}
 }

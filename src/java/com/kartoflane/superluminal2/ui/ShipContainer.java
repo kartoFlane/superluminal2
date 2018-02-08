@@ -24,12 +24,12 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.db.Database;
+import com.kartoflane.superluminal2.db.ModDatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.events.SLAddEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
@@ -99,7 +99,7 @@ public class ShipContainer implements Disposable, SLListener
 
 	private boolean shipSaved = false;
 	private File saveDestination = null;
-	private DatabaseEntry saveMod = null;
+	private ModDatabaseEntry saveMod = null;
 
 	private ShipController shipController = null;
 	private GibPropContainer gibContainer = null;
@@ -405,7 +405,7 @@ public class ShipContainer implements Disposable, SLListener
 		}
 	}
 
-	public void save( File f, DatabaseEntry mod )
+	public void save( File f, ModDatabaseEntry mod )
 	{
 		if ( f == null )
 			throw new IllegalStateException( "Save destination must not be null." );

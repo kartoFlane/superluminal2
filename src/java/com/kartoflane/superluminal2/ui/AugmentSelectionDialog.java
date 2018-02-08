@@ -34,8 +34,8 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
-import com.kartoflane.superluminal2.core.Database;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.utils.UIUtils;
 

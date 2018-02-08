@@ -36,7 +36,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 
-import com.kartoflane.superluminal2.core.DatabaseEntry;
+import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
@@ -274,11 +274,11 @@ public class IOUtils
 	/**
 	 * Reads contents of the DatabaseEntry into a filename-byte map.
 	 */
-	public static HashMap<String, byte[]> readEntry( DatabaseEntry entry ) throws IOException
+	public static HashMap<String, byte[]> readEntry( AbstractDatabaseEntry entry ) throws IOException
 	{
 		HashMap<String, byte[]> result = new HashMap<String, byte[]>();
 
-		for ( String fileName : entry.list() ) {
+		for ( String fileName : entry.listInnerPaths() ) {
 			InputStream is = null;
 			try {
 				is = entry.getInputStream( fileName );

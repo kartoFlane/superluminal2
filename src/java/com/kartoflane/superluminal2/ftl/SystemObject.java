@@ -3,7 +3,7 @@ package com.kartoflane.superluminal2.ftl;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
-import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 
 

@@ -25,9 +25,9 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Manager;
+import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
@@ -91,7 +91,7 @@ public class ShipSaveUtils
 	 * @param container
 	 *            the ShipContainer to be saved.
 	 */
-	public static void saveShipModFTL( File destination, DatabaseEntry entry, ShipContainer container )
+	public static void saveShipModFTL( File destination, AbstractDatabaseEntry entry, ShipContainer container )
 		throws IllegalArgumentException, IOException, JDOMParseException
 	{
 		if ( destination == null )
@@ -104,7 +104,7 @@ public class ShipSaveUtils
 		IOUtils.writeZip( entryMap, destination );
 	}
 
-	public static void saveShipModXML( File destination, DatabaseEntry entry, ShipContainer container )
+	public static void saveShipModXML( File destination, AbstractDatabaseEntry entry, ShipContainer container )
 		throws IllegalArgumentException, IOException, JDOMParseException
 	{
 		if ( destination == null )

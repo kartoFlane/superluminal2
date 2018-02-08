@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ui;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -54,12 +55,13 @@ import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Modifiers;
 import com.kartoflane.superluminal2.core.Cache;
-import com.kartoflane.superluminal2.core.Database;
-import com.kartoflane.superluminal2.core.DatabaseEntry;
 import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.core.MouseInputDispatcher;
+import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
+import com.kartoflane.superluminal2.db.Database;
+import com.kartoflane.superluminal2.db.ModDatabaseEntry;
 import com.kartoflane.superluminal2.events.SLListener;
 import com.kartoflane.superluminal2.events.SLModAltEvent;
 import com.kartoflane.superluminal2.events.SLModCommandEvent;
@@ -688,12 +690,19 @@ public class EditorWindow
 
 								try {
 									Database db = Database.getInstance();
+
+									ArrayList<File> entries = new ArrayList<File>();
+
+									// Unload modded files and store them for reloading
+									for ( AbstractDatabaseEntry de : db.getEntries() ) {
+										if ( de instanceof ModDatabaseEntry ) {
+											entries.add( ( (ModDatabaseEntry)de ).getFile() );
+											db.removeEntry( de );
+										}
+									}
+
+									// Reload the base game files.
 									db.removeEntry( db.getCore() );
-
-									DatabaseEntry[] entries = db.getEntries();
-
-									for ( DatabaseEntry de : db.getEntries() )
-										db.removeEntry( de );
 
 									File datsDir = new File( Manager.resourcePath );
 									File dataFile = new File( datsDir + "/data.dat" );
@@ -703,9 +712,10 @@ public class EditorWindow
 									db.loadCore( data, resource );
 									db.getCore().load();
 
-									for ( DatabaseEntry de : entries ) {
+									// Reload modded files
+									for ( File modFile : entries ) {
 										// Need to reopen the entries, since they were closed during removal
-										db.addEntry( new DatabaseEntry( de.getFile() ) );
+										db.addEntry( new ModDatabaseEntry( modFile ) );
 									}
 
 									db.cacheAnimations();
@@ -1103,14 +1113,8 @@ public class EditorWindow
 									public void run()
 									{
 										for ( String path : fileList ) {
-											DatabaseEntry de;
 											try {
-												de = new DatabaseEntry( new File( path ) );
-												DatabaseEntry[] dbEntries = db.getEntries();
-												if ( de == db.getCore() )
-													continue;
-												if ( !Utils.contains( dbEntries, de ) )
-													db.addEntry( de );
+												db.addEntry( new ModDatabaseEntry( new File( path ) ) );
 											}
 											catch ( Exception ex ) {
 												log.warn( String.format( "Could not create a database entry for file '%s': ", path ), ex );
@@ -1677,9 +1681,9 @@ public class EditorWindow
 
 	public boolean promptSaveShip( ShipContainer container, boolean prompt )
 	{
-		SaveOptions sop = container.getSaveOptions();
-		File file = sop.file;
-		DatabaseEntry mod = sop.mod;
+		SaveOptions soPrev = container.getSaveOptions();
+		File file = soPrev.file;
+		ModDatabaseEntry mod = soPrev.mod;
 
 		if ( file == null || prompt ) {
 			SaveOptionsDialog dialog = new SaveOptionsDialog( shell );

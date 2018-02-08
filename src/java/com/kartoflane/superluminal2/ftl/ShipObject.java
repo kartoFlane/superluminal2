@@ -13,7 +13,7 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
-import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.utils.Utils;

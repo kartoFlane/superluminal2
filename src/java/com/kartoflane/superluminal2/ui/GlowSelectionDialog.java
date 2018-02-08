@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Systems;
-import com.kartoflane.superluminal2.core.Database;
+import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
 import com.kartoflane.superluminal2.ftl.SystemObject;
