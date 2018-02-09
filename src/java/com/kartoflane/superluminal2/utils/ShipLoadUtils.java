@@ -35,7 +35,6 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
@@ -175,7 +174,7 @@ public class ShipLoadUtils
 		if ( isPlayer ) {
 			child = e.getChild( "desc" );
 			if ( child == null )
-				ship.setShipDescription( new VerbatimText( "<desc> tag was missing!" ) );
+				ship.setShipDescription( "<desc> tag was missing!" );
 			else
 				ship.setShipDescription( DatParser.readTextElement( child ) );
 		}

@@ -21,6 +21,17 @@ public class DefaultDeferredText implements IDeferredText
 		this.textId = textId;
 	}
 
+	public DefaultDeferredText( String textId, String resolvedText )
+	{
+		this.textId = textId;
+		this.resolvedText = resolvedText;
+	}
+
+	public IDeferredText derive( String newTextId )
+	{
+		return new DefaultDeferredText( newTextId, resolvedText );
+	}
+
 	/**
 	 * Returns the "id" attribute value, or null.
 	 */

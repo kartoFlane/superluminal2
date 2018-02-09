@@ -11,6 +11,15 @@ public interface IDeferredText extends Comparable<IDeferredText>
 
 
 	/**
+	 * Creates a copy of this DeferredText with the specified id, but the same resolved text.
+	 * 
+	 * @param newTextId
+	 *            the new text id
+	 * @return the new DeferredText
+	 */
+	IDeferredText derive( String newTextId );
+
+	/**
 	 * Returns the "id" attribute value, or null.
 	 */
 	String getTextId();

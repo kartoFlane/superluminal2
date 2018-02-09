@@ -75,15 +75,15 @@ public class SHPUtils
 
 		v = string( getFieldValueByName( shipInstance, "shipName" ) );
 		if ( v != null )
-			ship.setShipName( new VerbatimText( v ) );
+			ship.setShipName( v );
 
 		v = string( getFieldValueByName( shipInstance, "shipClass" ) );
 		if ( v != null )
-			ship.setShipClass( new VerbatimText( v ) );
+			ship.setShipClass( v );
 
 		v = string( getFieldValueByName( shipInstance, "descr" ) );
 		if ( v != null )
-			ship.setShipDescription( new VerbatimText( v ) );
+			ship.setShipDescription( v );
 
 		v = string( getFieldValueByName( shipInstance, "imageName" ) );
 		if ( v != null )

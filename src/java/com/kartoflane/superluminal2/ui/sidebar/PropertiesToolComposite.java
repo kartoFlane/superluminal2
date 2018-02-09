@@ -32,11 +32,11 @@ import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.DefaultDeferredText;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
@@ -174,6 +174,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					public void widgetSelected( SelectionEvent e )
 					{
 						ship.setBlueprintName( cmbShips.getText() );
+						ship.update();
 					}
 				}
 			);
@@ -190,7 +191,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					@Override
 					public void modifyText( ModifyEvent e )
 					{
-						ship.setShipName( new VerbatimText( txtName.getText() ) );
+						ship.setShipName(
+							new DefaultDeferredText(
+								"text_" + ship.getBlueprintName() + "_name",
+								txtName.getText()
+							)
+						);
 					}
 				}
 			);
@@ -211,6 +217,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					public void modifyText( ModifyEvent e )
 					{
 						ship.setBlueprintName( txtBlueprint.getText() );
+						ship.update();
 					}
 				}
 			);
@@ -228,7 +235,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				@Override
 				public void modifyText( ModifyEvent e )
 				{
-					ship.setShipClass( new VerbatimText( txtClass.getText() ) );
+					ship.setShipClass(
+						new DefaultDeferredText(
+							"text_" + ship.getBlueprintName() + "_class",
+							txtClass.getText()
+						)
+					);
 				}
 			}
 		);
@@ -249,7 +261,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					public void modifyText( ModifyEvent e )
 					{
 						lblDesc.setText( "Description: (" + txtDesc.getText().length() + "/255)" );
-						ship.setShipDescription( new VerbatimText( txtDesc.getText() ) );
+						ship.setShipDescription(
+							new DefaultDeferredText(
+								"text_" + ship.getBlueprintName() + "_desc",
+								txtDesc.getText()
+							)
+						);
 					}
 				}
 			);

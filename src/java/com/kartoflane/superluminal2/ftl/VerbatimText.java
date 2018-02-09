@@ -19,6 +19,12 @@ public class VerbatimText implements IDeferredText
 	}
 
 	@Override
+	public IDeferredText derive( String newTextId )
+	{
+		return new DefaultDeferredText( newTextId, text );
+	}
+
+	@Override
 	public String getTextId()
 	{
 		// Shouldn't ever be called.

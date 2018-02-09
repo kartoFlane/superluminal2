@@ -28,6 +28,7 @@ import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.DefaultDeferredText;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -35,6 +36,7 @@ import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
+import com.kartoflane.superluminal2.ftl.IDeferredText;
 import com.kartoflane.superluminal2.ftl.ImageObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
@@ -148,6 +150,10 @@ public class ShipSaveUtils
 		byte[] bytes = null;
 
 		// Create the files in memory
+		fileName = "data/text_blueprints.xml.append";
+		bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes();
+		fileMap.put( fileName, bytes );
+
 		fileName = "data/" + Database.getInstance().getAssociatedFile( ship.getBlueprintName() ) + ".append";
 		bytes = IOUtils.readDocument( generateBlueprintXML( ship ) ).getBytes();
 		fileMap.put( fileName, bytes );
@@ -338,6 +344,52 @@ public class ShipSaveUtils
 		IOUtils.writeFileXML( generateLayoutXML( ship ), f );
 	}
 
+	private static void outputNamedTextReferenceElement( Element destElement, IDeferredText text )
+	{
+		if ( destElement == null )
+			throw new IllegalArgumentException( "Element must not be null." );
+		if ( text == null )
+			throw new IllegalArgumentException( "Text must not be null." );
+
+		// Include for compatibility with FTL pre-1.6.1
+		destElement.setText( text.getTextValue() );
+
+		if ( text instanceof DefaultDeferredText ) {
+			// FTL 1.6.1+
+			// id attributes take precedence over tag value, if they're available.
+			destElement.setAttribute( "id", text.getTextId() );
+		}
+	}
+
+	private static Element createNamedTextSourceElement( IDeferredText text )
+	{
+		if ( text == null )
+			throw new IllegalArgumentException( "Text must not be null." );
+
+		Element e = new Element( "text" );
+		e.setText( text.getTextValue() );
+		e.setAttribute( "name", text.getTextId() );
+
+		return e;
+	}
+
+	protected static Document generateTextXML( ShipObject ship )
+	{
+		Document doc = new Document();
+		Element root = new Element( "wrapper" );
+
+		root.addContent( createNamedTextSourceElement( ship.getShipClass() ) );
+
+		if ( ship.isPlayerShip() ) {
+			root.addContent( createNamedTextSourceElement( ship.getShipName() ) );
+			root.addContent( createNamedTextSourceElement( ship.getShipDescription() ) );
+		}
+
+		doc.setRootElement( root );
+
+		return doc;
+	}
+
 	/**
 	 * This method generates the shipBlueprint tag that describes the ship passed as argument.
 	 * 
@@ -350,33 +402,30 @@ public class ShipSaveUtils
 		Document doc = new Document();
 		Element root = new Element( "wrapper" );
 		Element e = null;
-		String attr = null;
+		String value = null;
 
 		Element shipBlueprint = new Element( "shipBlueprint" );
-		attr = ship.getBlueprintName();
-		shipBlueprint.setAttribute( "name", attr == null ? "" : attr );
-		attr = ship.getLayout();
-		shipBlueprint.setAttribute( "layout", attr == null ? "" : attr );
-		attr = ship.getImageNamespace();
-		shipBlueprint.setAttribute( "img", attr == null ? "" : attr );
+		value = ship.getBlueprintName();
+		shipBlueprint.setAttribute( "name", value == null ? "" : value );
+		value = ship.getLayout();
+		shipBlueprint.setAttribute( "layout", value == null ? "" : value );
+		value = ship.getImageNamespace();
+		shipBlueprint.setAttribute( "img", value == null ? "" : value );
 
 		// The ship's class name, used for flavor only on player ships,
 		// but on enemy ships it is used as the enemy ship's name
 		e = new Element( "class" );
-		attr = ship.getShipClass().getTextId(); // TODO select save mode (pre/post 1.6)
-		e.setText( attr == null ? "" : attr );
+		outputNamedTextReferenceElement( e, ship.getShipClass() );
 		shipBlueprint.addContent( e );
 
 		// Name and description only affect player ships
 		if ( ship.isPlayerShip() ) {
 			e = new Element( "name" );
-			attr = ship.getShipName().getTextId(); // TODO select save mode (pre/post 1.6)
-			e.setText( attr == null ? "" : attr );
+			outputNamedTextReferenceElement( e, ship.getShipName() );
 			shipBlueprint.addContent( e );
 
 			e = new Element( "desc" );
-			attr = ship.getShipDescription().getTextId(); // TODO select save mode (pre/post 1.6)
-			e.setText( attr == null ? "" : attr );
+			outputNamedTextReferenceElement( e, ship.getShipDescription() );
 			shipBlueprint.addContent( e );
 		}
 		// Sector tags
