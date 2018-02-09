@@ -1650,20 +1650,25 @@ public class EditorWindow
 	public boolean promptSaveShip( ShipContainer container, boolean prompt )
 	{
 		SaveOptions soPrev = container.getSaveOptions();
+
 		File file = soPrev.file;
 		ModDatabaseEntry mod = soPrev.mod;
 
 		if ( file == null || prompt ) {
 			SaveOptionsDialog dialog = new SaveOptionsDialog( shell );
 			SaveOptions so = dialog.open();
-			file = so.file;
-			mod = so.mod;
+
+			if ( so != null ) {
+				file = so.file;
+				mod = so.mod;
+			}
+			else {
+				return false;
+			}
 		}
 
-		if ( file != null ) // User could've aborted selection, which returns null.
-			container.save( file, mod );
-
-		return file != null;
+		container.save( file, mod );
+		return true;
 	}
 
 	private void reloadDatabase()

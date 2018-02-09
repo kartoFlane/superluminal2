@@ -28,9 +28,9 @@ import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
+import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.db.ModDatabaseEntry;
-import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.events.SLAddEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.events.SLListener;
@@ -355,23 +355,38 @@ public class ShipContainer implements Disposable, SLListener
 	}
 
 	/**
-	 * Saves the ship at the location supplied in argument.<br>
-	 * <br>
-	 * Saving method depends on the argument:<br>
+	 * Saves the ship at the specified location, with the same save settings as previously.
+	 * 
+	 * @see #save(File, ModDatabaseEntry, GameVersion)
+	 */
+	public void save( File f )
+	{
+		if ( f == null )
+			throw new IllegalArgumentException( "Save destination must not be null." );
+
+		save( f, saveMod );
+	}
+
+	/**
+	 * Saves the ship at the location supplied in argument.
+	 * 
+	 * Saving method depends on the argument:
 	 * - if the argument is a directory, the ship is saved as a resource folder (ie. creates "data" and
 	 * "img" folders in the directory passed in argument)
 	 * - if the argument is a file, the ship is saved as a zip archive
 	 * 
 	 * @param f
 	 *            the file the ship is to be saved as, or the directory in which it is to be saved
+	 * @param mod
+	 *            the mod to save the ship wtih
 	 */
-	public void save( File f )
+	public void save( File f, ModDatabaseEntry mod )
 	{
 		if ( f == null )
-			throw new IllegalStateException( "Save destination must not be null." );
+			throw new IllegalArgumentException( "Save destination must not be null." );
 
 		saveDestination = f;
-		saveMod = null;
+		saveMod = mod;
 
 		if ( saveDestination.isDirectory() ) {
 			EditorWindow.log.trace( "Saving ship to " + saveDestination.getAbsolutePath() );
@@ -401,50 +416,6 @@ public class ShipContainer implements Disposable, SLListener
 				UIUtils.showWarningDialog(
 					window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details."
 				);
-			}
-		}
-	}
-
-	public void save( File f, ModDatabaseEntry mod )
-	{
-		if ( f == null )
-			throw new IllegalStateException( "Save destination must not be null." );
-		if ( mod == null ) {
-			save( f );
-		}
-		else {
-			saveDestination = f;
-			saveMod = mod;
-
-			if ( saveDestination.isDirectory() ) {
-				EditorWindow.log.trace( "Saving ship to " + saveDestination.getAbsolutePath() );
-
-				try {
-					ShipSaveUtils.saveShipModXML( saveDestination, mod, this );
-					shipSaved = true;
-					EditorWindow.log.trace( "Ship saved successfully." );
-				}
-				catch ( Exception ex ) {
-					EditorWindow.log.error( "An error occured while saving the ship: ", ex );
-					UIUtils.showWarningDialog(
-						window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details."
-					);
-				}
-			}
-			else {
-				EditorWindow.log.trace( "Saving ship as " + saveDestination.getAbsolutePath() );
-
-				try {
-					ShipSaveUtils.saveShipModFTL( saveDestination, mod, this );
-					shipSaved = true;
-					EditorWindow.log.trace( "Ship saved successfully." );
-				}
-				catch ( Exception ex ) {
-					EditorWindow.log.error( "An error occured while saving the ship: ", ex );
-					UIUtils.showWarningDialog(
-						window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details."
-					);
-				}
 			}
 		}
 	}

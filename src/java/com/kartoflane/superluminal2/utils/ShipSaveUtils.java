@@ -26,7 +26,6 @@ import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
@@ -44,6 +43,7 @@ import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.ui.SaveOptionsDialog.SaveOptions;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 
@@ -59,39 +59,15 @@ public class ShipSaveUtils
 	private static final Logger log = LogManager.getLogger( ShipSaveUtils.class );
 
 
-	public static void saveShipFTL( File saveFile, ShipContainer container ) throws IllegalArgumentException, IOException
-	{
-		if ( saveFile == null )
-			throw new IllegalArgumentException( "Destination file must not be null." );
-		if ( saveFile.isDirectory() )
-			throw new IllegalArgumentException( "Not a file: " + saveFile.getName() );
-
-		HashMap<String, byte[]> fileMap = saveShip( container );
-		IOUtils.writeZip( fileMap, saveFile );
-	}
-
-	public static void saveShipXML( File destination, ShipContainer container ) throws IllegalArgumentException, IOException
-	{
-		if ( destination == null )
-			throw new IllegalArgumentException( "Destination file must not be null." );
-		if ( !destination.isDirectory() )
-			throw new IllegalArgumentException( "Not a directory: " + destination.getName() );
-
-		HashMap<String, byte[]> fileMap = saveShip( container );
-		IOUtils.writeDir( fileMap, destination );
-	}
-
 	/**
 	 * Saves the ship within the context of the specified database entry, as the specified file.
 	 * 
 	 * @param destination
 	 *            the output file.
-	 * @param entry
-	 *            the DatabaseEntry (runtime representation of an .ftl mod) within which the ship is to be saved.
 	 * @param container
 	 *            the ShipContainer to be saved.
 	 */
-	public static void saveShipModFTL( File destination, AbstractDatabaseEntry entry, ShipContainer container )
+	public static void saveShipFTL( File destination, ShipContainer container )
 		throws IllegalArgumentException, IOException, JDOMParseException
 	{
 		if ( destination == null )
@@ -99,12 +75,21 @@ public class ShipSaveUtils
 		if ( destination.isDirectory() )
 			throw new IllegalArgumentException( "Not a file: " + destination.getName() );
 
-		HashMap<String, byte[]> entryMap = IOUtils.readEntry( entry );
-		IOUtils.merge( entryMap, container );
-		IOUtils.writeZip( entryMap, destination );
+		SaveOptions so = container.getSaveOptions();
+
+		HashMap<String, byte[]> fileMap = null;
+		if ( so.mod == null ) {
+			fileMap = saveShip( container );
+		}
+		else {
+			fileMap = IOUtils.readEntry( so.mod );
+			IOUtils.merge( fileMap, container );
+		}
+
+		IOUtils.writeZip( fileMap, destination );
 	}
 
-	public static void saveShipModXML( File destination, AbstractDatabaseEntry entry, ShipContainer container )
+	public static void saveShipXML( File destination, ShipContainer container )
 		throws IllegalArgumentException, IOException, JDOMParseException
 	{
 		if ( destination == null )
@@ -112,9 +97,19 @@ public class ShipSaveUtils
 		if ( !destination.isDirectory() )
 			throw new IllegalArgumentException( "Not a directory: " + destination.getName() );
 
-		HashMap<String, byte[]> entryMap = IOUtils.readEntry( entry );
-		IOUtils.merge( entryMap, container );
-		IOUtils.writeDir( entryMap, destination );
+		SaveOptions so = container.getSaveOptions();
+
+		HashMap<String, byte[]> fileMap = null;
+
+		if ( so.mod == null ) {
+			fileMap = saveShip( container );
+		}
+		else {
+			fileMap = IOUtils.readEntry( so.mod );
+			IOUtils.merge( fileMap, container );
+		}
+
+		IOUtils.writeDir( fileMap, destination );
 	}
 
 	/**

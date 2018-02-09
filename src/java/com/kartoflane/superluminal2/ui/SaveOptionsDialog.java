@@ -32,27 +32,21 @@ import com.kartoflane.superluminal2.utils.Utils;
 public class SaveOptionsDialog
 {
 	private static SaveOptionsDialog instance = null;
-	private static String prevPath = System.getProperty( "user.home" );
+	private static String prevPath = System.getProperty( "user.home" ) + "/";
 
-	private File resultFile = null;
-	private ModDatabaseEntry resultMod = null;
+	protected File resultFile = null;
+	protected SaveOptions resultOptions = null;
 
-	private Shell shell = null;
-	private Button btnCancel;
-	private Button btnConfirm;
-	private Label lblSaveLocation;
-	private Button btnBrowse;
-	private Text txtDestination;
-	private Button btnDirectory;
-	private Group grpSaveAs;
-	private Button btnFTL;
-	private Label lblDirectoryHelp;
-	private Label lblArchiveHelp;
-	private Label lblInclude;
-	private Combo cmbInclude;
-	private Label lblSeparator2;
-	private Label lblIncludeInfo;
-	private Label lblSeparator1;
+	protected Shell shell = null;
+
+	protected Button btnCancel;
+	protected Button btnConfirm;
+	protected Button btnBrowse;
+	protected Text txtDestination;
+	protected Group grpSaveAs;
+	protected Button btnDirectory;
+	protected Button btnFTL;
+	protected Combo cmbInclude;
 
 
 	public SaveOptionsDialog( Shell parent )
@@ -75,29 +69,33 @@ public class SaveOptionsDialog
 		btnDirectory.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, true, false, 1, 1 ) );
 		btnDirectory.setText( "Resource folder" );
 
-		lblDirectoryHelp = new Label( grpSaveAs, SWT.NONE );
+		Label lblDirectoryHelp = new Label( grpSaveAs, SWT.NONE );
 		lblDirectoryHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
 		lblDirectoryHelp.setImage( helpImage );
 		String msg = "Saves the ship as a series of folders mirroring the internal " +
 			"structure of the game's files -- source code for your mod, so to say.";
-		UIUtils.addTooltip( lblDirectoryHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
+		UIUtils.addTooltip(
+			lblDirectoryHelp,
+			Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() )
+		);
 
 		btnFTL = new Button( grpSaveAs, SWT.RADIO );
 		btnFTL.setText( "FTL file" );
+		btnFTL.setSelection( true );
 
-		lblArchiveHelp = new Label( grpSaveAs, SWT.NONE );
-		lblArchiveHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
-		lblArchiveHelp.setImage( helpImage );
+		Label lblFTLHelp = new Label( grpSaveAs, SWT.NONE );
+		lblFTLHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+		lblFTLHelp.setImage( helpImage );
 		msg = "Saves the ship as a ready-to-install .ftl archive.";
-		UIUtils.addTooltip( lblArchiveHelp, msg );
+		UIUtils.addTooltip( lblFTLHelp, msg );
 
-		lblSeparator1 = new Label( shell, SWT.NONE );
-		lblSeparator1.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 2, 1 ) );
+		Label lblSeparator = new Label( shell, SWT.NONE );
+		lblSeparator.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 2, 1 ) );
 
-		lblInclude = new Label( shell, SWT.NONE );
+		Label lblInclude = new Label( shell, SWT.NONE );
 		lblInclude.setText( "Include mod files from:" );
 
-		lblIncludeInfo = new Label( shell, SWT.NONE );
+		Label lblIncludeInfo = new Label( shell, SWT.NONE );
 		lblIncludeInfo.setImage( helpImage );
 		lblIncludeInfo.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
 
@@ -122,14 +120,13 @@ public class SaveOptionsDialog
 		}
 		UIUtils.addTooltip( lblIncludeInfo, msg );
 
-		lblSeparator2 = new Label( shell, SWT.NONE );
-		lblSeparator2.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 2, 1 ) );
+		lblSeparator = new Label( shell, SWT.NONE );
+		lblSeparator.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 2, 1 ) );
 
-		lblSaveLocation = new Label( shell, SWT.NONE );
+		Label lblSaveLocation = new Label( shell, SWT.NONE );
 		lblSaveLocation.setText( "Save location:" );
 
 		btnBrowse = new Button( shell, SWT.NONE );
-		btnBrowse.setEnabled( false );
 		GridData gd_btnBrowse = new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 );
 		gd_btnBrowse.widthHint = 80;
 		btnBrowse.setLayoutData( gd_btnBrowse );
@@ -177,23 +174,6 @@ public class SaveOptionsDialog
 			}
 		);
 
-		cmbInclude.addSelectionListener(
-			new SelectionAdapter() {
-				@Override
-				public void widgetSelected( SelectionEvent e )
-				{
-					int i = cmbInclude.getSelectionIndex();
-					if ( i == 0 ) {
-						resultMod = null;
-					}
-					else {
-						Database db = Database.getInstance();
-						resultMod = (ModDatabaseEntry)db.getEntries()[i];
-					}
-				}
-			}
-		);
-
 		btnBrowse.addSelectionListener(
 			new SelectionAdapter() {
 				@Override
@@ -226,6 +206,7 @@ public class SaveOptionsDialog
 				@Override
 				public void widgetSelected( SelectionEvent e )
 				{
+					resultOptions = buildSaveOptions();
 					dispose();
 				}
 			}
@@ -236,7 +217,7 @@ public class SaveOptionsDialog
 				@Override
 				public void widgetSelected( SelectionEvent e )
 				{
-					resultFile = null;
+					resultOptions = null;
 					dispose();
 				}
 			}
@@ -262,6 +243,22 @@ public class SaveOptionsDialog
 		shell.setLocation( parLoc.x + parSize.x / 3 - size.x / 2, parLoc.y + parSize.y / 3 - size.y / 2 );
 	}
 
+	protected SaveOptions buildSaveOptions()
+	{
+		// Find the mod to package with the ship, if the user selected any.
+		ModDatabaseEntry resultMod = null;
+		int i = cmbInclude.getSelectionIndex();
+		if ( i == 0 ) {
+			resultMod = null;
+		}
+		else {
+			Database db = Database.getInstance();
+			resultMod = (ModDatabaseEntry)db.getEntries()[i];
+		}
+
+		return new SaveOptions( resultFile, resultMod );
+	}
+
 	public SaveOptions open()
 	{
 		Display display = Display.getDefault();
@@ -273,7 +270,7 @@ public class SaveOptionsDialog
 				display.sleep();
 		}
 
-		return new SaveOptions( resultFile, resultMod );
+		return resultOptions;
 	}
 
 	public static SaveOptionsDialog getInstance()
