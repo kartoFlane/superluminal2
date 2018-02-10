@@ -1698,7 +1698,7 @@ public class EditorWindow
 						db.removeEntry( db.getCore() );
 
 						File datsDir = new File( Manager.resourcePath );
-						db.loadCore( datsDir );
+						db.buildCore( datsDir );
 						db.getCore().load();
 
 						// Reload modded files

@@ -155,7 +155,7 @@ public class Database
 	{
 		this();
 
-		loadCore( ftlDir );
+		buildCore( ftlDir );
 	}
 
 	public static Database getInstance()
@@ -172,14 +172,21 @@ public class Database
 	}
 
 	/**
-	 * Reloads the core of the Database using the specified archives.
+	 * Builds a DatabaseEntry using .dat files found in the specified directory (non-recursive).
+	 * This method defaults to picking 'ftl.dat' if it is available. Failing that, it'll try to
+	 * pick 'data.dat' and 'resource.dat'. If those don't exist as well, the method will fail.
+	 * 
+	 * The built DatabaseEntry is added to the database as the core entry, but is not loaded.
 	 * 
 	 * @param datsDir
 	 *            file pointing to the directory containing FTL's .dat files
 	 *            In FTL 1.01-1.5.13 this is the /resources directory.
 	 *            In FTL 1.6.1 this is the base directory.
+	 * @throws IOException
+	 *             if neither 'ftl.dat' or 'data.dat' and 'resource.dat' files
+	 *             could be found in the specifed directory.
 	 */
-	public void loadCore( File datsDir ) throws IOException
+	public void buildCore( File datsDir ) throws IOException
 	{
 		if ( dataEntries.size() > 0 )
 			dataEntries.remove( 0 );
