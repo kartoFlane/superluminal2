@@ -29,7 +29,8 @@ public abstract class BaseView
 	public static final RGB HIGHLIGHT_RGB = new RGB( 0, 128, 192 );
 	public static final RGB DENY_RGB = new RGB( 230, 100, 100 );
 	public static final RGB ALLOW_RGB = new RGB( 50, 230, 50 );
-	public static final RGB PIN_RGB = new RGB( 192, 192, 0 );
+	public static final RGB PIN_RGB = new RGB( 255, 255, 64 );
+	public static final RGB PIN_HIGHLIGHT_RGB = new RGB( 192, 192, 128 );
 
 	protected AbstractController controller = null;
 	protected BaseModel model = null;

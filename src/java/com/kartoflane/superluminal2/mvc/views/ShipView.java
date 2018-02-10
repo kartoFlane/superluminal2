@@ -47,7 +47,7 @@ public class ShipView extends BaseView
 			setBorderColor( controller.isPinned() ? PIN_RGB : SELECT_RGB );
 		}
 		else if ( controller.isHighlighted() ) {
-			setBorderColor( HIGHLIGHT_RGB );
+			setBorderColor( controller.isPinned() ? PIN_HIGHLIGHT_RGB : HIGHLIGHT_RGB );
 		}
 		else {
 			setBorderColor( defaultBorder );

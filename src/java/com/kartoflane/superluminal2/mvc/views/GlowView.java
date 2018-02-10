@@ -47,7 +47,7 @@ public class GlowView extends BaseView
 			setBorderThickness( 2 );
 		}
 		else if ( controller.isHighlighted() ) {
-			setBorderColor( HIGHLIGHT_RGB );
+			setBorderColor( controller.isPinned() ? PIN_HIGHLIGHT_RGB : HIGHLIGHT_RGB );
 			setBackgroundColor( defaultBackground );
 			setBorderThickness( 3 );
 		}
