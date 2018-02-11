@@ -16,6 +16,11 @@ public class UpdateData
 	public final ComparableVersion remoteVersion;
 	/** List with changes since the local version */
 	public final List<String> changes;
+	/**
+	 * Whether to offer to self-patch the program (we might want to
+	 * disable it for releases where self-patching is broken).
+	 */
+	public final boolean offerSelfPatch;
 	/** Last caught exception, stored in case of errors */
 	public final Exception lastException;
 
@@ -30,6 +35,7 @@ public class UpdateData
 		downloadLink = null;
 		remoteVersion = null;
 		changes = null;
+		offerSelfPatch = false;
 		lastException = ex;
 	}
 
@@ -40,8 +46,10 @@ public class UpdateData
 	 *            the newest available version number
 	 * @param changes
 	 *            list with changes since the local version
+	 * @param offerSelfPatch
+	 *            whether to offer to self-patch the program.
 	 */
-	public UpdateData( String downloadLink, ComparableVersion remoteVersion, List<String> changes )
+	public UpdateData( String downloadLink, ComparableVersion remoteVersion, List<String> changes, boolean offerSelfPatch )
 	{
 		if ( downloadLink == null ) {
 			throw new IllegalArgumentException( "Download link must not be null." );
@@ -56,6 +64,7 @@ public class UpdateData
 		this.lastException = null;
 		this.downloadLink = downloadLink;
 		this.remoteVersion = remoteVersion;
+		this.offerSelfPatch = offerSelfPatch;
 		this.changes = changes;
 	}
 }

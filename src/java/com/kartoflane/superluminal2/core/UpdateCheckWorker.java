@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -90,6 +91,7 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 			Element root = updateDoc.getRootElement();
 			Element latest = root.getChild( "latest" );
 			String id = latest.getAttributeValue( "id" );
+			boolean offerSelfPatch = Boolean.valueOf( latest.getAttributeValue( "offer-selfpatch", "true" ) );
 
 			String downloadLink = latest.getAttributeValue( "url" );
 			ComparableVersion remoteVersion = new ComparableVersion( id );
@@ -98,14 +100,16 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 			Element changelog = root.getChild( "changelog" );
 			for ( Element version : changelog.getChildren( "version" ) ) {
 				ComparableVersion vId = new ComparableVersion( version.getAttributeValue( "id" ) );
-				if ( vId.compareTo( Superluminal.APP_VERSION ) > 0 ) {
+				// Only list changes from user's local version up to the latest version
+				// (in case we ever push not-yet-released changes into the auto_update.xml file)
+				if ( vId.compareTo( Superluminal.APP_VERSION ) > 0 && vId.compareTo( remoteVersion ) <= 0 ) {
 					for ( Element change : version.getChildren( "change" ) ) {
 						changes.add( change.getValue() );
 					}
 				}
 			}
 
-			ud = new UpdateData( downloadLink, remoteVersion, changes );
+			ud = new UpdateData( downloadLink, remoteVersion, changes, offerSelfPatch );
 		}
 		catch ( UnknownHostException e ) {
 			log.error( "Update check failed -- connection to the repository could not be estabilished." );
@@ -203,41 +207,11 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 						box.setMessage( buf.toString() );
 
 						if ( box.open() == SWT.YES ) {
-							try {
-								File outputDir = new File( "" );
-								SelfPatcher sp = new SelfPatcher(
-									new SPSLGetTask( ud.downloadLink, outputDir ),
-									new SPSLPatchTask( outputDir ),
-									new SPSLRunTask()
-								);
-								DownloadDialog dd = new DownloadDialog( EditorWindow.getInstance().getShell() );
-								sp.patch( dd );
+							if ( ud.offerSelfPatch ) {
+								performSelfPatch( ud );
 							}
-							catch ( Exception e ) {
-								log.error( "Self-patching failed!", e );
-
-								box = new MessageBox(
-									EditorWindow.getInstance().getShell(),
-									SWT.ICON_ERROR | SWT.YES | SWT.NO
-								);
-								box.setText( Superluminal.APP_NAME + " - Auto-Update Failed" );
-								box.setMessage(
-									"Whoops! Something went terribly wrong, and the editor was unable to patch itself.\n" +
-										"Do you want to download and update the editor manually?"
-								);
-
-								if ( box.open() == SWT.YES ) {
-									URL url = new URL( ud.downloadLink == null ? Superluminal.APP_FORUM_URL : ud.downloadLink );
-									Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-									if ( desktop != null && desktop.isSupported( Desktop.Action.BROWSE ) ) {
-										try {
-											desktop.browse( url.toURI() );
-										}
-										catch ( Exception ex ) {
-											log.error( "An error has occured while opening web browser.", ex );
-										}
-									}
-								}
+							else {
+								openBrowserDownloadLink( ud );
 							}
 						}
 					}
@@ -278,6 +252,51 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 		catch ( ExecutionException e ) {
 			log.error( "Could not finalize update check - UpdateData not available yet?" );
 			return;
+		}
+	}
+
+	private void performSelfPatch( UpdateData ud ) throws MalformedURLException
+	{
+		try {
+			File outputDir = new File( "" );
+			SelfPatcher sp = new SelfPatcher(
+				new SPSLGetTask( ud.downloadLink, outputDir ),
+				new SPSLPatchTask( outputDir ),
+				new SPSLRunTask()
+			);
+			DownloadDialog dd = new DownloadDialog( EditorWindow.getInstance().getShell() );
+			sp.patch( dd );
+		}
+		catch ( Exception e ) {
+			log.error( "Self-patching failed!", e );
+
+			MessageBox box = new MessageBox(
+				EditorWindow.getInstance().getShell(),
+				SWT.ICON_ERROR | SWT.YES | SWT.NO
+			);
+			box.setText( Superluminal.APP_NAME + " - Auto-Update Failed" );
+			box.setMessage(
+				"Whoops! Something went terribly wrong, and the editor was unable to patch itself.\n" +
+					"Do you want to download and update the editor manually?"
+			);
+
+			if ( box.open() == SWT.YES ) {
+				openBrowserDownloadLink( ud );
+			}
+		}
+	}
+
+	private void openBrowserDownloadLink( UpdateData ud ) throws MalformedURLException
+	{
+		URL url = new URL( ud.downloadLink == null ? Superluminal.APP_FORUM_URL : ud.downloadLink );
+		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if ( desktop != null && desktop.isSupported( Desktop.Action.BROWSE ) ) {
+			try {
+				desktop.browse( url.toURI() );
+			}
+			catch ( Exception ex ) {
+				log.error( "An error has occured while opening web browser.", ex );
+			}
 		}
 	}
 }
