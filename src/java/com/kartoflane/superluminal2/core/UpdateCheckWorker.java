@@ -258,7 +258,7 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 	private void performSelfPatch( UpdateData ud ) throws MalformedURLException
 	{
 		try {
-			File outputDir = new File( "" );
+			File outputDir = new File( "." );
 			SelfPatcher sp = new SelfPatcher(
 				new SPSLGetTask( ud.downloadLink, outputDir ),
 				new SPSLPatchTask( outputDir ),

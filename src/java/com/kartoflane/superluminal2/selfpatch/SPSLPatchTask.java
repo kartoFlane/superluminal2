@@ -83,11 +83,16 @@ public class SPSLPatchTask implements SPPatchTask
 		File patcherFileOld = new File( outputDir, "patcher.jar" );
 
 		if ( !patcherFileOld.exists() || patcherFileOld.delete() ) {
-			patcherFileNew.renameTo( patcherFileOld );
-			log.info( "Successfully updated patcher.jar" );
+			boolean result = patcherFileNew.renameTo( patcherFileOld );
+			if ( result ) {
+				log.info( "Successfully updated patcher.jar" );
+			}
+			else {
+				log.error( "Failed to update patcher.jar -- file could not be renamed!" );
+			}
 		}
 		else {
-			log.error( "Failed to update patcher.jar!" );
+			log.error( "Failed to update patcher.jar -- old file could not be deleted!" );
 		}
 	}
 
