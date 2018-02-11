@@ -26,9 +26,9 @@ public class ShipObject extends GameObject
 	private String layout = "myship";
 	private String img = "myship";
 
-	private String shipClass = "Ship Class";
-	private String shipName = "The Nameless One";
-	private String shipDescription = "This ship is completely devoid of any description whatsoever!";
+	private IDeferredText shipClass = new VerbatimText( "Ship Class" );
+	private IDeferredText shipName = new VerbatimText( "The Nameless One" );
+	private IDeferredText shipDescription = new VerbatimText( "This ship is completely devoid of any description whatsoever!" );
 
 	private TreeSet<RoomObject> rooms;
 	private HashSet<DoorObject> doors;
@@ -130,11 +130,15 @@ public class ShipObject extends GameObject
 			weaponByList = true;
 			droneByList = true;
 		}
+
+		update();
 	}
 
 	public void update()
 	{
-		// Nothing to do here
+		shipClass = shipClass.derive( "text_" + blueprintName + "_class" );
+		shipName = shipName.derive( "text_" + blueprintName + "_name" );
+		shipDescription = shipDescription.derive( "text_" + blueprintName + "_desc" );
 	}
 
 	public boolean isPlayerShip()
@@ -209,17 +213,24 @@ public class ShipObject extends GameObject
 	/**
 	 * Sets the name of the ship's class, eg. "Kestrel Cruiser", "Auto-Scout"
 	 */
-	public void setShipClass( String className )
+	public void setShipClass( IDeferredText className )
 	{
 		if ( className == null )
 			throw new IllegalArgumentException( "The ship class' name must not be null." );
 		shipClass = className;
 	}
 
+	public void setShipClass( String className )
+	{
+		if ( className == null )
+			throw new IllegalArgumentException( "The ship class' name must not be null." );
+		setShipDescription( new DefaultDeferredText( "text_" + blueprintName + "_class", className ) );
+	}
+
 	/**
 	 * @return name of the ship's class, eg. "Kestrel Cruiser", "Auto-Scout"
 	 */
-	public String getShipClass()
+	public IDeferredText getShipClass()
 	{
 		return shipClass;
 	}
@@ -228,17 +239,24 @@ public class ShipObject extends GameObject
 	 * Sets the name of the ship, eg. "The Torus", "Gila Monster", etc.<br>
 	 * Player ships only.
 	 */
-	public void setShipName( String shipName )
+	public void setShipName( IDeferredText shipName )
 	{
 		if ( shipName == null )
 			throw new IllegalArgumentException( "The ship's name must not be null." );
 		this.shipName = shipName;
 	}
 
+	public void setShipName( String shipName )
+	{
+		if ( shipName == null )
+			throw new IllegalArgumentException( "The ship's name must not be null." );
+		setShipDescription( new DefaultDeferredText( "text_" + blueprintName + "_name", shipName ) );
+	}
+
 	/**
 	 * @return the name of the ship, eg. "The Torus", "Gila Monster", etc.
 	 */
-	public String getShipName()
+	public IDeferredText getShipName()
 	{
 		return shipName;
 	}
@@ -247,17 +265,24 @@ public class ShipObject extends GameObject
 	 * Sets the ship's description.<br>
 	 * Player ships only.
 	 */
-	public void setShipDescription( String desc )
+	public void setShipDescription( IDeferredText desc )
 	{
 		if ( desc == null )
 			throw new IllegalArgumentException( "Description must not be null." );
 		shipDescription = desc;
 	}
 
+	public void setShipDescription( String desc )
+	{
+		if ( desc == null )
+			throw new IllegalArgumentException( "Description must not be null." );
+		setShipDescription( new DefaultDeferredText( "text_" + blueprintName + "_desc", desc ) );
+	}
+
 	/**
 	 * @return the ship's description.
 	 */
-	public String getShipDescription()
+	public IDeferredText getShipDescription()
 	{
 		return shipDescription;
 	}

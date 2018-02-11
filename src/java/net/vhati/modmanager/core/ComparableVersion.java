@@ -7,19 +7,17 @@ import java.util.regex.Pattern;
 
 
 /**
- * A version string (eg, 10.4.2_17 or 2.7.5rc1 ).<br>
- * <br>
- * It is composed of three parts:<br>
- * - A series of period-separated positive ints.<br>
- * 
- * - The numbers may be immediately followed by a short
- * suffix string.<br>
- * 
- * - Finally, a string comment, separated from the rest
- * by a space.<br>
- * <br>
- * The (numbers + suffix) or comment may appear alone.<br>
- * <br>
+ * A version string (eg, 10.4.2_17 or 2.7.5rc1 ).
+ *
+ * It is composed of three parts:
+ * - A series of period-separated positive ints.
+ *
+ * - The numbers may be immediately followed by a short suffix string.
+ *
+ * - Finally, a string comment, separated from the rest by a space.
+ *
+ * The (numbers + suffix) or comment may appear alone.
+ *
  * For details, see the string constructor and compareTo().
  */
 public class ComparableVersion implements Comparable<ComparableVersion>
@@ -32,7 +30,7 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 	private String suffix;
 	private String comment;
 
-	private String suffixDivider; // Suffix prior to a number, if there was a number.
+	private String suffixDivider;  // Suffix prior to a number, if there was a number.
 	private int suffixNum;
 
 
@@ -45,16 +43,14 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 
 	/**
 	 * Constructs an AppVersion by parsing a string.
-	 * 
-	 * The suffix can be:<br>
-	 * - A divider string followed by a number.<br>
-	 * - Optional Hyphen/underscore, then a|b|r|rc, then 0-9+.<br>
-	 * - Hyphen/underscore, then 0-9+.<br>
-	 * Or the suffix can be a single letter without a number.<br>
-	 * <br>
+	 *
+	 * The suffix can be:
+	 * - A divider string followed by a number.
+	 * - Optional Hyphen/underscore, then a|b|r|rc, then 0-9+.
+	 * - Hyphen/underscore, then 0-9+.
+	 * Or the suffix can be a single letter without a number.
+	 *
 	 * Examples:
-	 * 
-	 * <pre>
 	 * 1
 	 * 1 Blah
 	 * 1.2 Blah
@@ -67,8 +63,7 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 	 * 1.2.3z Blah
 	 * 1.2.3D
 	 * Alpha
-	 * </pre>
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             if the string is unsuitable
 	 */
@@ -123,6 +118,7 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 		}
 	}
 
+
 	private void setNumbers( String s )
 	{
 		if ( s == null || s.length() == 0 ) {
@@ -155,8 +151,6 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 
 		Matcher m = suffixPtn.matcher( s );
 		if ( m.matches() ) {
-			suffix = s;
-
 			// Matched groups 1 and 2... or 3.
 
 			if ( m.group( 1 ) != null ) {
@@ -192,6 +186,7 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 			throw new IllegalArgumentException( "Could not parse version comment string: " + s );
 		}
 	}
+
 
 	/**
 	 * Returns the array of major/minor/etc version numbers.
@@ -233,85 +228,71 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 		return comment;
 	}
 
+
 	@Override
 	public String toString()
 	{
 		StringBuilder buf = new StringBuilder();
 		for ( int number : numbers ) {
-			if ( buf.length() > 0 )
-				buf.append( "." );
+			if ( buf.length() > 0 ) buf.append( "." );
 			buf.append( number );
 		}
 		if ( suffix != null ) {
 			buf.append( suffix );
 		}
 		if ( comment != null ) {
-			if ( buf.length() > 0 )
-				buf.append( " " );
+			if ( buf.length() > 0 ) buf.append( " " );
 			buf.append( comment );
 		}
 
 		return buf.toString();
 	}
 
+
 	/**
-	 * Compares this object with the specified object for order.<br>
-	 * <br>
+	 * Compares this object with the specified object for order.
+	 *
 	 * - The ints are compared arithmetically. In case of ties,
-	 * the version with the most numbers wins.<br>
+	 * the version with the most numbers wins.
 	 * - If both versions' suffixes have a number, and the same
 	 * characters appear before that number, then the suffix number
-	 * is compared arithmetically.<br>
-	 * - Then the entire suffix is compared alphabetically.<br>
+	 * is compared arithmetically.
+	 * - Then the entire suffix is compared alphabetically.
 	 * - Then the comment is compared alphabetically.
 	 */
 	@Override
 	public int compareTo( ComparableVersion other )
 	{
-		if ( other == null )
-			return -1;
-		if ( other == this )
-			return 0;
+		if ( other == null ) return -1;
+		if ( other == this ) return 0;
 
 		int[] oNumbers = other.getNumbers();
 		for ( int i = 0; i < numbers.length && i < oNumbers.length; i++ ) {
-			if ( numbers[i] < oNumbers[i] )
-				return -1;
-			if ( numbers[i] > oNumbers[i] )
-				return 1;
+			if ( numbers[i] < oNumbers[i] ) return -1;
+			if ( numbers[i] > oNumbers[i] ) return 1;
 		}
-		if ( numbers.length < oNumbers.length )
-			return -1;
-		if ( numbers.length > oNumbers.length )
-			return 1;
+		if ( numbers.length < oNumbers.length ) return -1;
+		if ( numbers.length > oNumbers.length ) return 1;
 
 		if ( suffixDivider != null && other.getSuffixDivider() != null ) {
 			if ( suffixDivider.equals( other.getSuffixDivider() ) ) {
-				if ( suffixNum < other.getSuffixNumber() )
-					return -1;
-				if ( suffixNum > other.getSuffixNumber() )
-					return 1;
+				if ( suffixNum < other.getSuffixNumber() ) return -1;
+				if ( suffixNum > other.getSuffixNumber() ) return 1;
 			}
 		}
 
-		if ( suffix == null && other.getSuffix() != null )
-			return -1;
-		if ( suffix != null && other.getSuffix() == null )
-			return 1;
+		if ( suffix == null && other.getSuffix() != null ) return -1;
+		if ( suffix != null && other.getSuffix() == null ) return 1;
 		if ( suffix != null && other.getSuffix() != null ) {
 			int cmp = suffix.compareTo( other.getSuffix() );
-			if ( cmp != 0 )
-				return cmp;
+			if ( cmp != 0 ) return cmp;
 		}
 
-		if ( comment == null && other.getComment() != null )
-			return -1;
-		if ( comment != null && other.getComment() == null )
-			return 1;
+		if ( comment == null && other.getComment() != null ) return -1;
+		if ( comment != null && other.getComment() == null ) return 1;
 		if ( comment != null && other.getComment() != null ) {
 			int cmp = comment.compareTo( other.getComment() );
-			if ( cmp != 0 )
-				return cmp;
+			if ( cmp != 0 ) return cmp;
 		}
 
 		return 0;
@@ -320,35 +301,24 @@ public class ComparableVersion implements Comparable<ComparableVersion>
 	@Override
 	public boolean equals( Object o )
 	{
-		if ( o == null )
-			return false;
-		if ( o == this )
-			return true;
-		if ( o instanceof ComparableVersion == false )
-			return false;
+		if ( o == null ) return false;
+		if ( o == this ) return true;
+		if ( o instanceof ComparableVersion == false ) return false;
 		ComparableVersion other = (ComparableVersion)o;
 
 		int[] oNumbers = other.getNumbers();
 		for ( int i = 0; i < numbers.length && i < oNumbers.length; i++ ) {
-			if ( numbers[i] != oNumbers[i] )
-				return false;
+			if ( numbers[i] != oNumbers[i] ) return false;
 		}
-		if ( numbers.length != oNumbers.length )
-			return false;
+		if ( numbers.length != oNumbers.length ) return false;
 
-		if ( suffix == null && other.getSuffix() != null )
-			return false;
-		if ( suffix != null && other.getSuffix() == null )
-			return false;
-		if ( !suffix.equals( other.getSuffix() ) )
-			return false;
+		if ( suffix == null && other.getSuffix() != null ) return false;
+		if ( suffix != null && other.getSuffix() == null ) return false;
+		if ( !suffix.equals( other.getSuffix() ) ) return false;
 
-		if ( comment == null && other.getComment() != null )
-			return false;
-		if ( comment != null && other.getComment() == null )
-			return false;
-		if ( !comment.equals( other.getComment() ) )
-			return false;
+		if ( comment == null && other.getComment() != null ) return false;
+		if ( comment != null && other.getComment() == null ) return false;
+		if ( !comment.equals( other.getComment() ) ) return false;
 
 		return true;
 	}

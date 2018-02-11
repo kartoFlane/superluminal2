@@ -380,7 +380,7 @@ public class AugmentSelectionDialog
 
 			trtm = new TreeItem( tree, SWT.NONE );
 			trtm.setText( 0, augment.getBlueprintName() );
-			trtm.setText( 1, augment.getTitle() );
+			trtm.setText( 1, augment.getTitle().toString() );
 			trtm.setData( augment );
 
 			if ( result == augment )
@@ -400,7 +400,7 @@ public class AugmentSelectionDialog
 
 	private void updateData()
 	{
-		txtDesc.setText( result == null ? "" : result.getDescription() );
+		txtDesc.setText( result == null ? "" : result.getDescription().toString() );
 	}
 
 	public static AugmentSelectionDialog getInstance()

@@ -223,15 +223,15 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject>
 
 				if ( caseSensitive ) {
 					result &= o.getBlueprintName().contains( blue );
-					result &= o.getTitle().contains( title );
-					result &= o.getShortName().contains( shortT );
-					result &= o.getDescription().contains( desc );
+					result &= o.getTitle().toString().contains( title );
+					result &= o.getShortName().toString().contains( shortT );
+					result &= o.getDescription().toString().contains( desc );
 				}
 				else {
 					result &= o.getBlueprintName().toLowerCase().contains( blue.toLowerCase() );
-					result &= o.getTitle().toLowerCase().contains( title.toLowerCase() );
-					result &= o.getShortName().toLowerCase().contains( shortT.toLowerCase() );
-					result &= o.getDescription().toLowerCase().contains( desc.toLowerCase() );
+					result &= o.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
+					result &= o.getShortName().toString().toLowerCase().contains( shortT.toLowerCase() );
+					result &= o.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
 				}
 
 				return result;

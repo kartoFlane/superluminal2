@@ -174,13 +174,13 @@ public class AugmentSearchDialog extends AbstractSearchDialog<AugmentObject>
 
 				if ( caseSensitive ) {
 					result &= o.getBlueprintName().contains( blue );
-					result &= o.getTitle().contains( title );
-					result &= o.getDescription().contains( desc );
+					result &= o.getTitle().toString().contains( title );
+					result &= o.getDescription().toString().contains( desc );
 				}
 				else {
 					result &= o.getBlueprintName().toLowerCase().contains( blue.toLowerCase() );
-					result &= o.getTitle().toLowerCase().contains( title.toLowerCase() );
-					result &= o.getDescription().toLowerCase().contains( desc.toLowerCase() );
+					result &= o.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
+					result &= o.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
 				}
 
 				return result;

@@ -234,10 +234,10 @@ public class ShipLoaderDialog
 						else {
 							btnLoad.setEnabled( true );
 							txtBlueprint.setText( selection.getBlueprintName() );
-							txtClass.setText( selection.getShipClass() );
+							txtClass.setText( selection.getShipClass().toString() );
 							if ( selection.isPlayerShip() ) {
-								txtName.setText( selection.getShipName() );
-								txtDescription.setText( selection.getShipDescription() );
+								txtName.setText( selection.getShipName().toString() );
+								txtDescription.setText( selection.getShipDescription().toString() );
 							}
 							else {
 								txtName.setText( "N/A" );
@@ -455,7 +455,7 @@ public class ShipLoaderDialog
 				ShipMetadata metadata = dataList.get( 0 );
 
 				blueprintItem.setData( metadata );
-				blueprintItem.setText( 1, metadata.getShipClass() );
+				blueprintItem.setText( 1, metadata.getShipClass().toString() );
 				dataTreeMap.put( metadata, blueprintItem );
 			}
 			else {
@@ -463,7 +463,7 @@ public class ShipLoaderDialog
 					TreeItem metadataItem = new TreeItem( blueprintItem, SWT.NONE );
 
 					metadataItem.setText( 0, blueprint );
-					metadataItem.setText( 1, metadata.getShipClass() );
+					metadataItem.setText( 1, metadata.getShipClass().toString() );
 					metadataItem.setData( metadata );
 					dataTreeMap.put( metadata, metadataItem );
 				}
@@ -611,7 +611,6 @@ public class ShipLoaderDialog
 
 	private class MetadataComparator implements Comparator<String>
 	{
-
 		private final boolean byBlueprint;
 		private final HashMap<String, ArrayList<ShipMetadata>> map;
 

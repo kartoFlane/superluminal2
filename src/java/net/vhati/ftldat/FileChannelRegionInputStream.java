@@ -18,7 +18,7 @@ public class FileChannelRegionInputStream extends InputStream
 	// When possible read() calls will reuse this,
 	// rather than pester the channel.
 	private ByteBuffer buf = null;
-	private long bufOffset = 0; // Relative to regionOffset.
+	private long bufOffset = 0;  // Relative to regionOffset.
 	private int bufLength = 0;
 
 	private long intraPos = 0;
@@ -40,23 +40,20 @@ public class FileChannelRegionInputStream extends InputStream
 	@Override
 	public int available() throws IOException
 	{
-		if ( !channel.isOpen() )
-			throw new ClosedChannelException();
+		if ( !channel.isOpen() ) throw new ClosedChannelException();
 		return bufLength;
 	}
 
 	@Override
 	public int read() throws IOException
 	{
-		if ( !channel.isOpen() )
-			throw new ClosedChannelException();
-		if ( intraPos >= regionLength )
-			return -1;
+		if ( !channel.isOpen() ) throw new ClosedChannelException();
+		if ( intraPos >= regionLength ) return -1;
 
 		if ( intraPos < bufOffset || intraPos >= bufOffset + bufLength ) {
 			// The requested byte isn't currently buffered.
 			bufOffset = intraPos;
-			int len = 0; // Get *something*.
+			int len = 0;          // Get *something*.
 			buf.position( 0 );
 			while ( len == 0 ) {
 				len = channel.read( buf, regionOffset + bufOffset );
@@ -72,7 +69,7 @@ public class FileChannelRegionInputStream extends InputStream
 
 		// Do an absolute get() from the buffer,
 		// and interpret the byte as if it were unsigned.
-		int result = (int)( buf.get( (int)( intraPos - bufOffset ) ) & 0xff );
+		int result = buf.get( (int)( intraPos - bufOffset ) ) & 0xff;
 		intraPos++;
 		return result;
 	}
@@ -80,16 +77,11 @@ public class FileChannelRegionInputStream extends InputStream
 	@Override
 	public int read( byte[] b, int bOff, int bLen ) throws IOException
 	{
-		if ( bLen == 0 )
-			return 0;
-		if ( bOff < 0 )
-			throw new IndexOutOfBoundsException( String.format( "Index: %d, Size: %d", bOff, bLen ) );
-		if ( bOff + bLen > b.length )
-			throw new IndexOutOfBoundsException( String.format( "Index: %d, Size: %d", ( bOff + bLen ), bLen ) );
-		if ( !channel.isOpen() )
-			throw new ClosedChannelException();
-		if ( intraPos >= regionLength )
-			return -1;
+		if ( bLen == 0 ) return 0;
+		if ( bOff < 0 ) throw new IndexOutOfBoundsException( String.format( "Index: %d, Size: %d", bOff, bLen ) );
+		if ( bOff + bLen > b.length ) throw new IndexOutOfBoundsException( String.format( "Index: %d, Size: %d", ( bOff + bLen ), bLen ) );
+		if ( !channel.isOpen() ) throw new ClosedChannelException();
+		if ( intraPos >= regionLength ) return -1;
 
 		int bytesTotal = Math.min( bLen, (int)( regionLength - intraPos ) );
 		int bytesRemaining = bytesTotal;
@@ -132,13 +124,12 @@ public class FileChannelRegionInputStream extends InputStream
 		return bytesRead;
 	}
 
+
 	@Override
 	public long skip( long n ) throws IOException
 	{
-		if ( !channel.isOpen() )
-			throw new ClosedChannelException();
-		if ( intraPos >= regionLength )
-			return -1;
+		if ( !channel.isOpen() ) throw new ClosedChannelException();
+		if ( intraPos >= regionLength ) return -1;
 
 		if ( intraPos + n <= regionLength ) {
 			n = regionLength - intraPos;

@@ -26,9 +26,9 @@ import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
-import com.kartoflane.superluminal2.db.AbstractDatabaseEntry;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.DefaultDeferredText;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -36,6 +36,7 @@ import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
+import com.kartoflane.superluminal2.ftl.IDeferredText;
 import com.kartoflane.superluminal2.ftl.ImageObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
@@ -44,6 +45,7 @@ import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.ui.SaveOptionsDialog.SaveOptions;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 
@@ -59,39 +61,15 @@ public class ShipSaveUtils
 	private static final Logger log = LogManager.getLogger( ShipSaveUtils.class );
 
 
-	public static void saveShipFTL( File saveFile, ShipContainer container ) throws IllegalArgumentException, IOException
-	{
-		if ( saveFile == null )
-			throw new IllegalArgumentException( "Destination file must not be null." );
-		if ( saveFile.isDirectory() )
-			throw new IllegalArgumentException( "Not a file: " + saveFile.getName() );
-
-		HashMap<String, byte[]> fileMap = saveShip( container );
-		IOUtils.writeZip( fileMap, saveFile );
-	}
-
-	public static void saveShipXML( File destination, ShipContainer container ) throws IllegalArgumentException, IOException
-	{
-		if ( destination == null )
-			throw new IllegalArgumentException( "Destination file must not be null." );
-		if ( !destination.isDirectory() )
-			throw new IllegalArgumentException( "Not a directory: " + destination.getName() );
-
-		HashMap<String, byte[]> fileMap = saveShip( container );
-		IOUtils.writeDir( fileMap, destination );
-	}
-
 	/**
 	 * Saves the ship within the context of the specified database entry, as the specified file.
 	 * 
 	 * @param destination
 	 *            the output file.
-	 * @param entry
-	 *            the DatabaseEntry (runtime representation of an .ftl mod) within which the ship is to be saved.
 	 * @param container
 	 *            the ShipContainer to be saved.
 	 */
-	public static void saveShipModFTL( File destination, AbstractDatabaseEntry entry, ShipContainer container )
+	public static void saveShipFTL( File destination, ShipContainer container )
 		throws IllegalArgumentException, IOException, JDOMParseException
 	{
 		if ( destination == null )
@@ -99,12 +77,21 @@ public class ShipSaveUtils
 		if ( destination.isDirectory() )
 			throw new IllegalArgumentException( "Not a file: " + destination.getName() );
 
-		HashMap<String, byte[]> entryMap = IOUtils.readEntry( entry );
-		IOUtils.merge( entryMap, container );
-		IOUtils.writeZip( entryMap, destination );
+		SaveOptions so = container.getSaveOptions();
+
+		HashMap<String, byte[]> fileMap = null;
+		if ( so.mod == null ) {
+			fileMap = saveShip( container );
+		}
+		else {
+			fileMap = IOUtils.readEntry( so.mod );
+			IOUtils.merge( fileMap, container );
+		}
+
+		IOUtils.writeZip( fileMap, destination );
 	}
 
-	public static void saveShipModXML( File destination, AbstractDatabaseEntry entry, ShipContainer container )
+	public static void saveShipXML( File destination, ShipContainer container )
 		throws IllegalArgumentException, IOException, JDOMParseException
 	{
 		if ( destination == null )
@@ -112,9 +99,19 @@ public class ShipSaveUtils
 		if ( !destination.isDirectory() )
 			throw new IllegalArgumentException( "Not a directory: " + destination.getName() );
 
-		HashMap<String, byte[]> entryMap = IOUtils.readEntry( entry );
-		IOUtils.merge( entryMap, container );
-		IOUtils.writeDir( entryMap, destination );
+		SaveOptions so = container.getSaveOptions();
+
+		HashMap<String, byte[]> fileMap = null;
+
+		if ( so.mod == null ) {
+			fileMap = saveShip( container );
+		}
+		else {
+			fileMap = IOUtils.readEntry( so.mod );
+			IOUtils.merge( fileMap, container );
+		}
+
+		IOUtils.writeDir( fileMap, destination );
 	}
 
 	/**
@@ -153,6 +150,10 @@ public class ShipSaveUtils
 		byte[] bytes = null;
 
 		// Create the files in memory
+		fileName = "data/text_blueprints.xml.append";
+		bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes();
+		fileMap.put( fileName, bytes );
+
 		fileName = "data/" + Database.getInstance().getAssociatedFile( ship.getBlueprintName() ) + ".append";
 		bytes = IOUtils.readDocument( generateBlueprintXML( ship ) ).getBytes();
 		fileMap.put( fileName, bytes );
@@ -343,6 +344,52 @@ public class ShipSaveUtils
 		IOUtils.writeFileXML( generateLayoutXML( ship ), f );
 	}
 
+	private static void outputNamedTextReferenceElement( Element destElement, IDeferredText text )
+	{
+		if ( destElement == null )
+			throw new IllegalArgumentException( "Element must not be null." );
+		if ( text == null )
+			throw new IllegalArgumentException( "Text must not be null." );
+
+		// Include for compatibility with FTL pre-1.6.1
+		destElement.setText( text.getTextValue() );
+
+		if ( text instanceof DefaultDeferredText ) {
+			// FTL 1.6.1+
+			// id attributes take precedence over tag value, if they're available.
+			destElement.setAttribute( "id", text.getTextId() );
+		}
+	}
+
+	private static Element createNamedTextSourceElement( IDeferredText text )
+	{
+		if ( text == null )
+			throw new IllegalArgumentException( "Text must not be null." );
+
+		Element e = new Element( "text" );
+		e.setText( text.getTextValue() );
+		e.setAttribute( "name", text.getTextId() );
+
+		return e;
+	}
+
+	protected static Document generateTextXML( ShipObject ship )
+	{
+		Document doc = new Document();
+		Element root = new Element( "wrapper" );
+
+		root.addContent( createNamedTextSourceElement( ship.getShipClass() ) );
+
+		if ( ship.isPlayerShip() ) {
+			root.addContent( createNamedTextSourceElement( ship.getShipName() ) );
+			root.addContent( createNamedTextSourceElement( ship.getShipDescription() ) );
+		}
+
+		doc.setRootElement( root );
+
+		return doc;
+	}
+
 	/**
 	 * This method generates the shipBlueprint tag that describes the ship passed as argument.
 	 * 
@@ -355,33 +402,30 @@ public class ShipSaveUtils
 		Document doc = new Document();
 		Element root = new Element( "wrapper" );
 		Element e = null;
-		String attr = null;
+		String value = null;
 
 		Element shipBlueprint = new Element( "shipBlueprint" );
-		attr = ship.getBlueprintName();
-		shipBlueprint.setAttribute( "name", attr == null ? "" : attr );
-		attr = ship.getLayout();
-		shipBlueprint.setAttribute( "layout", attr == null ? "" : attr );
-		attr = ship.getImageNamespace();
-		shipBlueprint.setAttribute( "img", attr == null ? "" : attr );
+		value = ship.getBlueprintName();
+		shipBlueprint.setAttribute( "name", value == null ? "" : value );
+		value = ship.getLayout();
+		shipBlueprint.setAttribute( "layout", value == null ? "" : value );
+		value = ship.getImageNamespace();
+		shipBlueprint.setAttribute( "img", value == null ? "" : value );
 
 		// The ship's class name, used for flavor only on player ships,
 		// but on enemy ships it is used as the enemy ship's name
 		e = new Element( "class" );
-		attr = ship.getShipClass();
-		e.setText( attr == null ? "" : attr );
+		outputNamedTextReferenceElement( e, ship.getShipClass() );
 		shipBlueprint.addContent( e );
 
 		// Name and description only affect player ships
 		if ( ship.isPlayerShip() ) {
 			e = new Element( "name" );
-			attr = ship.getShipName();
-			e.setText( attr == null ? "" : attr );
+			outputNamedTextReferenceElement( e, ship.getShipName() );
 			shipBlueprint.addContent( e );
 
 			e = new Element( "desc" );
-			attr = ship.getShipDescription();
-			e.setText( attr == null ? "" : attr );
+			outputNamedTextReferenceElement( e, ship.getShipDescription() );
 			shipBlueprint.addContent( e );
 		}
 		// Sector tags

@@ -9,6 +9,7 @@ import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.jdom2.output.EscapeStrategy;
 import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
@@ -81,6 +82,7 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor
 			}
 
 			try {
+				// Always null!? And what about other TextModes?
 				final String space = element.getAttributeValue( "space", Namespace.XML_NAMESPACE );
 				if ( "default".equals( space ) ) {
 					fstack.setTextMode( fstack.getDefaultMode() );
@@ -88,6 +90,7 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor
 				else if ( "preserve".equals( space ) ) {
 					fstack.setTextMode( Format.TextMode.PRESERVE );
 				}
+				// if ( space != null ) System.out.println( space );
 
 				Walker walker = buildWalker( fstack, content, true );
 				if ( !walker.hasNext() ) {
@@ -152,17 +155,51 @@ public class SloppyXMLOutputProcessor extends AbstractXMLOutputProcessor
 	 * is encoding bytes to match. If encoding is null, the default
 	 * is "UTF-8".
 	 *
+	 * If XML character entity escaping is allowed, otherwise unmappable
+	 * characters may be written without errors. If disabled, an
+	 * UnmappableCharacterException will make their presence obvious and fatal.
+	 *
 	 * LineEndings will be CR-LF. Except for comments!?
+	 *
+	 * @param doc
+	 * @param writer
+	 * @param allowEscaping
 	 */
-	public static void sloppyPrint( Document doc, Writer writer, String encoding ) throws IOException
+	public static void sloppyPrint( Document doc, Writer writer, String encoding, boolean allowEscaping ) throws IOException
 	{
 		Format format = Format.getPrettyFormat();
+
+		// TODO: XML output bug
+		// Setting PRESERVE for some reason causes XML to be printed in a minified
+		// way. Can't figure out why this happens, so just gonna keep it at default
+		// for pretty format (TRIM).
+		// This is especially confusing since this doesn't happen to SMM, and this
+		// XML-printing code is directly copied from it.
+		// Since the editor doesn't print XML data with leading/trailing spaces
+		// anyway, making sure the files stay readable is more valuable *shrug*
+
+		// format.setTextMode( Format.TextMode.PRESERVE ); // Permit leading/trailing space.
+
 		format.setExpandEmptyElements( false );
 		format.setOmitDeclaration( false );
 		format.setIndent( "\t" );
 		format.setLineSeparator( LineSeparator.CRNL );
 
-		if ( encoding != null ) format.setEncoding( encoding );
+		if ( encoding != null ) {
+			format.setEncoding( encoding );
+		}
+
+		if ( !allowEscaping ) {
+			format.setEscapeStrategy(
+				new EscapeStrategy() {
+					@Override
+					public boolean shouldEscape( char ch )
+					{
+						return false;
+					}
+				}
+			);
+		}
 
 		XMLOutputter outputter = new XMLOutputter( format, new SloppyXMLOutputProcessor() );
 		outputter.output( doc, writer );

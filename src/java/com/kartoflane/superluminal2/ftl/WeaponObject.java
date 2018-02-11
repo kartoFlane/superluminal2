@@ -18,11 +18,13 @@ import com.kartoflane.superluminal2.db.Database;
  */
 public class WeaponObject extends GameObject implements Comparable<WeaponObject>, Identifiable
 {
+	private static final IDeferredText NO_WEAPON = new VerbatimText( "<No Weapon>" );
+
 	private final String blueprintName;
 	private WeaponTypes weaponType;
-	private String title = "";
-	private String shortName = "";
-	private String description = "";
+	private IDeferredText title = IDeferredText.EMPTY;
+	private IDeferredText shortName = IDeferredText.EMPTY;
+	private IDeferredText description = IDeferredText.EMPTY;
 	private String animName = "";
 
 	private AnimationObject cachedAnimation = null;
@@ -36,8 +38,8 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 	{
 		weaponType = null;
 		blueprintName = "Default Weapon";
-		title = "<No Weapon>";
-		shortName = "<No Weapon>";
+		title = NO_WEAPON;
+		shortName = NO_WEAPON;
 		animName = "Default Animation";
 		cachedAnimation = Database.DEFAULT_ANIM_OBJ;
 	}
@@ -99,38 +101,38 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 		return blueprintName;
 	}
 
-	public void setTitle( String title )
+	public void setTitle( IDeferredText title )
 	{
 		if ( title == null )
 			throw new IllegalArgumentException( blueprintName + ": title must not be null." );
 		this.title = title;
 	}
 
-	public String getTitle()
+	public IDeferredText getTitle()
 	{
 		return title;
 	}
 
-	public void setShortName( String name )
+	public void setShortName( IDeferredText name )
 	{
 		if ( name == null )
 			throw new IllegalArgumentException( blueprintName + ": name must not be null." );
 		shortName = name;
 	}
 
-	public String getShortName()
+	public IDeferredText getShortName()
 	{
 		return shortName;
 	}
 
-	public void setDescription( String desc )
+	public void setDescription( IDeferredText desc )
 	{
 		if ( desc == null )
 			throw new IllegalArgumentException( blueprintName + ": description must not be null." );
 		description = desc;
 	}
 
-	public String getDescription()
+	public IDeferredText getDescription()
 	{
 		return description;
 	}
@@ -163,7 +165,7 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 	@Override
 	public String toString()
 	{
-		return title;
+		return title.toString();
 	}
 
 	@Override

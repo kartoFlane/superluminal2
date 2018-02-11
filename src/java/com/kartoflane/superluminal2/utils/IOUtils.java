@@ -456,7 +456,7 @@ public class IOUtils
 		try {
 			f.getAbsoluteFile().getParentFile().mkdirs();
 			writer = new BufferedWriter( new FileWriter( f ) );
-			SloppyXMLOutputProcessor.sloppyPrint( doc, writer, null );
+			SloppyXMLOutputProcessor.sloppyPrint( doc, writer, null, false );
 
 			return true;
 		}
@@ -482,7 +482,7 @@ public class IOUtils
 		StringWriter writer = null;
 		try {
 			writer = new StringWriter();
-			SloppyXMLOutputProcessor.sloppyPrint( doc, writer, null );
+			SloppyXMLOutputProcessor.sloppyPrint( doc, writer, null, false );
 
 			result = writer.toString();
 		}

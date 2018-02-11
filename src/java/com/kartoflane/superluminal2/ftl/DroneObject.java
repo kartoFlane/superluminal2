@@ -9,11 +9,13 @@ import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable
 {
+	private static final IDeferredText NO_DRONE = new VerbatimText( "<No Drone>" );
+
 	private final String blueprintName;
 	private DroneTypes droneType;
-	private String title = "";
-	private String shortName = "";
-	private String description = "";
+	private IDeferredText title = IDeferredText.EMPTY;
+	private IDeferredText shortName = IDeferredText.EMPTY;
+	private IDeferredText description = IDeferredText.EMPTY;
 
 	private HashMap<DroneStats, Float> statMap = null;
 
@@ -22,8 +24,8 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 	{
 		droneType = null;
 		blueprintName = "Default Drone";
-		title = "<No Drone>";
-		shortName = "<No Drone>";
+		title = NO_DRONE;
+		shortName = NO_DRONE;
 	}
 
 	public DroneObject( String blueprint )
@@ -57,38 +59,38 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 		return blueprintName;
 	}
 
-	public void setTitle( String title )
+	public void setTitle( IDeferredText title )
 	{
 		if ( title == null )
 			throw new IllegalArgumentException( blueprintName + ": title must not be null." );
 		this.title = title;
 	}
 
-	public String getTitle()
+	public IDeferredText getTitle()
 	{
 		return title;
 	}
 
-	public void setShortName( String name )
+	public void setShortName( IDeferredText name )
 	{
 		if ( name == null )
 			throw new IllegalArgumentException( blueprintName + ": name must not be null." );
 		shortName = name;
 	}
 
-	public String getShortName()
+	public IDeferredText getShortName()
 	{
 		return shortName;
 	}
 
-	public void setDescription( String desc )
+	public void setDescription( IDeferredText desc )
 	{
 		if ( desc == null )
 			throw new IllegalArgumentException( blueprintName + ": description must not be null." );
 		description = desc;
 	}
 
-	public String getDescription()
+	public IDeferredText getDescription()
 	{
 		return description;
 	}
@@ -121,7 +123,7 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 	@Override
 	public String toString()
 	{
-		return title;
+		return title.toString();
 	}
 
 	@Override

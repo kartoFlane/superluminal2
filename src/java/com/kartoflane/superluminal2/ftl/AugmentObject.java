@@ -5,16 +5,18 @@ import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 public class AugmentObject extends GameObject implements Comparable<AugmentObject>, Identifiable
 {
+	private static final IDeferredText NO_AUGMENT = new VerbatimText( "<No Augment>" );
+
 	private final String blueprintName;
-	private String title = "";
-	private String description = "";
+	private IDeferredText title = IDeferredText.EMPTY;
+	private IDeferredText description = IDeferredText.EMPTY;
 
 
 	/** Creates a default augment object. */
 	public AugmentObject()
 	{
 		blueprintName = "Default Augment";
-		title = "<No Augment>";
+		title = NO_AUGMENT;
 	}
 
 	public AugmentObject( String blueprintName )
@@ -37,26 +39,26 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 		return blueprintName;
 	}
 
-	public void setTitle( String title )
+	public void setTitle( IDeferredText title )
 	{
 		if ( title == null )
 			throw new IllegalArgumentException( blueprintName + ": title must not be null." );
 		this.title = title;
 	}
 
-	public String getTitle()
+	public IDeferredText getTitle()
 	{
 		return title;
 	}
 
-	public void setDescription( String desc )
+	public void setDescription( IDeferredText desc )
 	{
 		if ( desc == null )
 			throw new IllegalArgumentException( blueprintName + ": description must not be null." );
 		description = desc;
 	}
 
-	public String getDescription()
+	public IDeferredText getDescription()
 	{
 		return description;
 	}
@@ -81,6 +83,6 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 	@Override
 	public String toString()
 	{
-		return title;
+		return title.toString();
 	}
 }

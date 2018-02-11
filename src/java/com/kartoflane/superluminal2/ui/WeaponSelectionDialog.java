@@ -493,7 +493,7 @@ public class WeaponSelectionDialog
 
 				trtm = new TreeItem( typeItem, SWT.NONE );
 				trtm.setText( 0, weapon.getBlueprintName() );
-				trtm.setText( 1, weapon.getTitle() );
+				trtm.setText( 1, weapon.getTitle().toString() );
 				trtm.setData( weapon );
 
 				if ( result == weapon )
@@ -538,7 +538,7 @@ public class WeaponSelectionDialog
 			for ( WeaponObject weapon : list ) {
 				TreeItem weaponItem = new TreeItem( trtm, SWT.NONE );
 				weaponItem.setText( 0, weapon.getBlueprintName() );
-				weaponItem.setText( 1, weapon.getTitle() );
+				weaponItem.setText( 1, weapon.getTitle().toString() );
 				weaponItem.setData( weapon );
 			}
 		}
@@ -577,7 +577,7 @@ public class WeaponSelectionDialog
 			}
 			statTable.setVisible( true );
 			statTable.updateColumnWidth();
-			txtDesc.setText( result.getDescription() );
+			txtDesc.setText( result.getDescription().toString() );
 		}
 		else {
 			preview.setImage( null );

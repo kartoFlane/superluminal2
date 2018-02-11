@@ -9,32 +9,28 @@ import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.vhati.ftldat.FTLPack;
+import net.vhati.ftldat.PkgPack;
 
 
 /**
- * Represents the base game archives in pre-1.6 versions of FTL.
+ * Represents the base game archives in post-1.6 versions of FTL.
  */
-public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
+public class BasePost16DatabaseEntry extends AbstractDatabaseEntry
 {
 	private static final Logger log = LogManager.getLogger();
 
-	private final FTLPack data;
-	private final FTLPack resource;
+	private final PkgPack data;
 
 
 	/**
 	 * Creates the BaseDatabaseEntry, which serves as the core of the database.
 	 * 
 	 * @param data
-	 *            the data.dat archive
-	 * @param resource
-	 *            the resource.dat archive
+	 *            the ftl.dat archive
 	 */
-	public BasePre16DatabaseEntry( FTLPack data, FTLPack resource )
+	public BasePost16DatabaseEntry( PkgPack data )
 	{
 		this.data = data;
-		this.resource = resource;
 	}
 
 	@Override
@@ -49,14 +45,7 @@ public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
 		if ( innerPath == null )
 			throw new IllegalArgumentException( "Inner path must not be null." );
 
-		boolean result = data.contains( innerPath );
-
-		if ( !result ) {
-			// Not in the data archive. Lookup resources archive.
-			result = resource.contains( innerPath );
-		}
-
-		return result;
+		return data.contains( innerPath );
 	}
 
 	@Override
@@ -65,14 +54,7 @@ public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
 		if ( innerPath == null )
 			throw new IllegalArgumentException( "Inner path must not be null." );
 
-		if ( innerPath.endsWith( ".txt" ) || innerPath.endsWith( ".xml" ) ||
-			innerPath.endsWith( ".xml.append" ) || innerPath.endsWith( ".append.xml" ) ||
-			innerPath.endsWith( ".xml.rawappend" ) || innerPath.endsWith( ".rawappend.xml" ) ) {
-			return data.getInputStream( innerPath );
-		}
-		else {
-			return resource.getInputStream( innerPath );
-		}
+		return data.getInputStream( innerPath );
 	}
 
 	@Override
@@ -81,7 +63,6 @@ public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
 		Set<String> result = new TreeSet<String>();
 
 		result.addAll( data.list() );
-		result.addAll( resource.list() );
 
 		return result;
 	}
@@ -106,7 +87,6 @@ public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
 	{
 		try {
 			data.close();
-			resource.close();
 		}
 		catch ( IOException e ) {
 			log.error( "Error: failed to close DatabaseEntry " + this );
@@ -116,15 +96,15 @@ public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
 	@Override
 	public int hashCode()
 	{
-		return data.hashCode() ^ resource.hashCode();
+		return data.hashCode();
 	}
 
 	@Override
 	public boolean equals( Object o )
 	{
-		if ( o instanceof BasePre16DatabaseEntry ) {
-			BasePre16DatabaseEntry other = (BasePre16DatabaseEntry)o;
-			return data.equals( other.data ) && resource.equals( other.resource );
+		if ( o instanceof BasePost16DatabaseEntry ) {
+			BasePost16DatabaseEntry other = (BasePost16DatabaseEntry)o;
+			return data.equals( other.data );
 		}
 		else {
 			return false;

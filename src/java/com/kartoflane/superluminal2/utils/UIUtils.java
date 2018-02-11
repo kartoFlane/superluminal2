@@ -351,36 +351,58 @@ public class UIUtils
 	{
 		File result = null;
 
-		String message = "";
-		message += "You will now be prompted to locate FTL manually.\n";
-		message += "Select '(FTL dir)/resources/data.dat'.\n";
-		message += "Or 'FTL.app', if you're on OSX.";
+		String message = ""
+			+ "You will now be prompted to locate FTL manually.\n"
+			+ "Look in {FTL dir} to select 'ftl.dat' or 'data.dat'.\n"
+			+ "\n"
+			+ "It may be buried under a subdirectory called 'resources/'.\n"
+			+ "Or select 'FTL.app', if you're on OSX.";
 
 		MessageBox box = new MessageBox( parentShell, SWT.ICON_INFORMATION | SWT.OK );
 		box.setText( "Find FTL" );
 		box.setMessage( message );
 
 		FileDialog fd = new FileDialog( parentShell, SWT.OPEN );
-		fd.setText( "Find data.dat or FTL.app" );
+		fd.setText( "Find ftl.dat or data.dat or FTL.app" );
 		fd.setFilterExtensions( new String[] { "*.dat", "*.app" } );
-		fd.setFilterNames( new String[] { "FTL Data File - (FTL dir)/resources/data.dat", "FTL Application Bundle" } );
+		fd.setFilterNames( new String[] { "FTL Resources", "FTL App Bundle" } );
 
-		String filePath = fd.open();
+		boolean exit = false;
+		while ( !exit && result == null ) {
+			String filePath = fd.open();
 
-		if ( filePath == null ) {
-			// User aborted selection
-			// Nothing to do here
-		}
-		else {
-			File f = new File( filePath );
-			if ( f.getName().equals( "data.dat" ) ) {
-				result = f.getParentFile();
+			if ( filePath == null ) {
+				// User aborted selection
+				// Nothing to do here
+				exit = true;
 			}
-			else if ( f.getName().endsWith( ".app" ) ) {
-				File contentsPath = new File( f, "Contents" );
-				if ( contentsPath.exists() && contentsPath.isDirectory() && new File( contentsPath, "Resources" ).exists() )
-					result = new File( contentsPath, "Resources" );
-				// TODO test whether this works on OSX
+			else {
+				File f = new File( filePath );
+				if ( f.getName().equals( "resource.dat" ) || f.getName().equals( "data.dat" )
+					|| f.getName().equals( "ftl.dat" ) ) {
+					result = f.getParentFile();
+				}
+				else if ( f.getName().endsWith( ".app" ) ) {
+					// TODO test whether this works on OSX
+					File contentsPath = new File( f, "Contents" );
+					if ( contentsPath.exists() && contentsPath.isDirectory()
+						&& new File( contentsPath, "Resources" ).exists() ) {
+						result = new File( contentsPath, "Resources" );
+					}
+				}
+				else {
+					// Shouldn't ever happen unless the dat-recognizing code is wrong
+					UIUtils.showInfoDialog(
+						parentShell,
+						"Invalid file",
+						String.format(
+							"The file you selected (%s) is not a valid .dat archive or FTL.app.\n"
+								+ "\n"
+								+ "Please select a valid file.",
+							f.getName()
+						)
+					);
+				}
 			}
 		}
 
