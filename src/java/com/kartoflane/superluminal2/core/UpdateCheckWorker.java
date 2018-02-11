@@ -53,31 +53,32 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 		log.info( "Checking for updates..." );
 
 		if ( manuallyTriggeredCheck ) {
-			// Execute on SWT's UI thread for the popup to work correctly.
-			// Yuck.
-			Display.getDefault().asyncExec(
-				new Runnable() {
-					public void run()
-					{
-						UIUtils.showLoadDialog(
-							EditorWindow.getInstance().getShell(),
-							"Checking for updates...", "Checking for updates, please wait...",
-							new Runnable() {
-								public void run()
-								{
-									while ( !UpdateCheckWorker.this.isDone() && !UpdateCheckWorker.this.isCancelled() ) {
-										try {
-											Thread.sleep( 100 );
-										}
-										catch ( InterruptedException e ) {
-										}
-									}
-								}
-							}
-						);
+			// Task to keep the load dialog visible while the check for updates is being performed.
+			final Runnable pollTask = new Runnable() {
+				public void run()
+				{
+					while ( !UpdateCheckWorker.this.isDone() && !UpdateCheckWorker.this.isCancelled() ) {
+						try {
+							Thread.sleep( 100 );
+						}
+						catch ( InterruptedException e ) {
+						}
 					}
 				}
-			);
+			};
+
+			final Runnable showLoadDialog = new Runnable() {
+				public void run()
+				{
+					UIUtils.showLoadDialog(
+						EditorWindow.getInstance().getShell(),
+						"Checking for updates...", "Checking for updates, please wait...", pollTask
+					);
+				}
+			};
+
+			// Execute on SWT's UI thread for the popup to work correctly.
+			Display.getDefault().asyncExec( showLoadDialog );
 		}
 
 		UpdateData ud = null;
