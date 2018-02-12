@@ -1,6 +1,12 @@
 <versions>
-	<latest id="2.1.2b" url="https://github.com/kartoFlane/superluminal2/releases/latest" offer-selfpatch="false" />
+	<latest id="2.2" url="https://github.com/kartoFlane/superluminal2/releases/latest" offer-selfpatch="false" />
 	<changelog>
+		<version id="2.2">
+			<change>Added support for FTL 1.6.1+</change>
+			<change>Self-patching functionality should now work for non-Windows platforms (still broken for versions 2.1.2b and lower; you need to update manually)</change>
+			<change>Pirate ships from dlcPirateBlueprints.xml file can now be loaded in the editor</change>
+			<change>Editor now recognizes .rawclobber files</change>
+		</version>
 		<version id="2.1.2b">
 			<change>Updated GUI library version. Hopefully fixes the issues with Windows 10.</change>
 			<change>Self-patching functionality is broken for non-Windows platforms, you'll need to update the editor manually.</change>

@@ -1,5 +1,16 @@
 Changelog
 
+2.2:
+- Added support for FTL 1.6.1+
+- Self-patching functionality should now work on all platforms (still broken in versions 2.1.2b and lower; you'll need to update manually)
+- Added File > Change .dat Files, allowing you to navigate to other .dat files, and tell the editor to use them (useful if you ever want to use pre-1.6 archives for whatever reason)
+- Pirate ships from dlcPirateBlueprints.xml file can now be loaded in the editor.
+- The editor now also scans .rawclobber files in loaded mods.
+- Automatic update check performed at startup no longer blocks GUI.
+- Pinned objects are now highlighted with a yellow border.
+- Updated GUI library from 4.5.1 to 4.6.1.
+- Updated links to the new FTL forums address.
+
 2.1.2b:
 - Updated GUI library from 4.4 to 4.5.1. Hopefully this fixes the issues with Windows 10.
 
