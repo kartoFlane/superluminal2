@@ -1,9 +1,7 @@
 Compiling & versioning
 ======================
 
-The build process for this project is automated by Maven.
-  http://maven.apache.org/
-  http://docs.codehaus.org/display/MAVENUSER/Getting+Started+with+Maven
+The build process for this project is automated by [Maven](http://maven.apache.org/).
 
 ## Compiling
 
@@ -18,7 +16,7 @@ For example, `mvn clean package -P win`
 
 ## Versioning
 
-To increment project version, run `mvn versions:set` -- you will then be prompted to enter the new version string.
+To increment project version in Maven's POMs, run `mvn versions:set` -- you will then be prompted to enter the new version string.
 
 When releasing new versions of the program, remember to:
 
@@ -32,6 +30,17 @@ When releasing new versions of the program, remember to:
 - Update the changelog:
 	- Complete changelog: `skels/common/readme_changelog.txt`
 	- Brief rundown of important changes in XML format: `skels/common/auto_update.xml`
+
+
+## Releasing
+
+Releasing a new version of the program generally has the following workflow:
+
+- Commit and push all changes constituting the current version to the repository
+- Increment versions (see section [Versioning](https://github.com/kartoFlane/superluminal2/blob/master/README_developers.md#versioning))
+- Run `mvn clean package`
+- Upload assembled distribution archives, making them available for download (currently: GitHub repository releases)
+- Push version increment commit with the message: `Increment version (insert_version_here)`
 
 
 Dependencies
@@ -72,23 +81,23 @@ Repository
 		- `common/`  
 		Files to include in all distribution archives.
 
-		- `auto_update.xml`  
-			Info about the latest release, downloaded periodically by clients.
+			- `auto_update.xml`  
+				Info about the latest release, downloaded periodically by clients.
 
-	- `win/`, `linux/`, `mac/`  
-		System-specific files to include in distribution archives.
+		- `win/`, `linux/`, `mac/`  
+			System-specific files to include in distribution archives.
 
-	- `exe/`  
-		Materials to create superluminal.exe (not part of Maven).
+		- `exe/`  
+			Materials to create superluminal.exe (not part of Maven).
 
-		- Get [Launch4j](http://launch4j.sourceforge.net/index.html)
-		- Drag `launch4j_*.xml` onto `launch4jc.exe`.
-		- `superluminal.exe` will appear alongside the xml.
-		- Drag `superluminal.exe` into `skel_win/`.
-		- Run `mvn clean package`.
+			- Get [Launch4j](http://launch4j.sourceforge.net/index.html)
+			- Drag `launch4j_*.xml` onto `launch4jc.exe`.
+			- `superluminal.exe` will appear alongside the xml.
+			- Drag `superluminal.exe` into `skel_win/`.
+			- Run `mvn clean package`.
 
-		The manifest files will be embedded to prevent VirtualStore redirection.  
-		http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware
+			The manifest files will be embedded to prevent VirtualStore redirection.  
+			[Article: Making Your Application UAC-Aware](http://www.codeproject.com/Articles/17968/Making-Your-Application-UAC-Aware)
 
 	- `src/`  
 		The source code of the application
