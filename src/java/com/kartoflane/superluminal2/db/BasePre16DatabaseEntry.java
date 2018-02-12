@@ -116,7 +116,13 @@ public class BasePre16DatabaseEntry extends AbstractDatabaseEntry
 	@Override
 	public int hashCode()
 	{
-		return data.hashCode() ^ resource.hashCode();
+		int result = 43;
+		int salt = 17;
+
+		result = salt * result + data.hashCode();
+		result = salt * result + resource.hashCode();
+
+		return result;
 	}
 
 	@Override
