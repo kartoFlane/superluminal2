@@ -51,15 +51,12 @@ public abstract class AbstractDatabaseEntry
 	protected Map<String, GlowSet> glowSetMap = new HashMap<String, GlowSet>();
 	protected Map<String, WeaponList> weaponListMap = new HashMap<String, WeaponList>();
 	protected Map<String, DroneList> droneListMap = new HashMap<String, DroneList>();
+	protected Map<String, String> textLookupMap = new HashMap<String, String>();
 	/**
 	 * Temporary map to hold anim sheets, since they
 	 * need to be loaded before weaponAnims, which reference them
 	 */
 	protected HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
-	/**
-	 * Temporary map to hold DeferredTexts.
-	 */
-	protected Map<String, String> textLookupMap = new HashMap<String, String>();
 
 
 	/**
@@ -366,6 +363,7 @@ public abstract class AbstractDatabaseEntry
 		weaponListMap.clear();
 		droneListMap.clear();
 		animSheetMap.clear();
+		textLookupMap.clear();
 		System.gc();
 	}
 
