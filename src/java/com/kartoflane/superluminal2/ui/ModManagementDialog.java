@@ -437,7 +437,7 @@ public class ModManagementDialog
 			}
 		}
 		catch ( IOException ex ) {
-			log.warn( String.format( "An error has occured while loading mod file '%s': ", file.getName(), ex ) );
+			log.warn( String.format( "An error has occurred while loading mod file '%s': ", file.getName(), ex ) );
 		}
 	}
 

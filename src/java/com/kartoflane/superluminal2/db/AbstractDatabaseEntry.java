@@ -432,11 +432,11 @@ public abstract class AbstractDatabaseEntry
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				}
 				catch ( IOException e ) {
-					log.error( String.format( "%s: an error occured while loading file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while loading file '%s': ", getName(), innerPath ), e );
 					found = true;
 				}
 				catch ( JDOMParseException e ) {
-					log.error( String.format( "%s: an error occured while parsing file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while parsing file '%s': ", getName(), innerPath ), e );
 					found = true;
 				}
 				finally {
@@ -445,7 +445,7 @@ public abstract class AbstractDatabaseEntry
 							is.close();
 					}
 					catch ( IOException e ) {
-						log.error( getName() + ": an error occured while closing stream", e );
+						log.error( getName() + ": an error occurred while closing stream", e );
 					}
 				}
 			}
@@ -514,11 +514,11 @@ public abstract class AbstractDatabaseEntry
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				}
 				catch ( IOException e ) {
-					log.error( String.format( "%s: an error occured while loading file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while loading file '%s': ", getName(), innerPath ), e );
 					found = true;
 				}
 				catch ( JDOMParseException e ) {
-					log.error( String.format( "%s: an error occured while parsing file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while parsing file '%s': ", getName(), innerPath ), e );
 					found = true;
 				}
 				finally {
@@ -527,7 +527,7 @@ public abstract class AbstractDatabaseEntry
 							is.close();
 					}
 					catch ( IOException e ) {
-						log.error( getName() + ": an error occured while closing stream", e );
+						log.error( getName() + ": an error occurred while closing stream", e );
 					}
 				}
 			}
@@ -561,10 +561,10 @@ public abstract class AbstractDatabaseEntry
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				}
 				catch ( IOException e ) {
-					log.error( String.format( "%s: an error occured while loading file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while loading file '%s': ", getName(), innerPath ), e );
 				}
 				catch ( JDOMParseException e ) {
-					log.error( String.format( "%s: an error occured while parsing file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while parsing file '%s': ", getName(), innerPath ), e );
 				}
 				finally {
 					try {
@@ -572,7 +572,7 @@ public abstract class AbstractDatabaseEntry
 							is.close();
 					}
 					catch ( IOException e ) {
-						log.error( getName() + ": an error occured while closing stream", e );
+						log.error( getName() + ": an error occurred while closing stream", e );
 					}
 				}
 			}
@@ -601,10 +601,10 @@ public abstract class AbstractDatabaseEntry
 				// log.trace(String.format("Inner path '%s' could not be found.", "data/rooms" + ext));
 			}
 			catch ( IOException e ) {
-				log.error( String.format( "%s: an error occured while loading file '%s': ", getName(), "data/rooms" ), e );
+				log.error( String.format( "%s: an error occurred while loading file '%s': ", getName(), "data/rooms" ), e );
 			}
 			catch ( JDOMParseException e ) {
-				log.error( String.format( "%s: an error occured while parsing file '%s': ", getName(), "data/rooms" ), e );
+				log.error( String.format( "%s: an error occurred while parsing file '%s': ", getName(), "data/rooms" ), e );
 			}
 			finally {
 				try {
@@ -612,7 +612,7 @@ public abstract class AbstractDatabaseEntry
 						is.close();
 				}
 				catch ( IOException e ) {
-					log.error( getName() + ": an error occured while closing stream", e );
+					log.error( getName() + ": an error occurred while closing stream", e );
 				}
 			}
 		}
@@ -666,11 +666,11 @@ public abstract class AbstractDatabaseEntry
 					// log.trace(String.format("Inner path '%s' could not be found.", innerPath + ext));
 				}
 				catch ( IOException e ) {
-					log.error( String.format( "%s: an error occured while loading file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while loading file '%s': ", getName(), innerPath ), e );
 					found = true;
 				}
 				catch ( JDOMParseException e ) {
-					log.error( String.format( "%s: an error occured while parsing file '%s': ", getName(), innerPath ), e );
+					log.error( String.format( "%s: an error occurred while parsing file '%s': ", getName(), innerPath ), e );
 					found = true;
 				}
 				finally {
@@ -679,7 +679,7 @@ public abstract class AbstractDatabaseEntry
 							is.close();
 					}
 					catch ( IOException e ) {
-						log.error( getName() + ": an error occured while closing stream", e );
+						log.error( getName() + ": an error occurred while closing stream", e );
 					}
 				}
 			}

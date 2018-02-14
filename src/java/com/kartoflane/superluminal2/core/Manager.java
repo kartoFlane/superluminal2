@@ -658,7 +658,7 @@ public abstract class Manager
 			log.warn( String.format( "%s - resource could not be found.", path ) );
 		}
 		catch ( IOException e ) {
-			log.error( String.format( "An error has occured while getting input stream for %s: ", loadPath ), e );
+			log.error( String.format( "An error has occurred while getting input stream for %s: ", loadPath ), e );
 		}
 
 		if ( result == null )

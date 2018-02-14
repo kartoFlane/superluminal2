@@ -397,9 +397,9 @@ public class ShipContainer implements Disposable, SLListener
 				EditorWindow.log.trace( "Ship saved successfully." );
 			}
 			catch ( Exception ex ) {
-				EditorWindow.log.error( "An error occured while saving the ship: ", ex );
+				EditorWindow.log.error( "An error occurred while saving the ship: ", ex );
 				UIUtils.showWarningDialog(
-					window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details."
+					window.getShell(), null, "An error has occurred while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details."
 				);
 			}
 		}
@@ -412,9 +412,9 @@ public class ShipContainer implements Disposable, SLListener
 				EditorWindow.log.trace( "Ship saved successfully." );
 			}
 			catch ( Exception ex ) {
-				EditorWindow.log.error( "An error occured while saving the ship: ", ex );
+				EditorWindow.log.error( "An error occurred while saving the ship: ", ex );
 				UIUtils.showWarningDialog(
-					window.getShell(), null, "An error has occured while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details."
+					window.getShell(), null, "An error has occurred while saving the ship:\n" + ex.getMessage() + "\n\nCheck log for details."
 				);
 			}
 		}

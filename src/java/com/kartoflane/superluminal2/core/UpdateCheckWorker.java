@@ -117,11 +117,11 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 			ud = new UpdateData( e );
 		}
 		catch ( JDOMException e ) {
-			log.error( "Udpate check failed -- an error has occured while parsing update file.", e );
+			log.error( "Udpate check failed -- an error has occurred while parsing update file.", e );
 			ud = new UpdateData( e );
 		}
 		catch ( Exception e ) {
-			log.error( "An unknown error occured while checking for updates.", e );
+			log.error( "An unknown error occurred while checking for updates.", e );
 			ud = new UpdateData( e );
 		}
 		finally {
@@ -217,12 +217,12 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 						}
 					}
 					catch ( Exception e ) {
-						log.error( "An error has occured while displaying update result.", e );
+						log.error( "An error has occurred while displaying update result.", e );
 						UIUtils.showWarningDialog(
 							EditorWindow.getInstance().getShell(),
 							null,
 							String.format(
-								"An error has occured while displaying update result:%n%n%s: %s",
+								"An error has occurred while displaying update result:%n%n%s: %s",
 								e.getClass().getSimpleName(), e.getMessage()
 							)
 						);
@@ -296,7 +296,7 @@ public class UpdateCheckWorker extends SwingWorker<UpdateData, Void>
 				desktop.browse( url.toURI() );
 			}
 			catch ( Exception ex ) {
-				log.error( "An error has occured while opening web browser.", ex );
+				log.error( "An error has occurred while opening web browser.", ex );
 			}
 		}
 	}

@@ -205,9 +205,9 @@ public class Superluminal
 			editorWindow = new EditorWindow( display );
 		}
 		catch ( Exception e ) {
-			log.error( "Exception occured while creating EditorWindow: ", e );
+			log.error( "Exception occurred while creating EditorWindow: ", e );
 
-			String msg = "An error has occured while creating the editor's GUI:\n" +
+			String msg = "An error has occurred while creating the editor's GUI:\n" +
 				e.getClass().getSimpleName() + ": " + e.getMessage() + "\n\n" +
 				"Check the log for details.";
 			UIUtils.showErrorDialog( null, null, Utils.wrap( msg, 50, 5 ) );
@@ -296,9 +296,9 @@ public class Superluminal
 				);
 			}
 			catch ( Exception e ) {
-				log.error( "An error occured while loading dat archives:", e );
+				log.error( "An error occurred while loading dat archives:", e );
 
-				String msg = "An error has occured while loading the game's resources.\n\n" +
+				String msg = "An error has occurred while loading the game's resources.\n\n" +
 					"Please check editor-log.txt in the editor's directory, and post\n" +
 					"it in the editor's thread at the FTL forums.";
 				UIUtils.showErrorDialog( editorWindow.getShell(), null, msg );
@@ -338,7 +338,7 @@ public class Superluminal
 				ship.save( new File( name ) );
 			}
 
-			log.error( "An unexpected error has occured and the editor was forced to terminate.", t );
+			log.error( "An unexpected error has occurred and the editor was forced to terminate.", t );
 			UIUtils.showErrorDialog( editorWindow.getShell(), null, msg );
 		}
 
@@ -470,10 +470,10 @@ public class Superluminal
 			log.error( "Keybind file could not be found: " + f.getAbsolutePath() );
 		}
 		catch ( IOException ex ) {
-			log.error( "An error has occured while loading keybind file: ", ex );
+			log.error( "An error has occurred while loading keybind file: ", ex );
 		}
 		catch ( JDOMParseException ex ) {
-			log.error( "JDOM exception occured while loading file " + f.getAbsolutePath(), ex );
+			log.error( "JDOM exception occurred while loading file " + f.getAbsolutePath(), ex );
 		}
 	}
 
@@ -510,7 +510,7 @@ public class Superluminal
 			IOUtils.writeFileXML( keyDoc, f );
 		}
 		catch ( IOException e ) {
-			log.error( "An error occured while saving hotkeys file: ", e );
+			log.error( "An error occurred while saving hotkeys file: ", e );
 		}
 	}
 }

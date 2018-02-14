@@ -633,7 +633,7 @@ public class EditorWindow
 							Manager.loadShip( SHPUtils.loadShipSHP( f ) );
 						}
 						catch ( Exception ex ) {
-							log.error( "Error occured while reading .shp file:", ex );
+							log.error( "Error occurred while reading .shp file:", ex );
 							String msg = "Superluminal was unable to open the legacy project file.\n\n" +
 								"This can happen when the file is structurized in a way that the editor doesn't expect.\n" +
 								"Posting the .shp file in the editor's thread at the FTL forums will help the editor's author fix the issue.";
@@ -1717,8 +1717,8 @@ public class EditorWindow
 		);
 
 		if ( ex[0] != null ) {
-			log.error( "An error has occured while reloading the database.", ex[0] );
-			String msg = "An error has occured while reloading the Database:\n" +
+			log.error( "An error has occurred while reloading the database.", ex[0] );
+			String msg = "An error has occurred while reloading the Database:\n" +
 				ex[0].getClass().getSimpleName() + ": " + ex[0].getMessage() + "\n\n" +
 				"Check the log for details.";
 			UIUtils.showErrorDialog( null, null, msg );

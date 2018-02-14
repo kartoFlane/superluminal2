@@ -67,7 +67,7 @@ public class FTLLayoutParseException extends Exception
 	}
 
 	/**
-	 * @return the partial layout that was successfully built before the error occured.
+	 * @return the partial layout that was successfully built before the error occurred.
 	 */
 	public ShipLayout getPartialLayout()
 	{
