@@ -496,7 +496,7 @@ public class SquareColorPickerDialog extends Dialog
 			}
 
 			float[] hsv = rgb.getHSB();
-			huePicker.setSelection( hsv[0] );
+			huePicker.setSelection( hsv[0] / 360.0f );
 			shadePicker.setSelection( hsv[1], hsv[2] );
 		}
 		else if ( src == txtR || src == txtG || src == txtB ) {
@@ -518,7 +518,7 @@ public class SquareColorPickerDialog extends Dialog
 			}
 
 			float[] hsv = rgb.getHSB();
-			huePicker.setSelection( hsv[0] );
+			huePicker.setSelection( hsv[0] / 360.0f );
 			shadePicker.setSelection( hsv[1], hsv[2] );
 		}
 		else if ( src == txtH || src == txtS || src == txtV ) {
