@@ -158,7 +158,7 @@ public class ShipLoadUtils
 		child = e.getChild( "class" );
 		if ( child == null )
 			throw new IllegalArgumentException( "Missing <class> tag." );
-		ship.setShipClass( DatParser.readTextElement( child ) );
+		ship.setShipClass( DatParser.readTextElement( child ).getTextValue() );
 
 		// Get the name of the ship
 		// Exclusive to player ships
@@ -166,7 +166,7 @@ public class ShipLoadUtils
 			child = e.getChild( "name" );
 			if ( child == null )
 				throw new IllegalArgumentException( "Missing <name> tag." );
-			ship.setShipName( DatParser.readTextElement( child ) );
+			ship.setShipName( DatParser.readTextElement( child ).getTextValue() );
 		}
 
 		// Get the description of the ship
@@ -176,7 +176,7 @@ public class ShipLoadUtils
 			if ( child == null )
 				ship.setShipDescription( "<desc> tag was missing!" );
 			else
-				ship.setShipDescription( DatParser.readTextElement( child ) );
+				ship.setShipDescription( DatParser.readTextElement( child ).getTextValue() );
 		}
 
 		// Get the list of systems installed on the ship
