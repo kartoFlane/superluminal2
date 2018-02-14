@@ -220,11 +220,22 @@ public class ShipObject extends GameObject
 		shipClass = className;
 	}
 
+	/**
+	 * Convenience counterpart to {@link #setShipClass(IDeferredText)}, which
+	 * automatically constructs a {@link IDeferredText} wrapper around the provided string.
+	 * 
+	 * @param className
+	 *            the name of the ship's class
+	 * 
+	 * @see #setShipClass(IDeferredText)
+	 */
 	public void setShipClass( String className )
 	{
 		if ( className == null )
 			throw new IllegalArgumentException( "The ship class' name must not be null." );
-		setShipDescription( new DefaultDeferredText( "text_" + blueprintName + "_class", className ) );
+		if ( className.equals( getShipClass().getTextValue() ) )
+			return;
+		setShipClass( new DefaultDeferredText( "text_" + blueprintName + "_class", className ) );
 	}
 
 	/**
@@ -246,11 +257,22 @@ public class ShipObject extends GameObject
 		this.shipName = shipName;
 	}
 
+	/**
+	 * Convenience counterpart to {@link #setShipName(IDeferredText)}, which
+	 * automatically constructs a {@link IDeferredText} wrapper around the provided string.
+	 * 
+	 * @param shipName
+	 *            the name of the ship
+	 * 
+	 * @see #setShipName(IDeferredText)
+	 */
 	public void setShipName( String shipName )
 	{
 		if ( shipName == null )
 			throw new IllegalArgumentException( "The ship's name must not be null." );
-		setShipDescription( new DefaultDeferredText( "text_" + blueprintName + "_name", shipName ) );
+		if ( shipName.equals( getShipName().getTextValue() ) )
+			return;
+		setShipName( new DefaultDeferredText( "text_" + blueprintName + "_name", shipName ) );
 	}
 
 	/**
@@ -262,7 +284,8 @@ public class ShipObject extends GameObject
 	}
 
 	/**
-	 * Sets the ship's description.<br>
+	 * Sets the ship's description. Length of the description should be shorter than
+	 * approximately 255 characters to ensure that it fits inside container window in-game.
 	 * Player ships only.
 	 */
 	public void setShipDescription( IDeferredText desc )
@@ -272,10 +295,21 @@ public class ShipObject extends GameObject
 		shipDescription = desc;
 	}
 
+	/**
+	 * Convenience counterpart to {@link #setShipDescription(IDeferredText)}, which
+	 * automatically constructs a {@link IDeferredText} wrapper around the provided string.
+	 * 
+	 * @param desc
+	 *            the ship's description
+	 * 
+	 * @see #setShipDescription(IDeferredText)
+	 */
 	public void setShipDescription( String desc )
 	{
 		if ( desc == null )
 			throw new IllegalArgumentException( "Description must not be null." );
+		if ( desc.equals( getShipDescription().getTextValue() ) )
+			return;
 		setShipDescription( new DefaultDeferredText( "text_" + blueprintName + "_desc", desc ) );
 	}
 
