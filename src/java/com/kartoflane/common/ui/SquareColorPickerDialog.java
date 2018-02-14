@@ -488,9 +488,9 @@ public class SquareColorPickerDialog extends Dialog
 			String text = ( (Text)src ).getText();
 			RGB rgb = new RGB( 0, 0, 0 );
 			try {
-				rgb.red = Integer.parseInt( text.substring( 0, 2 ), 16 );
-				rgb.green = Integer.parseInt( text.substring( 2, 4 ), 16 );
-				rgb.blue = Integer.parseInt( text.substring( 4, 6 ), 16 );
+				rgb.red = Math.max( 0, Math.min( 255, Integer.parseInt( text.substring( 0, 2 ), 16 ) ) );
+				rgb.green = Math.max( 0, Math.min( 255, Integer.parseInt( text.substring( 2, 4 ), 16 ) ) );
+				rgb.blue = Math.max( 0, Math.min( 255, Integer.parseInt( text.substring( 4, 6 ), 16 ) ) );
 			}
 			catch ( StringIndexOutOfBoundsException e ) {
 			}
@@ -502,17 +502,17 @@ public class SquareColorPickerDialog extends Dialog
 		else if ( src == txtR || src == txtG || src == txtB ) {
 			RGB rgb = new RGB( 0, 0, 0 );
 			try {
-				rgb.red = Math.min( 255, Integer.parseInt( txtR.getText() ) );
+				rgb.red = Math.max( 0, Math.min( 255, Integer.parseInt( txtR.getText() ) ) );
 			}
 			catch ( NumberFormatException e ) {
 			}
 			try {
-				rgb.green = Math.min( 255, Integer.parseInt( txtG.getText() ) );
+				rgb.green = Math.max( 0, Math.min( 255, Integer.parseInt( txtG.getText() ) ) );
 			}
 			catch ( NumberFormatException e ) {
 			}
 			try {
-				rgb.blue = Math.min( 255, Integer.parseInt( txtB.getText() ) );
+				rgb.blue = Math.max( 0, Math.min( 255, Integer.parseInt( txtB.getText() ) ) );
 			}
 			catch ( NumberFormatException e ) {
 			}
@@ -524,17 +524,17 @@ public class SquareColorPickerDialog extends Dialog
 		else if ( src == txtH || src == txtS || src == txtV ) {
 			HSV hsv = new HSV( 0, 0, 0 );
 			try {
-				hsv.h = Math.min( 360, Float.parseFloat( txtH.getText() ) ) / 360f;
+				hsv.h = Math.max( 0, Math.min( 360, Float.parseFloat( txtH.getText() ) ) ) / 360f;
 			}
 			catch ( NumberFormatException e ) {
 			}
 			try {
-				hsv.s = Math.min( 100, Float.parseFloat( txtS.getText() ) ) / 100f;
+				hsv.s = Math.max( 0, Math.min( 100, Float.parseFloat( txtS.getText() ) ) ) / 100f;
 			}
 			catch ( NumberFormatException e ) {
 			}
 			try {
-				hsv.v = Math.min( 100, Float.parseFloat( txtV.getText() ) ) / 100f;
+				hsv.v = Math.max( 0, Math.min( 100, Float.parseFloat( txtV.getText() ) ) ) / 100f;
 			}
 			catch ( NumberFormatException e ) {
 			}
