@@ -32,7 +32,6 @@ import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
-import com.kartoflane.superluminal2.ftl.DefaultDeferredText;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -191,12 +190,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					@Override
 					public void modifyText( ModifyEvent e )
 					{
-						ship.setShipName(
-							new DefaultDeferredText(
-								"text_" + ship.getBlueprintName() + "_name",
-								txtName.getText()
-							)
-						);
+						ship.setShipName( txtName.getText() );
 					}
 				}
 			);
@@ -235,12 +229,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				@Override
 				public void modifyText( ModifyEvent e )
 				{
-					ship.setShipClass(
-						new DefaultDeferredText(
-							"text_" + ship.getBlueprintName() + "_class",
-							txtClass.getText()
-						)
-					);
+					ship.setShipClass( txtClass.getText() );
 				}
 			}
 		);
@@ -261,12 +250,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					public void modifyText( ModifyEvent e )
 					{
 						lblDesc.setText( "Description: (" + txtDesc.getText().length() + "/255)" );
-						ship.setShipDescription(
-							new DefaultDeferredText(
-								"text_" + ship.getBlueprintName() + "_desc",
-								txtDesc.getText()
-							)
-						);
+						ship.setShipDescription( txtDesc.getText() );
 					}
 				}
 			);
