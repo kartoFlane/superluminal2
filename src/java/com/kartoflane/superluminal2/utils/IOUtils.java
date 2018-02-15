@@ -31,7 +31,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
@@ -106,6 +105,31 @@ public class IOUtils
 	}
 
 	/**
+	 * @return true if the filename ends with .xml, .append, .rawappend or .rawclobber
+	 */
+	public static boolean isXmlFile( String fileName )
+	{
+		if ( fileName == null )
+			throw new IllegalArgumentException( "fileName must not be null." );
+		return fileName.endsWith( ".xml" ) || fileName.endsWith( ".append" ) ||
+			fileName.endsWith( ".rawappend" ) || fileName.endsWith( ".rawclobber" );
+	}
+
+	public static boolean isXmlAppendFile( String fileName )
+	{
+		if ( fileName == null )
+			throw new IllegalArgumentException( "fileName must not be null." );
+		return fileName.endsWith( ".append" ) || fileName.endsWith( ".rawappend" );
+	}
+
+	public static boolean isXmlClobberFile( String fileName )
+	{
+		if ( fileName == null )
+			throw new IllegalArgumentException( "fileName must not be null." );
+		return fileName.endsWith( ".xml" ) || fileName.endsWith( ".rawclobber" );
+	}
+
+	/**
 	 * Merges the file-byte map with the specified ShipContainer, effectively saving
 	 * the ship in the file-byte map.
 	 */
@@ -113,48 +137,43 @@ public class IOUtils
 		throws JDOMParseException, IOException
 	{
 		ShipObject ship = container.getShipController().getGameObject();
-		Map<String, byte[]> fileMap = ShipSaveUtils.saveShip( container );
+		Map<String, byte[]> addMap = ShipSaveUtils.saveShip( container );
 
-		for ( String file : fileMap.keySet() ) {
+		for ( String file : addMap.keySet() ) {
 			if ( base.containsKey( file ) ) {
 				// Mod already contains that file; need to consider further
 				if ( file.endsWith( ".png" ) || file.equals( ship.getLayoutTXT() ) || file.equals( ship.getLayoutXML() ) ) {
 					// Overwrite graphics and layout files
-					base.put( file, fileMap.get( file ) );
+					base.put( file, addMap.get( file ) );
 				}
-				else if ( file.endsWith( ".xml" ) || file.endsWith( ".append" ) ||
-					file.endsWith( ".rawappend" ) || file.endsWith( ".rawclobber" ) ) {
+				else if ( isXmlFile( file ) ) {
 					// Merge XML files, while removing obscured elements
-					Document docBase = IOUtils.parseXML( new String( base.get( file ) ) );
-					Document docAdd = IOUtils.parseXML( new String( fileMap.get( file ) ) );
+					Document docBase = IOUtils.parseXML( new String( base.get( file ) ), false );
+					Document docAdd = IOUtils.parseXML( new String( addMap.get( file ) ), false );
 
-					Element root = docBase.getRootElement();
+					Element rootBase = docBase.getRootElement();
+					Element rootAdd = docAdd.getRootElement();
 
-					List<Content> addList = docAdd.getContent();
-					for ( int i = 0; i < addList.size(); ++i ) {
-						Content c = addList.get( i );
-						if ( c instanceof Element == false )
-							continue;
-						Element e = (Element)c;
+					List<Element> addList = rootAdd.getChildren();
+					for ( int i = addList.size() - 1; i >= 0; --i ) {
+						Element e = addList.get( i );
 
 						String name = e.getAttributeValue( "name" );
 						if ( name == null ) {
 							// Can't identify; just add it.
-							e.detach();
-							root.addContent( e );
+							rootBase.addContent( e.detach() );
 						}
 						else {
 							// Remove elements that are obscured, in order to prevent bloating
-							List<Element> baseList = root.getChildren( e.getName(), e.getNamespace() );
-							for ( int j = 0; j < baseList.size(); ++j ) {
+							List<Element> baseList = rootBase.getChildren( e.getName() );
+							for ( int j = baseList.size() - 1; j >= 0; --j ) {
 								Element el = baseList.get( j );
 								String name2 = el.getAttributeValue( "name" );
 								if ( name2 != null && name2.equals( name ) ) {
 									el.detach();
 								}
 							}
-							e.detach();
-							root.addContent( e );
+							rootBase.addContent( e.detach() );
 						}
 					}
 
@@ -163,7 +182,7 @@ public class IOUtils
 			}
 			else {
 				// Doesn't exist; add it
-				base.put( file, fileMap.get( file ) );
+				base.put( file, addMap.get( file ) );
 			}
 		}
 	}
@@ -207,7 +226,7 @@ public class IOUtils
 	public static Document readFileXML( File f ) throws FileNotFoundException, IOException, JDOMParseException
 	{
 		String contents = readFileText( f );
-		return parseXML( contents );
+		return parseXML( contents, true );
 	}
 
 	/**
@@ -241,7 +260,7 @@ public class IOUtils
 	public static Document readStreamXML( InputStream is, String label ) throws IOException, JDOMParseException
 	{
 		String contents = readStreamText( is, label );
-		return parseXML( contents );
+		return parseXML( contents, true );
 	}
 
 	/**
@@ -274,7 +293,7 @@ public class IOUtils
 	/**
 	 * Reads contents of the DatabaseEntry into a filename-byte map.
 	 */
-	public static HashMap<String, byte[]> readEntry( AbstractDatabaseEntry entry ) throws IOException
+	public static HashMap<String, byte[]> readEntry( AbstractDatabaseEntry entry ) throws IOException, JDOMParseException
 	{
 		HashMap<String, byte[]> result = new HashMap<String, byte[]>();
 
@@ -282,7 +301,24 @@ public class IOUtils
 			InputStream is = null;
 			try {
 				is = entry.getInputStream( fileName );
-				result.put( fileName, readStream( is ) );
+
+				if ( isXmlFile( fileName ) ) {
+					Document doc = IOUtils.readStreamXML( is, fileName );
+
+					// parseXML automatically promotes single-child nodes to root
+					// Normally this is useful, but here it causes buggy behaviour.
+					Element root = doc.getRootElement();
+					if ( !root.getName().equals( "wrapper" ) ) {
+						root = new Element( "wrapper" );
+						root.addContent( doc.getRootElement().detach() );
+						doc.setRootElement( root );
+					}
+
+					result.put( fileName, readDocument( doc ).getBytes() );
+				}
+				else {
+					result.put( fileName, readStream( is ) );
+				}
 			}
 			finally {
 				if ( is != null )
@@ -303,14 +339,14 @@ public class IOUtils
 	 * @throws JDOMParseException
 	 *             when an exception occurs while parsing XML
 	 */
-	public static Document parseXML( String contents ) throws JDOMParseException
+	public static Document parseXML( String contents, boolean promoteRoot ) throws JDOMParseException
 	{
 		if ( contents == null )
 			throw new IllegalArgumentException( "Parsed string must not be null." );
 
 		SloppyXMLParser parser = new SloppyXMLParser();
 
-		return parser.build( contents );
+		return parser.build( contents, promoteRoot );
 	}
 
 	/**

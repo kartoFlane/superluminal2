@@ -40,7 +40,7 @@ public class DataUtils
 
 		IOUtils.DecodeResult dr = IOUtils.decodeText( is, null );
 		String contents = dr.text;
-		Document doc = IOUtils.parseXML( contents );
+		Document doc = IOUtils.parseXML( contents, true );
 
 		ArrayList<Element> shipList = new ArrayList<Element>();
 
@@ -73,7 +73,7 @@ public class DataUtils
 	public static ArrayList<Element> findTagsNamed( String contents, String tagName ) throws JDOMParseException
 	{
 		Document doc = null;
-		doc = IOUtils.parseXML( contents );
+		doc = IOUtils.parseXML( contents, true );
 		ArrayList<Element> tagList = new ArrayList<Element>();
 
 		Element root = doc.getRootElement();

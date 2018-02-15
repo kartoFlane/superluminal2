@@ -105,8 +105,13 @@ public class SloppyXMLParser
 		entityMap.put( "quot", "\"" );
 	}
 
-
 	public Document build( CharSequence s ) throws JDOMParseException
+	{
+		return build( s, true );
+	}
+
+
+	public Document build( CharSequence s, boolean promoteRoot ) throws JDOMParseException
 	{
 		Element rootNode = factory.element( "wrapper" );
 		Document doc = factory.document( rootNode );
@@ -310,7 +315,7 @@ public class SloppyXMLParser
 				}
 			}
 
-			if ( rootNode.getChildren().size() == 1 ) {
+			if ( promoteRoot && rootNode.getChildren().size() == 1 ) {
 				// No need for the wrapper, promote its only child to root.
 
 				Element newRoot = rootNode.getChildren().get( 0 );

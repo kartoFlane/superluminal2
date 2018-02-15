@@ -637,7 +637,7 @@ public abstract class AbstractDatabaseEntry
 					DecodeResult dr = IOUtils.decodeText( is, null );
 
 					Document doc = null;
-					doc = IOUtils.parseXML( dr.text );
+					doc = IOUtils.parseXML( dr.text, true );
 					Element root = doc.getRootElement();
 
 					// Preload anim sheets
