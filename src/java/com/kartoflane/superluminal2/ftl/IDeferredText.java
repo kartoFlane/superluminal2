@@ -32,7 +32,11 @@ public interface IDeferredText extends Comparable<IDeferredText>
 	/**
 	 * Returns either the looked-up text or the element's own value.
 	 *
-	 * TODO: Test to find out which one FTL prioritizes.
+	 * When a textId is available, FTL 1.6.1 will attempt to resolve it and use that resolved
+	 * text. If the textId does not resolve (there's no entry in text_ files for the textId),
+	 * the textId will be used verbatim, prefixed by an error message. If the id attribute is
+	 * completely missing from the tag, FTL will use the tag's own text (ie. as it used to
+	 * work before FTL 1.6.1)
 	 */
 	String getTextValue();
 }

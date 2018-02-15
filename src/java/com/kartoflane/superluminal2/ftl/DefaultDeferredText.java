@@ -52,11 +52,13 @@ public class DefaultDeferredText implements IDeferredText
 
 	/**
 	 * Returns either the looked-up text or the element's own value.
+	 * 
+	 * @see {@link IDeferredText#getTextValue()}
 	 */
 	@Override
 	public String getTextValue()
 	{
-		return resolvedText;
+		return resolvedText == null ? textId : resolvedText;
 	}
 
 	@Override
