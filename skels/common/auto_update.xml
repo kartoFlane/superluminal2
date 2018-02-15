@@ -1,6 +1,10 @@
 <versions>
-	<latest id="2.2" url="https://github.com/kartoFlane/superluminal2/releases/latest" offer-selfpatch="false" />
+	<latest id="2.2.1" url="https://github.com/kartoFlane/superluminal2/releases/latest" offer-selfpatch="false" />
 	<changelog>
+		<version id="2.2.1">
+			<change>Fixed a crash when saving a ship that was created with old FTL file format.</change>
+			<change>Several bug fixes.</change>
+		</version>
 		<version id="2.2">
 			<change>Added support for FTL 1.6.1+</change>
 			<change>Self-patching functionality should now work for non-Windows platforms (still broken for versions 2.1.2b and lower; you need to update manually)</change>

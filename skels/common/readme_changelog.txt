@@ -1,5 +1,12 @@
 Changelog
 
+2.2.1:
+- Fixed a crash when saving a ship that was created with old FTL file format.
+- Fixed a crash when changing colors in Generate FLoor Image window using RGB or hex values.
+- Fixed values not being consistently capped to min/max in Generate Floor Image window.
+- Fixed a bug which could cause ship class and ship name to not be loaded.
+- Fixed a bug which caused XML files to be broken when using the "Include Mod Files From" feature when saving.
+
 2.2:
 - Added support for FTL 1.6.1+
 - Self-patching functionality should now work on all platforms (still broken in versions 2.1.2b and lower; you'll need to update manually)
