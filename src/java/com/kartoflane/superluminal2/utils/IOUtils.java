@@ -136,6 +136,7 @@ public class IOUtils
 	public static void merge( Map<String, byte[]> base, ShipContainer container )
 		throws JDOMParseException, IOException
 	{
+		Charset utf8 = Charset.forName( "UTF-8" );
 		ShipObject ship = container.getShipController().getGameObject();
 		Map<String, byte[]> addMap = ShipSaveUtils.saveShip( container );
 
@@ -177,7 +178,7 @@ public class IOUtils
 						}
 					}
 
-					base.put( file, readDocument( docBase ).getBytes() );
+					base.put( file, readDocument( docBase ).getBytes( utf8 ) );
 				}
 			}
 			else {
@@ -296,6 +297,7 @@ public class IOUtils
 	public static HashMap<String, byte[]> readEntry( AbstractDatabaseEntry entry ) throws IOException, JDOMParseException
 	{
 		HashMap<String, byte[]> result = new HashMap<String, byte[]>();
+		Charset utf8 = Charset.forName( "UTF-8" );
 
 		for ( String fileName : entry.listInnerPaths() ) {
 			InputStream is = null;
@@ -314,7 +316,7 @@ public class IOUtils
 						doc.setRootElement( root );
 					}
 
-					result.put( fileName, readDocument( doc ).getBytes() );
+					result.put( fileName, readDocument( doc ).getBytes( utf8 ) );
 				}
 				else {
 					result.put( fileName, readStream( is ) );

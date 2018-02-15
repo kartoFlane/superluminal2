@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
@@ -149,26 +150,28 @@ public class ShipSaveUtils
 		String fileName = null;
 		byte[] bytes = null;
 
+		Charset utf8 = Charset.forName( "UTF-8" );
+
 		// Create the files in memory
 		fileName = "data/text_blueprints.xml.append";
-		bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes();
+		bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes( utf8 );
 		fileMap.put( fileName, bytes );
 
 		fileName = "data/" + Database.getInstance().getAssociatedFile( ship.getBlueprintName() ) + ".append";
-		bytes = IOUtils.readDocument( generateBlueprintXML( ship ) ).getBytes();
+		bytes = IOUtils.readDocument( generateBlueprintXML( ship ) ).getBytes( utf8 );
 		fileMap.put( fileName, bytes );
 
 		fileName = "data/" + ship.getLayout() + ".txt";
-		bytes = generateLayoutTXT( ship ).getBytes();
+		bytes = generateLayoutTXT( ship ).getBytes( utf8 );
 		fileMap.put( fileName, bytes );
 
 		fileName = "data/" + ship.getLayout() + ".xml";
-		bytes = IOUtils.readDocument( generateLayoutXML( ship ) ).getBytes();
+		bytes = IOUtils.readDocument( generateLayoutXML( ship ) ).getBytes( utf8 );
 		fileMap.put( fileName, bytes );
 
 		if ( ship.isPlayerShip() ) {
 			fileName = "data/rooms.xml.append";
-			bytes = IOUtils.readDocument( generateRoomsXML( ship ) ).getBytes();
+			bytes = IOUtils.readDocument( generateRoomsXML( ship ) ).getBytes( utf8 );
 			fileMap.put( fileName, bytes );
 		}
 
